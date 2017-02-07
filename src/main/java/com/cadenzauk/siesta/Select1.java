@@ -7,11 +7,8 @@
 package com.cadenzauk.siesta;
 
 import com.google.common.collect.Iterables;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
@@ -49,12 +46,12 @@ public class Select1<R1> extends Select<R1> {
         Object[] args = whereClauseArgs();
         String sql = sql();
         System.out.println(sql);
-        return Optional.ofNullable(Iterables.getOnlyElement(jdbcTemplate.query(sql, args, alias.table().rowMapper()), null));
+        return Optional.ofNullable(Iterables.getOnlyElement(jdbcTemplate.query(sql, args, alias.rowMapper()), null));
     }
 
     public String sql() {
         return String.format("select %s from %s%s%s",
-            alias.table().columns().stream().map(c -> alias.inSelectClause(c.column())).collect(joining(", ")),
+            alias.table().columns().map(alias::inSelectClause).collect(joining(", ")),
             alias.inWhereClause(),
             whereClauseSql(),
             orderByClauseSql());

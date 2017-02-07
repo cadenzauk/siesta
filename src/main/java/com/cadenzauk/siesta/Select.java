@@ -18,10 +18,11 @@ import java.util.function.Function;
 import static java.util.stream.Collectors.joining;
 
 public abstract class Select<RT> {
-    protected Expression whereClause = null;
     protected final Scope scope;
-    protected final List<OrderBy<?,?>> orderByClauses = new ArrayList<>();
+    protected Expression whereClause;
     protected Expression onClause;
+
+    private final List<OrderBy<?,?>> orderByClauses = new ArrayList<>();
 
     public abstract class ClauseBuilder {
         public Optional<RT> optional(JdbcTemplate jdbcTemplate) {
@@ -145,7 +146,7 @@ public abstract class Select<RT> {
         return new Select1<>(alias);
     }
 
-    public static <R> Select1<R> from(Table<R,?> table) {
+    public static <R> Select1<R> from(Table<R> table) {
         return new Select1<>(table.as(table.tableName()));
     }
 
@@ -154,9 +155,9 @@ public abstract class Select<RT> {
 
     @NotNull
     protected Object[] onClauseArgs() {
-        return whereClause == null
+        return onClause == null
             ? new Object[0]
-            : whereClause.args().toArray();
+            : onClause.args().toArray();
     }
 
     @NotNull

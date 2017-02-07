@@ -6,15 +6,13 @@
 
 package com.cadenzauk.siesta;
 
-import org.h2.result.Row;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import static com.cadenzauk.siesta.Table.aTable;
-import static com.cadenzauk.siesta.Tests.isEqualTo;
+import static com.cadenzauk.siesta.Conditions.isEqualTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +26,7 @@ public class Select1Test {
         public final static Column<String, Row1> NAME = Column.aColumn("NAME", DataType.STRING, Row1.class);
         public final static Column<String, Row1> DESCRIPTION = Column.aColumn("DESCRIPTION", DataType.STRING, Row1.class);
 
-        public final static Table<Row1,Row1> TABLE = aTable("TEST", "ROW1", Row1::new, Row1.class)
+        public final static Table<Row1> TABLE = aTable("TEST", "ROW1", Row1::new, Row1.class)
             .mandatory(NAME, Row1::name, Row1::setName)
             .mandatory(DESCRIPTION, Row1::description, Row1::setDescription)
             .build();

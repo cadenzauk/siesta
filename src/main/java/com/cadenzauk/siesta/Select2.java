@@ -22,7 +22,7 @@ public class Select2<R1, R2> extends Select<Tuple2<R1, R2>> {
 
     public class JoinClauseStartBuilder {
         public <T> JoinClauseBuilder on(Column<T,R2> column2, Column<T,R1> column1) {
-            onClause = new ColumnTest<>(alias2, column2, new OperatorColumnTest<>("=", alias1, column1));
+            onClause = new ColumnTest<>(alias2, column2, new OperatorColumnCondition<>("=", alias1, column1));
             return new JoinClauseBuilder();
         }
 
@@ -48,8 +48,8 @@ public class Select2<R1, R2> extends Select<Tuple2<R1, R2>> {
 
     public String sql() {
         return String.format("select %s, %s from %s %s %s on %s%s%s",
-            alias1.table().columns().stream().map(c -> alias1.inSelectClause(c.column())).collect(joining(", ")),
-            alias2.table().columns().stream().map(c -> alias2.inSelectClause(c.column())).collect(joining(", ")),
+            alias1.table().columns().map(alias1::inSelectClause).collect(joining(", ")),
+            alias2.table().columns().map(alias2::inSelectClause).collect(joining(", ")),
             alias1.inWhereClause(),
             joinType.sql(),
             alias2.inWhereClause(),

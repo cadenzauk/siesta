@@ -8,24 +8,24 @@ package com.cadenzauk.siesta;
 
 import java.util.stream.Stream;
 
-public class ColumnTest<T, R> implements Expression {
+public class OperatorColumnCondition<T, R> implements Condition<T> {
+    private final String operator;
     private final Alias<R> alias;
-    private final Column<T, R> column;
-    private final Condition condition;
+    private final Column<T,R> column;
 
-    public ColumnTest(Alias<R> alias, Column<T,R> column, Condition condition) {
+    public OperatorColumnCondition(String operator, Alias<R> alias, Column<T,R> column) {
+        this.operator = operator;
         this.alias = alias;
         this.column = column;
-        this.condition = condition;
     }
 
     @Override
     public String sql() {
-        return alias.inExpression(column) + " " + condition.sql();
+        return operator + " " + alias.inExpression(column);
     }
 
     @Override
     public Stream<Object> args() {
-        return condition.args();
+        return Stream.empty();
     }
 }

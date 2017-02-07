@@ -9,9 +9,9 @@ package com.cadenzauk.siesta;
 import org.junit.Test;
 
 import static com.cadenzauk.siesta.Table.aTable;
-import static com.cadenzauk.siesta.Tests.isEqualTo;
-import static com.cadenzauk.siesta.Tests.isGreaterThan;
-import static com.cadenzauk.siesta.Tests.isNotEqualTo;
+import static com.cadenzauk.siesta.Conditions.isEqualTo;
+import static com.cadenzauk.siesta.Conditions.isGreaterThan;
+import static com.cadenzauk.siesta.Conditions.isNotEqualTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -20,7 +20,7 @@ public class Select2Test {
         private final static Column<String, Row1> NAME = Column.aColumn("NAME", DataType.STRING, Row1.class);
         private final static Column<String, Row1> DESCRIPTION = Column.aColumn("DESCRIPTION", DataType.STRING, Row1.class);
 
-        private final static Table<Row1, Row1> TABLE = aTable("TEST", "ROW1", Row1::new, Row1.class)
+        private final static Table<Row1> TABLE = aTable("TEST", "ROW1", Row1::new, Row1.class)
             .mandatory(NAME, Row1::name, Row1::setName)
             .mandatory(DESCRIPTION, Row1::description, Row1::setDescription)
             .build();
@@ -49,7 +49,7 @@ public class Select2Test {
         private final static Column<String, Row2> NAME = Column.aColumn("NAME", DataType.STRING, Row2.class);
         private final static Column<String, Row2> DESCRIPTION = Column.aColumn("DESCRIPTION", DataType.STRING, Row2.class);
 
-        private final static Table<Row2, Row2> TABLE = aTable("TEST", "ROW2", Row2::new, Row2.class)
+        private final static Table<Row2> TABLE = aTable("TEST", "ROW2", Row2::new, Row2.class)
             .mandatory(NAME, Row2::name, Row2::setName)
             .mandatory(DESCRIPTION, Row2::description, Row2::setDescription)
             .build();

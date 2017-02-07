@@ -8,7 +8,7 @@ package com.cadenzauk.siesta;
 
 import java.util.stream.Stream;
 
-public interface Test<T> {
+public interface Condition<T> {
     String sql();
 
     Stream<Object> args();

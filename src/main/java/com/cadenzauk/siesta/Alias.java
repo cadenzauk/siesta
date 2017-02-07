@@ -12,10 +12,10 @@ import org.springframework.jdbc.core.RowMapper;
 import java.util.stream.Stream;
 
 public class Alias<R> {
-    private final Table<R,?> table;
+    private final Table<R> table;
     private final String alias;
 
-    public Alias(Table<R,?> table, String alias) {
+    public Alias(Table<R> table, String alias) {
         this.table = table;
         this.alias = alias;
     }
@@ -24,7 +24,7 @@ public class Alias<R> {
         return String.format("%s as %s", table.qualifiedName(), alias);
     }
 
-    String inSelectClause(Column<?,R> column) {
+    String inSelectClause(TableColumn<?,R> column) {
         return String.format("%1$s.%2$s as %1$s_%2$s", alias, column.name());
     }
 
@@ -32,7 +32,7 @@ public class Alias<R> {
         return String.format("%s.%s", alias, column.name());
     }
 
-    Table<R,?> table() {
+    Table<R> table() {
         return table;
     }
 

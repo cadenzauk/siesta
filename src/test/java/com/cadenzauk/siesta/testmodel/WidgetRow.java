@@ -9,7 +9,7 @@ package com.cadenzauk.siesta.testmodel;
 import com.cadenzauk.siesta.Column;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Table;
-import com.cadenzauk.siesta.TableColumn;
+import com.cadenzauk.siesta.RowBuilderColumn;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -23,8 +23,8 @@ public class WidgetRow {
     public static final Column<Long,WidgetRow> MANUFACTURER_ID = Column.aColumn("MANUFACTURER_ID", DataType.LONG, WidgetRow.class);
     public static final Column<String,WidgetRow> DESCRIPTION = Column.aColumn("DESCRIPTION", DataType.STRING, WidgetRow.class);
 
-    public static final Table<WidgetRow,Builder> TABLE = aTable("TEST", "WIDGET", Builder::new, Builder::build, WidgetRow.class)
-        .mandatory(WIDGET_ID, WidgetRow::widgetId, Builder::widgetId, TableColumn.Builder::primaryKey)
+    public static final Table<WidgetRow> TABLE = aTable("TEST", "WIDGET", Builder::new, Builder::build, WidgetRow.class)
+        .mandatory(WIDGET_ID, WidgetRow::widgetId, Builder::widgetId, RowBuilderColumn.Builder::primaryKey)
         .mandatory(NAME, WidgetRow::name, Builder::name)
         .mandatory(MANUFACTURER_ID, WidgetRow::manufacturerId, Builder::manufacturerId)
         .optional(DESCRIPTION, WidgetRow::description, Builder::description)

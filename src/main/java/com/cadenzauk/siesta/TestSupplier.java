@@ -8,5 +8,5 @@ package com.cadenzauk.siesta;
 
 @FunctionalInterface
 public interface TestSupplier<T> {
-    Test<T> get(Scope scope);
+    Condition<T> get(Scope scope);
 }
