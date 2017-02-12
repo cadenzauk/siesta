@@ -9,7 +9,7 @@ package com.cadenzauk.siesta;
 import java.util.stream.Stream;
 
 public interface Expression {
-    String sql();
+    String sql(Scope scope);
 
     Stream<Object> args();
 }

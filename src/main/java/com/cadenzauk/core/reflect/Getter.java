@@ -24,7 +24,7 @@ public class Getter {
 
     public static <T, V> Function<T, V> forField(Class<T> targetClass, Class<V> fieldType, Field field) {
         Optional<Method> getterMethod = getMethods()
-            .map(x -> ClassUtil.getDeclaredMethod(targetClass, x.apply(field.getName()), fieldType))
+            .map(x -> ClassUtil.declaredMethod(targetClass, x.apply(field.getName()), fieldType))
             .flatMap(StreamUtil::of)
             .findFirst();
 
@@ -35,7 +35,7 @@ public class Getter {
 
     public static <T, V> Function<T, Optional<V>> forField(Class<T> targetClass, Class<Optional> fieldType, Class<V> argType, Field field) {
         Optional<Method> getterMethod = getMethods()
-            .map(x -> ClassUtil.getDeclaredMethod(targetClass, x.apply(field.getName()), fieldType))
+            .map(x -> ClassUtil.declaredMethod(targetClass, x.apply(field.getName()), fieldType))
             .flatMap(StreamUtil::of)
             .findFirst();
 

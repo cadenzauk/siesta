@@ -6,12 +6,14 @@
 
 package com.cadenzauk.siesta;
 
-public class OrderBy<T, R> {
+import com.cadenzauk.siesta.catalog.Column;
+
+public class Ordering<T, R> {
     private final Alias<R> alias;
     private final Column<T, R> column;
     private final Order order;
 
-    public OrderBy(Alias<R> alias, Column<T,R> column, Order order) {
+    public Ordering(Alias<R> alias, Column<T,R> column, Order order) {
         this.alias = alias;
         this.column = column;
         this.order = order;

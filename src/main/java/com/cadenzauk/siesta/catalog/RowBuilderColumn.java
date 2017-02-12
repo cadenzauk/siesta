@@ -4,12 +4,14 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.ClassUtil;
 import com.cadenzauk.core.reflect.Getter;
 import com.cadenzauk.core.reflect.Setter;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.NamingStrategy;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -20,7 +22,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.cadenzauk.siesta.Column.aColumn;
+import static com.cadenzauk.siesta.catalog.Column.aColumn;
 
 public class RowBuilderColumn<T, R, B> implements TableColumn<T, R> {
     private final Column<T, R> column;
@@ -37,6 +39,11 @@ public class RowBuilderColumn<T, R, B> implements TableColumn<T, R> {
 
     public Function<R, Optional<T>> getter() {
         return getter;
+    }
+
+    @Override
+    public Column<T, R> column() {
+        return column;
     }
 
     @Override
@@ -63,10 +70,10 @@ public class RowBuilderColumn<T, R, B> implements TableColumn<T, R> {
         setter.accept(builder, value);
     }
 
-    public static <R, B> RowBuilderColumn<?, R, B> fromField(Class<R> rowClass, Class<B> builderClass, Field field) {
+    public static <R, B> RowBuilderColumn<?, R, B> fromField(NamingStrategy namingStrategy, Class<R> rowClass, Class<B> builderClass, Field field) {
         String fieldName = field.getName();
-        Field builderField = ClassUtil.getDeclaredField(builderClass, fieldName).orElseThrow(() -> new IllegalArgumentException("Builder class " + builderClass + " does not have a field " + fieldName + "."));
-        String columnName = StringUtil.camelToUpper(fieldName);
+        Field builderField = ClassUtil.declaredField(builderClass, fieldName).orElseThrow(() -> new IllegalArgumentException("Builder class " + builderClass + " does not have a field " + fieldName + "."));
+        String columnName = namingStrategy.columnName(fieldName);
         Class<?> fieldType = field.getType();
         if (fieldType == Long.class || fieldType == Long.TYPE) {
             return mandatory(aColumn(columnName, DataType.LONG, rowClass), Getter.forField(rowClass, Long.class, field), Setter.forField(builderClass, Long.class, builderField)).build();

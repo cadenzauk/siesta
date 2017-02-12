@@ -6,12 +6,11 @@
 
 package com.cadenzauk.siesta;
 
-import org.junit.Assert;
+import com.cadenzauk.siesta.catalog.Table;
 import org.junit.Test;
 
 import java.util.Optional;
 
-import static com.cadenzauk.siesta.Table.aTable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -34,7 +33,8 @@ public class TableBuilderTest {
 
     @Test
     public void buildReflectively() {
-        Table<TestRow> testRowTable = aTable("SCHEMA", "TEST", TestRow::new, TestRow.class).buildReflectively();
+        Catalog catalog = Catalog.newBuilder().defaultSchema("SCHEMA").build();
+        Table<TestRow> testRowTable = catalog.table(TestRow.class, t -> t.tableName("TEST"));
 
         String sql = Select.from(testRowTable.as("t")).sql();
 

@@ -4,7 +4,10 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.expression;
+
+import com.cadenzauk.siesta.Expression;
+import com.cadenzauk.siesta.Scope;
 
 import java.util.stream.Stream;
 
@@ -18,8 +21,8 @@ public class AndExpression implements Expression {
     }
 
     @Override
-    public String sql() {
-        return String.format("(%s) and (%s)", lhs.sql(), rhs.sql());
+    public String sql(Scope scope) {
+        return String.format("(%s) and (%s)", lhs.sql(scope), rhs.sql(scope));
     }
 
     @Override

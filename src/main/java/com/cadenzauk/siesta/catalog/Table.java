@@ -4,17 +4,21 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.catalog;
 
+import com.cadenzauk.core.lang.StringUtil;
+import com.cadenzauk.core.reflect.*;
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.Catalog;
 import com.google.common.collect.ImmutableList;
+import com.sun.javaws.exceptions.InvalidArgumentException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import javax.persistence.Transient;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -24,12 +28,14 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class Table<R> {
+    private final Catalog catalog;
     private final Class<R> rowClass;
     private final String schema;
     private final String tableName;
     private final Impl<?> impl;
 
     private <B> Table(Builder<R, B> builder) {
+        catalog = builder.catalog;
         rowClass = builder.rowClass;
         schema = builder.schema;
         tableName = builder.tableName;
@@ -38,6 +44,10 @@ public class Table<R> {
 
     public Class<R> rowClass() {
         return rowClass;
+    }
+
+    public Catalog catalog() {
+        return catalog;
     }
 
     public String schema() {
@@ -53,7 +63,11 @@ public class Table<R> {
     }
 
     public RowMapper<R> rowMapper(String s) {
-        return impl.rowMapper();
+        return impl.rowMapper(Optional.of(s));
+    }
+
+    public <T> RowMapper<Optional<T>> rowMapper(String s, Column<T, R> column) {
+        return impl.rowMapper(Optional.of(s), column);
     }
 
     public String qualifiedName() {
@@ -68,12 +82,14 @@ public class Table<R> {
         impl.insert(jdbcTemplate, row);
     }
 
-    public static <R, B> Builder<R, B> aTable(String schema, String tableName, Supplier<B> newBuilder, Function<B, R> buildRow, Class<R> rowClass) {
-        return new Builder<>(rowClass, schema, tableName, newBuilder, buildRow);
-    }
-
-    public static <R> Builder<R, R> aTable(String schema, String tableName, Supplier<R> newRow, Class<R> rowClass) {
-        return new Builder<>(rowClass, schema, tableName, newRow, Function.identity());
+    public <T> Column<T,R> column(Function<R,T> getter) {
+        String columnName = catalog.namingStrategy().columnName(MethodUtil.fromReference(rowClass, getter).getName());
+        //noinspection unchecked
+        return (Column<T,R>) columns()
+            .filter(x -> StringUtils.equalsIgnoreCase(x.column().name(), columnName))
+            .map(TableColumn::column)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(""));
     }
 
     private class Impl<B> {
@@ -113,41 +129,74 @@ public class Table<R> {
                 return buildRow.apply(builder);
             };
         }
+
+        public <T> RowMapper<Optional<T>> rowMapper(Optional<String> prefix, Column<T, R> column) {
+            return (rs, i) ->
+                column.dataType().get(rs, prefix.map(s -> s + column.name()).orElse(column.name()));
+        }
     }
 
     public static final class Builder<R, B> {
+        private final Catalog catalog;
         private final Class<R> rowClass;
-        private final String schema;
-        private final String tableName;
-        private final Supplier<B> newBuilder;
+        private final Class<B> builderClass;
         private final Function<B, R> buildRow;
+        private String schema;
+        private String tableName;
+        private Supplier<B> newBuilder;
+        private Set<String> excludedFields = new HashSet<>();
         private final List<RowBuilderColumn<?, R, B>> columns = new ArrayList<>();
 
-        private Builder(Class<R> rowClass, String schema, String tableName, Supplier<B> newBuilder, Function<B, R> buildRow) {
+        public Builder(Catalog catalog, Class<R> rowClass, Class<B> builderClass, Function<B,R> buildRow) {
+            this.catalog = catalog;
             this.rowClass = rowClass;
-            this.schema = schema;
-            this.tableName = tableName;
-            this.newBuilder = newBuilder;
+            this.builderClass = builderClass;
             this.buildRow = buildRow;
+
+            Optional<javax.persistence.Table> tableAnnotation = ClassUtil.getAnnotation(javax.persistence.Table.class, rowClass);
+            this.schema = tableAnnotation
+                .map(javax.persistence.Table::schema)
+                .orElse(catalog.defaultSchema());
+            this.tableName = tableAnnotation
+                .map(javax.persistence.Table::name)
+                .orElseGet(() -> catalog.namingStrategy().tableName(rowClass.getSimpleName()));
         }
 
         public Table<R> build() {
+            if (newBuilder == null) {
+                this.newBuilder = Factory.forClass(builderClass);
+            }
+            Arrays.stream(rowClass.getDeclaredFields())
+                .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
+                .filter(f -> !excludedFields.contains(f.getName()))
+                .forEach(f -> columns.add(RowBuilderColumn.fromField(catalog.namingStrategy(), rowClass, builderClass, f)));
             return new Table<>(this);
         }
 
-        public Table<R> buildReflectively() {
-            Class<B> builderClass = (Class<B>) newBuilder.get().getClass();
-            Arrays.stream(rowClass.getDeclaredFields())
-                .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                .forEach(f -> columns.add(RowBuilderColumn.fromField(rowClass, builderClass, f)));
-            return new Table<>(this);
+        public Builder<R, B> schema(String val) {
+            schema = val;
+            return this;
+        }
+
+        public Builder<R, B> tableName(String val) {
+            tableName = val;
+            return this;
+        }
+
+        public <BB> Builder<R, BB> builder(Class<BB> builderClass, Function<BB,R> buildRow) {
+            return new Builder<R, BB>(catalog, rowClass, builderClass, buildRow)
+                .schema(schema)
+                .tableName(tableName);
         }
 
         public <T> Builder<R, B> mandatory(Column<T, R> column, Function<R, T> getter, BiConsumer<B, T> setter) {
+            excludedFields.add(MethodUtil.fromReference(rowClass, getter).getName());
             return mandatory(column, getter, setter, Optional.empty());
         }
 
         public <T> Builder<R, B> mandatory(Column<T, R> column, Function<R, T> getter, BiConsumer<B, T> setter, Consumer<RowBuilderColumn.Builder<T, R, B>> init) {
+            excludedFields.add(MethodUtil.fromReference(rowClass, getter).getName());
             return mandatory(column, getter, setter, Optional.of(init));
         }
 
@@ -159,14 +208,17 @@ public class Table<R> {
         }
 
         public <T> Builder<R, B> optional(Column<T, R> column, Function<R, Optional<T>> getter, BiConsumer<B, Optional<T>> setter) {
+            excludedFields.add(MethodUtil.fromReference(rowClass, getter).getName());
             return optional(column, getter, setter, Optional.empty());
         }
 
         public <T> Builder<R, B> optional(Column<T, R> column, Function<R, Optional<T>> getter, BiConsumer<B, Optional<T>> setter, Consumer<RowBuilderColumn.Builder<T, R, B>> init) {
+            excludedFields.add(MethodUtil.fromReference(rowClass, getter).getName());
             return optional(column, getter, setter, Optional.ofNullable(init));
         }
 
         private <T> Builder<R, B> optional(Column<T, R> column, Function<R, Optional<T>> getter, BiConsumer<B, Optional<T>> setter, Optional<Consumer<RowBuilderColumn.Builder<T, R, B>>> init) {
+            excludedFields.add(MethodUtil.fromReference(rowClass, getter).getName());
             RowBuilderColumn.Builder<T, R, B> columnBuilder = RowBuilderColumn.optional(column, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add(columnBuilder.build());

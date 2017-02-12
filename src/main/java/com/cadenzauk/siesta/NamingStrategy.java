@@ -6,7 +6,7 @@
 
 package com.cadenzauk.siesta;
 
-@FunctionalInterface
-public interface TestSupplier<T> {
-    Condition<T> get(Scope scope);
+public interface NamingStrategy {
+    String tableName(String rowClass);
+    String columnName(String fieldName);
 }

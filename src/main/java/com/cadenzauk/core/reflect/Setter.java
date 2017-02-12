@@ -7,11 +7,9 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.stream.StreamUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -26,7 +24,7 @@ public class Setter {
 
     public static <T, V> BiConsumer<T, V> forField(Class<T> targetClass, Class<V> fieldType, Field field) {
         Optional<Method> setterMethod = Stream.of(WITH_X, SET_X, X)
-            .map(x -> ClassUtil.getDeclaredMethod(targetClass, x.apply(field.getName()), fieldType))
+            .map(x -> ClassUtil.declaredMethod(targetClass, x.apply(field.getName()), fieldType))
             .flatMap(StreamUtil::of)
             .findFirst();
 
@@ -37,7 +35,7 @@ public class Setter {
 
     public static <T, V> BiConsumer<T, Optional<V>> forField(Class<T> targetClass, Class<Optional> fieldType, Class<V> argType, Field field) {
         Optional<Method> setterMethod = Stream.of(WITH_X, SET_X, X)
-            .map(x -> ClassUtil.getDeclaredMethod(targetClass, x.apply(field.getName()), fieldType))
+            .map(x -> ClassUtil.declaredMethod(targetClass, x.apply(field.getName()), fieldType))
             .flatMap(StreamUtil::of)
             .findFirst();
 

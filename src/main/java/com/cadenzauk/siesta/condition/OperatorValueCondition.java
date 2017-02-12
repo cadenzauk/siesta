@@ -4,7 +4,10 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.condition;
+
+import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.Scope;
 
 import java.util.stream.Stream;
 
@@ -18,7 +21,7 @@ public class OperatorValueCondition<T, R> implements Condition<T> {
     }
 
     @Override
-    public String sql() {
+    public String sql(Scope scope) {
         return operator + " ?";
     }
 

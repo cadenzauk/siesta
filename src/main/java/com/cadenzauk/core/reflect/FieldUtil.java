@@ -6,6 +6,8 @@
 
 package com.cadenzauk.core.reflect;
 
+import javax.persistence.Transient;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 public class FieldUtil {
@@ -25,5 +27,9 @@ public class FieldUtil {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean hasAnnotation(Class<? extends Annotation> annotationClass, Field field) {
+        return field.getAnnotation(annotationClass) != null;
     }
 }
