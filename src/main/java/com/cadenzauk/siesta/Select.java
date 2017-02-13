@@ -75,8 +75,13 @@ public abstract class Select<RT> implements TypedExpression<RT> {
             return new WhereClauseBuilder();
         }
 
-        public <T, R> WhereClauseBuilder where(TypedExpression<T> lhs, Condition<T> rhs) {
+        public <T> WhereClauseBuilder where(TypedExpression<T> lhs, Condition<T> rhs) {
             whereClause = new CompleteExpression<>(lhs, rhs);
+            return new WhereClauseBuilder();
+        }
+
+        public <T, R> WhereClauseBuilder where(MethodReference<R,T> lhs, Condition<T> rhs) {
+            whereClause = new CompleteExpression<>(UnresolvedColumn.of(lhs), rhs);
             return new WhereClauseBuilder();
         }
 

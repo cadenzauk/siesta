@@ -54,6 +54,10 @@ public class Conditions {
         return new OperatorColumnCondition<>("<>", alias, column);
     }
 
+    public static <T, R> Condition<T> isNotEqualTo(MethodReference<R,T> getter) {
+        return new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(getter));
+    }
+
     // ---
     public static <T> Condition<T> isGreaterThan(T value) {
         return new OperatorValueCondition<>(">", value);

@@ -47,12 +47,24 @@ public class Select1<R1, RT> extends Select<RT> {
         return join(JoinType.LEFT_OUTER, alias2);
     }
 
+    public <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder leftJoin(Class<R2> r2Class, String alias2) {
+        return join(JoinType.LEFT_OUTER, alias.table().catalog().table(r2Class).as(alias2));
+    }
+
     public <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder rightJoin(Alias<R2> alias2) {
         return join(JoinType.RIGHT_OUTER, alias2);
     }
 
+    public <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder rightJoin(Class<R2> r2Class, String alias2) {
+        return join(JoinType.RIGHT_OUTER, alias.table().catalog().table(r2Class).as(alias2));
+    }
+
     public <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder fullOuterJoin(Alias<R2> alias2) {
         return join(JoinType.FULL_OUTER, alias2);
+    }
+
+    public <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder fullOuterJoin(Class<R2> r2Class, String alias2) {
+        return join(JoinType.FULL_OUTER, alias.table().catalog().table(r2Class).as(alias2));
     }
 
     private <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder join(JoinType joinType, Alias<R2> alias2) {

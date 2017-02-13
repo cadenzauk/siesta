@@ -36,7 +36,7 @@ public class TableBuilderTest {
         Catalog catalog = Catalog.newBuilder().defaultSchema("SCHEMA").build();
         Table<TestRow> testRowTable = catalog.table(TestRow.class, t -> t.tableName("TEST"));
 
-        String sql = Select.from(testRowTable.as("t")).sql();
+        String sql = catalog.from(testRowTable.as("t")).sql();
 
         assertThat(sql, is("select t.ID as t_ID, t.NAME as t_NAME from SCHEMA.TEST as t"));
     }

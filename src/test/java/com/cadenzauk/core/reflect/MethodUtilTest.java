@@ -16,6 +16,7 @@ import java.util.function.Function;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -66,5 +67,6 @@ public class MethodUtilTest {
         Method method = MethodUtil.fromReference(TestClass::method2);
 
         assertThat(method.getName(), is("method2"));
+        assertThat(method.getDeclaringClass().getCanonicalName(), is(TestClass.class.getCanonicalName()));
     }
 }

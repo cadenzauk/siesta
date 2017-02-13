@@ -6,10 +6,12 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.reflect.MethodReference;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.expression.CompleteExpression;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
+import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -46,6 +48,11 @@ public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1, RT2>> {
 
         public <T> JoinClauseBuilder on(TypedExpression<T> lhs, Condition<T> rhs) {
             onClause = new CompleteExpression<>(lhs, rhs);
+            return new JoinClauseBuilder();
+        }
+
+        public <T,R> JoinClauseBuilder on(MethodReference<R,T> lhs, Condition<T> rhs) {
+            onClause = new CompleteExpression<>(UnresolvedColumn.of(lhs), rhs);
             return new JoinClauseBuilder();
         }
     }
