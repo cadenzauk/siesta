@@ -6,18 +6,13 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodReference;
-import com.cadenzauk.siesta.catalog.Column;
-import com.cadenzauk.siesta.expression.CompleteExpression;
+import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
-import java.util.function.Function;
-
-import static com.cadenzauk.siesta.Alias.column;
 
 public class Select1<R1, RT> extends Select<RT> {
     private final Alias<R1> alias;
@@ -33,6 +28,10 @@ public class Select1<R1, RT> extends Select<RT> {
 
     public <T> Select1<R1, T> select(MethodReference<R1,T> methodReference) {
         return select(UnresolvedColumn.of(methodReference));
+    }
+
+    public <T> Select1<R1, T> select(Alias<R1> alias, MethodReference<R1,T> methodReference) {
+        return select(ResolvedColumn.of(alias, methodReference));
     }
 
     public <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder join(Alias<R2> alias2) {
@@ -69,21 +68,6 @@ public class Select1<R1, RT> extends Select<RT> {
 
     private <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder join(JoinType joinType, Alias<R2> alias2) {
         return new Select2<>(joinType, alias, alias2, rowMapper(), alias2.rowMapper(), projection(), Projection.of(alias2)).joinClause();
-    }
-
-    public <T> WhereClauseBuilder where(Column<T, R1> column, Condition<T> condition) {
-        whereClause = new CompleteExpression<>(new ResolvedColumn<>(alias, column), condition);
-        return new WhereClauseBuilder();
-    }
-
-    public <T> WhereClauseBuilder where(TypedExpression<T> lhs, Condition<T> condition) {
-        whereClause = new CompleteExpression<>(lhs, condition);
-        return new WhereClauseBuilder();
-    }
-
-    public <T> WhereClauseBuilder where(MethodReference<R1,T> lhs, Condition<T> condition) {
-        whereClause = new CompleteExpression<>(column(alias, lhs), condition);
-        return new WhereClauseBuilder();
     }
 
     public List<RT> list(JdbcTemplate jdbcTemplate) {

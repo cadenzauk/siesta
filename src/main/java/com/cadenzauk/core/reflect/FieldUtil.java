@@ -6,7 +6,6 @@
 
 package com.cadenzauk.core.reflect;
 
-import javax.persistence.Transient;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 

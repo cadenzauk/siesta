@@ -7,7 +7,7 @@
 package com.cadenzauk.siesta.expression;
 
 import com.cadenzauk.core.lang.StringUtil;
-import com.cadenzauk.core.reflect.MethodReference;
+import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.core.reflect.MethodUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
@@ -17,7 +17,6 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static com.cadenzauk.siesta.catalog.Column.aColumn;
 
@@ -60,11 +59,13 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
             .orElseGet(() -> scope.findAlias(column.rowClass()));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T, R> UnresolvedColumn<T,R> of(MethodReference<R,T> getter) {
         Method method = MethodUtil.fromReference(getter);
         return new UnresolvedColumn<>(aColumn(StringUtil.camelToUpper(method.getName()), getter, (Class<R>) method.getDeclaringClass()));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T, R> UnresolvedColumn<T,R> of(String alias, MethodReference<R,T> getter) {
         Method method = MethodUtil.fromReference(getter);
         return new UnresolvedColumn<>(alias, aColumn(StringUtil.camelToUpper(method.getName()), getter, (Class<R>) method.getDeclaringClass()));

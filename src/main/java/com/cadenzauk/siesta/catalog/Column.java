@@ -6,13 +6,12 @@
 
 package com.cadenzauk.siesta.catalog;
 
+import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.TypedExpression;
 import org.springframework.jdbc.core.RowMapper;
-
-import java.util.function.Function;
 
 public class Column<T, R> implements TypedExpression<T> {
     private final String name;
@@ -64,7 +63,11 @@ public class Column<T, R> implements TypedExpression<T> {
         return new Column<>(name, type, rowClass);
     }
 
-    public static <T, R> Column<T, R> aColumn(String name, Function<R, T> function, Class<R> rowClass) {
+    public static <T, R> Column<T, R> aColumn(String name, MethodReference<R, T> function, Class<R> rowClass) {
+        return new Column<>(name, null, rowClass);
+    }
+
+    public static <T, R> Column<T,R> of(String name, Class<R> rowClass) {
         return new Column<>(name, null, rowClass);
     }
 }

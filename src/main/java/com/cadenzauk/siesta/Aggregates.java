@@ -6,7 +6,7 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodReference;
+import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.siesta.aggregate.MaxFunction;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 

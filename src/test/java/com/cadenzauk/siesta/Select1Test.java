@@ -14,10 +14,9 @@ import org.springframework.jdbc.core.RowMapper;
 import static com.cadenzauk.siesta.Conditions.isEqualTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class Select1Test {
     public static class Row1 {
@@ -28,24 +27,16 @@ public class Select1Test {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String description() {
             return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
         }
     }
 
     @Test
     public void whereIsEqualToOneColumnWithoutAlias() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class)
+        String sql = database.from(Row1.class)
             .where(Row1::name, isEqualTo(Row1::description))
             .sql();
 
@@ -54,9 +45,9 @@ public class Select1Test {
 
     @Test
     public void whereIsEqualToOneColumnWithDefaultAlias() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "w")
+        String sql = database.from(Row1.class, "w")
             .where(Row1::name, isEqualTo(Row1::description))
             .sql();
 
@@ -65,9 +56,9 @@ public class Select1Test {
 
     @Test
     public void whereIsEqualToOneColumnWithAlias() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "w")
+        String sql = database.from(Row1.class, "w")
             .where(Row1::name, isEqualTo("w", Row1::description))
             .sql();
 
@@ -76,9 +67,9 @@ public class Select1Test {
 
     @Test
     public void whereIsEqualToOneValue() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "w")
+        String sql = database.from(Row1.class, "w")
             .where(Row1::description, isEqualTo("fred"))
             .sql();
 
@@ -87,9 +78,9 @@ public class Select1Test {
 
     @Test
     public void whereIsEqualToTwoValues() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "w")
+        String sql = database.from(Row1.class, "w")
             .where(Row1::description, isEqualTo("fred"))
             .and(Row1::name, isEqualTo("bob"))
             .sql();
@@ -99,9 +90,9 @@ public class Select1Test {
 
     @Test
     public void orderByOneColumnDefaultAscending() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "q")
+        String sql = database.from(Row1.class, "q")
             .where(Row1::name, isEqualTo("joe"))
             .orderBy(Row1::description)
             .sql();
@@ -111,9 +102,9 @@ public class Select1Test {
 
     @Test
     public void orderByOneColumnAscending() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "q")
+        String sql = database.from(Row1.class, "q")
             .where(Row1::name, isEqualTo("joe"))
             .orderBy(Row1::description, Order.ASCENDING)
             .sql();
@@ -123,9 +114,9 @@ public class Select1Test {
 
     @Test
     public void orderByOneColumnDescending() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "q")
+        String sql = database.from(Row1.class, "q")
             .where(Row1::name, isEqualTo("joe"))
             .orderBy(Row1::description, Order.DESCENDING)
             .sql();
@@ -135,9 +126,9 @@ public class Select1Test {
 
     @Test
     public void noWhereClauseOrderByOneColumnDefaultAscending() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "q")
+        String sql = database.from(Row1.class, "q")
             .orderBy(Row1::name)
             .sql();
 
@@ -147,11 +138,11 @@ public class Select1Test {
     @Test
     public void optional() throws Exception {
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        catalog.from(Row1.class, "w")
+        database.from(Row1.class, "w")
             .optional(jdbcTemplate);
 
-        verify(jdbcTemplate, times(1)).query(eq("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w"), ArgumentMatchers.<Object[]>any(), ArgumentMatchers.<RowMapper<Row1>>any());
+        verify(jdbcTemplate, times(1)).query(eq("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w"), any(Object[].class), ArgumentMatchers.<RowMapper<Row1>>any());
     }
 }

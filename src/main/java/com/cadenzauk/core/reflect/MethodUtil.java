@@ -6,6 +6,7 @@
 
 package com.cadenzauk.core.reflect;
 
+import com.cadenzauk.core.function.MethodReference;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -15,11 +16,8 @@ import org.objenesis.ObjenesisHelper;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MethodUtil {
     public static Object invoke(Method method, Object target, Object... args) {
@@ -33,12 +31,9 @@ public class MethodUtil {
 
     public static <T,V> Method fromReference(Class<T> c1ass, Function<T,V> methodReference) {
         AtomicReference<Method> result = new AtomicReference<>();
-        MethodInterceptor interceptor = new MethodInterceptor() {
-            @Override
-            public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-                result.set(method);
-                return null;
-            }
+        MethodInterceptor interceptor = (obj, method, args, proxy) -> {
+            result.set(method);
+            return null;
         };
 
         Enhancer enhancer = new Enhancer();
@@ -58,10 +53,10 @@ public class MethodUtil {
     public static <T,V> Method fromReference(MethodReference<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
             .map(writeReplace -> (SerializedLambda)invoke(writeReplace, methodReference))
-            .map(SerializedLambda::getImplClass)
-            .map(className -> className.replaceAll("/", "."))
-            .map(ClassUtil::forName)
-            .map(klass -> fromReference((Class<T>)klass, methodReference))
+            .flatMap(lambda -> {
+                Class<?> implClass = ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."));
+                return ClassUtil.declaredMethod(implClass, lambda.getImplMethodName());
+            })
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 }

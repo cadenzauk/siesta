@@ -8,17 +8,18 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public class Catalog {
-    private Map<Class<?>, Table<?>> metadataCache = new ConcurrentHashMap<>();
+public class Database {
+    private final Map<Class<?>, Table<?>> metadataCache = new ConcurrentHashMap<>();
     private final String defaultSchema;
     private final NamingStrategy namingStrategy;
 
-    private Catalog(Builder builder) {
+    private Database(Builder builder) {
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
     }
@@ -36,6 +37,12 @@ public class Catalog {
         return table(rowClass, Function.identity());
     }
 
+    @SuppressWarnings("unchecked")
+    public <R> void insert(JdbcTemplate jdbcTemplate, R row) {
+        Class<R> rowClass = (Class<R>)row.getClass();
+        table(rowClass).insert(jdbcTemplate, row);
+    }
+
     public <R> Select1<R,R> from(Class<R> rowClass) {
         return Select.from(table(rowClass));
     }
@@ -48,11 +55,11 @@ public class Catalog {
         return Select.from(table(rowClass).as(alias));
     }
 
+    @SuppressWarnings("unchecked")
     public <R,B> Table<R> table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
         return (Table<R>) metadataCache.computeIfAbsent(rowClass, k -> {
             Table.Builder<R, R> builder = new Table.Builder<>(this, rowClass, rowClass, Function.identity());
-            Table<R> table = init.apply(builder).build();
-            return table;
+            return init.apply(builder).build();
         });
     }
 
@@ -77,8 +84,8 @@ public class Catalog {
             return this;
         }
 
-        public Catalog build() {
-            return new Catalog(this);
+        public Database build() {
+            return new Database(this);
         }
     }
 }

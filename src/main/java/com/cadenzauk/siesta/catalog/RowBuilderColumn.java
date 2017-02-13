@@ -6,7 +6,6 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.ClassUtil;
 import com.cadenzauk.core.reflect.Getter;
 import com.cadenzauk.core.reflect.Setter;

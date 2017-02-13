@@ -6,9 +6,8 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodReference;
+import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.expression.CompleteExpression;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
@@ -18,9 +17,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
-
-public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1, RT2>> {
+public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
     private final Alias<R1> alias1;
     private final Alias<R2> alias2;
     private final JoinType joinType;
@@ -36,23 +33,28 @@ public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1, RT2>> {
     }
 
     @Override
-    public RowMapper<Tuple2<RT1, RT2>> rowMapper(String label) {
+    public RowMapper<Tuple2<RT1,RT2>> rowMapper(String label) {
         return rowMapper();
     }
 
     public class JoinClauseStartBuilder {
-        public <T> JoinClauseBuilder on(Column<T,R2> column2, Condition<T> condition) {
-            onClause = new CompleteExpression<>(new ResolvedColumn<>(alias2, column2), condition);
-            return new JoinClauseBuilder();
-        }
-
         public <T> JoinClauseBuilder on(TypedExpression<T> lhs, Condition<T> rhs) {
             onClause = new CompleteExpression<>(lhs, rhs);
             return new JoinClauseBuilder();
         }
 
-        public <T,R> JoinClauseBuilder on(MethodReference<R,T> lhs, Condition<T> rhs) {
+        public <T, R> JoinClauseBuilder on(MethodReference<R,T> lhs, Condition<T> rhs) {
             onClause = new CompleteExpression<>(UnresolvedColumn.of(lhs), rhs);
+            return new JoinClauseBuilder();
+        }
+
+        public <T, R> JoinClauseBuilder on(String alias, MethodReference<R,T> lhs, Condition<T> rhs) {
+            onClause = new CompleteExpression<>(UnresolvedColumn.of(alias, lhs), rhs);
+            return new JoinClauseBuilder();
+        }
+
+        public <T, R> JoinClauseBuilder on(Alias<R> alias, MethodReference<R,T> lhs, Condition<T> rhs) {
+            onClause = new CompleteExpression<>(ResolvedColumn.of(alias, lhs), rhs);
             return new JoinClauseBuilder();
         }
     }
@@ -65,7 +67,7 @@ public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1, RT2>> {
     }
 
     @Override
-    public List<Tuple2<RT1, RT2>> list(JdbcTemplate jdbcTemplate) {
+    public List<Tuple2<RT1,RT2>> list(JdbcTemplate jdbcTemplate) {
         Object[] args = ArrayUtils.addAll(onClauseArgs(), whereClauseArgs());
         String sql = sql();
         System.out.println(sql);

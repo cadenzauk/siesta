@@ -11,23 +11,21 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.isNotNull;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 public class MethodUtilTest {
-    public static class TestClass {
+    private static class TestClass {
         public TestClass(int ignored) {
         }
 
         void method1() {
         }
-        Optional<String> method2() {
+
+        public Optional<String> method2() {
             return null;
         }
     }

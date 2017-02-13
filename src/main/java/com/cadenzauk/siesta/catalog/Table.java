@@ -6,12 +6,10 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.*;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.Catalog;
+import com.cadenzauk.siesta.Database;
 import com.google.common.collect.ImmutableList;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,14 +26,14 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class Table<R> {
-    private final Catalog catalog;
+    private final Database database;
     private final Class<R> rowClass;
     private final String schema;
     private final String tableName;
     private final Impl<?> impl;
 
     private <B> Table(Builder<R, B> builder) {
-        catalog = builder.catalog;
+        database = builder.database;
         rowClass = builder.rowClass;
         schema = builder.schema;
         tableName = builder.tableName;
@@ -46,8 +44,8 @@ public class Table<R> {
         return rowClass;
     }
 
-    public Catalog catalog() {
-        return catalog;
+    public Database catalog() {
+        return database;
     }
 
     public String schema() {
@@ -83,7 +81,7 @@ public class Table<R> {
     }
 
     public <T> Column<T,R> column(Function<R,T> getter) {
-        String columnName = catalog.namingStrategy().columnName(MethodUtil.fromReference(rowClass, getter).getName());
+        String columnName = database.namingStrategy().columnName(MethodUtil.fromReference(rowClass, getter).getName());
         //noinspection unchecked
         return (Column<T,R>) columns()
             .filter(x -> StringUtils.equalsIgnoreCase(x.column().name(), columnName))
@@ -137,7 +135,7 @@ public class Table<R> {
     }
 
     public static final class Builder<R, B> {
-        private final Catalog catalog;
+        private final Database database;
         private final Class<R> rowClass;
         private final Class<B> builderClass;
         private final Function<B, R> buildRow;
@@ -147,8 +145,8 @@ public class Table<R> {
         private Set<String> excludedFields = new HashSet<>();
         private final List<RowBuilderColumn<?, R, B>> columns = new ArrayList<>();
 
-        public Builder(Catalog catalog, Class<R> rowClass, Class<B> builderClass, Function<B,R> buildRow) {
-            this.catalog = catalog;
+        public Builder(Database database, Class<R> rowClass, Class<B> builderClass, Function<B,R> buildRow) {
+            this.database = database;
             this.rowClass = rowClass;
             this.builderClass = builderClass;
             this.buildRow = buildRow;
@@ -156,10 +154,10 @@ public class Table<R> {
             Optional<javax.persistence.Table> tableAnnotation = ClassUtil.getAnnotation(javax.persistence.Table.class, rowClass);
             this.schema = tableAnnotation
                 .map(javax.persistence.Table::schema)
-                .orElse(catalog.defaultSchema());
+                .orElse(database.defaultSchema());
             this.tableName = tableAnnotation
                 .map(javax.persistence.Table::name)
-                .orElseGet(() -> catalog.namingStrategy().tableName(rowClass.getSimpleName()));
+                .orElseGet(() -> database.namingStrategy().tableName(rowClass.getSimpleName()));
         }
 
         public Table<R> build() {
@@ -170,7 +168,7 @@ public class Table<R> {
                 .filter(f -> !Modifier.isStatic(f.getModifiers()))
                 .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
                 .filter(f -> !excludedFields.contains(f.getName()))
-                .forEach(f -> columns.add(RowBuilderColumn.fromField(catalog.namingStrategy(), rowClass, builderClass, f)));
+                .forEach(f -> columns.add(RowBuilderColumn.fromField(database.namingStrategy(), rowClass, builderClass, f)));
             return new Table<>(this);
         }
 
@@ -185,7 +183,7 @@ public class Table<R> {
         }
 
         public <BB> Builder<R, BB> builder(Class<BB> builderClass, Function<BB,R> buildRow) {
-            return new Builder<R, BB>(catalog, rowClass, builderClass, buildRow)
+            return new Builder<>(database, rowClass, builderClass, buildRow)
                 .schema(schema)
                 .tableName(tableName);
         }

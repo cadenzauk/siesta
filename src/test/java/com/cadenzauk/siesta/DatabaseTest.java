@@ -6,7 +6,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -14,12 +13,11 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static com.cadenzauk.siesta.Aggregates.max;
-import static com.cadenzauk.siesta.Alias.column;
 import static com.cadenzauk.siesta.Conditions.isEqualTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class CatalogTest {
+public class DatabaseTest {
     public static class Person {
         private int id;
         private String firstName;
@@ -45,7 +43,7 @@ public class CatalogTest {
 
     @Test
     public void from() throws Exception {
-        Catalog customers = siesta();
+        Database customers = siesta();
 
         String sql = customers.from(Person.class)
             .where(Person::id, isEqualTo(1))
@@ -61,7 +59,7 @@ public class CatalogTest {
 
     @Test
     public void project() {
-        Catalog customers = siesta();
+        Database customers = siesta();
 
         String sql = customers.from(Person.class)
             .select(Person::id)
@@ -75,7 +73,7 @@ public class CatalogTest {
 
     @Test
     public void aggregate() {
-        Catalog customers = siesta();
+        Database customers = siesta();
 
         String sql = customers.from(Person.class)
             .select(max(Person::id))
@@ -89,16 +87,16 @@ public class CatalogTest {
 
     @Test
     public void subQuery() {
-        Catalog catalog = siesta();
-        Alias<Person> outer = catalog.table(Person.class).as("outer");
-        Alias<Person> inner = catalog.table(Person.class).as("inner");
+        Database database = siesta();
+        Alias<Person> outer = database.table(Person.class).as("outer");
+        Alias<Person> inner = database.table(Person.class).as("inner");
 
-        String sql = catalog.from(outer)
+        String sql = database.from(outer)
             .select(Person::firstName)
             .where(Person::id, isEqualTo(
-                catalog.from(inner)
+                database.from(inner)
                     .select(max(Person::id))
-                    .where(Person::surname, isEqualTo(column(outer, Person::surname)))))
+                    .where(Person::surname, isEqualTo(outer, Person::surname))))
             .sql();
 
         assertThat(sql, is("select outer.FIRST_NAME as outer_FIRST_NAME " +
@@ -109,20 +107,20 @@ public class CatalogTest {
 
     @Test
     public void columnsFromMethodReferences() {
-        Catalog catalog = siesta();
+        Database database = siesta();
 
-        Alias<Person> p = catalog.table(Person.class).as("p");
-        String sql = catalog.from(p)
-            .select(column(p, Person::firstName))
-            .where(column(p, Person::id), isEqualTo(2))
+        Alias<Person> p = database.table(Person.class).as("p");
+        String sql = database.from(p)
+            .select(p, Person::firstName)
+            .where(p, Person::id, isEqualTo(2))
             .sql();
 
         assertThat(sql, is("select p.FIRST_NAME as p_FIRST_NAME from CUSTOMERS.PERSON as p where p.ID = ?"));
     }
 
     @NotNull
-    private Catalog siesta() {
-        return Catalog.newBuilder()
+    private Database siesta() {
+        return Database.newBuilder()
             .defaultSchema("CUSTOMERS")
             .namingStrategy(new UppercaseUnderscores())
             .build();

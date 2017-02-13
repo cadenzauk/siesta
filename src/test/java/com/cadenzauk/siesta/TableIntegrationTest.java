@@ -7,10 +7,10 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import liquibase.integration.spring.SpringLiquibase;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +26,6 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Optional;
 
-import static com.cadenzauk.siesta.Alias.column;
 import static com.cadenzauk.siesta.Conditions.isEqualTo;
 import static org.hamcrest.core.Is.is;
 
@@ -58,10 +57,29 @@ public class TableIntegrationTest {
     private DataSource dataSource;
 
     @Test
-    public void selectFromDatabase() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
-        catalog.table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder.class, ManufacturerRow.Builder::build));
-        catalog.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
+    public void selectFromDatabaseOneTable() {
+        Database database = database();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
+        WidgetRow aWidget = WidgetRow.newBuilder()
+            .widgetId(2)
+            .manufacturerId(2)
+            .name("Dodacky")
+            .description(Optional.of("Thingamibob"))
+            .build();
+
+        database.insert(jdbcTemplate, aWidget);
+
+        Optional<WidgetRow> theSame = database.from(WidgetRow.class)
+            .where(WidgetRow::widgetId, isEqualTo(2L))
+            .optional(jdbcTemplate);
+
+        Assert.assertThat(theSame, is(Optional.of(aWidget)));
+    }
+
+    @Test
+    public void selectFromDatabaseTwoTables() {
+        Database database = database();
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
             .manufacturerId(2)
@@ -73,41 +91,28 @@ public class TableIntegrationTest {
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
-        catalog.table(ManufacturerRow.class).insert(jdbcTemplate, aManufacturer);
-        catalog.table(WidgetRow.class).insert(jdbcTemplate, aWidget);
+        database.insert(jdbcTemplate, aManufacturer);
+        database.insert(jdbcTemplate, aWidget);
 
-        Alias<WidgetRow> w = catalog.table(WidgetRow.class).as("w");
-        Alias<ManufacturerRow> m = catalog.table(ManufacturerRow.class).as("m");
-        Optional<WidgetRow> theSame = catalog.from(w)
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
+        Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
+        Optional<WidgetRow> theSame = database.from(w)
             .join(m)
-            .on(column(m, ManufacturerRow::manufacturerId), isEqualTo(column(w, WidgetRow::manufacturerId)))
-            .where(column(w, WidgetRow::name), isEqualTo("Dodacky"))
-            .and(column(w, WidgetRow::widgetId), isEqualTo(1L))
+            .on(m, ManufacturerRow::manufacturerId, isEqualTo(w, WidgetRow::manufacturerId))
+            .where(w, WidgetRow::name, isEqualTo("Dodacky"))
+            .and(w, WidgetRow::widgetId, isEqualTo(1L))
             .optional(jdbcTemplate)
             .map(Tuple2::item1);
 
         Assert.assertThat(theSame, is(Optional.of(aWidget)));
     }
 
-//    @Test
-//    public void selectFromDatabaseViaReflection() {
-//        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-//        Table<WidgetRow> table = aTable("TEST", "WIDGET", WidgetRow::newBuilder, WidgetRow.Builder::build, WidgetRow.class).buildReflectively();
-//
-//        WidgetRow aWidget = WidgetRow.newBuilder()
-//            .widgetId(2)
-//            .manufacturerId(2)
-//            .name("Dodacky")
-//            .description(Optional.of("Thingamibob"))
-//            .build();
-//
-//        table.insert(jdbcTemplate, aWidget);
-//
-//        Optional<WidgetRow> theSame = Select.from(table)
-//            .where(WidgetRow.WIDGET_ID, isEqualTo(2L))
-//            .optional(jdbcTemplate);
-//
-//        Assert.assertThat(theSame, is(Optional.of(aWidget)));
-//    }
+    @NotNull
+    private Database database() {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
+        database.table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder.class, ManufacturerRow.Builder::build));
+        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
+        return database;
+    }
 
 }

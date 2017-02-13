@@ -11,9 +11,9 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class DataType<T> {
-    public static DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
-    public static DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
-    public static DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt);
+    public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
+    public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
+    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt);
 
     @FunctionalInterface
     public interface ResultSetExtractor<T> {
@@ -22,7 +22,7 @@ public class DataType<T> {
     private final Class<T> javaClass;
     private final ResultSetExtractor<T> resultSetExtractor;
 
-    public DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor) {
+    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor) {
         this.javaClass = javaClass;
         this.resultSetExtractor = resultSetExtractor;
     }

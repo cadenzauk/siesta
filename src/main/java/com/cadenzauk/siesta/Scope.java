@@ -22,7 +22,7 @@ public class Scope {
         this.aliases = ImmutableList.copyOf(aliases);
     }
 
-    public Scope(Scope outer, Alias<?>... aliases) {
+    private Scope(Scope outer, Alias<?>... aliases) {
         this.outer = Optional.of(outer);
         this.aliases = ImmutableList.copyOf(aliases);
     }

@@ -11,7 +11,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class ClassUtil {
     public static Optional<Method> declaredMethod(Class<?> klass, String name, Class<?>... parameterTypes) {

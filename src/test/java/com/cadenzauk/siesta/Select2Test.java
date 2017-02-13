@@ -57,9 +57,9 @@ public class Select2Test {
 
     @Test
     public void innerJoin() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "r1")
+        String sql = database.from(Row1.class, "r1")
             .join(Row2.class, "r2").on(Row2::name, isEqualTo(Row1::name))
             .sql();
 
@@ -68,9 +68,9 @@ public class Select2Test {
 
     @Test
     public void leftOuterJoin() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "r1")
+        String sql = database.from(Row1.class, "r1")
             .leftJoin(Row2.class, "r2").on(Row2::name, isEqualTo(Row1::name))
             .sql();
 
@@ -79,9 +79,9 @@ public class Select2Test {
 
     @Test
     public void rightOuterJoin() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "r1")
+        String sql = database.from(Row1.class, "r1")
             .rightJoin(Row2.class, "r2").on(Row2::name, isEqualTo(Row1::name))
             .sql();
 
@@ -90,9 +90,9 @@ public class Select2Test {
 
     @Test
     public void fullOuterJoin() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "r1")
+        String sql = database.from(Row1.class, "r1")
             .fullOuterJoin(Row2.class, "r2").on(Row2::name, isEqualTo(Row1::name))
             .sql();
 
@@ -101,9 +101,9 @@ public class Select2Test {
 
     @Test
     public void innerJoinWhereOneValue() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "r1")
+        String sql = database.from(Row1.class, "r1")
             .join(Row2.class, "r2").on(Row2::name, isEqualTo(Row1::name))
             .where(Row1::description, isGreaterThan(""))
             .sql();
@@ -113,9 +113,9 @@ public class Select2Test {
 
     @Test
     public void innerJoinWhereOneValueAndOneColumn() {
-        Catalog catalog = Catalog.newBuilder().defaultSchema("TEST").build();
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
 
-        String sql = catalog.from(Row1.class, "r1")
+        String sql = database.from(Row1.class, "r1")
             .join(Row2.class, "r2").on(Row2::name, isEqualTo(Row1::name))
             .where(Row1::description, isGreaterThan(""))
             .and(Row2::name, isNotEqualTo(Row1::name))

@@ -6,12 +6,13 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodReference;
+import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.expression.AndExpression;
 import com.cadenzauk.siesta.expression.CompleteExpression;
+import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,16 +21,14 @@ import org.springframework.jdbc.core.RowMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
-import static com.cadenzauk.siesta.Alias.column;
 import static java.util.stream.Collectors.joining;
 
 public abstract class Select<RT> implements TypedExpression<RT> {
     protected final Scope scope;
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
-    protected Expression whereClause;
+    private Expression whereClause;
     protected Expression onClause;
 
     private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
@@ -59,12 +58,41 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         }
     }
 
-    public class JoinClauseBuilder extends ClauseBuilder {
-        public <T, R> JoinClauseBuilder and(Column<T, R> column, Condition<T> condition) {
-            onClause = new AndExpression(onClause , new CompleteExpression<>(new UnresolvedColumn<>(column), condition));
-            return this;
+    public class JoinOrWhereClauseBuilder extends ClauseBuilder {
+        public <T> OrderByBuilder orderBy(TypedExpression<T> expression) {
+            return new OrderByBuilder().then(expression);
         }
 
+        public <T, R> OrderByBuilder orderBy(MethodReference<R,T> columnGetter) {
+            return new OrderByBuilder().then(columnGetter);
+        }
+
+        public <T, R> OrderByBuilder orderBy(String alias, MethodReference<R,T> columnGetter) {
+            return new OrderByBuilder().then(alias, columnGetter);
+        }
+
+        public <T, R> OrderByBuilder orderBy(Alias<R> alias, MethodReference<R,T> columnGetter) {
+            return new OrderByBuilder().then(alias, columnGetter);
+        }
+
+        public <T> OrderByBuilder orderBy(TypedExpression<T> expression, Order order) {
+            return new OrderByBuilder().then(expression, order);
+        }
+
+        public <T, R> OrderByBuilder orderBy(MethodReference<R,T> columnGetter, Order order) {
+            return new OrderByBuilder().then(columnGetter, order);
+        }
+
+        public <T, R> OrderByBuilder orderBy(String alias, MethodReference<R,T> columnGetter, Order order) {
+            return new OrderByBuilder().then(alias, columnGetter, order);
+        }
+
+        public <T, R> OrderByBuilder orderBy(Alias<R> alias, MethodReference<R,T> columnGetter, Order order) {
+            return new OrderByBuilder().then(alias, columnGetter, order);
+        }
+    }
+
+    public class JoinClauseBuilder extends JoinOrWhereClauseBuilder {
         public <T, R> JoinClauseBuilder and(String alias, Column<T, R> column, Condition<T> condition) {
             onClause = new AndExpression(onClause , new CompleteExpression<>(new UnresolvedColumn<>(alias, column), condition));
             return this;
@@ -85,40 +113,19 @@ public abstract class Select<RT> implements TypedExpression<RT> {
             return new WhereClauseBuilder();
         }
 
-        public <T, R> WhereClauseBuilder where(String alias, Column<T, R> column, Condition<T> condition) {
-            whereClause = new CompleteExpression<>(new UnresolvedColumn<>(alias, column), condition);
+        public <T, R> WhereClauseBuilder where(String alias, MethodReference<R,T> lhs, Condition<T> rhs) {
+            whereClause = new CompleteExpression<>(UnresolvedColumn.of(alias, lhs), rhs);
             return new WhereClauseBuilder();
         }
 
-        public <T, R> OrderByBuilder orderBy(Column<T,R> column) {
-            return new OrderByBuilder().then(column);
-        }
-
-        public <T, R> OrderByBuilder orderBy(String alias, Column<T,R> column) {
-            return new OrderByBuilder().then(alias, column);
-        }
-
-        public <T, R> OrderByBuilder orderBy(Column<T,R> column, Order order) {
-            return new OrderByBuilder().then(column, order);
-        }
-
-        public <T, R> OrderByBuilder orderBy(String alias, Column<T,R> column, Order order) {
-            return new OrderByBuilder().then(alias, column, order);
+        public <T, R> WhereClauseBuilder where(Alias<R> alias, MethodReference<R,T> getterReference, Condition<T> condition) {
+            whereClause = new CompleteExpression<>(ResolvedColumn.of(alias, getterReference), condition);
+            return new WhereClauseBuilder();
         }
     }
 
-    public class WhereClauseBuilder extends ClauseBuilder {
-        public <T, R> WhereClauseBuilder and(Column<T,R> column, Condition<T> condition) {
-            whereClause = new AndExpression(whereClause, new CompleteExpression<>(new UnresolvedColumn<>(column), condition));
-            return this;
-        }
-
-        public <T, R> WhereClauseBuilder and(String alias, Column<T,R> column, Condition<T> rhs) {
-            whereClause = new AndExpression(whereClause, new CompleteExpression<>(new UnresolvedColumn<>(alias, column), rhs));
-            return this;
-        }
-
-        public <T, R> WhereClauseBuilder and(TypedExpression<T> lhs, Condition<T> rhs) {
+    public class WhereClauseBuilder extends JoinOrWhereClauseBuilder {
+        public <T> WhereClauseBuilder and(TypedExpression<T> lhs, Condition<T> rhs) {
             whereClause = new AndExpression(whereClause, new CompleteExpression<>(lhs, rhs));
             return this;
         }
@@ -128,50 +135,55 @@ public abstract class Select<RT> implements TypedExpression<RT> {
             return this;
         }
 
-        public <T, R> OrderByBuilder orderBy(Column<T,R> column) {
-            return new OrderByBuilder().then(column);
+        public <T, R> WhereClauseBuilder and(String alias, MethodReference<R,T> lhs, Condition<T> rhs) {
+            whereClause = new AndExpression(whereClause, new CompleteExpression<>(UnresolvedColumn.of(alias, lhs), rhs));
+            return this;
         }
 
-        public <T, R> OrderByBuilder orderBy(MethodReference<R,T> column) {
-            return new OrderByBuilder().then(UnresolvedColumn.of(column).column());
+        public <T, R> WhereClauseBuilder and(Alias<R> alias, MethodReference<R,T> lhs, Condition<T> rhs) {
+            whereClause = new AndExpression(whereClause, new CompleteExpression<>(ResolvedColumn.of(alias, lhs), rhs));
+            return this;
         }
-
-        public <T, R> OrderByBuilder orderBy(String alias, Column<T,R> column) {
-            return new OrderByBuilder().then(alias, column);
-        }
-
-        public <T, R> OrderByBuilder orderBy(Column<T,R> column, Order order) {
-            return new OrderByBuilder().then(column, order);
-        }
-
-        public <T, R> OrderByBuilder orderBy(String alias, Column<T,R> column, Order order) {
-            return new OrderByBuilder().then(alias, column, order);
-        }
-
-        public <T, R> OrderByBuilder orderBy(MethodReference<R,T> column, Order order) {
-            return new OrderByBuilder().then(UnresolvedColumn.of(column).column(), order);
-        }
-
     }
 
     public class OrderByBuilder extends ClauseBuilder {
-        public <T, R> OrderByBuilder then(Column<T,R> column) {
-            orderByClauses.add(new Ordering<>(scope.findAlias(column.rowClass()), column, Order.ASCENDING));
+        public <T> OrderByBuilder then(TypedExpression<T> column) {
+            orderByClauses.add(new Ordering<>(column, Order.ASCENDING));
             return this;
         }
 
-        public <T, R> OrderByBuilder then(String alias, Column<T,R> column) {
-            orderByClauses.add(new Ordering<>(scope.findAlias(column.rowClass(), alias), column, Order.ASCENDING));
+        public <T, R> OrderByBuilder then(MethodReference<R,T> column) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(column), Order.ASCENDING));
             return this;
         }
 
-        public <T, R> OrderByBuilder then(Column<T,R> column, Order order) {
-            orderByClauses.add(new Ordering<>(scope.findAlias(column.rowClass()), column, order));
+        public <T, R> OrderByBuilder then(String alias, MethodReference<R,T> column) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(alias, column), Order.ASCENDING));
             return this;
         }
 
-        public <T, R> OrderByBuilder then(String alias, Column<T,R> column, Order order) {
-            orderByClauses.add(new Ordering<>(scope.findAlias(column.rowClass(), alias), column, order));
+        public <T, R> OrderByBuilder then(Alias<R> alias, MethodReference<R,T> column) {
+            orderByClauses.add(new Ordering<>(ResolvedColumn.of(alias, column), Order.ASCENDING));
+            return this;
+        }
+
+        public <T> OrderByBuilder then(TypedExpression<T> column, Order order) {
+            orderByClauses.add(new Ordering<>(column, order));
+            return this;
+        }
+
+        public <T, R> OrderByBuilder then(MethodReference<R,T> column, Order order) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(column), order));
+            return this;
+        }
+
+        public <T, R> OrderByBuilder then(String alias, MethodReference<R,T> column, Order order) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(alias, column), order));
+            return this;
+        }
+
+        public <T, R> OrderByBuilder then(Alias<R> alias, MethodReference<R,T> column, Order order) {
+            orderByClauses.add(new Ordering<>(ResolvedColumn.of(alias, column), order));
             return this;
         }
     }
@@ -190,24 +202,56 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return projection;
     }
 
-    public <T, R> OrderByBuilder orderBy(Column<T,R> column) {
-        return new OrderByBuilder().then(column);
+    public <T> WhereClauseBuilder where(TypedExpression<T> lhs, Condition<T> condition) {
+        whereClause = new CompleteExpression<>(lhs, condition);
+        return new WhereClauseBuilder();
     }
 
-    public <T, R> OrderByBuilder orderBy(MethodReference<R,T> column) {
-        return new OrderByBuilder().then(UnresolvedColumn.of(column).column());
+    public <T,R> WhereClauseBuilder where(MethodReference<R,T> lhs, Condition<T> condition) {
+        whereClause = new CompleteExpression<>(UnresolvedColumn.of(lhs), condition);
+        return new WhereClauseBuilder();
     }
 
-    public <T, R> OrderByBuilder orderBy(String alias, Column<T,R> column) {
-        return new OrderByBuilder().then(alias, column);
+    public <T,R> WhereClauseBuilder where(String alias, MethodReference<R,T> lhs, Condition<T> condition) {
+        whereClause = new CompleteExpression<>(UnresolvedColumn.of(alias, lhs), condition);
+        return new WhereClauseBuilder();
     }
 
-    public <T, R> OrderByBuilder orderBy(Column<T,R> column, Order order) {
-        return new OrderByBuilder().then(column, order);
+    public <T,R> WhereClauseBuilder where(Alias<R> alias, MethodReference<R,T> lhs, Condition<T> condition) {
+        whereClause = new CompleteExpression<>(ResolvedColumn.of(alias, lhs), condition);
+        return new WhereClauseBuilder();
     }
 
-    public <T, R> OrderByBuilder orderBy(String alias, Column<T,R> column, Order order) {
-        return new OrderByBuilder().then(alias, column, order);
+    public <T> OrderByBuilder orderBy(TypedExpression<T> expression) {
+        return new OrderByBuilder().then(expression);
+    }
+
+    public <T, R> OrderByBuilder orderBy(MethodReference<R,T> columnGetter) {
+        return new OrderByBuilder().then(columnGetter);
+    }
+
+    public <T, R> OrderByBuilder orderBy(String alias, MethodReference<R,T> columnGetter) {
+        return new OrderByBuilder().then(alias, columnGetter);
+    }
+
+    public <T, R> OrderByBuilder orderBy(Alias<R> alias, MethodReference<R,T> columnGetter) {
+        return new OrderByBuilder().then(alias, columnGetter);
+    }
+
+    public <T> OrderByBuilder orderBy(TypedExpression<T> expression, Order order) {
+        return new OrderByBuilder().then(expression, order);
+    }
+
+    public <T, R> OrderByBuilder orderBy(MethodReference<R,T> columnGetter, Order order) {
+        return new OrderByBuilder().then(columnGetter, order);
+    }
+
+    public <T, R> OrderByBuilder orderBy(String alias, MethodReference<R,T> columnGetter, Order order) {
+        return new OrderByBuilder().then(alias, columnGetter, order);
+    }
+
+    public <T, R> OrderByBuilder orderBy(Alias<R> alias, MethodReference<R,T> columnGetter, Order order) {
+        return new OrderByBuilder().then(alias, columnGetter, order);
     }
 
     public abstract List<RT> list(JdbcTemplate jdbcTemplate);
@@ -242,7 +286,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     protected String orderByClauseSql(Scope scope) {
         return orderByClauses.isEmpty()
             ? ""
-            : " order by " + orderByClauses.stream().map(Ordering::sql).collect(joining(", "));
+            : " order by " + orderByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
     }
 
     public static <R> Select1<R,R> from(Alias<R> alias) {
