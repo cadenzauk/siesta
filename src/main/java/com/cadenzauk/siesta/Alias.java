@@ -6,16 +6,13 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.function.MethodReference;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Alias<R> {
@@ -49,10 +46,6 @@ public class Alias<R> {
             .toHashCode();
     }
 
-    public String aliasName() {
-        return aliasName;
-    }
-
     String inWhereClause() {
         return String.format("%s as %s", table.qualifiedName(), aliasName);
     }
@@ -65,20 +58,12 @@ public class Alias<R> {
         return String.format("%s_%s", aliasName, column.name());
     }
 
-    public String inExpression(Column<?, R> column) {
-        return String.format("%s.%s", aliasName, column.name());
-    }
-
     public Table<R> table() {
         return table;
     }
 
     RowMapper<R> rowMapper() {
         return table.rowMapper(aliasName + "_");
-    }
-
-    <T> RowMapper<Optional<T>> rowMapper(Column<T, R> column) {
-        return table.rowMapper(aliasName + "_", column);
     }
 
     @SuppressWarnings("unchecked")

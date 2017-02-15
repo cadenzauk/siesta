@@ -6,10 +6,12 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -38,21 +40,29 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
+    public <T,R> Column<T, R> columnFor(Method getterMethod) {
+        String name = namingStrategy().columnName(getterMethod.getName());
+        DataType<T> dataType = (DataType<T>) DataType.of(getterMethod);
+        Class<R> rowClass = (Class<R>) getterMethod.getDeclaringClass();
+        return Column.aColumn(name, dataType, rowClass);
+    }
+
+    @SuppressWarnings("unchecked")
     public <R> void insert(JdbcTemplate jdbcTemplate, R row) {
         Class<R> rowClass = (Class<R>)row.getClass();
         table(rowClass).insert(jdbcTemplate, row);
     }
 
     public <R> Select1<R,R> from(Class<R> rowClass) {
-        return Select.from(table(rowClass));
+        return Select.from(this, table(rowClass));
     }
 
     public <R> Select1<R,R> from(Alias<R> alias) {
-        return Select.from(alias);
+        return Select.from(this, alias);
     }
 
     public <R> Select1<R,R> from(Class<R> rowClass, String alias) {
-        return Select.from(table(rowClass).as(alias));
+        return Select.from(this, table(rowClass).as(alias));
     }
 
     @SuppressWarnings("unchecked")

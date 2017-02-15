@@ -11,7 +11,8 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import static com.cadenzauk.siesta.Conditions.isEqualTo;
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,12 +33,30 @@ public class Select1Test {
         }
     }
 
+    public static class Row2 {
+        private String name;
+        private String description;
+        private Optional<String> comment;
+
+        public String name() {
+            return name;
+        }
+
+        public String description() {
+            return description;
+        }
+
+        public Optional<String> comment() {
+            return comment;
+        }
+    }
+
     @Test
     public void whereIsEqualToOneColumnWithoutAlias() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class)
-            .where(Row1::name, isEqualTo(Row1::description))
+            .where(Row1::name).isEqualTo(Row1::description)
             .sql();
 
         assertThat(sql, is("select ROW1.NAME as ROW1_NAME, ROW1.DESCRIPTION as ROW1_DESCRIPTION from TEST.ROW1 as ROW1 where ROW1.NAME = ROW1.DESCRIPTION"));
@@ -48,7 +67,7 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "w")
-            .where(Row1::name, isEqualTo(Row1::description))
+            .where(Row1::name).isEqualTo(Row1::description)
             .sql();
 
         assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where w.NAME = w.DESCRIPTION"));
@@ -59,7 +78,7 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "w")
-            .where(Row1::name, isEqualTo("w", Row1::description))
+            .where(Row1::name).isEqualTo("w", Row1::description)
             .sql();
 
         assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where w.NAME = w.DESCRIPTION"));
@@ -70,7 +89,7 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "w")
-            .where(Row1::description, isEqualTo("fred"))
+            .where(Row1::description).isEqualTo("fred")
             .sql();
 
         assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where w.DESCRIPTION = ?"));
@@ -81,8 +100,8 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "w")
-            .where(Row1::description, isEqualTo("fred"))
-            .and(Row1::name, isEqualTo("bob"))
+            .where(Row1::description).isEqualTo("fred")
+            .and(Row1::name).isEqualTo("bob")
             .sql();
 
         assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where (w.DESCRIPTION = ?) and (w.NAME = ?)"));
@@ -93,7 +112,7 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "q")
-            .where(Row1::name, isEqualTo("joe"))
+            .where(Row1::name).isEqualTo("joe")
             .orderBy(Row1::description)
             .sql();
 
@@ -105,7 +124,7 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "q")
-            .where(Row1::name, isEqualTo("joe"))
+            .where(Row1::name).isEqualTo("joe")
             .orderBy(Row1::description, Order.ASCENDING)
             .sql();
 
@@ -117,11 +136,35 @@ public class Select1Test {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "q")
-            .where(Row1::name, isEqualTo("joe"))
+            .where(Row1::name).isEqualTo("joe")
             .orderBy(Row1::description, Order.DESCENDING)
             .sql();
 
         assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION from TEST.ROW1 as q where q.NAME = ? order by q.DESCRIPTION descending"));
+    }
+
+    @Test
+    public void optionalColumnInCondition() {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
+
+        String sql = database.from(Row2.class, "q")
+            .where(Row2::name).isEqualTo(Row2::comment)
+            .orderBy(Row2::description, Order.DESCENDING)
+            .sql();
+
+        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q where q.NAME = q.COMMENT order by q.DESCRIPTION descending"));
+    }
+
+    @Test
+    public void optionalColumnInWhere() {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
+
+        String sql = database.from(Row2.class, "q")
+            .where(Row2::comment).isEqualTo(Row2::name)
+            .orderBy(Row2::description, Order.ASCENDING)
+            .sql();
+
+        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q where q.COMMENT = q.NAME order by q.DESCRIPTION ascending"));
     }
 
     @Test

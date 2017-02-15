@@ -6,22 +6,26 @@
 
 package com.cadenzauk.siesta;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
 public class DataType<T> {
-    public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
-    public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
-    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt);
-
     @FunctionalInterface
     public interface ResultSetExtractor<T> {
         T get(ResultSet rs, String col) throws SQLException;
     }
-    private final Class<T> javaClass;
-    private final ResultSetExtractor<T> resultSetExtractor;
 
+    public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
+    public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
+    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt);
+
+    private final Class<T> javaClass;
+
+    private final ResultSetExtractor<T> resultSetExtractor;
     private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor) {
         this.javaClass = javaClass;
         this.resultSetExtractor = resultSetExtractor;
@@ -35,4 +39,33 @@ public class DataType<T> {
             throw new RuntimeException(e);
         }
     }
+
+    public static DataType<?> of(Method getterMethod) {
+        Class<?> fieldType = getterMethod.getReturnType();
+        if (fieldType == Long.class || fieldType == Long.TYPE) {
+            return DataType.LONG;
+        }
+        if (fieldType == Integer.class || fieldType == Integer.TYPE) {
+            return DataType.INTEGER;
+        }
+        if (fieldType == String.class) {
+            return DataType.STRING;
+        }
+        if (fieldType == Optional.class) {
+            ParameterizedType genericType = (ParameterizedType)getterMethod.getGenericReturnType();
+            Type argType = genericType.getActualTypeArguments()[0];
+            if (argType == Long.class || fieldType == Long.TYPE) {
+                return DataType.LONG;
+            }
+            if (argType == Integer.class || fieldType == Integer.TYPE) {
+                return DataType.INTEGER;
+            }
+            if (argType == String.class) {
+                return DataType.STRING;
+            }
+        }
+        throw new RuntimeException("Unable to determine the type of " + getterMethod);
+    }
+
+
 }

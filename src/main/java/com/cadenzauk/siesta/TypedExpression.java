@@ -15,7 +15,7 @@ public interface TypedExpression<T> {
 
     String label(Scope scope);
 
-    RowMapper<T> rowMapper(String label);
+    RowMapper<T> rowMapper(Scope scope, String label);
 
     default Stream<Object> args() {
         return Stream.empty();

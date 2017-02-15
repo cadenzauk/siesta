@@ -6,11 +6,11 @@
 
 package com.cadenzauk.core.reflect;
 
-import com.cadenzauk.core.function.MethodReference;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 import org.objenesis.ObjenesisHelper;
 
 import java.lang.invoke.SerializedLambda;
@@ -49,8 +49,17 @@ public class MethodUtil {
         return result.get();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T,V> Method fromReference(MethodReference<T,V> methodReference) {
+    public static <T,V> Method fromReference(Function1<T,V> methodReference) {
+        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
+            .map(writeReplace -> (SerializedLambda)invoke(writeReplace, methodReference))
+            .flatMap(lambda -> {
+                Class<?> implClass = ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."));
+                return ClassUtil.declaredMethod(implClass, lambda.getImplMethodName());
+            })
+            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+    }
+
+    public static <T,V> Method fromReference(FunctionOptional1<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
             .map(writeReplace -> (SerializedLambda)invoke(writeReplace, methodReference))
             .flatMap(lambda -> {

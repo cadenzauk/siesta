@@ -25,7 +25,7 @@ public class MethodUtilTest {
         void method1() {
         }
 
-        public Optional<String> method2() {
+        Optional<String> method2() {
             return null;
         }
     }

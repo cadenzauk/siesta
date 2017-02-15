@@ -6,9 +6,9 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.function.MethodReference;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.siesta.expression.CompleteExpression;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.apache.commons.lang3.ArrayUtils;
@@ -33,34 +33,42 @@ public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
     }
 
     @Override
-    public RowMapper<Tuple2<RT1,RT2>> rowMapper(String label) {
+    public RowMapper<Tuple2<RT1,RT2>> rowMapper(Scope scope, String label) {
         return rowMapper();
     }
 
     public class JoinClauseStartBuilder {
-        public <T> JoinClauseBuilder on(TypedExpression<T> lhs, Condition<T> rhs) {
-            onClause = new CompleteExpression<>(lhs, rhs);
-            return new JoinClauseBuilder();
+        public <T> ExpressionBuilder<T,JoinClauseBuilder> on(TypedExpression<T> lhs) {
+            return ExpressionBuilder.of(lhs, Select2.this::setOnClause);
         }
 
-        public <T, R> JoinClauseBuilder on(MethodReference<R,T> lhs, Condition<T> rhs) {
-            onClause = new CompleteExpression<>(UnresolvedColumn.of(lhs), rhs);
-            return new JoinClauseBuilder();
+        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(Function1<R,T> lhs) {
+            return ExpressionBuilder.of(UnresolvedColumn.of(lhs), Select2.this::setOnClause);
         }
 
-        public <T, R> JoinClauseBuilder on(String alias, MethodReference<R,T> lhs, Condition<T> rhs) {
-            onClause = new CompleteExpression<>(UnresolvedColumn.of(alias, lhs), rhs);
-            return new JoinClauseBuilder();
+        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(FunctionOptional1<R,T> lhs) {
+            return ExpressionBuilder.of(UnresolvedColumn.of(lhs), Select2.this::setOnClause);
         }
 
-        public <T, R> JoinClauseBuilder on(Alias<R> alias, MethodReference<R,T> lhs, Condition<T> rhs) {
-            onClause = new CompleteExpression<>(ResolvedColumn.of(alias, lhs), rhs);
-            return new JoinClauseBuilder();
+        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(String alias, Function1<R,T> lhs) {
+            return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), Select2.this::setOnClause);
+        }
+
+        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(String alias, FunctionOptional1<R,T> lhs) {
+            return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), Select2.this::setOnClause);
+        }
+
+        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(Alias<R> alias, Function1<R,T> lhs) {
+            return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Select2.this::setOnClause);
+        }
+
+        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+            return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Select2.this::setOnClause);
         }
     }
 
-    public Select2(JoinType joinType, Alias<R1> alias1, Alias<R2> alias2, RowMapper<RT1> rowMapper1, RowMapper<RT2> rowMapper2, Projection p1, Projection p2) {
-        super(new Scope(alias1, alias2), RowMappers.of(rowMapper1, rowMapper2), Projection.of(p1, p2));
+    public Select2(Database database, JoinType joinType, Alias<R1> alias1, Alias<R2> alias2, RowMapper<RT1> rowMapper1, RowMapper<RT2> rowMapper2, Projection p1, Projection p2) {
+        super(new Scope(database, alias1, alias2), RowMappers.of(rowMapper1, rowMapper2), Projection.of(p1, p2));
         this.joinType = joinType;
         this.alias1 = alias1;
         this.alias2 = alias2;

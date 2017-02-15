@@ -7,8 +7,8 @@
 package com.cadenzauk.core.function;
 
 import java.io.Serializable;
+import java.util.Optional;
+import java.util.function.Function;
 
-@FunctionalInterface
-public interface Function3<T1, T2, T3, R> extends Serializable {
-    R apply(T1 p1, T2 p2, T3 p3);
+public interface FunctionOptional1<T,U> extends Function<T,Optional<U>>, Serializable {
 }

@@ -10,11 +10,11 @@ import com.cadenzauk.siesta.*;
 
 import java.util.stream.Stream;
 
-public class CompleteExpression<T> implements Expression {
+public class BooleanExpression<T> implements Expression {
     private final TypedExpression<T> lhs;
     private final Condition<T> rhs;
 
-    public CompleteExpression(TypedExpression<T> lhs, Condition<T> rhs) {
+    public BooleanExpression(TypedExpression<T> lhs, Condition<T> rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
@@ -26,6 +26,6 @@ public class CompleteExpression<T> implements Expression {
 
     @Override
     public Stream<Object> args() {
-        return rhs.args();
+        return Stream.concat(lhs.args(), rhs.args());
     }
 }

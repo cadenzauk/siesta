@@ -6,7 +6,7 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.function.MethodReference;
+import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,20 +17,20 @@ import java.util.List;
 public class Select1<R1, RT> extends Select<RT> {
     private final Alias<R1> alias;
 
-    public Select1(Alias<R1> alias, RowMapper<RT> rowMapper, Projection projection) {
-        super(new Scope(alias), rowMapper, projection);
+    public Select1(Database database, Alias<R1> alias, RowMapper<RT> rowMapper, Projection projection) {
+        super(new Scope(database, alias), rowMapper, projection);
         this.alias = alias;
     }
 
     public <T> Select1<R1, T> select(TypedExpression<T> column) {
-        return new Select1<>(alias, column.rowMapper(column.label(scope)), Projection.of(column));
+        return new Select1<>(scope.database(), alias, column.rowMapper(scope, column.label(scope)), Projection.of(column));
     }
 
-    public <T> Select1<R1, T> select(MethodReference<R1,T> methodReference) {
+    public <T> Select1<R1, T> select(Function1<R1,T> methodReference) {
         return select(UnresolvedColumn.of(methodReference));
     }
 
-    public <T> Select1<R1, T> select(Alias<R1> alias, MethodReference<R1,T> methodReference) {
+    public <T> Select1<R1, T> select(Alias<R1> alias, Function1<R1,T> methodReference) {
         return select(ResolvedColumn.of(alias, methodReference));
     }
 
@@ -67,7 +67,7 @@ public class Select1<R1, RT> extends Select<RT> {
     }
 
     private <R2> Select2<R1, R2, RT, R2>.JoinClauseStartBuilder join(JoinType joinType, Alias<R2> alias2) {
-        return new Select2<>(joinType, alias, alias2, rowMapper(), alias2.rowMapper(), projection(), Projection.of(alias2)).joinClause();
+        return new Select2<>(scope.database(), joinType, alias, alias2, rowMapper(), alias2.rowMapper(), projection(), Projection.of(alias2)).joinClause();
     }
 
     public List<RT> list(JdbcTemplate jdbcTemplate) {
@@ -100,7 +100,7 @@ public class Select1<R1, RT> extends Select<RT> {
     }
 
     @Override
-    public RowMapper<RT> rowMapper(String label) {
+    public RowMapper<RT> rowMapper(Scope scope, String label) {
         return rowMapper();
     }
 }

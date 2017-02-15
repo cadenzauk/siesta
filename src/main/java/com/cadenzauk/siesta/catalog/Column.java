@@ -6,11 +6,8 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.function.MethodReference;
-import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TypedExpression;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.siesta.*;
 import org.springframework.jdbc.core.RowMapper;
 
 public class Column<T, R> implements TypedExpression<T> {
@@ -55,7 +52,7 @@ public class Column<T, R> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(String label) {
+    public RowMapper<T> rowMapper(Scope scope, String label) {
         return (rs, i) -> dataType.get(rs, label).orElse(null);
     }
 
@@ -63,7 +60,7 @@ public class Column<T, R> implements TypedExpression<T> {
         return new Column<>(name, type, rowClass);
     }
 
-    public static <T, R> Column<T, R> aColumn(String name, MethodReference<R, T> function, Class<R> rowClass) {
+    public static <T, R> Column<T, R> aColumn(String name, Function1<R, T> function, Class<R> rowClass) {
         return new Column<>(name, null, rowClass);
     }
 

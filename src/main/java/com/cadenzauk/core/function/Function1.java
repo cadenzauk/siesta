@@ -10,5 +10,5 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 @FunctionalInterface
-public interface MethodReference<T,U> extends Function<T,U>, Serializable {
+public interface Function1<T,U> extends Function<T,U>, Serializable {
 }

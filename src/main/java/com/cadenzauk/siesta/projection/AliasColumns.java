@@ -21,8 +21,8 @@ public class AliasColumns<R> implements Projection {
     }
 
     @Override
-    public String sql(Scope ignored) {
-        Scope scope = new Scope(alias);
+    public String sql(Scope outer) {
+        Scope scope = new Scope(outer.database(), alias);
         return alias
             .table()
             .columns()

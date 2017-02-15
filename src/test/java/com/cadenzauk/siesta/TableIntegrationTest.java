@@ -26,7 +26,6 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Optional;
 
-import static com.cadenzauk.siesta.Conditions.isEqualTo;
 import static org.hamcrest.core.Is.is;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -71,7 +70,7 @@ public class TableIntegrationTest {
         database.insert(jdbcTemplate, aWidget);
 
         Optional<WidgetRow> theSame = database.from(WidgetRow.class)
-            .where(WidgetRow::widgetId, isEqualTo(2L))
+            .where(WidgetRow::widgetId).isEqualTo(2L)
             .optional(jdbcTemplate);
 
         Assert.assertThat(theSame, is(Optional.of(aWidget)));
@@ -98,9 +97,9 @@ public class TableIntegrationTest {
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         Optional<WidgetRow> theSame = database.from(w)
             .join(m)
-            .on(m, ManufacturerRow::manufacturerId, isEqualTo(w, WidgetRow::manufacturerId))
-            .where(w, WidgetRow::name, isEqualTo("Dodacky"))
-            .and(w, WidgetRow::widgetId, isEqualTo(1L))
+            .on(m, ManufacturerRow::manufacturerId).isEqualTo(w, WidgetRow::manufacturerId)
+            .where(w, WidgetRow::name).isEqualTo("Dodacky")
+            .and(w, WidgetRow::widgetId).isEqualTo(1L)
             .optional(jdbcTemplate)
             .map(Tuple2::item1);
 

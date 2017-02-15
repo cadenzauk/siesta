@@ -139,11 +139,11 @@ public class Table<R> {
         private final Class<R> rowClass;
         private final Class<B> builderClass;
         private final Function<B, R> buildRow;
+        private final Set<String> excludedFields = new HashSet<>();
+        private final List<RowBuilderColumn<?, R, B>> columns = new ArrayList<>();
         private String schema;
         private String tableName;
         private Supplier<B> newBuilder;
-        private Set<String> excludedFields = new HashSet<>();
-        private final List<RowBuilderColumn<?, R, B>> columns = new ArrayList<>();
 
         public Builder(Database database, Class<R> rowClass, Class<B> builderClass, Function<B,R> buildRow) {
             this.database = database;

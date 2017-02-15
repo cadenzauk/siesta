@@ -16,15 +16,22 @@ import static java.util.stream.Collectors.toList;
 public class Scope {
     private final Optional<Scope> outer;
     private final List<Alias<?>> aliases;
+    private final Database database;
 
-    public Scope(Alias<?>... aliases) {
+    public Scope(Database database, Alias<?>... aliases) {
+        this.database = database;
         this.outer = Optional.empty();
         this.aliases = ImmutableList.copyOf(aliases);
     }
 
     private Scope(Scope outer, Alias<?>... aliases) {
+        this.database = outer.database;
         this.outer = Optional.of(outer);
         this.aliases = ImmutableList.copyOf(aliases);
+    }
+
+    public Database database() {
+        return database;
     }
 
     public <R> Alias<R> findAlias(Class<R> requiredRowClass, String requiredAlias) {
