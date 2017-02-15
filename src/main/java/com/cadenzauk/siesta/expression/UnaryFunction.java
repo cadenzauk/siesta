@@ -10,7 +10,6 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TypedExpression;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.stream.Stream;

@@ -6,7 +6,6 @@
 
 package com.cadenzauk.siesta.expression;
 
-import com.cadenzauk.siesta.Expression;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.stream.Stream;

@@ -4,20 +4,13 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.expression;
 
+import com.cadenzauk.siesta.Scope;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.util.stream.Stream;
-
-public interface TypedExpression<T> {
-    String sql(Scope scope);
-
+public interface TypedExpression<T> extends Expression {
     String label(Scope scope);
 
     RowMapper<T> rowMapper(Scope scope, String label);
-
-    default Stream<Object> args() {
-        return Stream.empty();
-    }
 }

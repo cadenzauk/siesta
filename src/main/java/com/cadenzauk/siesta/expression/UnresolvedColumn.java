@@ -11,12 +11,12 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TypedExpression;
 import com.cadenzauk.siesta.catalog.Column;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     private final Optional<String> alias;
@@ -36,6 +36,11 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     public String sql(Scope scope) {
         Column<T,R> column = scope.database().columnFor(getterMethod);
         return resolve(scope).inSelectClauseSql(column);
+    }
+
+    @Override
+    public Stream<Object> args() {
+        return Stream.empty();
     }
 
     @Override

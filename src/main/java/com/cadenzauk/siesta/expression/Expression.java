@@ -4,7 +4,9 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.expression;
+
+import com.cadenzauk.siesta.Scope;
 
 import java.util.stream.Stream;
 

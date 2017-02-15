@@ -21,6 +21,9 @@ public class StringUtil {
     }
 
     public static String camelToUpper(String camelName) {
+        if (StringUtils.isEmpty(camelName)) {
+            return "";
+        }
         return Arrays.stream(camelName.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"))
             .filter(StringUtils::isNotBlank)
             .map(String::toUpperCase)

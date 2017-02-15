@@ -8,7 +8,7 @@ package com.cadenzauk.siesta.projection;
 
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TypedExpression;
+import com.cadenzauk.siesta.expression.TypedExpression;
 
 public class ExpressionProjection<T> implements Projection {
     private final TypedExpression<T> expression;

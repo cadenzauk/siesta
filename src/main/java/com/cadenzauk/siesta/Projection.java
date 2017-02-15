@@ -6,6 +6,7 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.projection.AliasColumns;
 import com.cadenzauk.siesta.projection.ExpressionProjection;
 import com.cadenzauk.siesta.projection.ProjectionList;

@@ -10,9 +10,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.expression.AndExpression;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.expression.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +18,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
@@ -54,6 +53,11 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         @Override
         public RowMapper<RT> rowMapper(Scope scope, String label) {
             return Select.this.rowMapper(scope, label);
+        }
+
+        @Override
+        public Stream<Object> args() {
+            return Select.this.args();
         }
     }
 
@@ -316,10 +320,17 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     public abstract String sql();
 
     @NotNull
-    protected Object[] onClauseArgs() {
+    protected Stream<Object> onClauseArgs() {
         return onClause == null
-            ? new Object[0]
-            : onClause.args().toArray();
+            ? Stream.empty()
+            : onClause.args();
+    }
+
+    @NotNull
+    protected Stream<Object> whereClauseArgs() {
+        return whereClause == null
+            ? Stream.empty()
+            : whereClause.args();
     }
 
     @NotNull
@@ -327,13 +338,6 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return whereClause == null
             ? ""
             : " where " + whereClause.sql(scope);
-    }
-
-    @NotNull
-    protected Object[] whereClauseArgs() {
-        return whereClause == null
-            ? new Object[0]
-            : whereClause.args().toArray();
     }
 
     @NotNull

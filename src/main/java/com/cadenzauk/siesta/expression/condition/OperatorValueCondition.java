@@ -4,30 +4,29 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta.condition;
+package com.cadenzauk.siesta.expression.condition;
 
 import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TypedExpression;
 
 import java.util.stream.Stream;
 
-public class OperatorExpressionCondition<T> implements Condition<T> {
+public class OperatorValueCondition<T, R> implements Condition<T> {
     private final String operator;
-    private final TypedExpression<T> expression;
+    private final T value;
 
-    public OperatorExpressionCondition(String operator, TypedExpression<T> expression) {
+    public OperatorValueCondition(String operator, T value) {
         this.operator = operator;
-        this.expression = expression;
+        this.value = value;
     }
 
     @Override
     public String sql(Scope scope) {
-        return operator + " " + expression.sql(scope);
+        return operator + " ?";
     }
 
     @Override
     public Stream<Object> args() {
-        return expression.args();
+        return Stream.of(value);
     }
 }

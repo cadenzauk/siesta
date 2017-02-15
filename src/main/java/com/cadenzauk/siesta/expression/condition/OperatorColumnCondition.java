@@ -4,7 +4,7 @@
  * All rights reserved.   May not be used without permission.
  */
 
-package com.cadenzauk.siesta.condition;
+package com.cadenzauk.siesta.expression.condition;
 
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.catalog.Column;

@@ -11,11 +11,11 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TypedExpression;
 import com.cadenzauk.siesta.catalog.Column;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
 public class ResolvedColumn<T,R> implements TypedExpression<T> {
     private final Alias<R> alias;
@@ -29,6 +29,11 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
     @Override
     public String sql(Scope scope) {
         return alias.inSelectClauseSql(column);
+    }
+
+    @Override
+    public Stream<Object> args() {
+        return Stream.empty();
     }
 
     @Override

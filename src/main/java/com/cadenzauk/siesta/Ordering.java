@@ -6,6 +6,8 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.expression.TypedExpression;
+
 public class Ordering<T, R> {
     private final TypedExpression<T> expression;
     private final Order order;

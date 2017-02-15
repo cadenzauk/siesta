@@ -10,12 +10,14 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
+import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
     private final Alias<R1> alias1;
@@ -76,7 +78,7 @@ public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
 
     @Override
     public List<Tuple2<RT1,RT2>> list(JdbcTemplate jdbcTemplate) {
-        Object[] args = ArrayUtils.addAll(onClauseArgs(), whereClauseArgs());
+        Object[] args = args().toArray();
         String sql = sql();
         System.out.println(sql);
         return jdbcTemplate.query(sql, args, rowMapper());
@@ -92,6 +94,11 @@ public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
             onClause.sql(scope),
             whereClauseSql(scope),
             orderByClauseSql(scope));
+    }
+
+    @Override
+    public Stream<Object> args() {
+        return Stream.concat(onClauseArgs(), whereClauseArgs());
     }
 
     JoinClauseStartBuilder joinClause() {

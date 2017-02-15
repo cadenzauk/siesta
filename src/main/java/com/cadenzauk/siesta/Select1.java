@@ -8,11 +8,13 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
+import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Select1<R1, RT> extends Select<RT> {
     private final Alias<R1> alias;
@@ -71,7 +73,7 @@ public class Select1<R1, RT> extends Select<RT> {
     }
 
     public List<RT> list(JdbcTemplate jdbcTemplate) {
-        Object[] args = whereClauseArgs();
+        Object[] args = args().toArray();
         String sql = sql();
         System.out.println(sql);
         return jdbcTemplate.query(sql, args, rowMapper());
@@ -84,6 +86,11 @@ public class Select1<R1, RT> extends Select<RT> {
     @Override
     public String sql(Scope scope) {
         return "(" + sqlImpl(scope.plus(alias)) + ")";
+    }
+
+    @Override
+    public Stream<Object> args() {
+        return whereClauseArgs();
     }
 
     private String sqlImpl(Scope actualScope) {

@@ -8,7 +8,10 @@ package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.siesta.*;
+import com.cadenzauk.siesta.expression.TypedExpression;
 import org.springframework.jdbc.core.RowMapper;
+
+import java.util.stream.Stream;
 
 public class Column<T, R> implements TypedExpression<T> {
     private final String name;
@@ -44,6 +47,11 @@ public class Column<T, R> implements TypedExpression<T> {
     @Override
     public String sql(Scope scope) {
         return scope.findAlias(rowClass).inSelectClauseSql(this);
+    }
+
+    @Override
+    public Stream<Object> args() {
+        return Stream.empty();
     }
 
     @Override
