@@ -1,107 +1,72 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
-import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
-import java.util.List;
-import java.util.stream.Stream;
+public class Select2<RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
+    private final RowMapper<RT1> rowMapper1;
+    private final RowMapper<RT2> rowMapper2;
 
-public class Select2<R1, R2, RT1, RT2> extends Select<Tuple2<RT1,RT2>> {
-    private final Alias<R1> alias1;
-    private final Alias<R2> alias2;
-    private final JoinType joinType;
-
-    @Override
-    public String sql(Scope scope) {
-        return "(" + sql() + ")";
+    public Select2(Scope scope, From from, RowMapper<RT1> rowMapper1, RowMapper<RT2> rowMapper2, Projection p1, Projection p2) {
+        super(scope, from, RowMappers.of(rowMapper1, rowMapper2), Projection.of(p1, p2));
+        this.rowMapper1 = rowMapper1;
+        this.rowMapper2 = rowMapper2;
     }
 
-    @Override
-    public String label(Scope scope) {
-        return null;
+    Select2JoinClauseStartBuilder joinClause() {
+        return new Select2JoinClauseStartBuilder();
     }
 
-    @Override
-    public RowMapper<Tuple2<RT1,RT2>> rowMapper(Scope scope, String label) {
-        return rowMapper();
+    private <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder join(JoinType joinType, Alias<R3> alias2) {
+        return new Select3<>(scope.plus(alias2), from.join(joinType, alias2), rowMapper1, rowMapper2, alias2.rowMapper(), projection(), Projection.of(alias2)).joinClause();
     }
 
-    public class JoinClauseStartBuilder {
-        public <T> ExpressionBuilder<T,JoinClauseBuilder> on(TypedExpression<T> lhs) {
-            return ExpressionBuilder.of(lhs, Select2.this::setOnClause);
+    public class Select2JoinClauseStartBuilder extends JoinClauseStartBuilder<Select2JoinClauseStartBuilder,Select2JoinClauseBuilder> {
+        public Select2JoinClauseStartBuilder() {
+            super(Select2JoinClauseStartBuilder::newJoinClause);
         }
 
-        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(Function1<R,T> lhs) {
-            return ExpressionBuilder.of(UnresolvedColumn.of(lhs), Select2.this::setOnClause);
-        }
-
-        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(FunctionOptional1<R,T> lhs) {
-            return ExpressionBuilder.of(UnresolvedColumn.of(lhs), Select2.this::setOnClause);
-        }
-
-        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(String alias, Function1<R,T> lhs) {
-            return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), Select2.this::setOnClause);
-        }
-
-        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(String alias, FunctionOptional1<R,T> lhs) {
-            return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), Select2.this::setOnClause);
-        }
-
-        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(Alias<R> alias, Function1<R,T> lhs) {
-            return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Select2.this::setOnClause);
-        }
-
-        public <T, R> ExpressionBuilder<T,JoinClauseBuilder> on(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-            return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Select2.this::setOnClause);
+        private Select2JoinClauseBuilder newJoinClause() {
+            return new Select2JoinClauseBuilder();
         }
     }
 
-    public Select2(Database database, JoinType joinType, Alias<R1> alias1, Alias<R2> alias2, RowMapper<RT1> rowMapper1, RowMapper<RT2> rowMapper2, Projection p1, Projection p2) {
-        super(new Scope(database, alias1, alias2), RowMappers.of(rowMapper1, rowMapper2), Projection.of(p1, p2));
-        this.joinType = joinType;
-        this.alias1 = alias1;
-        this.alias2 = alias2;
-    }
+    public class Select2JoinClauseBuilder extends JoinClauseBuilder<Select2JoinClauseBuilder> {
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder join(Alias<R3> alias) {
+            return Select2.this.join(JoinType.INNER, alias);
+        }
 
-    @Override
-    public List<Tuple2<RT1,RT2>> list(JdbcTemplate jdbcTemplate) {
-        Object[] args = args().toArray();
-        String sql = sql();
-        System.out.println(sql);
-        return jdbcTemplate.query(sql, args, rowMapper());
-    }
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder join(Class<R3> rowClass, String alias) {
+            return Select2.this.join(JoinType.INNER, scope.database().table(rowClass).as(alias));
+        }
 
-    @Override
-    public String sql() {
-        return String.format("select %s from %s %s %s on %s%s%s",
-            projection().sql(scope),
-            alias1.inWhereClause(),
-            joinType.sql(),
-            alias2.inWhereClause(),
-            onClause.sql(scope),
-            whereClauseSql(scope),
-            orderByClauseSql(scope));
-    }
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder leftJoin(Alias<R3> alias) {
+            return Select2.this.join(JoinType.LEFT_OUTER, alias);
+        }
 
-    @Override
-    public Stream<Object> args() {
-        return Stream.concat(onClauseArgs(), whereClauseArgs());
-    }
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder leftJoin(Class<R3> rowClass, String alias) {
+            return Select2.this.join(JoinType.LEFT_OUTER, scope.database().table(rowClass).as(alias));
+        }
 
-    JoinClauseStartBuilder joinClause() {
-        return new JoinClauseStartBuilder();
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder rightJoin(Alias<R3> alias) {
+            return Select2.this.join(JoinType.RIGHT_OUTER, alias);
+        }
+
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder rightJoin(Class<R3> rowClass, String alias) {
+            return Select2.this.join(JoinType.RIGHT_OUTER, scope.database().table(rowClass).as(alias));
+        }
+
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder fullOuterJoin(Alias<R3> alias) {
+            return Select2.this.join(JoinType.FULL_OUTER, alias);
+        }
+
+        public <R3> Select3<RT1,RT2,R3>.Select3JoinClauseStartBuilder fullOuterJoin(Class<R3> rowClass, String alias) {
+            return Select2.this.join(JoinType.FULL_OUTER, scope.database().table(rowClass).as(alias));
+        }
     }
 }

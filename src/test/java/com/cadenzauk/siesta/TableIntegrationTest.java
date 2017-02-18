@@ -1,12 +1,13 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import liquibase.integration.spring.SpringLiquibase;
@@ -71,7 +72,7 @@ public class TableIntegrationTest {
 
         Optional<WidgetRow> theSame = database.from(WidgetRow.class)
             .where(WidgetRow::widgetId).isEqualTo(2L)
-            .optional(jdbcTemplate);
+            .optional(JdbcTemplateSqlExecutor.of(jdbcTemplate));
 
         Assert.assertThat(theSame, is(Optional.of(aWidget)));
     }
@@ -100,7 +101,7 @@ public class TableIntegrationTest {
             .on(m, ManufacturerRow::manufacturerId).isEqualTo(w, WidgetRow::manufacturerId)
             .where(w, WidgetRow::name).isEqualTo("Dodacky")
             .and(w, WidgetRow::widgetId).isEqualTo(1L)
-            .optional(jdbcTemplate)
+            .optional(JdbcTemplateSqlExecutor.of(jdbcTemplate))
             .map(Tuple2::item1);
 
         Assert.assertThat(theSame, is(Optional.of(aWidget)));

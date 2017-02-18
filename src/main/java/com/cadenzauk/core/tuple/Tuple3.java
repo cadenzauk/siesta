@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.core.tuple;
 
 import com.cadenzauk.core.function.Function3;
 
-public class Tuple3<T1, T2, T3> {
+public class Tuple3<T1, T2, T3> implements Tuple {
     private final T1 item1;
     private final T2 item2;
     private final T3 item3;

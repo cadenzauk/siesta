@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta.catalog;
@@ -9,7 +9,6 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.siesta.*;
 import com.cadenzauk.siesta.expression.TypedExpression;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.stream.Stream;
 

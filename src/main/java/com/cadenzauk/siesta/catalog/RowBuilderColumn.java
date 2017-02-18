@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta.catalog;
@@ -88,6 +88,9 @@ public class RowBuilderColumn<T, R, B> implements TableColumn<T, R> {
             Type argType = genericType.getActualTypeArguments()[0];
             if (argType == String.class) {
                 return optional(aColumn(columnName, DataType.STRING, rowClass), Getter.forField(rowClass, Optional.class, String.class, field), Setter.forField(builderClass, Optional.class, String.class, builderField)).build();
+            }
+            if (argType == Integer.class) {
+                return optional(aColumn(columnName, DataType.INTEGER, rowClass), Getter.forField(rowClass, Optional.class, Integer.class, field), Setter.forField(builderClass, Optional.class, Integer.class, builderField)).build();
             }
         }
         return null;

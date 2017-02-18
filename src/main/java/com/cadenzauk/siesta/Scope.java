@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta;
@@ -24,7 +24,7 @@ public class Scope {
         this.aliases = ImmutableList.copyOf(aliases);
     }
 
-    private Scope(Scope outer, Alias<?>... aliases) {
+    private Scope(Scope outer, List<Alias<?>> aliases) {
         this.database = outer.database;
         this.outer = Optional.of(outer);
         this.aliases = ImmutableList.copyOf(aliases);
@@ -54,6 +54,10 @@ public class Scope {
     }
 
     public <R> Scope plus(Alias<R> alias) {
-        return new Scope(this, alias);
+        return new Scope(this, ImmutableList.of(alias));
+    }
+
+    public Scope plus(Scope inner) {
+        return new Scope(this, inner.aliases);
     }
 }

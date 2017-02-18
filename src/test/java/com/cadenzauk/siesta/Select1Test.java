@@ -1,191 +1,107 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
+@RunWith(JUnitParamsRunner.class)
 public class Select1Test {
-    public static class Row1 {
-        private String name;
-        private String description;
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
-        public String name() {
-            return name;
+    @Mock
+    private SqlExecutor sqlExecutor;
+
+    @Captor
+    private ArgumentCaptor<String> sql;
+
+    @Captor
+    private ArgumentCaptor<Object[]> args;
+
+    @Captor
+    private ArgumentCaptor<RowMapper<?>> rowMapper;
+
+    private Object[] testCaseForJoin(BiFunction<Alias<Child>,Select1<Parent>,Select2<Parent,Child>.Select2JoinClauseBuilder> f, String expected) {
+        return new Object[] { f, expected };
+    }
+
+    @SuppressWarnings("unused")
+    private Object[] parametersForJoin() {
+        return new Object[]{
+            testCaseForJoin((c, s) -> s.join(c).on(Parent::id).isEqualTo(Child::parentId), "join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+            testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+            testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Child::aliasId).isEqualTo(Parent::id), "join TEST.CHILD as c on c.ALIAS_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.join(Child.class, "c").on(c, Child::parentId).isEqualTo(Parent::id), "join TEST.CHILD as c on c.PARENT_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.join(Child.class, "c").on(c, Child::aliasId).isEqualTo(Parent::id), "join TEST.CHILD as c on c.ALIAS_ID = p.ID"),
+
+            testCaseForJoin((c, s) -> s.leftJoin(c).on(Parent::id).isEqualTo(Child::parentId), "left join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+            testCaseForJoin((c, s) -> s.leftJoin(Child.class, "c").on(Child::aliasId).isEqualTo(Parent::id), "left join TEST.CHILD as c on c.ALIAS_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.leftJoin(Child.class, "c").on("c", Child::parentId).isEqualTo(Parent::id), "left join TEST.CHILD as c on c.PARENT_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.leftJoin(Child.class, "c").on("c", Child::aliasId).isEqualTo(Parent::id), "left join TEST.CHILD as c on c.ALIAS_ID = p.ID"),
+
+            testCaseForJoin((c, s) -> s.rightJoin(c).on(Parent::id).isEqualTo(Child::parentId), "right join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+            testCaseForJoin((c, s) -> s.rightJoin(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "right join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+
+            testCaseForJoin((c, s) -> s.fullOuterJoin(c).on(Parent::id).isEqualTo(Child::parentId), "full outer join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+            testCaseForJoin((c, s) -> s.fullOuterJoin(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "full outer join TEST.CHILD as c on p.ID = c.PARENT_ID"),
+        };
+    }
+
+    @Test
+    @Parameters
+    public void join(BiFunction<Alias<Child>,Select1<Parent>,Select2<Parent,Child>.Select2JoinClauseBuilder> join, String expected) {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
+        Alias<Parent> p = database.table(Parent.class).as("p");
+        Alias<Child> c = database.table(Child.class).as("c");
+
+        join.apply(c, database.from(p)).optional(sqlExecutor);
+
+        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        assertThat(sql.getValue(), is("select p.ID as p_ID, c.PARENT_ID as c_PARENT_ID, c.ALIAS_ID as c_ALIAS_ID from TEST.PARENT as p " + expected));
+        assertThat(args.getValue(), arrayWithSize(0));
+    }
+
+    @SuppressWarnings("unused")
+    public static class Parent {
+        private int id;
+
+        public int id() {
+            return id;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class Child {
+        private int parentId;
+        private Optional<Integer> aliasId;
+
+        public int parentId() {
+            return parentId;
         }
 
-        public String description() {
-            return description;
+        public Optional<Integer> aliasId() {
+            return aliasId;
         }
-    }
-
-    public static class Row2 {
-        private String name;
-        private String description;
-        private Optional<String> comment;
-
-        public String name() {
-            return name;
-        }
-
-        public String description() {
-            return description;
-        }
-
-        public Optional<String> comment() {
-            return comment;
-        }
-    }
-
-    @Test
-    public void whereIsEqualToOneColumnWithoutAlias() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class)
-            .where(Row1::name).isEqualTo(Row1::description)
-            .sql();
-
-        assertThat(sql, is("select ROW1.NAME as ROW1_NAME, ROW1.DESCRIPTION as ROW1_DESCRIPTION from TEST.ROW1 as ROW1 where ROW1.NAME = ROW1.DESCRIPTION"));
-    }
-
-    @Test
-    public void whereIsEqualToOneColumnWithDefaultAlias() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "w")
-            .where(Row1::name).isEqualTo(Row1::description)
-            .sql();
-
-        assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where w.NAME = w.DESCRIPTION"));
-    }
-
-    @Test
-    public void whereIsEqualToOneColumnWithAlias() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "w")
-            .where(Row1::name).isEqualTo("w", Row1::description)
-            .sql();
-
-        assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where w.NAME = w.DESCRIPTION"));
-    }
-
-    @Test
-    public void whereIsEqualToOneValue() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "w")
-            .where(Row1::description).isEqualTo("fred")
-            .sql();
-
-        assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where w.DESCRIPTION = ?"));
-    }
-
-    @Test
-    public void whereIsEqualToTwoValues() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "w")
-            .where(Row1::description).isEqualTo("fred")
-            .and(Row1::name).isEqualTo("bob")
-            .sql();
-
-        assertThat(sql, is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w where (w.DESCRIPTION = ?) and (w.NAME = ?)"));
-    }
-
-    @Test
-    public void orderByOneColumnDefaultAscending() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "q")
-            .where(Row1::name).isEqualTo("joe")
-            .orderBy(Row1::description)
-            .sql();
-
-        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION from TEST.ROW1 as q where q.NAME = ? order by q.DESCRIPTION ascending"));
-    }
-
-    @Test
-    public void orderByOneColumnAscending() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "q")
-            .where(Row1::name).isEqualTo("joe")
-            .orderBy(Row1::description, Order.ASCENDING)
-            .sql();
-
-        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION from TEST.ROW1 as q where q.NAME = ? order by q.DESCRIPTION ascending"));
-    }
-
-    @Test
-    public void orderByOneColumnDescending() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "q")
-            .where(Row1::name).isEqualTo("joe")
-            .orderBy(Row1::description, Order.DESCENDING)
-            .sql();
-
-        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION from TEST.ROW1 as q where q.NAME = ? order by q.DESCRIPTION descending"));
-    }
-
-    @Test
-    public void optionalColumnInCondition() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row2.class, "q")
-            .where(Row2::name).isEqualTo(Row2::comment)
-            .orderBy(Row2::description, Order.DESCENDING)
-            .sql();
-
-        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q where q.NAME = q.COMMENT order by q.DESCRIPTION descending"));
-    }
-
-    @Test
-    public void optionalColumnInWhere() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row2.class, "q")
-            .where(Row2::comment).isEqualTo(Row2::name)
-            .orderBy(Row2::description, Order.ASCENDING)
-            .sql();
-
-        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q where q.COMMENT = q.NAME order by q.DESCRIPTION ascending"));
-    }
-
-    @Test
-    public void noWhereClauseOrderByOneColumnDefaultAscending() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        String sql = database.from(Row1.class, "q")
-            .orderBy(Row1::name)
-            .sql();
-
-        assertThat(sql, is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION from TEST.ROW1 as q order by q.NAME ascending"));
-    }
-
-    @Test
-    public void optional() throws Exception {
-        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        database.from(Row1.class, "w")
-            .optional(jdbcTemplate);
-
-        verify(jdbcTemplate, times(1)).query(eq("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION from TEST.ROW1 as w"), any(Object[].class), ArgumentMatchers.<RowMapper<Row1>>any());
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta.expression;
@@ -9,8 +9,8 @@ package com.cadenzauk.siesta.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.stream.Stream;
 
@@ -18,7 +18,7 @@ public class UnaryFunction<T> implements TypedExpression<T> {
     private final String name;
     private final TypedExpression<T> arg;
 
-    public UnaryFunction(String name, TypedExpression<T> arg) {
+    private UnaryFunction(String name, TypedExpression<T> arg) {
         this.name = name;
         this.arg = arg;
     }

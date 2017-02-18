@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta;
@@ -11,7 +11,6 @@ import com.cadenzauk.siesta.catalog.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.stream.Stream;
 
@@ -60,6 +59,10 @@ public class Alias<R> {
 
     public Table<R> table() {
         return table;
+    }
+
+    public String aliasName() {
+        return aliasName();
     }
 
     RowMapper<R> rowMapper() {

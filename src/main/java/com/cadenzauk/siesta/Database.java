@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 Cadenza United Kingdom Limited.
  *
- * All rights reserved.   May not be used without permission.
+ * All rights reserved.  May not be used without permission.
  */
 
 package com.cadenzauk.siesta;
@@ -53,15 +53,15 @@ public class Database {
         table(rowClass).insert(jdbcTemplate, row);
     }
 
-    public <R> Select1<R,R> from(Class<R> rowClass) {
+    public <R> Select1<R> from(Class<R> rowClass) {
         return Select.from(this, table(rowClass));
     }
 
-    public <R> Select1<R,R> from(Alias<R> alias) {
+    public <R> Select1<R> from(Alias<R> alias) {
         return Select.from(this, alias);
     }
 
-    public <R> Select1<R,R> from(Class<R> rowClass, String alias) {
+    public <R> Select1<R> from(Class<R> rowClass, String alias) {
         return Select.from(this, table(rowClass).as(alias));
     }
 
