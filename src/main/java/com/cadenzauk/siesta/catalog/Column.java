@@ -6,72 +6,25 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.siesta.*;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.RowMapper;
 
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class Column<T, R> implements TypedExpression<T> {
-    private final String name;
-    private final DataType<T> dataType;
-    private final Class<R> rowClass;
+public interface Column<T, R> {
+    String name();
 
-    private Column(String name, DataType<T> dataType, Class<R> rowClass) {
-        this.name = name;
-        this.dataType = dataType;
-        this.rowClass = rowClass;
-    }
+    DataType<T> dataType();
 
-    public String name() {
-        return name;
-    }
+    RowMapper<T> rowMapper(String label);
 
-    public DataType<T> dataType() {
-        return dataType;
-    }
+    Class<R> rowClass();
 
-    public Class<R> rowClass() {
-        return rowClass;
-    }
+    <U> Stream<Column<U,R>> as(DataType<U> requiredDataType);
 
-    public String sql(Alias<R> alias) {
-        return alias.inSelectClauseSql(this);
-    }
+    boolean primaryKey();
 
-    public String label(Alias<R> alias) {
-        return alias.inSelectClauseLabel(this);
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return scope.findAlias(rowClass).inSelectClauseSql(this);
-    }
-
-    @Override
-    public Stream<Object> args() {
-        return Stream.empty();
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return scope.findAlias(rowClass).inSelectClauseLabel(this);
-    }
-
-    @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return (rs, i) -> dataType.get(rs, label).orElse(null);
-    }
-
-    public static <T, R> Column<T, R> aColumn(String name, DataType<T> type, Class<R> rowClass) {
-        return new Column<>(name, type, rowClass);
-    }
-
-    public static <T, R> Column<T, R> aColumn(String name, Function1<R, T> function, Class<R> rowClass) {
-        return new Column<>(name, null, rowClass);
-    }
-
-    public static <T, R> Column<T,R> of(String name, Class<R> rowClass) {
-        return new Column<>(name, null, rowClass);
-    }
+    Function<R,Optional<T>> getter();
 }

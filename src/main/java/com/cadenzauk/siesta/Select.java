@@ -73,11 +73,23 @@ public class Select<RT> implements TypedExpression<RT> {
         return new OrderByBuilder().then(columnGetter);
     }
 
+    public <T, R> OrderByBuilder orderBy(FunctionOptional1<R,T> columnGetter) {
+        return new OrderByBuilder().then(columnGetter);
+    }
+
     public <T, R> OrderByBuilder orderBy(String alias, Function1<R,T> columnGetter) {
         return new OrderByBuilder().then(alias, columnGetter);
     }
 
+    public <T, R> OrderByBuilder orderBy(String alias, FunctionOptional1<R,T> columnGetter) {
+        return new OrderByBuilder().then(alias, columnGetter);
+    }
+
     public <T, R> OrderByBuilder orderBy(Alias<R> alias, Function1<R,T> columnGetter) {
+        return new OrderByBuilder().then(alias, columnGetter);
+    }
+
+    public <T, R> OrderByBuilder orderBy(Alias<R> alias, FunctionOptional1<R,T> columnGetter) {
         return new OrderByBuilder().then(alias, columnGetter);
     }
 
@@ -89,11 +101,23 @@ public class Select<RT> implements TypedExpression<RT> {
         return new OrderByBuilder().then(columnGetter, order);
     }
 
+    public <T, R> OrderByBuilder orderBy(FunctionOptional1<R,T> columnGetter, Order order) {
+        return new OrderByBuilder().then(columnGetter, order);
+    }
+
     public <T, R> OrderByBuilder orderBy(String alias, Function1<R,T> columnGetter, Order order) {
         return new OrderByBuilder().then(alias, columnGetter, order);
     }
 
+    public <T, R> OrderByBuilder orderBy(String alias, FunctionOptional1<R,T> columnGetter, Order order) {
+        return new OrderByBuilder().then(alias, columnGetter, order);
+    }
+
     public <T, R> OrderByBuilder orderBy(Alias<R> alias, Function1<R,T> columnGetter, Order order) {
+        return new OrderByBuilder().then(alias, columnGetter, order);
+    }
+
+    public <T, R> OrderByBuilder orderBy(Alias<R> alias, FunctionOptional1<R,T> columnGetter, Order order) {
         return new OrderByBuilder().then(alias, columnGetter, order);
     }
 
@@ -113,11 +137,11 @@ public class Select<RT> implements TypedExpression<RT> {
             Projection.of(Projection.of(column1), Projection.of(column2)));
     }
 
-    public <T,R> Select<T> select(Function1<R,T> methodReference) {
+    public <T, R> Select<T> select(Function1<R,T> methodReference) {
         return select(UnresolvedColumn.of(methodReference));
     }
 
-    public <T,R> Select<T> select(Alias<R> alias, Function1<R,T> methodReference) {
+    public <T, R> Select<T> select(Alias<R> alias, Function1<R,T> methodReference) {
         return select(ResolvedColumn.of(alias, methodReference));
     }
 
@@ -148,7 +172,7 @@ public class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public Stream<Object> args() {
-        return Stream.concat(from.args(),whereClauseArgs());
+        return Stream.concat(from.args(), whereClauseArgs());
     }
 
     @Override
@@ -250,11 +274,23 @@ public class Select<RT> implements TypedExpression<RT> {
             return new OrderByBuilder().then(columnGetter);
         }
 
+        public <T, R> OrderByBuilder orderBy(FunctionOptional1<R,T> columnGetter) {
+            return new OrderByBuilder().then(columnGetter);
+        }
+
         public <T, R> OrderByBuilder orderBy(String alias, Function1<R,T> columnGetter) {
             return new OrderByBuilder().then(alias, columnGetter);
         }
 
+        public <T, R> OrderByBuilder orderBy(String alias, FunctionOptional1<R,T> columnGetter) {
+            return new OrderByBuilder().then(alias, columnGetter);
+        }
+
         public <T, R> OrderByBuilder orderBy(Alias<R> alias, Function1<R,T> columnGetter) {
+            return new OrderByBuilder().then(alias, columnGetter);
+        }
+
+        public <T, R> OrderByBuilder orderBy(Alias<R> alias, FunctionOptional1<R,T> columnGetter) {
             return new OrderByBuilder().then(alias, columnGetter);
         }
 
@@ -266,13 +302,26 @@ public class Select<RT> implements TypedExpression<RT> {
             return new OrderByBuilder().then(columnGetter, order);
         }
 
+        public <T, R> OrderByBuilder orderBy(FunctionOptional1<R,T> columnGetter, Order order) {
+            return new OrderByBuilder().then(columnGetter, order);
+        }
+
         public <T, R> OrderByBuilder orderBy(String alias, Function1<R,T> columnGetter, Order order) {
+            return new OrderByBuilder().then(alias, columnGetter, order);
+        }
+
+        public <T, R> OrderByBuilder orderBy(String alias, FunctionOptional1<R,T> columnGetter, Order order) {
             return new OrderByBuilder().then(alias, columnGetter, order);
         }
 
         public <T, R> OrderByBuilder orderBy(Alias<R> alias, Function1<R,T> columnGetter, Order order) {
             return new OrderByBuilder().then(alias, columnGetter, order);
         }
+
+        public <T, R> OrderByBuilder orderBy(Alias<R> alias, FunctionOptional1<R,T> columnGetter, Order order) {
+            return new OrderByBuilder().then(alias, columnGetter, order);
+        }
+
     }
 
     public abstract class JoinClauseStartBuilder<S extends JoinClauseStartBuilder<S,J>, J extends JoinClauseBuilder<J>> {
@@ -313,7 +362,7 @@ public class Select<RT> implements TypedExpression<RT> {
         @SuppressWarnings("unchecked")
         private J setOnClause(Expression e) {
             from.on(e);
-            return newJoinClause.apply((S)this);
+            return newJoinClause.apply((S) this);
         }
     }
 
@@ -327,7 +376,7 @@ public class Select<RT> implements TypedExpression<RT> {
         }
 
         public <T, R> ExpressionBuilder<T,S> and(String alias, Function1<R,T> lhs) {
-            return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs),this::onAnd);
+            return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onAnd);
         }
 
         public <T, R> ExpressionBuilder<T,S> and(String alias, FunctionOptional1<R,T> lhs) {
@@ -418,12 +467,27 @@ public class Select<RT> implements TypedExpression<RT> {
             return this;
         }
 
+        public <T, R> OrderByBuilder then(FunctionOptional1<R,T> column) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(column), Order.ASCENDING));
+            return this;
+        }
+
         public <T, R> OrderByBuilder then(String alias, Function1<R,T> column) {
             orderByClauses.add(new Ordering<>(UnresolvedColumn.of(alias, column), Order.ASCENDING));
             return this;
         }
 
+        public <T, R> OrderByBuilder then(String alias, FunctionOptional1<R,T> column) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(alias, column), Order.ASCENDING));
+            return this;
+        }
+
         public <T, R> OrderByBuilder then(Alias<R> alias, Function1<R,T> column) {
+            orderByClauses.add(new Ordering<>(ResolvedColumn.of(alias, column), Order.ASCENDING));
+            return this;
+        }
+
+        public <T, R> OrderByBuilder then(Alias<R> alias, FunctionOptional1<R,T> column) {
             orderByClauses.add(new Ordering<>(ResolvedColumn.of(alias, column), Order.ASCENDING));
             return this;
         }
@@ -438,12 +502,27 @@ public class Select<RT> implements TypedExpression<RT> {
             return this;
         }
 
+        public <T, R> OrderByBuilder then(FunctionOptional1<R,T> column, Order order) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(column), order));
+            return this;
+        }
+
         public <T, R> OrderByBuilder then(String alias, Function1<R,T> column, Order order) {
             orderByClauses.add(new Ordering<>(UnresolvedColumn.of(alias, column), order));
             return this;
         }
 
+        public <T, R> OrderByBuilder then(String alias, FunctionOptional1<R,T> column, Order order) {
+            orderByClauses.add(new Ordering<>(UnresolvedColumn.of(alias, column), order));
+            return this;
+        }
+
         public <T, R> OrderByBuilder then(Alias<R> alias, Function1<R,T> column, Order order) {
+            orderByClauses.add(new Ordering<>(ResolvedColumn.of(alias, column), order));
+            return this;
+        }
+
+        public <T, R> OrderByBuilder then(Alias<R> alias, FunctionOptional1<R,T> column, Order order) {
             orderByClauses.add(new Ordering<>(ResolvedColumn.of(alias, column), order));
             return this;
         }

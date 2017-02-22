@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import javax.persistence.MappedSuperclass;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -40,6 +41,7 @@ public class SelectTest {
     public MockitoRule rule = MockitoJUnit.rule();
 
     @SuppressWarnings("unused")
+    @MappedSuperclass
     public static class Row1 {
         private String name;
         private String description;
@@ -54,18 +56,8 @@ public class SelectTest {
     }
 
     @SuppressWarnings("unused")
-    public static class Row2 {
-        private String name;
-        private String description;
+    public static class Row2 extends Row1 {
         private Optional<String> comment;
-
-        public String name() {
-            return name;
-        }
-
-        public String description() {
-            return description;
-        }
 
         public Optional<String> comment() {
             return comment;

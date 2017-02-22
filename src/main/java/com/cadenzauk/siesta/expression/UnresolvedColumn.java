@@ -8,8 +8,10 @@ package com.cadenzauk.siesta.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.MethodUtil;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
@@ -20,22 +22,22 @@ import java.util.stream.Stream;
 
 public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     private final Optional<String> alias;
-    private final Method getterMethod;
+    private final MethodInfo<R,T> getterMethod;
 
-    private UnresolvedColumn(Method getterMethod) {
+    private UnresolvedColumn(MethodInfo<R,T> getterMethod) {
         this.getterMethod = getterMethod;
         this.alias = Optional.empty();
     }
 
-    public UnresolvedColumn(String alias, Method getterMethod) {
+    private UnresolvedColumn(String alias, MethodInfo<R,T> getterMethod) {
         this.alias = Optional.of(alias);
         this.getterMethod = getterMethod;
     }
 
     @Override
     public String sql(Scope scope) {
-        Column<T,R> column = scope.database().columnFor(getterMethod);
-        return resolve(scope).inSelectClauseSql(column);
+        Column<T,R> column = scope.database().column(getterMethod);
+        return resolve(scope).inSelectClauseSql(column.name());
     }
 
     @Override
@@ -45,40 +47,42 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        Column<T,R> column = scope.database().columnFor(getterMethod);
-        return resolve(scope).inSelectClauseLabel(column);
+        Column<T,R> column = scope.database().column(getterMethod);
+        return resolve(scope).inSelectClauseLabel(column.name());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
-        Column<T,R> column = scope.database().columnFor(getterMethod);
-        return column.rowMapper(scope, label);
+        Column<T,R> column = scope.database().column(getterMethod);
+        return column.rowMapper(label);
     }
 
+    @SuppressWarnings("unchecked")
     private Alias<R> resolve(Scope scope) {
-        Column<T,R> column = scope.database().columnFor(getterMethod);
-        return alias
-            .map(a -> scope.findAlias(column.rowClass(), a))
-            .orElseGet(() -> scope.findAlias(column.rowClass()));
+        Class<R> rowClass = getterMethod.declaringClass();
+        return this.alias
+            .map(a -> scope.findAlias(rowClass, a))
+            .orElseGet(() -> scope.findAlias(rowClass));
     }
 
     public static <T, R> UnresolvedColumn<T,R> of(Function1<R,T> getter) {
-        Method method = MethodUtil.fromReference(getter);
+        MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(method);
     }
 
     public static <T, R> TypedExpression<T> of(FunctionOptional1<R,T> getter) {
-        Method method = MethodUtil.fromReference(getter);
+        MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(method);
     }
 
     public static <T, R> UnresolvedColumn<T,R> of(String alias, Function1<R,T> getter) {
-        Method method = MethodUtil.fromReference(getter);
+        MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(alias, method);
     }
 
     public static <T, R> TypedExpression<T> of(String alias, FunctionOptional1<R,T> getter) {
-        Method method = MethodUtil.fromReference(getter);
+        MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(alias, method);
     }
 }

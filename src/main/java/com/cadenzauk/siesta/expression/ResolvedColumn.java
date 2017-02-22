@@ -8,27 +8,27 @@ package com.cadenzauk.siesta.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.reflect.MethodUtil;
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 
-import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 public class ResolvedColumn<T,R> implements TypedExpression<T> {
     private final Alias<R> alias;
     private final Column<T,R> column;
 
-    private ResolvedColumn(Alias<R> alias, Column<T,R> column) {
+    @SuppressWarnings("unchecked")
+    private ResolvedColumn(Alias<R> alias, MethodInfo<R,T> method) {
         this.alias = alias;
-        this.column = column;
+        this.column = alias.column(method);
     }
 
     @Override
     public String sql(Scope scope) {
-        return alias.inSelectClauseSql(column);
+        return alias.inSelectClauseSql(column.name());
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        return alias.inSelectClauseLabel(column);
+        return alias.inSelectClauseLabel(column.name());
     }
 
     @Override
@@ -47,14 +47,12 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, Function1<R,T> getterReference) {
-        Method method = MethodUtil.fromReference(alias.table().rowClass(), getterReference);
-        String name = alias.table().catalog().namingStrategy().columnName(method.getName());
-        return new ResolvedColumn<>(alias, Column.of(name, alias.table().rowClass()));
+        MethodInfo<R,T> method = MethodInfo.of(getterReference);
+        return new ResolvedColumn<>(alias, method);
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, FunctionOptional1<R,T> getterReference) {
-        Method method = MethodUtil.fromReference(alias.table().rowClass(), getterReference);
-        String name = alias.table().catalog().namingStrategy().columnName(method.getName());
-        return new ResolvedColumn<>(alias, Column.of(name, alias.table().rowClass()));
+        MethodInfo<R,T> method = MethodInfo.of(getterReference);
+        return new ResolvedColumn<>(alias, method);
     }
 }

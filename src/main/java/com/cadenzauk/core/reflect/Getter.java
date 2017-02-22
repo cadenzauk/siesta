@@ -7,6 +7,7 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.stream.StreamUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -42,6 +43,10 @@ public class Getter {
         return getterMethod
             .map(m -> Getter.<T,V>fromMethodOptional(argType, m))
             .orElseGet(() -> Getter.fromFieldOptional(argType, field));
+    }
+
+    public static boolean isGetter(Method method, Field field) {
+        return getMethods().anyMatch(g -> StringUtils.equals(g.apply(field.getName()), method.getName()));
     }
 
     @NotNull

@@ -12,11 +12,13 @@ import com.cadenzauk.siesta.expression.condition.OperatorExpressionCondition;
 import com.cadenzauk.siesta.expression.condition.OperatorValueCondition;
 import com.cadenzauk.siesta.expression.*;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ExpressionBuilder<T,N> {
     private final TypedExpression<T> lhs;
     private final Function<Expression,N> onComplete;
+    private Optional<Double> selectivity;
 
     ExpressionBuilder(TypedExpression<T> lhs, Function<Expression,N> onComplete) {
         this.lhs = lhs;
@@ -24,7 +26,7 @@ public class ExpressionBuilder<T,N> {
     }
 
     public N isEqualTo(T value) {
-        return complete(new OperatorValueCondition<>("=", value));
+        return complete(new OperatorValueCondition<>("=", value, selectivity));
     }
 
     public N isEqualTo(TypedExpression<T> expression) {
@@ -56,7 +58,7 @@ public class ExpressionBuilder<T,N> {
     }
 
     public N isNotEqualTo(T value) {
-        return complete(new OperatorValueCondition<>("<>", value));
+        return complete(new OperatorValueCondition<>("<>", value, selectivity));
     }
 
     public N isNotEqualTo(TypedExpression<T> expression) {
@@ -88,7 +90,7 @@ public class ExpressionBuilder<T,N> {
     }
 
     public N isGreaterThan(T value) {
-        return complete(new OperatorValueCondition<>(">", value));
+        return complete(new OperatorValueCondition<>(">", value, selectivity));
     }
 
     public N isGreaterThan(TypedExpression<T> expression) {
@@ -117,6 +119,11 @@ public class ExpressionBuilder<T,N> {
 
     public <R> N isGreaterThan(Alias<R> alias, FunctionOptional1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>(">", ResolvedColumn.of(alias, getter)));
+    }
+
+    public ExpressionBuilder<T,N> selectivity(double v) {
+        selectivity = Optional.of(v);
+        return this;
     }
 
     private N complete(Condition<T> rhs) {

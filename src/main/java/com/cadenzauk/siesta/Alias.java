@@ -6,6 +6,7 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import org.apache.commons.lang3.StringUtils;
@@ -49,12 +50,12 @@ public class Alias<R> {
         return String.format("%s as %s", table.qualifiedName(), aliasName);
     }
 
-    public String inSelectClauseSql(Column<?, R> column) {
-        return String.format("%s.%s", aliasName, column.name());
+    public String inSelectClauseSql(String columnName) {
+        return String.format("%s.%s", aliasName, columnName);
     }
 
-    public String inSelectClauseLabel(Column<?, R> column) {
-        return String.format("%s_%s", aliasName, column.name());
+    public String inSelectClauseLabel(String columnName) {
+        return String.format("%s_%s", aliasName, columnName);
     }
 
     public Table<R> table() {
@@ -65,6 +66,10 @@ public class Alias<R> {
         return aliasName();
     }
 
+    public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
+        return table().column(methodInfo);
+    }
+
     RowMapper<R> rowMapper() {
         return table.rowMapper(aliasName + "_");
     }
@@ -72,7 +77,7 @@ public class Alias<R> {
     @SuppressWarnings("unchecked")
     <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {
         if (StringUtils.equals(requiredAlias, aliasName)) {
-            if (requiredRowClass == table.rowClass()) {
+            if (requiredRowClass.isAssignableFrom(table.rowClass())) {
                 return Stream.of((Alias<R2>) this);
             }
             throw new IllegalArgumentException("Alias " + aliasName + " is an alias for " + table().rowClass() + " and not " + requiredRowClass);
@@ -82,7 +87,7 @@ public class Alias<R> {
 
     @SuppressWarnings("unchecked")
     <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass) {
-        if (requiredRowClass == table.rowClass()) {
+        if (requiredRowClass.isAssignableFrom(table.rowClass())) {
             return Stream.of((Alias<R2>) this);
         }
         return Stream.empty();

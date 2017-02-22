@@ -30,6 +30,16 @@ public class MethodUtilTest {
         }
     }
 
+    private static class TestDerivedClass extends TestClass {
+        public TestDerivedClass(int ignored) {
+            super(ignored);
+        }
+
+        String derivedMethod() {
+            return "";
+        }
+    }
+
     @Test
     public void invokeNoArgsVoid() throws Exception {
         TestClass mock = Mockito.mock(TestClass.class);
@@ -63,6 +73,14 @@ public class MethodUtilTest {
     @Test
     public void fromReferenceWithoutClass() throws Exception {
         Method method = MethodUtil.fromReference(TestClass::method2);
+
+        assertThat(method.getName(), is("method2"));
+        assertThat(method.getDeclaringClass().getCanonicalName(), is(TestClass.class.getCanonicalName()));
+    }
+
+    @Test
+    public void fromReferenceToBaseMethodWithoutClass() throws Exception {
+        Method method = MethodUtil.fromReference(TestDerivedClass::method2);
 
         assertThat(method.getName(), is("method2"));
         assertThat(method.getDeclaringClass().getCanonicalName(), is(TestClass.class.getCanonicalName()));

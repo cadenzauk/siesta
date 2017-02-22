@@ -10,6 +10,8 @@ import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import javax.persistence.Column;
+import javax.persistence.Table;
 import java.util.Optional;
 
 import static com.cadenzauk.siesta.Aggregates.max;
@@ -17,12 +19,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class DatabaseTest {
+    @Table(name = "CUSTOMER")
     public static class Person {
         private int id;
         private String firstName;
         private Optional<String> middleNames;
         private String surname;
 
+        @Column(name = "ROW_ID")
         public int id() {
             return id;
         }
@@ -48,12 +52,12 @@ public class DatabaseTest {
             .where(Person::id).isEqualTo(1)
             .sql();
 
-        assertThat(sql, is("select PERSON.ID as PERSON_ID, " +
-            "PERSON.FIRST_NAME as PERSON_FIRST_NAME, " +
-            "PERSON.MIDDLE_NAMES as PERSON_MIDDLE_NAMES, " +
-            "PERSON.SURNAME as PERSON_SURNAME " +
-            "from CUSTOMERS.PERSON as PERSON " +
-            "where PERSON.ID = ?"));
+        assertThat(sql, is("select CUSTOMER.ROW_ID as CUSTOMER_ROW_ID, " +
+            "CUSTOMER.FIRST_NAME as CUSTOMER_FIRST_NAME, " +
+            "CUSTOMER.MIDDLE_NAMES as CUSTOMER_MIDDLE_NAMES, " +
+            "CUSTOMER.SURNAME as CUSTOMER_SURNAME " +
+            "from CUSTOMERS.CUSTOMER as CUSTOMER " +
+            "where CUSTOMER.ROW_ID = ?"));
     }
 
     @Test
@@ -65,9 +69,9 @@ public class DatabaseTest {
             .where(Person::firstName).isEqualTo("Fred")
             .sql();
 
-        assertThat(sql, is("select PERSON.ID as PERSON_ID " +
-            "from CUSTOMERS.PERSON as PERSON " +
-            "where PERSON.FIRST_NAME = ?"));
+        assertThat(sql, is("select CUSTOMER.ROW_ID as CUSTOMER_ROW_ID " +
+            "from CUSTOMERS.CUSTOMER as CUSTOMER " +
+            "where CUSTOMER.FIRST_NAME = ?"));
     }
 
     @Test
@@ -79,9 +83,9 @@ public class DatabaseTest {
             .where(Person::firstName).isEqualTo("Fred")
             .sql();
 
-        assertThat(sql, is("select max(PERSON.ID) as max_PERSON_ID " +
-            "from CUSTOMERS.PERSON as PERSON " +
-            "where PERSON.FIRST_NAME = ?"));
+        assertThat(sql, is("select max(CUSTOMER.ROW_ID) as max_CUSTOMER_ROW_ID " +
+            "from CUSTOMERS.CUSTOMER as CUSTOMER " +
+            "where CUSTOMER.FIRST_NAME = ?"));
     }
 
     @Test
@@ -99,9 +103,9 @@ public class DatabaseTest {
             .sql();
 
         assertThat(sql, is("select outer.FIRST_NAME as outer_FIRST_NAME " +
-            "from CUSTOMERS.PERSON as outer " +
-            "where outer.ID = (select max(inner.ID) as max_inner_ID" +
-            " from CUSTOMERS.PERSON as inner where inner.SURNAME = outer.SURNAME)"));
+            "from CUSTOMERS.CUSTOMER as outer " +
+            "where outer.ROW_ID = (select max(inner.ROW_ID) as max_inner_ROW_ID" +
+            " from CUSTOMERS.CUSTOMER as inner where inner.SURNAME = outer.SURNAME)"));
     }
 
     @Test
@@ -114,7 +118,7 @@ public class DatabaseTest {
             .where(p, Person::id).isEqualTo(2)
             .sql();
 
-        assertThat(sql, is("select p.FIRST_NAME as p_FIRST_NAME from CUSTOMERS.PERSON as p where p.ID = ?"));
+        assertThat(sql, is("select p.FIRST_NAME as p_FIRST_NAME from CUSTOMERS.CUSTOMER as p where p.ROW_ID = ?"));
     }
 
     @NotNull
