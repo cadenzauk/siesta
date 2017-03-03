@@ -6,9 +6,13 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
+import com.cadenzauk.siesta.expression.ResolvedColumn;
+import com.cadenzauk.siesta.expression.TypedExpression;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -56,6 +60,14 @@ public class Alias<R> {
 
     public String inSelectClauseLabel(String columnName) {
         return String.format("%s_%s", aliasName, columnName);
+    }
+
+    public <T> TypedExpression<T> col(Function1<R,T> getter) {
+        return ResolvedColumn.of(this, getter);
+    }
+
+    public <T> TypedExpression<T> col(FunctionOptional1<R,T> getter) {
+        return ResolvedColumn.of(this, getter);
     }
 
     public Table<R> table() {

@@ -8,7 +8,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.tuple.*;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.expression.*;
@@ -132,9 +132,42 @@ public class Select<RT> implements TypedExpression<RT> {
         return new Select<>(scope,
             from,
             RowMappers.of(
-                column1.rowMapper(scope, column2.label(scope)),
+                column1.rowMapper(scope, column1.label(scope)),
                 column2.rowMapper(scope, column2.label(scope))),
             Projection.of(Projection.of(column1), Projection.of(column2)));
+    }
+
+    public <T1, T2, T3> Select<Tuple3<T1,T2,T3>> select(TypedExpression<T1> column1, TypedExpression<T2> column2, TypedExpression<T3> column3) {
+        return new Select<>(scope,
+            from,
+            RowMappers.of(
+                column1.rowMapper(scope, column1.label(scope)),
+                column2.rowMapper(scope, column2.label(scope)),
+                column3.rowMapper(scope, column3.label(scope))),
+            Projection.of(Projection.of(column1), Projection.of(column2), Projection.of(column3)));
+    }
+
+    public <T1, T2, T3, T4> Select<Tuple4<T1,T2,T3,T4>> select(TypedExpression<T1> column1, TypedExpression<T2> column2, TypedExpression<T3> column3, TypedExpression<T4> column4) {
+        return new Select<>(scope,
+            from,
+            RowMappers.of(
+                column1.rowMapper(scope, column1.label(scope)),
+                column2.rowMapper(scope, column2.label(scope)),
+                column3.rowMapper(scope, column3.label(scope)),
+                column4.rowMapper(scope, column4.label(scope))),
+            Projection.of(Projection.of(column1), Projection.of(column2), Projection.of(column4), Projection.of(column4)));
+    }
+
+    public <T1, T2, T3, T4, T5> Select<Tuple5<T1,T2,T3,T4,T5>> select(TypedExpression<T1> column1, TypedExpression<T2> column2, TypedExpression<T3> column3, TypedExpression<T4> column4, TypedExpression<T5> column5) {
+        return new Select<>(scope,
+            from,
+            RowMappers.of(
+                column1.rowMapper(scope, column1.label(scope)),
+                column2.rowMapper(scope, column2.label(scope)),
+                column3.rowMapper(scope, column3.label(scope)),
+                column4.rowMapper(scope, column4.label(scope)),
+                column5.rowMapper(scope, column5.label(scope))),
+            Projection.of(Projection.of(column1), Projection.of(column2), Projection.of(column4), Projection.of(column4)));
     }
 
     public <T, R> Select<T> select(Function1<R,T> methodReference) {
@@ -146,7 +179,7 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     public Optional<RT> optional(SqlExecutor jdbcTemplate) {
-        return OptionalUtil.of(list(jdbcTemplate));
+        return OptionalUtil.ofOnly(list(jdbcTemplate));
     }
 
     public List<RT> list(SqlExecutor jdbcTemplate) {
@@ -415,6 +448,7 @@ public class Select<RT> implements TypedExpression<RT> {
             return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Select.this::setWhereClause);
         }
 
+        @SuppressWarnings("unchecked")
         private S onAnd(Expression rhs) {
             from.on(new AndExpression(from.on(), rhs));
             return (S) this;

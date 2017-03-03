@@ -4,12 +4,17 @@
  * All rights reserved.  May not be used without permission.
  */
 
-package com.cadenzauk.core.reflect;
+package com.cadenzauk.core.reflect.util;
+
+import com.cadenzauk.core.util.OptionalUtil;
+import com.cadenzauk.core.util.UtilityClass;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.Optional;
 
-public class FieldUtil {
+public final class FieldUtil extends UtilityClass {
     public static void set(Field field, Object target, Object value) {
         field.setAccessible(true);
         try {
@@ -28,7 +33,20 @@ public class FieldUtil {
         }
     }
 
+    public static Optional<ParameterizedType> genericType(Field field) {
+        return OptionalUtil.as(ParameterizedType.class, field.getGenericType());
+    }
+
+    public static Optional<Class<?>> genericTypeArgument(Field field, int index) {
+        return genericType(field)
+            .map(gt -> TypeUtil.actualTypeArgument(gt, index));
+    }
+
     public static boolean hasAnnotation(Class<? extends Annotation> annotationClass, Field field) {
         return field.getAnnotation(annotationClass) != null;
+    }
+
+    public static <A extends Annotation> Optional<A> annotation(Class<A> annotationClass, Field field) {
+        return Optional.ofNullable(field.getAnnotation(annotationClass));
     }
 }

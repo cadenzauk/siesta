@@ -4,19 +4,37 @@
  * All rights reserved.  May not be used without permission.
  */
 
-package com.cadenzauk.core.reflect;
+package com.cadenzauk.core.reflect.util;
 
+import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.core.stream.StreamUtil;
-import com.cadenzauk.core.util.OptionalUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ClassUtil {
+import static java.util.stream.Collectors.joining;
+
+public final class ClassUtil extends UtilityClass {
+    public static Optional<Class<?>> forName(String className) {
+        try {
+            return Optional.of(Class.forName(className));
+        } catch (ClassNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    public static Method getDeclaredMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
+        return declaredMethod(klass, name, parameterTypes)
+            .orElseThrow(() -> new NoSuchElementException(String.format("No such method as %s(%s) in %s",
+                name, Arrays.stream(parameterTypes).map(Object::toString).collect(joining(", ")), klass)));
+    }
+
     public static Optional<Method> declaredMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
         try {
             return Optional.of(klass.getDeclaredMethod(name, parameterTypes));
@@ -25,12 +43,13 @@ public class ClassUtil {
         }
     }
 
-    public static Class<?> forName(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public static Stream<Method> declaredMethods(Class<?> klass) {
+        return Arrays.stream(klass.getDeclaredMethods());
+    }
+
+    public static Field getDeclaredField(Class<?> klass, String fieldName) {
+        return declaredField(klass, fieldName)
+            .orElseThrow(() -> new NoSuchElementException("No such field as " + fieldName + " in " + klass));
     }
 
     public static Optional<Field> declaredField(Class<?> klass, String fieldName) {
@@ -56,7 +75,7 @@ public class ClassUtil {
         return Stream.concat(Stream.of(klass), superclass(klass).map(ClassUtil::superclasses).orElseGet(Stream::empty));
     }
 
-    public static <A extends Annotation, T> boolean hasAnnotation(Class<?> klass, Class<A> annotationClass) {
+    public static <A extends Annotation> boolean hasAnnotation(Class<?> klass, Class<A> annotationClass) {
         return klass.getAnnotation(annotationClass) != null;
     }
 
@@ -64,11 +83,11 @@ public class ClassUtil {
         return Optional.ofNullable(klass.getAnnotation(annotationClass));
     }
 
-    static <T> Constructor<T> constructor(Class<T> klass) {
+    public static <T> Optional<Constructor<T>> constructor(Class<T> klass, Class<?>... parameterTypes) {
         try {
-            return klass.getDeclaredConstructor();
+            return Optional.of(klass.getDeclaredConstructor(parameterTypes));
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(klass + " does not have a constructor with no arguments.");
+            return Optional.empty();
         }
     }
 }

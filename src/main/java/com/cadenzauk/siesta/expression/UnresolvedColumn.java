@@ -9,14 +9,11 @@ package com.cadenzauk.siesta.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.reflect.MethodUtil;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 
-import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.stream.Stream;
 

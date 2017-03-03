@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class ExpressionBuilder<T,N> {
     private final TypedExpression<T> lhs;
     private final Function<Expression,N> onComplete;
-    private Optional<Double> selectivity;
+    private Optional<Double> selectivity = Optional.empty();
 
     ExpressionBuilder(TypedExpression<T> lhs, Function<Expression,N> onComplete) {
         this.lhs = lhs;

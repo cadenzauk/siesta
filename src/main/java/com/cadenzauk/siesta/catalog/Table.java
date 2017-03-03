@@ -8,9 +8,9 @@ package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.reflect.ClassUtil;
+import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.Factory;
-import com.cadenzauk.core.reflect.FieldUtil;
+import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
@@ -222,11 +222,11 @@ public class Table<R> {
             return optional(getter, setter, Optional.of(init));
         }
 
-        public <T> Builder<R,B> mandatory(Function1<R,T> getter, BiConsumer<B,T> setter, Optional<Consumer<TableColumn.Builder<T,R,B>>> init) {
+        private <T> Builder<R,B> mandatory(Function1<R,T> getter, BiConsumer<B,T> setter, Optional<Consumer<TableColumn.Builder<T,R,B>>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
-            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, DataType.of(getterInfo.effectiveType()).get(), rowClass, getter, setter);
+            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, DataType.of(getterInfo), rowClass, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add(columnBuilder.build());
             return this;
@@ -236,7 +236,7 @@ public class Table<R> {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
-            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, DataType.of(getterInfo.effectiveType()).get(), rowClass, getter, setter);
+            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, DataType.of(getterInfo), rowClass, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add(columnBuilder.build());
             return this;

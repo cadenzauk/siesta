@@ -71,7 +71,7 @@ public class Database {
     }
 
     private <R, T> Optional<String> nameFromMethodAnnotation(FieldInfo<R,T> fieldInfo) {
-        return MethodInfo.ofGetter(fieldInfo)
+        return MethodInfo.findGetterForField(fieldInfo)
             .flatMap(this::nameFromMethodAnnotation);
     }
 

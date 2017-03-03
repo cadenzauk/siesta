@@ -6,13 +6,14 @@
 
 package com.cadenzauk.core.lang;
 
+import com.cadenzauk.core.util.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
 import static java.util.stream.Collectors.joining;
 
-public class StringUtil {
+public final class StringUtil extends UtilityClass {
     public static String uppercaseFirst(String s) {
         if (StringUtils.isEmpty(s)) {
             return "";

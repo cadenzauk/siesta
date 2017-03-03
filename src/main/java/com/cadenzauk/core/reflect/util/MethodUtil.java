@@ -4,10 +4,11 @@
  * All rights reserved.  May not be used without permission.
  */
 
-package com.cadenzauk.core.reflect;
+package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.util.UtilityClass;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -19,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-public class MethodUtil {
+public final class MethodUtil extends UtilityClass {
     public static Object invoke(Method method, Object target, Object... args) {
         try {
             method.setAccessible(true);
@@ -29,7 +30,7 @@ public class MethodUtil {
         }
     }
 
-    public static <T,V> Method fromReference(Class<T> c1ass, Function<T,V> methodReference) {
+    public static <T, V> Method fromReference(Class<T> c1ass, Function<T,V> methodReference) {
         AtomicReference<Method> result = new AtomicReference<>();
         MethodInterceptor interceptor = (obj, method, args, proxy) -> {
             result.set(method);
@@ -42,30 +43,26 @@ public class MethodUtil {
         enhancer.setCallbackType(interceptor.getClass());
 
         Class<?> proxyClass = enhancer.createClass();
-        Enhancer.registerCallbacks(proxyClass, new Callback[] { interceptor });
+        Enhancer.registerCallbacks(proxyClass, new Callback[]{interceptor});
         @SuppressWarnings("unchecked") T proxy = (T) ObjenesisHelper.newInstance(proxyClass);
 
         methodReference.apply(proxy);
         return result.get();
     }
 
-    public static <T,V> Method fromReference(Function1<T,V> methodReference) {
+    public static <T, V> Method fromReference(Function1<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-            .map(writeReplace -> (SerializedLambda)invoke(writeReplace, methodReference))
-            .flatMap(lambda -> {
-                Class<?> implClass = ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."));
-                return ClassUtil.declaredMethod(implClass, lambda.getImplMethodName());
-            })
+            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+            .flatMap(lambda -> ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."))
+                .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
-    public static <T,V> Method fromReference(FunctionOptional1<T,V> methodReference) {
+    public static <T, V> Method fromReference(FunctionOptional1<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-            .map(writeReplace -> (SerializedLambda)invoke(writeReplace, methodReference))
-            .flatMap(lambda -> {
-                Class<?> implClass = ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."));
-                return ClassUtil.declaredMethod(implClass, lambda.getImplMethodName());
-            })
+            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+            .flatMap(lambda -> ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."))
+                .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 }

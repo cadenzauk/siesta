@@ -6,9 +6,8 @@
 
 package com.cadenzauk.siesta;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import com.cadenzauk.core.reflect.MethodInfo;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -16,9 +15,9 @@ import java.util.Optional;
 public class DataType<T> {
     @FunctionalInterface
     public interface ResultSetExtractor<T> {
-
         T get(ResultSet rs, String col) throws SQLException;
     }
+
     public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
 
     public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
@@ -31,6 +30,7 @@ public class DataType<T> {
         this.javaClass = javaClass;
         this.resultSetExtractor = resultSetExtractor;
     }
+
     public Optional<T> get(ResultSet rs, String colName) {
         try {
             T value = resultSetExtractor.get(rs, colName);
@@ -40,31 +40,10 @@ public class DataType<T> {
         }
     }
 
-    public static DataType<?> of(Method getterMethod) {
-        Class<?> fieldType = getterMethod.getReturnType();
-        if (fieldType == Long.class || fieldType == Long.TYPE) {
-            return DataType.LONG;
-        }
-        if (fieldType == Integer.class || fieldType == Integer.TYPE) {
-            return DataType.INTEGER;
-        }
-        if (fieldType == String.class) {
-            return DataType.STRING;
-        }
-        if (fieldType == Optional.class) {
-            ParameterizedType genericType = (ParameterizedType)getterMethod.getGenericReturnType();
-            Type argType = genericType.getActualTypeArguments()[0];
-            if (argType == Long.class || fieldType == Long.TYPE) {
-                return DataType.LONG;
-            }
-            if (argType == Integer.class || fieldType == Integer.TYPE) {
-                return DataType.INTEGER;
-            }
-            if (argType == String.class) {
-                return DataType.STRING;
-            }
-        }
-        throw new RuntimeException("Unable to determine the type of " + getterMethod);
+    public static <T> DataType<T> of(MethodInfo<?,T> getterMethod) {
+        Class<T> fieldType = getterMethod.effectiveType();
+        return DataType.of(fieldType)
+            .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + getterMethod));
     }
 
     @SuppressWarnings("unchecked")
