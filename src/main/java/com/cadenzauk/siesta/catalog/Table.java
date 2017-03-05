@@ -24,23 +24,28 @@ package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.Factory;
-import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -96,8 +101,8 @@ public class Table<R> {
         return new Alias<>(this, alias);
     }
 
-    public void insert(JdbcTemplate jdbcTemplate, R row) {
-        impl.insert(jdbcTemplate, row);
+    public void insert(SqlExecutor sqlExecutor, R row) {
+        impl.insert(sqlExecutor, row);
     }
 
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
@@ -128,7 +133,7 @@ public class Table<R> {
             this.columns = ImmutableList.copyOf(columns);
         }
 
-        public void insert(JdbcTemplate jdbcTemplate, R row) {
+        public void insert(SqlExecutor sqlExecutor, R row) {
             String sql = String.format("insert into %s.%s (%s) values (%s)",
                 schema,
                 tableName,
@@ -140,7 +145,7 @@ public class Table<R> {
                 .map(c -> c.getter().apply(row).orElse(null))
                 .toArray();
 
-            jdbcTemplate.update(sql, args);
+            sqlExecutor.update(sql, args);
         }
 
         public RowMapper<R> rowMapper() {

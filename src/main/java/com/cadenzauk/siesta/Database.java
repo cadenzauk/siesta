@@ -30,7 +30,6 @@ import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -121,9 +120,9 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> void insert(JdbcTemplate jdbcTemplate, R row) {
+    public <R> void insert(SqlExecutor sqlExecutor, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
-        table(rowClass).insert(jdbcTemplate, row);
+        table(rowClass).insert(sqlExecutor, row);
     }
 
     public <R> Select1<R> from(Class<R> rowClass) {

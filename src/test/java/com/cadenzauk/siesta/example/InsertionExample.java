@@ -20,20 +20,17 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.example;
 
-import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
-import com.cadenzauk.siesta.testmodel.ManufacturerRow;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
 import liquibase.integration.spring.SpringLiquibase;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,13 +38,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class TableIntegrationTest {
+public class InsertionExample {
     @Configuration
     public static class Config {
         @Bean
@@ -65,6 +65,7 @@ public class TableIntegrationTest {
             springLiquibase.setDataSource(dataSource());
             springLiquibase.setChangeLog("classpath:/changelog-test.xml");
             springLiquibase.setDefaultSchema("TEST");
+            springLiquibase.setDropFirst(true);
             return springLiquibase;
         }
     }
@@ -73,62 +74,24 @@ public class TableIntegrationTest {
     private DataSource dataSource;
 
     @Test
-    public void selectFromDatabaseOneTable() {
-        Database database = database();
+    public void insertOneRowAndReadItBack() {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
 
-        WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(2)
-            .manufacturerId(2)
-            .name("Dodacky")
-            .description(Optional.of("Thingamibob"))
-            .build();
+        Widget sprocket = new Widget(1L, "Sprocket", 4L, Optional.empty());
+        database.insert(sqlExecutor, sprocket);
 
-        database.insert(sqlExecutor, aWidget);
-
-        Optional<WidgetRow> theSame = database.from(WidgetRow.class)
-            .where(WidgetRow::widgetId).isEqualTo(2L)
+        Optional<Widget> widgetNumberOne = database.from(Widget.class)
+            .where(Widget::widgetId).isEqualTo(1L)
             .optional(sqlExecutor);
 
-        Assert.assertThat(theSame, is(Optional.of(aWidget)));
+        List<Widget> sprockets = database.from(Widget.class)
+            .where(Widget::name).isEqualTo("Sprocket")
+            .list(sqlExecutor);
+
+        assertThat(widgetNumberOne.isPresent(), is(true));
+        assertThat(widgetNumberOne.map(Widget::name), is(Optional.of("Sprocket")));
+        assertThat(sprockets, hasSize(1));
+        assertThat(sprockets.get(0).widgetId(), is(1L));
     }
-
-    @Test
-    public void selectFromDatabaseTwoTables() {
-        Database database = database();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
-        ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
-            .manufacturerId(2)
-            .name("Makers")
-            .build();
-        WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(1)
-            .manufacturerId(2)
-            .name("Dodacky")
-            .description(Optional.of("Thingamibob"))
-            .build();
-        database.insert(sqlExecutor, aManufacturer);
-        database.insert(sqlExecutor, aWidget);
-
-        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
-        Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
-        Optional<WidgetRow> theSame = database.from(w)
-            .join(m)
-            .on(m, ManufacturerRow::manufacturerId).isEqualTo(w, WidgetRow::manufacturerId)
-            .where(w, WidgetRow::name).isEqualTo("Dodacky")
-            .and(w, WidgetRow::widgetId).isEqualTo(1L)
-            .optional(sqlExecutor)
-            .map(Tuple2::item1);
-
-        Assert.assertThat(theSame, is(Optional.of(aWidget)));
-    }
-
-    @NotNull
-    private Database database() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-        database.table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder.class, ManufacturerRow.Builder::build));
-        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
-        return database;
-    }
-
 }

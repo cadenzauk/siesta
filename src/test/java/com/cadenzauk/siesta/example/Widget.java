@@ -20,37 +20,41 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.spring;
+package com.cadenzauk.siesta.example;
 
-import com.cadenzauk.siesta.RowMapper;
-import com.cadenzauk.siesta.SqlExecutor;
-import org.springframework.jdbc.core.JdbcTemplate;
+import javax.persistence.Column;
+import javax.persistence.Table;
+import java.util.Optional;
 
-import javax.sql.DataSource;
-import java.util.List;
+public class Widget {
+    private long widgetId;
+    private String name;
+    private long manufacturerId;
+    private Optional<String> description;
 
-public class JdbcTemplateSqlExecutor implements SqlExecutor {
-    private final JdbcTemplate jdbcTemplate;
-
-    public JdbcTemplateSqlExecutor(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private Widget() {
     }
 
-    @Override
-    public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return jdbcTemplate.query(sql, args, rowMapper::mapRow);
+    public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
+        this.widgetId = widgetId;
+        this.name = name;
+        this.manufacturerId = manufacturerId;
+        this.description = description;
     }
 
-    @Override
-    public int update(String sql, Object[] args) {
-        return jdbcTemplate.update(sql, args);
+    public long widgetId() {
+        return widgetId;
     }
 
-    public static JdbcTemplateSqlExecutor of(JdbcTemplate jdbcTemplate) {
-        return new JdbcTemplateSqlExecutor(jdbcTemplate);
+    public String name() {
+        return name;
     }
 
-    public static JdbcTemplateSqlExecutor of(DataSource dataSource) {
-        return new JdbcTemplateSqlExecutor(new JdbcTemplate(dataSource));
+    public long manufacturerId() {
+        return manufacturerId;
+    }
+
+    public Optional<String> description() {
+        return description;
     }
 }

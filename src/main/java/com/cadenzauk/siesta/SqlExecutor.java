@@ -26,4 +26,6 @@ import java.util.List;
 
 public interface SqlExecutor {
     <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
+
+    int update(String sql, Object[] args);
 }
