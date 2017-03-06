@@ -22,10 +22,11 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.grammar.select.OrderBy;
+import com.cadenzauk.siesta.grammar.select.WhereClause;
 import com.google.common.collect.ImmutableList;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -185,7 +186,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForWhere(BiFunction<Alias<Row2>,Select<Row2>,Select<Row2>.WhereClauseBuilder> f, String expected) {
+    private Object[] testCaseForWhere(BiFunction<Alias<Row2>,Select<Row2>,WhereClause<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -204,7 +205,7 @@ public class SelectTest {
 
     @Test
     @Parameters
-    public void where(BiFunction<Alias<Row2>,Select<Row2>,Select<Row2>.WhereClauseBuilder> where, String expected) {
+    public void where(BiFunction<Alias<Row2>,Select<Row2>,WhereClause<Row2>> where, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         Alias<Row2> alias = database.table(Row2.class).as("q");
@@ -215,7 +216,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,Select<Row2>,Select<Row2>.OrderByBuilder> f, String expected) {
+    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,Select<Row2>,OrderBy<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -252,7 +253,7 @@ public class SelectTest {
 
     @Test
     @Parameters
-    public void orderByOnSelect(BiFunction<Alias<Row2>,Select<Row2>,Select<Row2>.OrderByBuilder> orderBy, String expected) {
+    public void orderByOnSelect(BiFunction<Alias<Row2>,Select<Row2>,OrderBy<Row2>> orderBy, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
@@ -263,7 +264,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,Select<Row2>.WhereClauseBuilder,Select<Row2>.OrderByBuilder> f, String expected) {
+    private Object[] testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,WhereClause<Row2>,OrderBy<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -300,7 +301,7 @@ public class SelectTest {
 
     @Test
     @Parameters
-    public void orderByOnWhereClause(BiFunction<Alias<Row2>,Select<Row2>.WhereClauseBuilder,Select<Row2>.OrderByBuilder> orderBy, String expected) {
+    public void orderByOnWhereClause(BiFunction<Alias<Row2>,WhereClause<Row2>,OrderBy<Row2>> orderBy, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 

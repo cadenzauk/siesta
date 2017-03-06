@@ -22,7 +22,6 @@
 
 package com.cadenzauk.core.tuple;
 
-import com.cadenzauk.core.function.Function6;
 import com.cadenzauk.core.function.Function7;
 
 public class Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Tuple {

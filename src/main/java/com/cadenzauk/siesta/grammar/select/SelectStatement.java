@@ -20,39 +20,29 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.example;
+package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.siesta.From;
+import com.cadenzauk.siesta.Order;
+import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.expression.Expression;
+import com.cadenzauk.siesta.expression.TypedExpression;
+
+import java.util.List;
 import java.util.Optional;
 
-public class Widget {
-    private long widgetId;
-    private String name;
-    private long manufacturerId;
-    private Optional<String> description;
+public interface SelectStatement<RT> extends TypedExpression<RT> {
+    List<RT> list(SqlExecutor sqlExecutor);
 
-    private Widget() {
-    }
+    Optional<RT> optional(SqlExecutor sqlExecutor);
 
-    public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
-        this.widgetId = widgetId;
-        this.name = name;
-        this.manufacturerId = manufacturerId;
-        this.description = description;
-    }
+    String sql();
 
-    public long widgetId() {
-        return widgetId;
-    }
+    void andWhere(Expression newClause);
 
-    public String name() {
-        return name;
-    }
+    WhereClause<RT> setWhereClause(Expression e);
 
-    public long manufacturerId() {
-        return manufacturerId;
-    }
+    From from();
 
-    public Optional<String> description() {
-        return description;
-    }
+    <T> void addOrderBy(TypedExpression<T> column, Order ascending);
 }

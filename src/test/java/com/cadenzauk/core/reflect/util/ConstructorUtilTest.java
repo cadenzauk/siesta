@@ -24,7 +24,6 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import com.cadenzauk.core.testutil.FluentAssert;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;

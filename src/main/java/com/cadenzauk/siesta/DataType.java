@@ -35,7 +35,6 @@ public class DataType<T> {
     }
 
     public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
-
     public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
     public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt);
     private final Class<T> javaClass;

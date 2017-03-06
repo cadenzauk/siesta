@@ -25,7 +25,6 @@ package com.cadenzauk.core.reflect;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
-import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.UtilityClass;
 
 import java.lang.reflect.Field;

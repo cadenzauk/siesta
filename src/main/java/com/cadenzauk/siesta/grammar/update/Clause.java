@@ -20,39 +20,22 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.example;
+package com.cadenzauk.siesta.grammar.update;
 
-import java.util.Optional;
+import com.cadenzauk.siesta.SqlExecutor;
 
-public class Widget {
-    private long widgetId;
-    private String name;
-    private long manufacturerId;
-    private Optional<String> description;
+public abstract class Clause<U> {
+    protected final UpdateStatement<U> statement;
 
-    private Widget() {
+    public Clause(UpdateStatement<U> statement) {
+        this.statement = statement;
     }
 
-    public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
-        this.widgetId = widgetId;
-        this.name = name;
-        this.manufacturerId = manufacturerId;
-        this.description = description;
+    public int execute(SqlExecutor sqlExecutor) {
+        return statement.execute(sqlExecutor);
     }
 
-    public long widgetId() {
-        return widgetId;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public long manufacturerId() {
-        return manufacturerId;
-    }
-
-    public Optional<String> description() {
-        return description;
+    public String sql() {
+        return statement.sql();
     }
 }

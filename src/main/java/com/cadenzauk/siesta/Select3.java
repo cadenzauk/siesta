@@ -23,6 +23,8 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.siesta.grammar.select.JoinClause;
+import com.cadenzauk.siesta.grammar.select.JoinClauseStart;
 
 public class Select3<RT1, RT2, RT3> extends Select<Tuple3<RT1,RT2,RT3>> {
     private final RowMapper<RT1> rowMapper1;
@@ -36,54 +38,58 @@ public class Select3<RT1, RT2, RT3> extends Select<Tuple3<RT1,RT2,RT3>> {
         this.rowMapper3 = rowMapper3;
     }
 
-    Select3JoinClauseStartBuilder joinClause() {
-        return new Select3JoinClauseStartBuilder();
+    Select3JoinClauseStart joinClause() {
+        return new Select3JoinClauseStart();
     }
 
-    private <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder join(JoinType joinType, Alias<R4> alias2) {
+    private <R4> Select4.Select4JoinClauseStart join(JoinType joinType, Alias<R4> alias2) {
         return new Select4<>(scope.plus(alias2), from.join(joinType, alias2), rowMapper1, rowMapper2, rowMapper3, alias2.rowMapper(), projection(), Projection.of(alias2)).joinClause();
     }
 
-    public class Select3JoinClauseStartBuilder extends JoinClauseStartBuilder<Select3JoinClauseStartBuilder,Select3JoinClauseBuilder> {
-        Select3JoinClauseStartBuilder() {
-            super(Select3JoinClauseStartBuilder::newJoinClause);
+    public class Select3JoinClauseStart extends JoinClauseStart<Select3JoinClauseStart,Select3JoinClause,Tuple3<RT1,RT2,RT3>> {
+        Select3JoinClauseStart() {
+            super(Select3.this.selectStatement, Select3JoinClauseStart::newJoinClause);
         }
 
-        private Select3JoinClauseBuilder newJoinClause() {
-            return new Select3JoinClauseBuilder();
+        private Select3JoinClause newJoinClause() {
+            return new Select3JoinClause();
         }
     }
 
-    public class Select3JoinClauseBuilder extends JoinClauseBuilder<Select3JoinClauseBuilder> {
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder join(Alias<R4> alias) {
+    public class Select3JoinClause extends JoinClause<Select3JoinClause,Tuple3<RT1,RT2,RT3>> {
+        public Select3JoinClause() {
+            super(Select3.this.selectStatement);
+        }
+
+        public <R4> Select4.Select4JoinClauseStart join(Alias<R4> alias) {
             return Select3.this.join(JoinType.INNER, alias);
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder join(Class<R4> rowClass, String alias) {
+        public <R4> Select4.Select4JoinClauseStart join(Class<R4> rowClass, String alias) {
             return Select3.this.join(JoinType.INNER, scope.database().table(rowClass).as(alias));
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder leftJoin(Alias<R4> alias) {
+        public <R4> Select4.Select4JoinClauseStart leftJoin(Alias<R4> alias) {
             return Select3.this.join(JoinType.LEFT_OUTER, alias);
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder leftJoin(Class<R4> rowClass, String alias) {
+        public <R4> Select4.Select4JoinClauseStart leftJoin(Class<R4> rowClass, String alias) {
             return Select3.this.join(JoinType.LEFT_OUTER, scope.database().table(rowClass).as(alias));
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder rightJoin(Alias<R4> alias) {
+        public <R4> Select4.Select4JoinClauseStart rightJoin(Alias<R4> alias) {
             return Select3.this.join(JoinType.RIGHT_OUTER, alias);
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder rightJoin(Class<R4> rowClass, String alias) {
+        public <R4> Select4.Select4JoinClauseStart rightJoin(Class<R4> rowClass, String alias) {
             return Select3.this.join(JoinType.RIGHT_OUTER, scope.database().table(rowClass).as(alias));
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder fullOuterJoin(Alias<R4> alias) {
+        public <R4> Select4.Select4JoinClauseStart fullOuterJoin(Alias<R4> alias) {
             return Select3.this.join(JoinType.FULL_OUTER, alias);
         }
 
-        public <R4> Select4<RT1,RT2,RT3,R4>.Select4JoinClauseStartBuilder fullOuterJoin(Class<R4> rowClass, String alias) {
+        public <R4> Select4.Select4JoinClauseStart fullOuterJoin(Class<R4> rowClass, String alias) {
             return Select3.this.join(JoinType.FULL_OUTER, scope.database().table(rowClass).as(alias));
         }
     }

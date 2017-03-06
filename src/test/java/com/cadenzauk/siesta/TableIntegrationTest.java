@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,6 +43,7 @@ import javax.sql.DataSource;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -90,7 +90,7 @@ public class TableIntegrationTest {
             .where(WidgetRow::widgetId).isEqualTo(2L)
             .optional(sqlExecutor);
 
-        Assert.assertThat(theSame, is(Optional.of(aWidget)));
+        assertThat(theSame, is(Optional.of(aWidget)));
     }
 
     @Test
@@ -120,7 +120,33 @@ public class TableIntegrationTest {
             .optional(sqlExecutor)
             .map(Tuple2::item1);
 
-        Assert.assertThat(theSame, is(Optional.of(aWidget)));
+        assertThat(theSame, is(Optional.of(aWidget)));
+    }
+
+    @Test
+    public void update() {
+        Database database = database();
+        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        WidgetRow aWidget = WidgetRow.newBuilder()
+            .widgetId(3)
+            .manufacturerId(2)
+            .name("Dodacky")
+            .description(Optional.of("Thingamibob"))
+            .build();
+        database.insert(sqlExecutor, aWidget);
+
+        database.update(WidgetRow.class)
+            .set(WidgetRow::name).to("Sprocket")
+            .set(WidgetRow::description).to(Optional.empty())
+            .where(WidgetRow::widgetId).isEqualTo(3L)
+            .execute(sqlExecutor);
+
+        Optional<WidgetRow> sprocket = database.from(WidgetRow.class)
+            .where(WidgetRow::widgetId).isEqualTo(3L)
+            .optional(sqlExecutor);
+
+        assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
+        assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
     }
 
     @NotNull

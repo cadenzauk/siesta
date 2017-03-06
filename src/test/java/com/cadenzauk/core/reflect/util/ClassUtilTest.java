@@ -24,7 +24,6 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import org.hamcrest.Matchers;
 import org.junit.Ignore;
 import org.junit.Test;
 

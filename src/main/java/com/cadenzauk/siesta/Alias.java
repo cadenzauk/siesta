@@ -91,7 +91,7 @@ public class Alias<R> {
     }
 
     public String aliasName() {
-        return aliasName();
+        return aliasName;
     }
 
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {

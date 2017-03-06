@@ -26,7 +26,6 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import liquibase.integration.spring.SpringLiquibase;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;

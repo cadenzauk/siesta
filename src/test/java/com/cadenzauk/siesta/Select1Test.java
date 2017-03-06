@@ -58,7 +58,7 @@ public class Select1Test {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private Object[] testCaseForJoin(BiFunction<Alias<Child>,Select1<Parent>,Select2<Parent,Child>.Select2JoinClauseBuilder> f, String expected) {
+    private Object[] testCaseForJoin(BiFunction<Alias<Child>,Select1<Parent>,Select2.Select2JoinClause> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -86,7 +86,7 @@ public class Select1Test {
 
     @Test
     @Parameters
-    public void join(BiFunction<Alias<Child>,Select1<Parent>,Select2<Parent,Child>.Select2JoinClauseBuilder> join, String expected) {
+    public void join(BiFunction<Alias<Child>,Select1<Parent>,Select2.Select2JoinClause> join, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Parent> p = database.table(Parent.class).as("p");
         Alias<Child> c = database.table(Child.class).as("c");

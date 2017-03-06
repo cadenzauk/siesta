@@ -20,10 +20,12 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.expression.condition.OperatorExpressionCondition;
 import com.cadenzauk.siesta.expression.condition.OperatorValueCondition;
 import com.cadenzauk.siesta.expression.*;
@@ -36,7 +38,7 @@ public class ExpressionBuilder<T,N> {
     private final Function<Expression,N> onComplete;
     private Optional<Double> selectivity = Optional.empty();
 
-    ExpressionBuilder(TypedExpression<T> lhs, Function<Expression,N> onComplete) {
+    private ExpressionBuilder(TypedExpression<T> lhs, Function<Expression,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
     }

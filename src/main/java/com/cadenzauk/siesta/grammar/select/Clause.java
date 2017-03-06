@@ -20,39 +20,55 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.example;
+package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.Select;
+import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.expression.TypedExpression;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class Widget {
-    private long widgetId;
-    private String name;
-    private long manufacturerId;
-    private Optional<String> description;
+public abstract class Clause<RT> implements TypedExpression<RT> {
+    protected SelectStatement<RT> select;
 
-    private Widget() {
+    public Clause(SelectStatement<RT> select) {
+        this.select = select;
     }
 
-    public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
-        this.widgetId = widgetId;
-        this.name = name;
-        this.manufacturerId = manufacturerId;
-        this.description = description;
+    public List<RT> list(SqlExecutor sqlExecutor) {
+        return select.list(sqlExecutor);
     }
 
-    public long widgetId() {
-        return widgetId;
+    public Optional<RT> optional(SqlExecutor sqlExecutor) {
+        return select.optional(sqlExecutor);
     }
 
-    public String name() {
-        return name;
+    public String sql() {
+        return select.sql();
     }
 
-    public long manufacturerId() {
-        return manufacturerId;
+    @Override
+    public String sql(Scope scope) {
+        return select.sql(scope);
     }
 
-    public Optional<String> description() {
-        return description;
+    @Override
+    public String label(Scope scope) {
+        return select.label(scope);
     }
+
+    @Override
+    public RowMapper<RT> rowMapper(Scope scope, String label) {
+        return select.rowMapper(scope, label);
+    }
+
+    @Override
+    public Stream<Object> args() {
+        return select.args();
+    }
+
 }

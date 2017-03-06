@@ -20,39 +20,30 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.example;
+package com.cadenzauk.siesta;
 
-import java.util.Optional;
+import com.cadenzauk.siesta.example.Widget;
+import com.cadenzauk.siesta.testmodel.WidgetRow;
+import org.junit.Test;
 
-public class Widget {
-    private long widgetId;
-    private String name;
-    private long manufacturerId;
-    private Optional<String> description;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-    private Widget() {
+public class UpdateTest {
+    @Test
+    public void update() {
+        Database database = Database.newBuilder()
+            .defaultSchema("TEST")
+            .build();
+        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
+
+        String sql = database.update(WidgetRow.class)
+            .set(WidgetRow::name).to("Fred")
+            .set(WidgetRow::description).to("Bob")
+            .where(WidgetRow::widgetId).isEqualTo(1L)
+            .sql();
+
+        assertThat(sql, is("update TEST.WIDGET as WIDGET set WIDGET.NAME = ?, WIDGET.DESCRIPTION = ? where WIDGET.WIDGET_ID = ?"));
     }
 
-    public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
-        this.widgetId = widgetId;
-        this.name = name;
-        this.manufacturerId = manufacturerId;
-        this.description = description;
-    }
-
-    public long widgetId() {
-        return widgetId;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public long manufacturerId() {
-        return manufacturerId;
-    }
-
-    public Optional<String> description() {
-        return description;
-    }
 }

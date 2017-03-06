@@ -96,7 +96,7 @@ public class TableColumn<T, R, B> implements Column<T,R> {
     }
 
     public static <T, R, B> TableColumn<T,R,B> fromField(Database database, Class<R> rowClass, Class<B> builderClass, Field field) {
-        FieldInfo<R,T> fieldInfo = (FieldInfo<R,T>) FieldInfo.of(rowClass, field);
+        @SuppressWarnings("unchecked") FieldInfo<R,T> fieldInfo = (FieldInfo<R,T>) FieldInfo.of(rowClass, field);
         DataType<T> dataType = DataType.of(fieldInfo.effectiveType())
             .orElseThrow(() -> new IllegalArgumentException("Unable to determine the data type for " + fieldInfo));
         Field builderField = ClassUtil.findField(builderClass, fieldInfo.name())

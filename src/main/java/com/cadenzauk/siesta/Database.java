@@ -137,6 +137,10 @@ public class Database {
         return Select.from(this, table(rowClass).as(alias));
     }
 
+    public <U> Update<U> update(Class<U> rowClass) {
+        return Update.update(this, table(rowClass));
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }

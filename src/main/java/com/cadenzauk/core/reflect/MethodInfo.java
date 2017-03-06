@@ -25,7 +25,6 @@ package com.cadenzauk.core.reflect;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.util.MethodUtil;
-import com.cadenzauk.core.util.UtilityClass;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
