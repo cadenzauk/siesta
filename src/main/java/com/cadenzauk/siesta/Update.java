@@ -22,17 +22,10 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.expression.AndExpression;
 import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.update.SetClause;
-import com.cadenzauk.siesta.grammar.update.SetExpressionBuilder;
 import com.cadenzauk.siesta.grammar.update.UpdateStatement;
 import com.cadenzauk.siesta.grammar.update.WhereClause;
 
@@ -42,7 +35,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class Update<U> {
+class Update<U> {
     private final UpdateStatement<U> statement = new Statement();
     private final Scope scope;
     private final Alias<U> alias;
@@ -54,43 +47,7 @@ public class Update<U> {
         scope = new Scope(database, alias);
     }
 
-    public <T> SetExpressionBuilder<T,SetClause<U>> set(Function1<U,T> lhs) {
-        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), this::addSet);
-    }
-
-    public <T> SetExpressionBuilder<T,SetClause<U>> set(FunctionOptional1<U,T> lhs) {
-        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), this::addSet);
-    }
-
-    public <T> ExpressionBuilder<T,WhereClause<U>> where(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, this::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<U>> where(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<U>> where(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<U>> where(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<U>> where(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<U>> where(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<U>> where(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::setWhereClause);
-    }
-
-    public String sql() {
+    private String sql() {
         return String.format("update %s as %s set %s%s",
             alias.table().qualifiedName(),
             alias.aliasName(),
@@ -98,7 +55,7 @@ public class Update<U> {
             whereClauseSql());
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
+    private int execute(SqlExecutor sqlExecutor) {
         Object[] args = args().toArray();
         String sql = sql();
         System.out.println(sql);
@@ -130,8 +87,12 @@ public class Update<U> {
         whereClause = new AndExpression(whereClause, newClause);
     }
 
-    static <U> Update<U> update(Database database, Table<U> table) {
-        return new Update<>(database, table.as(table.tableName()));
+    private SetClause<U> setClause() {
+        return new SetClause<U>(statement);
+    }
+
+    static <U> SetClause<U> update(Database database, Table<U> table) {
+        return new Update<U>(database, table.as(table.tableName())).setClause();
     }
 
     private class Statement implements UpdateStatement<U> {
@@ -160,5 +121,4 @@ public class Update<U> {
             return Update.this.sql();
         }
     }
-
 }

@@ -29,6 +29,7 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.grammar.update.SetClause;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
 import java.util.Map;
@@ -137,7 +138,7 @@ public class Database {
         return Select.from(this, table(rowClass).as(alias));
     }
 
-    public <U> Update<U> update(Class<U> rowClass) {
+    public <U> SetClause<U> update(Class<U> rowClass) {
         return Update.update(this, table(rowClass));
     }
 
