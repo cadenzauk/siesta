@@ -33,11 +33,11 @@ import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 
 import java.util.function.Function;
 
-public abstract class InJoinExpectingOn<S extends InJoinExpectingOn<S,J,RT>, J extends InJoinExpectingAnd<J,RT>, RT> {
+public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
     protected final SelectStatement<RT> statement;
-    private final Function<S,J> newJoinClause;
+    private final Function<SelectStatement<RT>,J> newJoinClause;
 
-    protected InJoinExpectingOn(SelectStatement<RT> statement, Function<S,J> newJoinClause) {
+    protected InJoinExpectingOn(SelectStatement<RT> statement, Function<SelectStatement<RT>,J> newJoinClause) {
         this.statement = statement;
         this.newJoinClause = newJoinClause;
     }
@@ -73,6 +73,6 @@ public abstract class InJoinExpectingOn<S extends InJoinExpectingOn<S,J,RT>, J e
     @SuppressWarnings("unchecked")
     private J setOnClause(Expression e) {
         statement.from().on(e);
-        return newJoinClause.apply((S) this);
+        return newJoinClause.apply(statement);
     }
 }

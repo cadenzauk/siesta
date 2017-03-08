@@ -35,44 +35,44 @@ public class ExpectingJoin3<RT1, RT2, RT3> extends InJoinExpectingAnd<ExpectingJ
         super(select);
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> join(Alias<R4> alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> join(Alias<R4> alias) {
         return join(JoinType.INNER, alias);
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> join(Class<R4> rowClass, String alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> join(Class<R4> rowClass, String alias) {
         return join(JoinType.INNER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> leftJoin(Alias<R4> alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> leftJoin(Alias<R4> alias) {
         return join(JoinType.LEFT_OUTER, alias);
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> leftJoin(Class<R4> rowClass, String alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> leftJoin(Class<R4> rowClass, String alias) {
         return join(JoinType.LEFT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> rightJoin(Alias<R4> alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> rightJoin(Alias<R4> alias) {
         return join(JoinType.RIGHT_OUTER, alias);
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> rightJoin(Class<R4> rowClass, String alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> rightJoin(Class<R4> rowClass, String alias) {
         return join(JoinType.RIGHT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> fullOuterJoin(Alias<R4> alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> fullOuterJoin(Alias<R4> alias) {
         return join(JoinType.FULL_OUTER, alias);
     }
 
-    public <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> fullOuterJoin(Class<R4> rowClass, String alias) {
+    public <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> fullOuterJoin(Class<R4> rowClass, String alias) {
         return join(JoinType.FULL_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    private <R4> InJoinExpectingOn4<RT1,RT2,RT3,R4> join(JoinType joinType, Alias<R4> alias2) {
+    private <R4> InJoinExpectingOn<ExpectingJoin4<RT1, RT2, RT3,R4>,Tuple4<RT1,RT2,RT3,R4>> join(JoinType joinType, Alias<R4> alias2) {
         Select<Tuple4<RT1,RT2,RT3,R4>> select4 = new Select<>(
             scope().plus(alias2),
             statement.from().join(joinType, alias2),
             RowMappers.add4th(statement.rowMapper(), alias2.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias2)));
-        return new InJoinExpectingOn4<>(select4.statement);
+        return new InJoinExpectingOn<>(select4.statement, ExpectingJoin4::new);
     }
 }

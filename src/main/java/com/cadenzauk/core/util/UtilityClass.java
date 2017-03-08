@@ -24,7 +24,7 @@ package com.cadenzauk.core.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 
-public class UtilityClass {
+public abstract class UtilityClass {
     protected UtilityClass() {
         throw new RuntimeInstantiationException("No " + getClass() + " for you.");
     }

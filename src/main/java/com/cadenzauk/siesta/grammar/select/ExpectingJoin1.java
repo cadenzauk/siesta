@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
@@ -33,43 +34,43 @@ public class ExpectingJoin1<RT> extends ExpectingSelect<RT> {
         super(select);
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> join(Alias<R2> alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> join(Alias<R2> alias2) {
         return join(JoinType.INNER, alias2);
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> join(Class<R2> r2Class, String alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> join(Class<R2> r2Class, String alias2) {
         return join(JoinType.INNER, scope().database().table(r2Class).as(alias2));
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> leftJoin(Alias<R2> alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> leftJoin(Alias<R2> alias2) {
         return join(JoinType.LEFT_OUTER, alias2);
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> leftJoin(Class<R2> r2Class, String alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> leftJoin(Class<R2> r2Class, String alias2) {
         return join(JoinType.LEFT_OUTER, scope().database().table(r2Class).as(alias2));
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> rightJoin(Alias<R2> alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> rightJoin(Alias<R2> alias2) {
         return join(JoinType.RIGHT_OUTER, alias2);
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> rightJoin(Class<R2> r2Class, String alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> rightJoin(Class<R2> r2Class, String alias2) {
         return join(JoinType.RIGHT_OUTER, scope().database().table(r2Class).as(alias2));
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> fullOuterJoin(Alias<R2> alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>>  fullOuterJoin(Alias<R2> alias2) {
         return join(JoinType.FULL_OUTER, alias2);
     }
 
-    public <R2> InJoinExpectingOn2<RT, R2> fullOuterJoin(Class<R2> r2Class, String alias2) {
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> fullOuterJoin(Class<R2> r2Class, String alias2) {
         return join(JoinType.FULL_OUTER, scope().database().table(r2Class).as(alias2));
     }
 
-    private <R2> InJoinExpectingOn2<RT, R2> join(JoinType joinType, Alias<R2> alias2) {
+    private <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> join(JoinType joinType, Alias<R2> alias2) {
         Select<Tuple2<RT,R2>> select2 = new Select<>(scope().plus(alias2),
             statement.from().join(joinType, alias2),
             RowMappers.of(statement.rowMapper(), alias2.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias2)));
-        return new InJoinExpectingOn2<>(select2.statement);
+        return new InJoinExpectingOn<>(select2.statement, ExpectingJoin2::new);
     }
 }
