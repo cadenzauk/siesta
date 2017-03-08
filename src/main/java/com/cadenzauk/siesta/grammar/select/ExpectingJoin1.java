@@ -30,7 +30,7 @@ import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
 
 public class ExpectingJoin1<RT> extends ExpectingSelect<RT> {
-    public ExpectingJoin1(SelectStatement<RT> select) {
+    public ExpectingJoin1(Select<RT> select) {
         super(select);
     }
 
@@ -71,6 +71,6 @@ public class ExpectingJoin1<RT> extends ExpectingSelect<RT> {
             statement.from().join(joinType, alias2),
             RowMappers.of(statement.rowMapper(), alias2.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias2)));
-        return new InJoinExpectingOn<>(select2.statement, ExpectingJoin2::new);
+        return new InJoinExpectingOn<>(select2, ExpectingJoin2::new);
     }
 }

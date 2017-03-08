@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.RowMappers;
 
 public class ExpectingJoin3<RT1, RT2, RT3> extends InJoinExpectingAnd<ExpectingJoin3<RT1,RT2,RT3>,Tuple3<RT1,RT2,RT3>> {
 
-    public ExpectingJoin3(SelectStatement<Tuple3<RT1,RT2,RT3>> select) {
+    public ExpectingJoin3(Select<Tuple3<RT1,RT2,RT3>> select) {
         super(select);
     }
 
@@ -73,6 +73,6 @@ public class ExpectingJoin3<RT1, RT2, RT3> extends InJoinExpectingAnd<ExpectingJ
             statement.from().join(joinType, alias2),
             RowMappers.add4th(statement.rowMapper(), alias2.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias2)));
-        return new InJoinExpectingOn<>(select4.statement, ExpectingJoin4::new);
+        return new InJoinExpectingOn<>(select4, ExpectingJoin4::new);
     }
 }

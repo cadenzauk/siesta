@@ -35,7 +35,7 @@ import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 
 public class ExpectingSelect<RT> extends ExpectingWhere<RT> {
-    public ExpectingSelect(SelectStatement<RT> select) {
+    public ExpectingSelect(Select<RT> select) {
         super(select);
     }
 

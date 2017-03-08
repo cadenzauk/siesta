@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 
 public class InOrderByExpectingThen<RT> extends ExpectingEndOfStatement<RT> {
-    public InOrderByExpectingThen(SelectStatement<RT> select) {
+    public InOrderByExpectingThen(Select<RT> select) {
         super(select);
     }
 

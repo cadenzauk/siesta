@@ -29,7 +29,7 @@ import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.expression.TypedExpression;
 
 public abstract class ExpectingOrderBy<RT> extends ExpectingEndOfStatement<RT> {
-    public ExpectingOrderBy(SelectStatement<RT> select) {
+    public ExpectingOrderBy(Select<RT> select) {
         super(select);
     }
 

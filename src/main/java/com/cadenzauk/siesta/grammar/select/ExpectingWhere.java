@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 
 public class ExpectingWhere<RT> extends ExpectingOrderBy<RT> {
-    public ExpectingWhere(SelectStatement<RT> select) {
+    public ExpectingWhere(Select<RT> select) {
         super(select);
     }
 

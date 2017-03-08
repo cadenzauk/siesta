@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.tuple.Tuple4;
 
 public class ExpectingJoin4<RT1, RT2, RT3,RT4> extends InJoinExpectingAnd<ExpectingJoin4<RT1, RT2, RT3,RT4>,Tuple4<RT1,RT2,RT3,RT4>> {
-    public ExpectingJoin4(SelectStatement<Tuple4<RT1,RT2,RT3,RT4>> select) {
+    public ExpectingJoin4(Select<Tuple4<RT1,RT2,RT3,RT4>> select) {
         super(select);
     }
 }

@@ -32,7 +32,7 @@ import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 
 public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT> extends ExpectingSelect<RT> {
-    public InJoinExpectingAnd(SelectStatement<RT> select) {
+    public InJoinExpectingAnd(Select<RT> select) {
         super(select);
     }
 

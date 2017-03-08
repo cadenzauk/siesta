@@ -34,10 +34,10 @@ import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 import java.util.function.Function;
 
 public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
-    protected final SelectStatement<RT> statement;
-    private final Function<SelectStatement<RT>,J> newJoinClause;
+    protected final Select<RT> statement;
+    private final Function<Select<RT>,J> newJoinClause;
 
-    protected InJoinExpectingOn(SelectStatement<RT> statement, Function<SelectStatement<RT>,J> newJoinClause) {
+    protected InJoinExpectingOn(Select<RT> statement, Function<Select<RT>,J> newJoinClause) {
         this.statement = statement;
         this.newJoinClause = newJoinClause;
     }

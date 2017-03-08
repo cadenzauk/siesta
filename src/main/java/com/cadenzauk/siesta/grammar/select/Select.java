@@ -48,7 +48,6 @@ import static java.util.stream.Collectors.joining;
 public class Select<RT> implements TypedExpression<RT> {
     protected final Scope scope;
     protected final From from;
-    protected final SelectStatement<RT> statement = new Statement();
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
     private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
@@ -82,42 +81,50 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     ExpectingWhere<RT> expectingWhere() {
-        return new ExpectingWhere<>(statement);
+        return new ExpectingWhere<>(this);
     }
 
-    protected Projection projection() {
+    Projection projection() {
         return projection;
     }
 
-    private Optional<RT> optional(SqlExecutor sqlExecutor) {
+    Optional<RT> optional(SqlExecutor sqlExecutor) {
         return OptionalUtil.ofOnly(list(sqlExecutor));
     }
 
-    private List<RT> list(SqlExecutor sqlExecutor) {
+    From from() {
+        return from;
+    }
+
+    Scope scope() {
+        return scope;
+    }
+
+    List<RT> list(SqlExecutor sqlExecutor) {
         Object[] args = args().toArray();
         String sql = sql();
         System.out.println(sql);
         return sqlExecutor.query(sql, args, rowMapper());
     }
 
-    private String sql() {
+    String sql() {
         return sqlImpl(scope);
     }
 
-    private RowMapper<RT> rowMapper() {
+    RowMapper<RT> rowMapper() {
         return rowMapper;
     }
 
-    private <T> void addOrderBy(TypedExpression<T> expression, Order order) {
+    <T> void addOrderBy(TypedExpression<T> expression, Order order) {
         orderByClauses.add(new Ordering<>(expression, order));
     }
 
-    private InWhereExpectingAnd<RT> setWhereClause(Expression e) {
+    InWhereExpectingAnd<RT> setWhereClause(Expression e) {
         whereClause = e;
-        return new InWhereExpectingAnd<>(statement);
+        return new InWhereExpectingAnd<>(this);
     }
 
-    private void andWhere(Expression e) {
+    void andWhere(Expression e) {
         whereClause = new AndExpression(whereClause, e);
     }
 
@@ -152,82 +159,10 @@ public class Select<RT> implements TypedExpression<RT> {
 
     public static <R> ExpectingJoin1<R> from(Database database, Alias<R> alias) {
         Select<R> select = new Select<>(new Scope(database, alias), From.from(alias), alias.rowMapper(), Projection.of(alias));
-        return new ExpectingJoin1<>(select.statement);
+        return new ExpectingJoin1<>(select);
     }
 
     public static <R> ExpectingJoin1<R> from(Database database, Table<R> table) {
         return from(database, table.as(table.tableName()));
-    }
-
-    private class Statement implements SelectStatement<RT> {
-        @Override
-        public List<RT> list(SqlExecutor sqlExecutor) {
-            return Select.this.list(sqlExecutor);
-        }
-
-        @Override
-        public Optional<RT> optional(SqlExecutor sqlExecutor) {
-            return Select.this.optional(sqlExecutor);
-        }
-
-        @Override
-        public String sql() {
-            return Select.this.sql();
-        }
-
-        @Override
-        public InWhereExpectingAnd<RT> setWhereClause(Expression e) {
-            return Select.this.setWhereClause(e);
-        }
-
-        @Override
-        public From from() {
-            return Select.this.from;
-        }
-
-        @Override
-        public <T> void addOrderBy(TypedExpression<T> column, Order ascending) {
-            Select.this.addOrderBy(column, ascending);
-        }
-
-        @Override
-        public Scope scope() {
-            return Select.this.scope;
-        }
-
-        @Override
-        public Projection projection() {
-            return Select.this.projection();
-        }
-
-        @Override
-        public RowMapper<RT> rowMapper() {
-            return Select.this.rowMapper();
-        }
-
-        @Override
-        public void andWhere(Expression newClause) {
-            Select.this.andWhere(newClause);
-        }
-
-        @Override
-        public String label(Scope scope) {
-            return Select.this.label(scope);
-        }
-
-        @Override
-        public RowMapper<RT> rowMapper(Scope scope, String label) {
-            return Select.this.rowMapper(scope, label);
-        }
-
-        @Override
-        public String sql(Scope scope) {
-            return Select.this.sql(scope);
-        }
-
-        @Override
-        public Stream<Object> args() {
-            return Select.this.args();
-        }
     }
 }
