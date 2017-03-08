@@ -22,36 +22,55 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.siesta.From;
-import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.expression.Expression;
 import com.cadenzauk.siesta.expression.TypedExpression;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public interface SelectStatement<RT> extends TypedExpression<RT> {
-    List<RT> list(SqlExecutor sqlExecutor);
+public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT> {
+    protected SelectStatement<RT> statement;
 
-    Optional<RT> optional(SqlExecutor sqlExecutor);
+    public ExpectingEndOfStatement(SelectStatement<RT> statement) {
+        this.statement = statement;
+    }
 
-    String sql();
+    public List<RT> list(SqlExecutor sqlExecutor) {
+        return statement.list(sqlExecutor);
+    }
 
-    void andWhere(Expression newClause);
+    public Optional<RT> optional(SqlExecutor sqlExecutor) {
+        return statement.optional(sqlExecutor);
+    }
 
-    InWhereExpectingAnd<RT> setWhereClause(Expression e);
+    public String sql() {
+        return statement.sql();
+    }
 
-    From from();
+    @Override
+    public String sql(Scope scope) {
+        return statement.sql(scope);
+    }
 
-    <T> void addOrderBy(TypedExpression<T> column, Order ascending);
+    @Override
+    public String label(Scope scope) {
+        return statement.label(scope);
+    }
 
-    Scope scope();
+    @Override
+    public RowMapper<RT> rowMapper(Scope scope, String label) {
+        return statement.rowMapper(scope, label);
+    }
 
-    Projection projection();
+    @Override
+    public Stream<Object> args() {
+        return statement.args();
+    }
 
-    RowMapper<RT> rowMapper();
+    protected Scope scope() {
+        return statement.scope();
+    }
 }

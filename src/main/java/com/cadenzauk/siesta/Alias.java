@@ -98,7 +98,7 @@ public class Alias<R> {
         return table().column(methodInfo);
     }
 
-    RowMapper<R> rowMapper() {
+    public RowMapper<R> rowMapper() {
         return table.rowMapper(aliasName + "_");
     }
 

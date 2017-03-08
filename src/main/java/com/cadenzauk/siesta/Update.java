@@ -64,7 +64,7 @@ class Update<U> {
 
     private SetClause<U> addSet(Expression expression) {
         sets.add(expression);
-        return new SetClause<U>(statement);
+        return new SetClause<>(statement);
     }
 
     private String whereClauseSql() {
@@ -88,11 +88,11 @@ class Update<U> {
     }
 
     private SetClause<U> setClause() {
-        return new SetClause<U>(statement);
+        return new SetClause<>(statement);
     }
 
-    static <U> SetClause<U> update(Database database, Table<U> table) {
-        return new Update<U>(database, table.as(table.tableName())).setClause();
+    public static <U> SetClause<U> update(Database database, Table<U> table) {
+        return new Update<>(database, table.as(table.tableName())).setClause();
     }
 
     private class Statement implements UpdateStatement<U> {

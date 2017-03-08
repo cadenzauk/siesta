@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
+import com.cadenzauk.siesta.grammar.select.ExpectingJoin2;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Rule;
@@ -58,7 +60,7 @@ public class Select1Test {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private Object[] testCaseForJoin(BiFunction<Alias<Child>,Select1<Parent>,Select2.Select2JoinClause> f, String expected) {
+    private Object[] testCaseForJoin(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -86,7 +88,7 @@ public class Select1Test {
 
     @Test
     @Parameters
-    public void join(BiFunction<Alias<Child>,Select1<Parent>,Select2.Select2JoinClause> join, String expected) {
+    public void join(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Parent> p = database.table(Parent.class).as("p");
         Alias<Child> c = database.table(Child.class).as("c");

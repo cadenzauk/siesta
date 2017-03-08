@@ -22,8 +22,11 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.grammar.select.OrderBy;
-import com.cadenzauk.siesta.grammar.select.WhereClause;
+import com.cadenzauk.siesta.grammar.select.ExpectingOrderBy;
+import com.cadenzauk.siesta.grammar.select.ExpectingWhere;
+import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
+import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
+import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.google.common.collect.ImmutableList;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -186,7 +189,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForWhere(BiFunction<Alias<Row2>,Select<Row2>,WhereClause<Row2>> f, String expected) {
+    private Object[] testCaseForWhere(BiFunction<Alias<Row2>,ExpectingWhere<Row2>,InWhereExpectingAnd<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -205,7 +208,7 @@ public class SelectTest {
 
     @Test
     @Parameters
-    public void where(BiFunction<Alias<Row2>,Select<Row2>,WhereClause<Row2>> where, String expected) {
+    public void where(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         Alias<Row2> alias = database.table(Row2.class).as("q");
@@ -216,7 +219,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,Select<Row2>,OrderBy<Row2>> f, String expected) {
+    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingOrderBy<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -253,7 +256,7 @@ public class SelectTest {
 
     @Test
     @Parameters
-    public void orderByOnSelect(BiFunction<Alias<Row2>,Select<Row2>,OrderBy<Row2>> orderBy, String expected) {
+    public void orderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
@@ -264,7 +267,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,WhereClause<Row2>,OrderBy<Row2>> f, String expected) {
+    private Object[] testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 
@@ -301,7 +304,7 @@ public class SelectTest {
 
     @Test
     @Parameters
-    public void orderByOnWhereClause(BiFunction<Alias<Row2>,WhereClause<Row2>,OrderBy<Row2>> orderBy, String expected) {
+    public void orderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 

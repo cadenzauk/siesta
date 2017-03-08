@@ -31,41 +31,41 @@ import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 
-public class WhereClause<RT> extends JoinOrWhereClause<RT> {
-    public WhereClause(SelectStatement<RT> select) {
+public class InWhereExpectingAnd<RT> extends ExpectingOrderBy<RT> {
+    public InWhereExpectingAnd(SelectStatement<RT> select) {
         super(select);
     }
 
-    public <T> ExpressionBuilder<T,WhereClause<RT>> and(TypedExpression<T> lhs) {
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> and(Function1<R,T> lhs) {
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Function1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> and(FunctionOptional1<R,T> lhs) {
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(FunctionOptional1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> and(String alias, Function1<R,T> lhs) {
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, Function1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> and(String alias, FunctionOptional1<R,T> lhs) {
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, FunctionOptional1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> and(Alias<R> alias, Function1<R,T> lhs) {
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Alias<R> alias, Function1<R,T> lhs) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    private WhereClause<RT> andWhere(Expression newClause) {
-        select.andWhere(newClause);
+    private InWhereExpectingAnd<RT> andWhere(Expression newClause) {
+        statement.andWhere(newClause);
         return this;
     }
 }

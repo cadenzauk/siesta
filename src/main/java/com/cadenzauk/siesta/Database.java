@@ -29,6 +29,8 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
+import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.update.SetClause;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
@@ -126,15 +128,15 @@ public class Database {
         table(rowClass).insert(sqlExecutor, row);
     }
 
-    public <R> Select1<R> from(Class<R> rowClass) {
+    public <R> ExpectingJoin1<R> from(Class<R> rowClass) {
         return Select.from(this, table(rowClass));
     }
 
-    public <R> Select1<R> from(Alias<R> alias) {
+    public <R> ExpectingJoin1<R> from(Alias<R> alias) {
         return Select.from(this, alias);
     }
 
-    public <R> Select1<R> from(Class<R> rowClass, String alias) {
+    public <R> ExpectingJoin1<R> from(Class<R> rowClass, String alias) {
         return Select.from(this, table(rowClass).as(alias));
     }
 

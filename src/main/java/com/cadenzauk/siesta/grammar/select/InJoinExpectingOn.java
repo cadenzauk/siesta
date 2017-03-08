@@ -25,20 +25,20 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 import com.cadenzauk.siesta.expression.Expression;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 
 import java.util.function.Function;
 
-public abstract class JoinClauseStart<S extends JoinClauseStart<S,J,RT>, J extends JoinClause<J,RT>, RT> {
-    private final SelectStatement<RT> select;
+public abstract class InJoinExpectingOn<S extends InJoinExpectingOn<S,J,RT>, J extends InJoinExpectingAnd<J,RT>, RT> {
+    protected final SelectStatement<RT> statement;
     private final Function<S,J> newJoinClause;
 
-    protected JoinClauseStart(SelectStatement<RT> select, Function<S,J> newJoinClause) {
-        this.select = select;
+    protected InJoinExpectingOn(SelectStatement<RT> statement, Function<S,J> newJoinClause) {
+        this.statement = statement;
         this.newJoinClause = newJoinClause;
     }
 
@@ -72,7 +72,7 @@ public abstract class JoinClauseStart<S extends JoinClauseStart<S,J,RT>, J exten
 
     @SuppressWarnings("unchecked")
     private J setOnClause(Expression e) {
-        select.from().on(e);
+        statement.from().on(e);
         return newJoinClause.apply((S) this);
     }
 }

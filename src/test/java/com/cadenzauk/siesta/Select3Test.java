@@ -69,11 +69,10 @@ public class Select3Test {
         String sql = database.from(Foo.class, "f")
             .join(Bar.class, "b").on(Bar::fooId).isEqualTo(Foo::id)
             .join(Baz.class, "z").on(Baz::barId).isEqualTo(Bar::id).and(Baz::id).isEqualTo(1)
+            .select(Baz::barId)
             .sql();
 
-        assertThat(sql, is("select f.ID as f_ID, " +
-            "b.ID as b_ID, b.FOO_ID as b_FOO_ID, " +
-            "z.ID as z_ID, z.BAR_ID as z_BAR_ID " +
+        assertThat(sql, is("select z.BAR_ID as z_BAR_ID " +
             "from TEST.FOO as f " +
             "join TEST.BAR as b on b.FOO_ID = f.ID " +
             "join TEST.BAZ as z on (z.BAR_ID = b.ID) and (z.ID = ?)"));

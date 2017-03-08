@@ -31,8 +31,8 @@ import com.cadenzauk.siesta.expression.Expression;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 
-public abstract class JoinClause<S extends JoinClause<S,RT>, RT> extends JoinOrWhereClause<RT> {
-    public JoinClause(SelectStatement<RT> select) {
+public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT> extends ExpectingSelect<RT> {
+    public InJoinExpectingAnd(SelectStatement<RT> select) {
         super(select);
     }
 
@@ -60,33 +60,9 @@ public abstract class JoinClause<S extends JoinClause<S,RT>, RT> extends JoinOrW
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onAnd);
     }
 
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> where(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), select::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> where(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), select::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> where(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), select::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> where(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), select::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> where(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), select::setWhereClause);
-    }
-
-    public <T, R> ExpressionBuilder<T,WhereClause<RT>> where(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), select::setWhereClause);
-    }
-
     @SuppressWarnings("unchecked")
     private S onAnd(Expression rhs) {
-        select.from().on(new AndExpression(select.from().on(), rhs));
+        statement.from().on(new AndExpression(statement.from().on(), rhs));
         return (S) this;
     }
 }

@@ -28,7 +28,6 @@ import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import liquibase.integration.spring.SpringLiquibase;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;

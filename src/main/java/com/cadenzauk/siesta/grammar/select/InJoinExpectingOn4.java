@@ -22,53 +22,14 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.siesta.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.Select;
-import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.core.tuple.Tuple4;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-public abstract class Clause<RT> implements TypedExpression<RT> {
-    protected SelectStatement<RT> select;
-
-    public Clause(SelectStatement<RT> select) {
-        this.select = select;
+public class InJoinExpectingOn4<RT1, RT2, RT3,RT4> extends InJoinExpectingOn<InJoinExpectingOn4<RT1, RT2, RT3,RT4>,ExpectingJoin4<RT1, RT2, RT3,RT4>,Tuple4<RT1,RT2,RT3,RT4>> {
+    InJoinExpectingOn4(SelectStatement<Tuple4<RT1,RT2,RT3,RT4>> statement) {
+        super(statement, InJoinExpectingOn4::newJoinClause);
     }
 
-    public List<RT> list(SqlExecutor sqlExecutor) {
-        return select.list(sqlExecutor);
+    private ExpectingJoin4<RT1, RT2, RT3,RT4> newJoinClause() {
+        return new ExpectingJoin4<>(statement);
     }
-
-    public Optional<RT> optional(SqlExecutor sqlExecutor) {
-        return select.optional(sqlExecutor);
-    }
-
-    public String sql() {
-        return select.sql();
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return select.sql(scope);
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return select.label(scope);
-    }
-
-    @Override
-    public RowMapper<RT> rowMapper(Scope scope, String label) {
-        return select.rowMapper(scope, label);
-    }
-
-    @Override
-    public Stream<Object> args() {
-        return select.args();
-    }
-
 }

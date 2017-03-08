@@ -27,7 +27,6 @@ import com.cadenzauk.siesta.expression.BooleanExpression;
 import com.cadenzauk.siesta.expression.Expression;
 import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.condition.OperatorValueCondition;
-import com.cadenzauk.siesta.grammar.ExpressionBuilder;
 
 import java.util.Optional;
 import java.util.function.Function;

@@ -22,36 +22,10 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.siesta.From;
-import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.core.tuple.Tuple4;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface SelectStatement<RT> extends TypedExpression<RT> {
-    List<RT> list(SqlExecutor sqlExecutor);
-
-    Optional<RT> optional(SqlExecutor sqlExecutor);
-
-    String sql();
-
-    void andWhere(Expression newClause);
-
-    InWhereExpectingAnd<RT> setWhereClause(Expression e);
-
-    From from();
-
-    <T> void addOrderBy(TypedExpression<T> column, Order ascending);
-
-    Scope scope();
-
-    Projection projection();
-
-    RowMapper<RT> rowMapper();
+public class ExpectingJoin4<RT1, RT2, RT3,RT4> extends InJoinExpectingAnd<ExpectingJoin4<RT1, RT2, RT3,RT4>,Tuple4<RT1,RT2,RT3,RT4>> {
+    public ExpectingJoin4(SelectStatement<Tuple4<RT1,RT2,RT3,RT4>> select) {
+        super(select);
+    }
 }
