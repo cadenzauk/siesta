@@ -22,33 +22,29 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.projection.AliasColumns;
-import com.cadenzauk.siesta.projection.ExpressionProjection;
-import com.cadenzauk.siesta.projection.ProjectionList;
+import com.cadenzauk.siesta.testmodel.WidgetRow;
+import org.junit.Test;
 
-import java.util.Optional;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
-public interface Projection {
-    String sql(Scope scope);
+public class SelectProjectionTest {
+    @Test
+    public void projectColumns() {
+        Database database = Database.newBuilder()
+            .defaultSchema("PROJ")
+            .build();
+        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
 
-    static <T> Projection of(TypedExpression<T> column) {
-        return new ExpressionProjection<>(column, Optional.empty());
-    }
+        String sql = database.from(WidgetRow.class, "w")
+            .select(WidgetRow::name, "n").comma(WidgetRow::description, "d").comma(WidgetRow::manufacturerId, "m")
+            .where(WidgetRow::name).isEqualTo("Bob")
+            .sql();
 
-    static <T> Projection of(TypedExpression<T> column, Optional<String> label) {
-        return new ExpressionProjection<>(column, label);
-    }
-
-    static <T> Projection of(TypedExpression<T> column, String label) {
-        return new ExpressionProjection<>(column, Optional.of(label));
-    }
-
-    static <R1> Projection of(Alias<R1> alias) {
-        return new AliasColumns<>(alias);
-    }
-
-    static Projection of(Projection... p) {
-        return new ProjectionList(p);
+        assertThat(sql, is("select w.NAME as n, " +
+            "w.DESCRIPTION as d, " +
+            "w.MANUFACTURER_ID as m " +
+            "from TEST.WIDGET as w " +
+            "where w.NAME = ?"));
     }
 }

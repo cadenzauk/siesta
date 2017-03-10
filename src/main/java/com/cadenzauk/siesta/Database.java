@@ -174,5 +174,10 @@ public class Database {
         public Database build() {
             return new Database(this);
         }
+
+        public <R,B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+            //TODO!
+            return this;
+        }
     }
 }

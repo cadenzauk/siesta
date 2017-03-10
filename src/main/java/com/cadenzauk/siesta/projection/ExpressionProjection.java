@@ -26,15 +26,19 @@ import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.expression.TypedExpression;
 
+import java.util.Optional;
+
 public class ExpressionProjection<T> implements Projection {
     private final TypedExpression<T> expression;
+    private final Optional<String> label;
 
-    public ExpressionProjection(TypedExpression<T> expression) {
+    public ExpressionProjection(TypedExpression<T> expression, Optional<String> label) {
         this.expression = expression;
+        this.label = label;
     }
 
     @Override
     public String sql(Scope scope) {
-        return String.format("%s as %s", expression.sql(scope), expression.label(scope));
+        return String.format("%s as %s", expression.sql(scope), label.orElseGet(() -> expression.label(scope)));
     }
 }

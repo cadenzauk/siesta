@@ -23,81 +23,49 @@
 package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.core.tuple.Tuple4;
-import com.cadenzauk.core.tuple.Tuple5;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMappers;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
+
+import java.util.Optional;
 
 public class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     public ExpectingSelect(Select<RT> select) {
         super(select);
     }
 
-    public <T> ExpectingWhere<T> select(TypedExpression<T> column) {
-        return new Select<>(scope(),
-            statement.from(),
-            column.rowMapper(scope(), column.label(scope())),
-            Projection.of(column))
-            .expectingWhere();
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression) {
+        return select(expression, Optional.empty());
     }
 
-    public <T1, T2> ExpectingWhere<Tuple2<T1,T2>> select(TypedExpression<T1> column1, TypedExpression<T2> column2) {
-        return new Select<>(scope(),
-            statement.from(),
-            RowMappers.of(
-                column1.rowMapper(scope(), column1.label(scope())),
-                column2.rowMapper(scope(), column2.label(scope()))),
-            Projection.of(Projection.of(column1), Projection.of(column2)))
-            .expectingWhere();
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression, String label) {
+        return select(expression, OptionalUtil.ofBlankable(label));
     }
 
-    public <T1, T2, T3> ExpectingWhere<Tuple3<T1,T2,T3>> select(TypedExpression<T1> column1, TypedExpression<T2> column2, TypedExpression<T3> column3) {
-        return new Select<>(scope(),
-            statement.from(),
-            RowMappers.of(
-                column1.rowMapper(scope(), column1.label(scope())),
-                column2.rowMapper(scope(), column2.label(scope())),
-                column3.rowMapper(scope(), column3.label(scope()))),
-            Projection.of(Projection.of(column1), Projection.of(column2), Projection.of(column3)))
-            .expectingWhere();
-    }
-
-    public <T1, T2, T3, T4> ExpectingWhere<Tuple4<T1,T2,T3,T4>> select(TypedExpression<T1> column1, TypedExpression<T2> column2, TypedExpression<T3> column3, TypedExpression<T4> column4) {
-        return new Select<>(scope(),
-            statement.from(),
-            RowMappers.of(
-                column1.rowMapper(scope(), column1.label(scope())),
-                column2.rowMapper(scope(), column2.label(scope())),
-                column3.rowMapper(scope(), column3.label(scope())),
-                column4.rowMapper(scope(), column4.label(scope()))),
-            Projection.of(Projection.of(column1), Projection.of(column2), Projection.of(column4), Projection.of(column4)))
-            .expectingWhere();
-    }
-
-    public <T1, T2, T3, T4, T5> ExpectingWhere<Tuple5<T1,T2,T3,T4,T5>> select(TypedExpression<T1> column1, TypedExpression<T2> column2, TypedExpression<T3> column3, TypedExpression<T4> column4, TypedExpression<T5> column5) {
-        return new Select<>(scope(),
-            statement.from(),
-            RowMappers.of(
-                column1.rowMapper(scope(), column1.label(scope())),
-                column2.rowMapper(scope(), column2.label(scope())),
-                column3.rowMapper(scope(), column3.label(scope())),
-                column4.rowMapper(scope(), column4.label(scope())),
-                column5.rowMapper(scope(), column5.label(scope()))),
-            Projection.of(Projection.of(column1), Projection.of(column2), Projection.of(column4), Projection.of(column4)))
-            .expectingWhere();
-    }
-
-    public <T, R> ExpectingWhere<T> select(Function1<R,T> methodReference) {
+    public <T, R> InProjectionExpectingComma1<T> select(Function1<R,T> methodReference) {
         return select(UnresolvedColumn.of(methodReference));
     }
 
-    public <T, R> ExpectingWhere<T> select(Alias<R> alias, Function1<R,T> methodReference) {
+    public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference) {
         return select(ResolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(Function1<R,T> methodReference, String label) {
+        return select(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference, String label) {
+        return select(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    private <T> InProjectionExpectingComma1<T> select(TypedExpression<T> column, Optional<String> label) {
+        Select<T> select = new Select<>(scope(),
+            statement.from(),
+            column.rowMapper(scope(), label.orElseGet(() -> column.label(scope()))),
+            Projection.of(column, label));
+        return new InProjectionExpectingComma1<>(select);
     }
 }

@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;

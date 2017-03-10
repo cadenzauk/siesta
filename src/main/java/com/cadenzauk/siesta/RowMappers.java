@@ -49,6 +49,21 @@ public class RowMappers {
         return (rs, i) -> Tuple.of(mapper1.mapRow(rs, i), mapper2.mapRow(rs, i), mapper3.mapRow(rs, i), mapper4.mapRow(rs, i), mapper5.mapRow(rs, i));
     }
 
+    public static <T1, T2, T3, T4, T5, T6> RowMapper<Tuple6<T1,T2,T3,T4,T5,T6>> of(RowMapper<T1> mapper1,
+                                                                                   RowMapper<T2> mapper2,
+                                                                                   RowMapper<T3> mapper3,
+                                                                                   RowMapper<T4> mapper4,
+                                                                                   RowMapper<T5> mapper5,
+                                                                                   RowMapper<T6> mapper6) {
+        return (rs, i) -> Tuple.of(
+            mapper1.mapRow(rs, i),
+            mapper2.mapRow(rs, i),
+            mapper3.mapRow(rs, i),
+            mapper4.mapRow(rs, i),
+            mapper5.mapRow(rs, i),
+            mapper6.mapRow(rs, i));
+    }
+
     public static <T1, T2, T3> RowMapper<Tuple3<T1,T2,T3>> add3rd(RowMapper<Tuple2<T1,T2>> mapper2, RowMapper<T3> mapper) {
         return (rs, i) -> {
             Tuple2<T1,T2> tuple = mapper2.mapRow(rs, i);
