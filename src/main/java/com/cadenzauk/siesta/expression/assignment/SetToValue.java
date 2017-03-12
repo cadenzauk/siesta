@@ -20,27 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.siesta.expression.assignment;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.Scope;
 
-public abstract class Clause<U> {
-    protected final UpdateStatement<U> statement;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-    public Clause(UpdateStatement<U> statement) {
-        this.statement = statement;
+public class SetToValue<T> implements AssignmentValue {
+    private final DataType<T> dataType;
+    private final T value;
+
+    public SetToValue(DataType<T> dataType, T value) {
+        Objects.requireNonNull(value);
+        this.dataType = dataType;
+        this.value = value;
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
+    @Override
+    public String sql(Scope scope) {
+        return " = ?";
     }
 
-    public String sql() {
-        return statement.sql();
-    }
-
-    protected Database database() {
-        return statement.database();
+    @Override
+    public Stream<Object> args() {
+        return Stream.of(dataType.toDatabase(value));
     }
 }

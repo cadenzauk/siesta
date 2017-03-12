@@ -136,7 +136,7 @@ public class TableIntegrationTest {
 
         database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Sprocket")
-            .set(WidgetRow::description).to(Optional.empty())
+            .set(WidgetRow::description).toNull()
             .where(WidgetRow::widgetId).isEqualTo(3L)
             .execute(sqlExecutor);
 
@@ -150,10 +150,10 @@ public class TableIntegrationTest {
 
     @NotNull
     private Database database() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-        database.table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder.class, ManufacturerRow.Builder::build));
-        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
-        return database;
+        return Database.newBuilder().defaultSchema("TEST")
+            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
+            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
+            .build();
     }
 
 }

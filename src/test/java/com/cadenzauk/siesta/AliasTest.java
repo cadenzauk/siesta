@@ -62,6 +62,9 @@ public class AliasTest {
     private Column<Long,WidgetRow> widgetRowId;
 
     @Mock
+    private Column<String,WidgetRow> widgetDescription;
+
+    @Mock
     private
     RowMapper<WidgetRow> rowMapper;
 
@@ -97,18 +100,26 @@ public class AliasTest {
     public void col() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
         Scope scope = mock(Scope.class);
-        when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
-        when(widgetRowId.name()).thenReturn("ROW_ID");
+        when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
+        when(widgetDescription.name()).thenReturn("DESCR");
 
         TypedExpression<Long> col = sut.col(WidgetRow::widgetId);
 
         assertThat(col, instanceOf(ResolvedColumn.class));
-        assertThat(col.label(scope), is("fred_ROW_ID"));
+        assertThat(col.label(scope), is("fred_DESCR"));
     }
 
     @Test
-    public void col1() throws Exception {
+    public void colOptional() throws Exception {
+        Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
+        Scope scope = mock(Scope.class);
+        when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
+        when(widgetRowId.name()).thenReturn("ROW_ID");
 
+        TypedExpression<String> col = sut.col(WidgetRow::description);
+
+        assertThat(col, instanceOf(ResolvedColumn.class));
+        assertThat(col.label(scope), is("fred_ROW_ID"));
     }
 
     @Test

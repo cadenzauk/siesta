@@ -22,37 +22,46 @@
 
 package com.cadenzauk.siesta.grammar.update;
 
-import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.expression.BooleanExpression;
-import com.cadenzauk.siesta.expression.Expression;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.condition.OperatorValueCondition;
+import com.cadenzauk.siesta.expression.Assignment;
+import com.cadenzauk.siesta.expression.assignment.AssignmentValue;
+import com.cadenzauk.siesta.expression.assignment.SetToNull;
+import com.cadenzauk.siesta.expression.assignment.SetToValue;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public class SetExpressionBuilder<T,N> {
+public class SetExpressionBuilder<T, N> {
+    private final Database database;
     private final TypedExpression<T> lhs;
-    private final Function<Expression,N> onComplete;
+    private final Function<Assignment,N> onComplete;
 
-    public SetExpressionBuilder(TypedExpression<T> lhs, Function<Expression,N> onComplete) {
+    private SetExpressionBuilder(Database database, TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
+        this.database = database;
         this.lhs = lhs;
         this.onComplete = onComplete;
     }
 
     public N to(T value) {
-        return complete(new OperatorValueCondition<>("=", value, Optional.empty()));
+        return to(Optional.ofNullable(value));
     }
 
     public N to(Optional<T> value) {
-        return complete(new OperatorValueCondition<>("=", value.orElse(null), Optional.empty()));
+        return value
+            .map(v -> complete(new SetToValue<>(database.getDataTypeOf(v), v)))
+            .orElseGet(() -> complete(new SetToNull()));
     }
 
-    private N complete(Condition<T> rhs) {
-        return onComplete.apply(new BooleanExpression<>(lhs, rhs));
+    public N toNull() {
+        return complete(new SetToNull());
     }
 
-    public static <T,N> SetExpressionBuilder<T,N> of(TypedExpression<T> lhs, Function<Expression,N> onComplete) {
-        return new SetExpressionBuilder<>(lhs, onComplete);
+    private N complete(AssignmentValue rhs) {
+        return onComplete.apply(new Assignment(lhs, rhs));
+    }
+
+    public static <T, N> SetExpressionBuilder<T,N> of(Database database, TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
+        return new SetExpressionBuilder<>(database, lhs, onComplete);
     }
 }

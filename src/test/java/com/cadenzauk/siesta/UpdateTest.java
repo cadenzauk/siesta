@@ -33,8 +33,8 @@ public class UpdateTest {
     public void update() {
         Database database = Database.newBuilder()
             .defaultSchema("TEST")
+            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
             .build();
-        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
 
         String sql = database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Fred")
@@ -44,5 +44,4 @@ public class UpdateTest {
 
         assertThat(sql, is("update TEST.WIDGET as WIDGET set WIDGET.NAME = ?, WIDGET.DESCRIPTION = ? where WIDGET.WIDGET_ID = ?"));
     }
-
 }

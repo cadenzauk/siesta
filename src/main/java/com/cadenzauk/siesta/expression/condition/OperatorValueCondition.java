@@ -23,17 +23,22 @@
 package com.cadenzauk.siesta.expression.condition;
 
 import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class OperatorValueCondition<T, R> implements Condition<T> {
+public class OperatorValueCondition<T> implements Condition<T> {
+    private final DataType<T> dataType;
     private final String operator;
     private final T value;
     private final Optional<Double> selectivity;
 
-    public OperatorValueCondition(String operator, T value, Optional<Double> selectivity) {
+    public OperatorValueCondition(DataType<T> dataType, String operator, T value, Optional<Double> selectivity) {
+        Objects.requireNonNull(value);
+        this.dataType = dataType;
         this.operator = operator;
         this.value = value;
         this.selectivity = selectivity;
@@ -46,6 +51,6 @@ public class OperatorValueCondition<T, R> implements Condition<T> {
 
     @Override
     public Stream<Object> args() {
-        return Stream.of(value);
+        return Stream.of(dataType.toDatabase(value));
     }
 }

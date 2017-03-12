@@ -31,6 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -50,6 +51,12 @@ public class ClassUtilTest {
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
             .withCause(RuntimeInstantiationException.class);
+    }
+
+    @Test
+    public void forObject() {
+        Class<Number> numberClass = ClassUtil.forObject(BigDecimal.ONE);
+        assertThat(numberClass, equalTo(BigDecimal.class));
     }
 
     @Test

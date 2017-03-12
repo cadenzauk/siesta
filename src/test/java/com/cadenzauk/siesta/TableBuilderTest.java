@@ -45,8 +45,11 @@ public class TableBuilderTest {
 
     @Test
     public void buildReflectively() {
-        Database database = Database.newBuilder().defaultSchema("SCHEMA").build();
-        Table<TestRow> testRowTable = database.table(TestRow.class, t -> t.tableName("TEST"));
+        Database database = Database.newBuilder()
+            .defaultSchema("SCHEMA")
+            .table(TestRow.class, t -> t.tableName("TEST"))
+            .build();
+        Table<TestRow> testRowTable = database.table(TestRow.class);
 
         String sql = database.from(testRowTable.as("t")).sql();
 

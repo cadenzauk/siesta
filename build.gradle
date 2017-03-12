@@ -47,12 +47,12 @@ sourceSets {
 }
 
 dependencies {
-    compile group: 'javax.persistence', name: 'persistence-api', version: '1.0'
     compile group: 'org.jetbrains', name: 'annotations', version: '15.0'
     compile group: 'org.springframework', name: 'spring-context', version: "$project.ext.springVersion"
     compile group: 'org.springframework', name: 'spring-test', version: "$project.ext.springVersion"
     compile group: 'org.springframework', name: 'spring-jdbc', version: "$project.ext.springVersion"
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5+'
+    compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final'
     compile group: 'com.google.guava', name: 'guava', version: '20.0+'
     compile group: 'cglib', name: 'cglib', version: '3.2.4'
     compile group: 'org.objenesis', name: 'objenesis', version: '2.5.1'

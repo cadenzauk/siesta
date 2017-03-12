@@ -22,8 +22,10 @@
 
 package com.cadenzauk.siesta.grammar.update;
 
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.expression.Expression;
+import com.cadenzauk.siesta.expression.Assignment;
 
 public interface UpdateStatement<U> {
     int execute(SqlExecutor sqlExecutor);
@@ -34,5 +36,7 @@ public interface UpdateStatement<U> {
 
     String sql();
 
-    SetClause<U> addSet(Expression expression);
+    SetClause<U> addSet(Assignment assignment);
+
+    Database database();
 }

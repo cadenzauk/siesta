@@ -20,27 +20,25 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.persistence.converter;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import javax.persistence.AttributeConverter;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Optional;
 
-public abstract class Clause<U> {
-    protected final UpdateStatement<U> statement;
-
-    public Clause(UpdateStatement<U> statement) {
-        this.statement = statement;
+public class LocalDateConverter implements AttributeConverter<LocalDate,Date> {
+    @Override
+    public Date convertToDatabaseColumn(LocalDate attribute) {
+        return Optional.ofNullable(attribute)
+            .map(Date::valueOf)
+            .orElse(null);
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
-    }
-
-    public String sql() {
-        return statement.sql();
-    }
-
-    protected Database database() {
-        return statement.database();
+    @Override
+    public LocalDate convertToEntityAttribute(Date dbData) {
+        return Optional.ofNullable(dbData)
+            .map(Date::toLocalDate)
+            .orElse(null);
     }
 }

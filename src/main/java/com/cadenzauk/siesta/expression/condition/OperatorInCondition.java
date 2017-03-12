@@ -20,27 +20,38 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.siesta.expression.condition;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.Scope;
 
-public abstract class Clause<U> {
-    protected final UpdateStatement<U> statement;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-    public Clause(UpdateStatement<U> statement) {
-        this.statement = statement;
+import static java.util.stream.Collectors.joining;
+
+public class OperatorInCondition<T> implements Condition<T> {
+    private final DataType<T> dataType;
+    private final T[] values;
+
+    public OperatorInCondition(DataType<T> dataType, T[] values) {
+        this.dataType = dataType;
+        this.values = values;
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
+    @Override
+    public String sql(Scope scope) {
+        return " in (" + Arrays.stream(values)
+            .map(x -> "?")
+            .collect(joining(", ")) + ")";
     }
 
-    public String sql() {
-        return statement.sql();
-    }
-
-    protected Database database() {
-        return statement.database();
+    @Override
+    public Stream<Object> args() {
+        return Arrays.stream(values)
+            .map(Optional::of)
+            .map(dataType::toDatabase);
     }
 }

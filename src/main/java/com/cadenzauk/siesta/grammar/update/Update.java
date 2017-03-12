@@ -20,14 +20,16 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar.update;
 
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.expression.AndExpression;
 import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.grammar.update.SetClause;
-import com.cadenzauk.siesta.grammar.update.UpdateStatement;
-import com.cadenzauk.siesta.grammar.update.WhereClause;
+import com.cadenzauk.siesta.expression.Assignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +37,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-class Update<U> {
+public class Update<U> {
     private final UpdateStatement<U> statement = new Statement();
     private final Scope scope;
     private final Alias<U> alias;
-    private final List<Expression> sets = new ArrayList<>();
+    private final List<Assignment> sets = new ArrayList<>();
     private Expression whereClause;
 
     private Update(Database database, Alias<U> alias) {
@@ -62,7 +64,7 @@ class Update<U> {
         return sqlExecutor.update(sql, args);
     }
 
-    private SetClause<U> addSet(Expression expression) {
+    private SetClause<U> addSet(Assignment expression) {
         sets.add(expression);
         return new SetClause<>(statement);
     }
@@ -73,7 +75,7 @@ class Update<U> {
 
     private Stream<Object> args() {
         return Stream.concat(
-            sets.stream().flatMap(Expression::args),
+            sets.stream().flatMap(Assignment::args),
             whereClause == null ? Stream.empty() : whereClause.args()
         );
     }
@@ -112,8 +114,13 @@ class Update<U> {
         }
 
         @Override
-        public SetClause<U> addSet(Expression expression) {
-            return Update.this.addSet(expression);
+        public SetClause<U> addSet(Assignment assignment) {
+            return Update.this.addSet(assignment);
+        }
+
+        @Override
+        public Database database() {
+            return Update.this.scope.database();
         }
 
         @Override

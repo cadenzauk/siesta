@@ -33,8 +33,8 @@ public class SelectProjectionTest {
     public void projectColumns() {
         Database database = Database.newBuilder()
             .defaultSchema("PROJ")
+            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
             .build();
-        database.table(WidgetRow.class, t -> t.builder(WidgetRow.Builder.class, WidgetRow.Builder::build));
 
         String sql = database.from(WidgetRow.class, "w")
             .select(WidgetRow::name, "n").comma(WidgetRow::description, "d").comma(WidgetRow::manufacturerId, "m")

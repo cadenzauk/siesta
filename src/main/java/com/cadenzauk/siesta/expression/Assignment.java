@@ -20,27 +20,28 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.siesta.expression;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.expression.Expression;
+import com.cadenzauk.siesta.expression.assignment.AssignmentValue;
 
-public abstract class Clause<U> {
-    protected final UpdateStatement<U> statement;
+import java.util.stream.Stream;
 
-    public Clause(UpdateStatement<U> statement) {
-        this.statement = statement;
+public class Assignment {
+    private final Expression lhs;
+    private final AssignmentValue rhs;
+
+    public Assignment(Expression lhs, AssignmentValue rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
+    public String sql(Scope scope) {
+        return lhs.sql(scope) + rhs.sql(scope);
     }
 
-    public String sql() {
-        return statement.sql();
-    }
-
-    protected Database database() {
-        return statement.database();
+    public Stream<Object> args() {
+        return Stream.concat(lhs.args(), rhs.args());
     }
 }

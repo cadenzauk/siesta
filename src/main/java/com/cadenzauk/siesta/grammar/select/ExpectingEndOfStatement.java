@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
@@ -72,5 +73,9 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
 
     protected Scope scope() {
         return statement.scope();
+    }
+
+    protected Database database() {
+        return statement.scope.database();
     }
 }

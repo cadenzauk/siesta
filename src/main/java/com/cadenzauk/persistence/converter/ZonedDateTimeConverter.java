@@ -20,27 +20,36 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.persistence.converter;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import javax.persistence.AttributeConverter;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
-public abstract class Clause<U> {
-    protected final UpdateStatement<U> statement;
+public class ZonedDateTimeConverter implements AttributeConverter<ZonedDateTime,Timestamp>{
+    private final ZoneId zoneId;
 
-    public Clause(UpdateStatement<U> statement) {
-        this.statement = statement;
+    public ZonedDateTimeConverter() {
+        zoneId = ZoneId.of("UTC");
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
+    public ZonedDateTimeConverter(ZoneId zoneId) {
+        this.zoneId = zoneId;
     }
 
-    public String sql() {
-        return statement.sql();
+    @Override
+    public Timestamp convertToDatabaseColumn(ZonedDateTime attribute) {
+        return Optional.ofNullable(attribute)
+            .map(zdt -> Timestamp.valueOf(zdt.toLocalDateTime()))
+            .orElse(null);
     }
 
-    protected Database database() {
-        return statement.database();
+    @Override
+    public ZonedDateTime convertToEntityAttribute(Timestamp dbData) {
+        return Optional.ofNullable(dbData)
+            .map(ts -> ZonedDateTime.ofInstant(ts.toInstant(), zoneId))
+            .orElse(null);
     }
 }

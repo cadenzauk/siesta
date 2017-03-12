@@ -107,7 +107,7 @@ public class Table<R> {
 
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
         String columnName = database.columnNameFor(methodInfo);
-        return DataType.of(methodInfo.effectiveType())
+        return database.dataTypeOf(methodInfo)
             .flatMap(dataType -> findColumn(dataType, columnName))
             .orElseThrow(() -> new IllegalArgumentException("No such column as " + columnName + " in " + qualifiedName()));
     }
@@ -221,8 +221,9 @@ public class Table<R> {
             return this;
         }
 
-        public <BB> Builder<R,BB> builder(Class<BB> builderClass, Function<BB,R> buildRow) {
-            return new Builder<>(database, rowClass, builderClass, buildRow)
+        public <BB> Builder<R,BB> builder(Function1<BB,R> buildRow) {
+            MethodInfo<BB,R> buildMethod = MethodInfo.of(buildRow);
+            return new Builder<>(database, rowClass, buildMethod.declaringClass(), buildRow)
                 .schema(schema)
                 .tableName(tableName);
         }
@@ -247,7 +248,7 @@ public class Table<R> {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
-            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, DataType.of(getterInfo), rowClass, getter, setter);
+            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, database.getDataTypeOf(getterInfo), rowClass, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add(columnBuilder.build());
             return this;
@@ -257,7 +258,7 @@ public class Table<R> {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
-            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, DataType.of(getterInfo), rowClass, getter, setter);
+            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, database.getDataTypeOf(getterInfo), rowClass, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add(columnBuilder.build());
             return this;

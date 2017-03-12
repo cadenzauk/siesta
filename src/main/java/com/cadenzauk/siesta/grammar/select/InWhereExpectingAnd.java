@@ -37,31 +37,31 @@ public class InWhereExpectingAnd<RT> extends ExpectingOrderBy<RT> {
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, this::andWhere);
+        return ExpressionBuilder.of(database(), lhs, this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     private InWhereExpectingAnd<RT> andWhere(Expression newClause) {

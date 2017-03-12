@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.expression.Expression;
 import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.TypedExpression;
@@ -43,31 +44,35 @@ public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
     }
 
     public <T> ExpressionBuilder<T,J> on(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, this::setOnClause);
+        return ExpressionBuilder.of(database(), lhs, this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setOnClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setOnClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::setOnClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::setOnClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::setOnClause);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::setOnClause);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::setOnClause);
+    }
+
+    private Database database() {
+        return statement.scope.database();
     }
 
     @SuppressWarnings("unchecked")

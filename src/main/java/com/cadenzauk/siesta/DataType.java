@@ -22,28 +22,61 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.reflect.util.TypeUtil;
+import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.OptionalUtil;
+import com.cadenzauk.persistence.converter.LocalDateConverter;
+import com.cadenzauk.persistence.converter.ZonedDateTimeConverter;
+import com.google.common.collect.ImmutableMap;
 
+import javax.persistence.AttributeConverter;
+import java.lang.reflect.ParameterizedType;
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class DataType<T> {
-    @FunctionalInterface
-    public interface ResultSetExtractor<T> {
-        T get(ResultSet rs, String col) throws SQLException;
+    public static final DataType<BigDecimal> BIG_DECIMAL = new DataType<>(BigDecimal.class, ResultSet::getBigDecimal, defaultConverter());
+    public static final DataType<Byte> BYTE = new DataType<>(Byte.class, ResultSet::getByte, defaultConverter());
+    public static final DataType<byte[]> BYTE_ARRAY = new DataType<>(byte[].class, ResultSet::getBytes, defaultConverter());
+    public static final DataType<Double> DOUBLE = new DataType<>(Double.class, ResultSet::getDouble, defaultConverter());
+    public static final DataType<Float> FLOAT = new DataType<>(Float.class, ResultSet::getFloat, defaultConverter());
+    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt, defaultConverter());
+    public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong, defaultConverter());
+    public static final DataType<Short> SHORT = new DataType<>(Short.class, ResultSet::getShort, defaultConverter());
+    public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString, defaultConverter());
+    public static final DataType<LocalDate> LOCAL_DATE = DataType.fromConverter(new LocalDateConverter());
+    public static final DataType<ZonedDateTime> ZONED_DATE_TIME = DataType.fromConverter(new ZonedDateTimeConverter());
+
+    private final Class<T> javaClass;
+    private final ResultSetExtractor<T> resultSetExtractor;
+    private final Function<Optional<T>,Object> converter;
+
+    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, Function<Optional<T>,Object> converter) {
+        this.javaClass = TypeUtil.boxedType(javaClass);
+        this.resultSetExtractor = resultSetExtractor;
+        this.converter = converter;
     }
 
-    public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong);
-    public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString);
-    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt);
-    private final Class<T> javaClass;
+    public Class<T> javaClass() {
+        return javaClass;
+    }
 
-    private final ResultSetExtractor<T> resultSetExtractor;
+    public Object toDatabase(Optional<T> v) {
+        return converter.apply(v);
+    }
 
-    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor) {
-        this.javaClass = javaClass;
-        this.resultSetExtractor = resultSetExtractor;
+    public Object toDatabase(T v) {
+        return converter.apply(Optional.ofNullable(v));
     }
 
     public Optional<T> get(ResultSet rs, String colName) {
@@ -55,23 +88,51 @@ public class DataType<T> {
         }
     }
 
-    public static <T> DataType<T> of(MethodInfo<?,T> getterMethod) {
-        Class<T> fieldType = getterMethod.effectiveType();
-        return DataType.of(fieldType)
-            .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + getterMethod));
+    private static <T> Function<Optional<T>,Object> defaultConverter() {
+        return v -> v.orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Optional<DataType<T>> of(Class<T> fieldType) {
-        if (fieldType == Long.class || fieldType == Long.TYPE) {
-            return Optional.of((DataType<T>) DataType.LONG);
+    public static <T,D,C extends AttributeConverter<T,D>> DataType<T> fromConverter(C converter) {
+        ParameterizedType any = Arrays.stream(converter.getClass().getGenericInterfaces())
+            .map(t -> OptionalUtil.as(ParameterizedType.class, t))
+            .flatMap(StreamUtil::of)
+            .filter(x -> x.getRawType() == AttributeConverter.class)
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("Unexpected error - couldn't find AttributeConverter interface."));
+
+        @SuppressWarnings("unchecked") Class<T> entityAttributeClass = (Class<T>) any.getActualTypeArguments()[0];
+        @SuppressWarnings("unchecked") Class<D> databaseClass = (Class<D>) any.getActualTypeArguments()[1];
+
+        ResultSetExtractor<D> resultSetExtractor = ResultSetExtractor.forType(databaseClass);
+
+        return new DataType<>(entityAttributeClass,
+            (rs,n) -> converter.convertToEntityAttribute(resultSetExtractor.get(rs, n)),
+            v -> v.map(converter::convertToDatabaseColumn).orElse(null));
+    }
+
+    @FunctionalInterface
+    private interface ResultSetExtractor<T> {
+        T get(ResultSet rs, String col) throws SQLException;
+
+        Map<Class<?>, ResultSetExtractor<?>> extractors = ImmutableMap.<Class<?>, ResultSetExtractor<?>>builder()
+            .put(BigDecimal.class, ResultSet::getBigDecimal)
+            .put(Byte.class, ResultSet::getByte)
+            .put(byte[].class, ResultSet::getBytes)
+            .put(Date.class, ResultSet::getDate)
+            .put(Double.class, ResultSet::getDouble)
+            .put(Float.class, ResultSet::getFloat)
+            .put(Integer.class, ResultSet::getInt)
+            .put(Long.class, ResultSet::getLong)
+            .put(Short.class, ResultSet::getShort)
+            .put(String.class, ResultSet::getString)
+            .put(Time.class, ResultSet::getTime)
+            .put(Timestamp.class, ResultSet::getTimestamp)
+            .build();
+
+        @SuppressWarnings("unchecked")
+        static <D> ResultSetExtractor<D> forType(Class<D> databaseClass) {
+            return Optional.ofNullable((ResultSetExtractor<D>) extractors.get(databaseClass))
+                .orElseThrow(() -> new IllegalArgumentException(""));
         }
-        if (fieldType == Integer.class || fieldType == Integer.TYPE) {
-            return Optional.of((DataType<T>) DataType.INTEGER);
-        }
-        if (fieldType == String.class) {
-            return Optional.of((DataType<T>) DataType.STRING);
-        }
-        return Optional.empty();
     }
 }

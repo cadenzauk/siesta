@@ -37,31 +37,31 @@ public class WhereClause<U> extends Clause<U> {
     }
 
     public <T> ExpressionBuilder<T,WhereClause<U>> and(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, this::andWhere);
+        return ExpressionBuilder.of(database(), lhs, this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,WhereClause<U>> and(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,WhereClause<U>> and(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,WhereClause<U>> and(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,WhereClause<U>> and(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,WhereClause<U>> and(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public <T, R> ExpressionBuilder<T,WhereClause<U>> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     private WhereClause<U> andWhere(Expression newClause) {

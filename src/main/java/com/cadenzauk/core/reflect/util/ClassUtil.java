@@ -31,12 +31,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 public final class ClassUtil extends UtilityClass {
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> forObject(T value) {
+        Objects.requireNonNull(value);
+        return (Class<T>) value.getClass();
+    }
+
     public static Optional<Class<?>> forName(String className) {
         try {
             return Optional.of(Class.forName(className));

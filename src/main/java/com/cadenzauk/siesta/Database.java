@@ -32,15 +32,21 @@ import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.update.SetClause;
+import com.cadenzauk.siesta.grammar.update.Update;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
+import javax.persistence.AttributeConverter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Database {
     private final Map<Class<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
+    private final DataTypeRegistry dataTypeRegistry = new DataTypeRegistry();
     private final String defaultSchema;
     private final NamingStrategy namingStrategy;
     private final Dialect dialect;
@@ -49,6 +55,8 @@ public class Database {
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
         dialect = builder.dialect;
+        builder.tables.forEach(t -> t.accept(this));
+        builder.converters.forEach(dataTypeRegistry::register);
     }
 
     public String defaultSchema() {
@@ -86,6 +94,24 @@ public class Database {
         return nameFromMethodAnnotation(fieldInfo)
             .orElseGet(() -> nameFromFieldAnnotation(fieldInfo)
                 .orElseGet(() -> namingStrategy().columnName(fieldInfo.field().getName())));
+    }
+
+    public <T, R> DataType<T> getDataTypeOf(MethodInfo<R,T> getterInfo) {
+        return dataTypeOf(getterInfo)
+            .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + getterInfo));
+    }
+
+    public <T> DataType<T> getDataTypeOf(T value) {
+        return dataTypeRegistry.dataTypeOf(value)
+            .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + value));
+    }
+
+    public <T, R> Optional<DataType<T>> dataTypeOf(MethodInfo<R,T> getterInfo) {
+        return dataTypeRegistry.dataTypeOf(getterInfo.effectiveType());
+    }
+
+    public <T, R> Optional<DataType<T>> dataTypeOf(FieldInfo<R,T> fieldInfo) {
+        return dataTypeRegistry.dataTypeOf(fieldInfo.effectiveType());
     }
 
     private <R, T> Optional<String> nameFromMethodAnnotation(FieldInfo<R,T> fieldInfo) {
@@ -152,6 +178,8 @@ public class Database {
         private String defaultSchema;
         private NamingStrategy namingStrategy = new UppercaseUnderscores();
         private Dialect dialect = new AnsiDialect();
+        private final List<Consumer<Database>> tables = new ArrayList<>();
+        private final List<AttributeConverter<?,?>> converters = new ArrayList<>();
 
         private Builder() {
         }
@@ -171,13 +199,18 @@ public class Database {
             return this;
         }
 
-        public Database build() {
-            return new Database(this);
+        public <R,B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+            tables.add(database -> database.table(rowClass, init));
+            return this;
         }
 
-        public <R,B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
-            //TODO!
+        public <T> Builder dataType(AttributeConverter<T,?> attributeConverter) {
+            converters.add(attributeConverter);
             return this;
+        }
+
+        public Database build() {
+            return new Database(this);
         }
     }
 }

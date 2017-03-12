@@ -36,30 +36,30 @@ public class ExpectingWhere<RT> extends ExpectingOrderBy<RT> {
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, statement::setWhereClause);
+        return ExpressionBuilder.of(database(), lhs, statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 }
