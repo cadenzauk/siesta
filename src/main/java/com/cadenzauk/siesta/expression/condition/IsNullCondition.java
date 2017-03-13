@@ -23,35 +23,24 @@
 package com.cadenzauk.siesta.expression.condition;
 
 import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+public class IsNullCondition<T> implements Condition<T> {
+    private final String operator;
 
-public class OperatorInCondition<T> implements Condition<T> {
-    private final DataType<T> dataType;
-    private final T[] values;
-
-    public OperatorInCondition(DataType<T> dataType, T[] values) {
-        this.dataType = dataType;
-        this.values = values;
+    public IsNullCondition(String operator) {
+        this.operator = operator;
     }
 
     @Override
     public String sql(Scope scope) {
-        return " in (" + Arrays.stream(values)
-            .map(x -> "?")
-            .collect(joining(", ")) + ")";
+        return "is " + operator + "null";
     }
 
     @Override
     public Stream<Object> args() {
-        return Arrays.stream(values)
-            .map(Optional::of)
-            .map(dataType::toDatabase);
+        return Stream.empty();
     }
 }

@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.DataType;
@@ -34,8 +35,9 @@ import com.cadenzauk.siesta.expression.ResolvedColumn;
 import com.cadenzauk.siesta.expression.TypedExpression;
 import com.cadenzauk.siesta.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.expression.condition.OperatorExpressionCondition;
-import com.cadenzauk.siesta.expression.condition.OperatorInCondition;
-import com.cadenzauk.siesta.expression.condition.OperatorIsNull;
+import com.cadenzauk.siesta.expression.condition.InCondition;
+import com.cadenzauk.siesta.expression.condition.IsNullCondition;
+import com.cadenzauk.siesta.expression.condition.LikeCondition;
 import com.cadenzauk.siesta.expression.condition.OperatorValueCondition;
 
 import java.util.Optional;
@@ -221,17 +223,46 @@ public class ExpressionBuilder<T, N> {
     //---
     @SafeVarargs
     public final N isIn(T... values) {
+        return isOpIn("in", values);
+    }
+
+    @SafeVarargs
+    public final N isNotIn(T... values) {
+        return isOpIn("not in", values);
+    }
+
+    private N isOpIn(String operator, T[] values) {
         if (values.length == 0) {
             throw new IllegalArgumentException("At least one value is required for an IN expression.");
         }
         DataType<T> dataType = database.getDataTypeOf(values[0]);
-        return complete(new OperatorInCondition<>(dataType, values));
+        return complete(new InCondition<>(dataType, operator, values));
     }
-
 
     //---
     public N isNull() {
-        return complete(new OperatorIsNull<>());
+        return complete(new IsNullCondition<>(""));
+    }
+
+    public N isNotNull() {
+        return complete(new IsNullCondition<>("not "));
+    }
+
+    //---
+    public N isLike(T value) {
+        return complete(new LikeCondition<>(database.getDataTypeOf(value), "like", value, Optional.empty()));
+    }
+
+    public N isLike(T value, String escape) {
+        return complete(new LikeCondition<>(database.getDataTypeOf(value), "like", value, OptionalUtil.ofBlankable(escape)));
+    }
+
+    public N isNotLike(T value) {
+        return complete(new LikeCondition<>(database.getDataTypeOf(value), "not like", value, Optional.empty()));
+    }
+
+    public N isNotLike(T value, String escape) {
+        return complete(new LikeCondition<>(database.getDataTypeOf(value), "not like", value, OptionalUtil.ofBlankable(escape)));
     }
 
     //---

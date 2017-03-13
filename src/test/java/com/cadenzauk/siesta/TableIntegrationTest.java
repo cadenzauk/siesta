@@ -27,7 +27,6 @@ import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import liquibase.integration.spring.SpringLiquibase;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +40,7 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Optional;
 
+import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -73,7 +73,7 @@ public class TableIntegrationTest {
 
     @Test
     public void selectFromDatabaseOneTable() {
-        Database database = database();
+        Database database = testDatabase();
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
 
         WidgetRow aWidget = WidgetRow.newBuilder()
@@ -94,7 +94,7 @@ public class TableIntegrationTest {
 
     @Test
     public void selectFromDatabaseTwoTables() {
-        Database database = database();
+        Database database = testDatabase();
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
             .manufacturerId(2)
@@ -124,7 +124,7 @@ public class TableIntegrationTest {
 
     @Test
     public void update() {
-        Database database = database();
+        Database database = testDatabase();
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(3)
@@ -147,13 +147,4 @@ public class TableIntegrationTest {
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
         assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
     }
-
-    @NotNull
-    private Database database() {
-        return Database.newBuilder().defaultSchema("TEST")
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .build();
-    }
-
 }
