@@ -24,7 +24,7 @@ package com.cadenzauk.siesta.projection;
 
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.Optional;
 

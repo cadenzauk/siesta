@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
@@ -55,8 +55,13 @@ public class UnaryFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public Stream<Object> args() {
-        return arg.args();
+    public Stream<Object> args(Scope scope) {
+        return arg.args(scope);
+    }
+
+    @Override
+    public int precedence() {
+        return 100;
     }
 
     public static <T> UnaryFunction<T> of(TypedExpression<T> arg, String name) {

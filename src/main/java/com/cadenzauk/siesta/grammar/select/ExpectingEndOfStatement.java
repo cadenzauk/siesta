@@ -26,7 +26,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,13 +62,18 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
     }
 
     @Override
+    public int precedence() {
+        return 0;
+    }
+
+    @Override
     public RowMapper<RT> rowMapper(Scope scope, String label) {
         return statement.rowMapper(scope, label);
     }
 
     @Override
-    public Stream<Object> args() {
-        return statement.args();
+    public Stream<Object> args(Scope scope) {
+        return statement.args(scope);
     }
 
     protected Scope scope() {

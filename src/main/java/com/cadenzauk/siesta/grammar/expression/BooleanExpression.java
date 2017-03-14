@@ -20,28 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.*;
+import com.cadenzauk.siesta.grammar.Expression;
 
-import java.util.stream.Stream;
-
-public class BooleanExpression<T> implements Expression {
-    private final TypedExpression<T> lhs;
-    private final Condition<T> rhs;
-
-    public BooleanExpression(TypedExpression<T> lhs, Condition<T> rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return lhs.sql(scope) + " " + rhs.sql(scope);
-    }
-
-    @Override
-    public Stream<Object> args() {
-        return Stream.concat(lhs.args(), rhs.args());
-    }
+public interface BooleanExpression extends Expression {
 }

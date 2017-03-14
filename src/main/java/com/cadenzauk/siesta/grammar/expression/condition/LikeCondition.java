@@ -20,14 +20,34 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.assignment;
+package com.cadenzauk.siesta.grammar.expression.condition;
 
+import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface AssignmentValue {
-    String sql(Scope scope);
+public class LikeCondition<T> implements Condition<T> {
+    private final String operator;
+    private final T value;
+    private final Optional<String> escape;
 
-    Stream<Object> args();
+    public LikeCondition(String operator, T value, Optional<String> escape) {
+        this.operator = operator;
+        this.value = value;
+        this.escape = escape.map(e -> String.format(" escape '%s'", e));
+    }
+
+    @Override
+    public String sql(Scope scope) {
+        return operator + " ?" + escape.orElse("");
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        DataType<T> dataType = scope.database().getDataTypeOf(value);
+        return Stream.of(dataType.toDatabase(value));
+    }
 }

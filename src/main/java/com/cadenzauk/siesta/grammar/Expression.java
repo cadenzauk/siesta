@@ -20,30 +20,22 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.condition;
+package com.cadenzauk.siesta.grammar;
 
-import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.expression.TypedExpression;
 
 import java.util.stream.Stream;
 
-public class OperatorExpressionCondition<T> implements Condition<T> {
-    private final String operator;
-    private final TypedExpression<T> expression;
+public interface Expression {
+    String sql(Scope scope);
 
-    public OperatorExpressionCondition(String operator, TypedExpression<T> expression) {
-        this.operator = operator;
-        this.expression = expression;
-    }
+    Stream<Object> args(Scope scope);
 
-    @Override
-    public String sql(Scope scope) {
-        return operator + " " + expression.sql(scope);
-    }
+    int precedence();
 
-    @Override
-    public Stream<Object> args() {
-        return expression.args();
+    default String sql(Expression e, Scope scope) {
+        return e.precedence() < precedence()
+            ? "(" + e.sql(scope) + ")"
+            : e.sql(scope);
     }
 }

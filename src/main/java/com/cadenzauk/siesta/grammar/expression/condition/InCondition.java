@@ -20,37 +20,39 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.condition;
+package com.cadenzauk.siesta.grammar.expression.condition;
 
 import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class OperatorValueCondition<T> implements Condition<T> {
-    private final DataType<T> dataType;
-    private final String operator;
-    private final T value;
-    private final Optional<Double> selectivity;
+import static java.util.stream.Collectors.joining;
 
-    public OperatorValueCondition(DataType<T> dataType, String operator, T value, Optional<Double> selectivity) {
-        Objects.requireNonNull(value);
-        this.dataType = dataType;
+public class InCondition<T> implements Condition<T> {
+    private final String operator;
+    private final T[] values;
+
+    public InCondition(String operator, T[] values) {
         this.operator = operator;
-        this.value = value;
-        this.selectivity = selectivity;
+        this.values = values;
     }
 
     @Override
     public String sql(Scope scope) {
-        return operator + " ?" + selectivity.map(scope.database().dialect()::selectivity).orElse("");
+        return operator + " (" + Arrays.stream(values)
+            .map(x -> "?")
+            .collect(joining(", ")) + ")";
     }
 
     @Override
-    public Stream<Object> args() {
-        return Stream.of(dataType.toDatabase(value));
+    public Stream<Object> args(Scope scope) {
+        DataType<T> dataType = scope.database().getDataTypeOf(values[0]);
+        return Arrays.stream(values)
+            .map(Optional::of)
+            .map(dataType::toDatabase);
     }
 }

@@ -25,11 +25,11 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.expression.AndExpression;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.AndExpression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 
 public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT> extends ExpectingSelect<RT> {
     public InJoinExpectingAnd(Select<RT> select) {
@@ -37,31 +37,31 @@ public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT>
     }
 
     public <T, R> ExpressionBuilder<T,S> and(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::onAnd);
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onAnd);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), this::onAnd);
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onAnd);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::onAnd);
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onAnd);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), this::onAnd);
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onAnd);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::onAnd);
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onAnd);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), this::onAnd);
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onAnd);
     }
 
     @SuppressWarnings("unchecked")
-    private S onAnd(Expression rhs) {
+    private S onAnd(BooleanExpression rhs) {
         statement.from().on(new AndExpression(statement.from().on(), rhs));
         return (S) this;
     }

@@ -27,9 +27,9 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.expression.AndExpression;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.AndExpression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.Assignment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class Update<U> {
     private final Scope scope;
     private final Alias<U> alias;
     private final List<Assignment> sets = new ArrayList<>();
-    private Expression whereClause;
+    private BooleanExpression whereClause;
 
     private Update(Database database, Alias<U> alias) {
         this.alias = alias;
@@ -58,7 +58,7 @@ public class Update<U> {
     }
 
     private int execute(SqlExecutor sqlExecutor) {
-        Object[] args = args().toArray();
+        Object[] args = args(scope).toArray();
         String sql = sql();
         System.out.println(sql);
         return sqlExecutor.update(sql, args);
@@ -73,19 +73,19 @@ public class Update<U> {
         return whereClause == null ? "" : " where " + whereClause.sql(scope);
     }
 
-    private Stream<Object> args() {
+    private Stream<Object> args(Scope scope) {
         return Stream.concat(
-            sets.stream().flatMap(Assignment::args),
-            whereClause == null ? Stream.empty() : whereClause.args()
+            sets.stream().flatMap(a -> a.args(scope)),
+            whereClause == null ? Stream.empty() : whereClause.args(scope)
         );
     }
 
-    private WhereClause<U> setWhereClause(Expression e) {
+    private WhereClause<U> setWhereClause(BooleanExpression e) {
         whereClause = e;
         return new WhereClause<>(statement);
     }
 
-    private void andWhere(Expression newClause) {
+    private void andWhere(BooleanExpression newClause) {
         whereClause = new AndExpression(whereClause, newClause);
     }
 
@@ -104,12 +104,12 @@ public class Update<U> {
         }
 
         @Override
-        public WhereClause<U> setWhereClause(Expression e) {
+        public WhereClause<U> setWhereClause(BooleanExpression e) {
             return Update.this.setWhereClause(e);
         }
 
         @Override
-        public void andWhere(Expression newClause) {
+        public void andWhere(BooleanExpression newClause) {
             Update.this.andWhere(newClause);
         }
 

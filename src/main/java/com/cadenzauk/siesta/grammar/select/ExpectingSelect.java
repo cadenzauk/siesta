@@ -26,9 +26,9 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
 import java.util.Optional;
 

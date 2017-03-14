@@ -20,35 +20,14 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.condition;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.Expression;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+public interface TypedExpression<T> extends Expression {
+    String label(Scope scope);
 
-public class LikeCondition<T> implements Condition<T> {
-    private final DataType<T> dataType;
-    private final String operator;
-    private final T value;
-    private final Optional<String> escape;
-
-    public LikeCondition(DataType<T> dataType, String operator, T value, Optional<String> escape) {
-        this.dataType = dataType;
-        this.operator = operator;
-        this.value = value;
-        this.escape = escape.map(e -> String.format(" escape '%s'", e));
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return operator + " ?" + escape.orElse("");
-    }
-
-    @Override
-    public Stream<Object> args() {
-        return Stream.of(dataType.toDatabase(value));
-    }
+    RowMapper<T> rowMapper(Scope scope, String label);
 }

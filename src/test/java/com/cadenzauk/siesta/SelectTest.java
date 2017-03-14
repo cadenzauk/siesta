@@ -168,7 +168,7 @@ public class SelectTest {
         verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION " +
             "from TEST.ROW1 as w " +
-            "where (w.DESCRIPTION = ?) and (w.NAME = ?)"));
+            "where w.DESCRIPTION = ? and w.NAME = ?"));
         assertThat(args.getValue(), arrayContaining("fred", "bob"));
     }
 

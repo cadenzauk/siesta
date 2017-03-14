@@ -20,31 +20,38 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.assignment;
+package com.cadenzauk.siesta.grammar.expression.condition;
 
+import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public class SetToValue<T> implements AssignmentValue {
-    private final DataType<T> dataType;
+public class OperatorValueCondition<T> implements Condition<T> {
+    private final String operator;
     private final T value;
-
-    public SetToValue(DataType<T> dataType, T value) {
+    private final Optional<Double> selectivity;
+    public OperatorValueCondition(String operator, T value, Optional<Double> selectivity) {
         Objects.requireNonNull(value);
-        this.dataType = dataType;
+        this.operator = operator;
         this.value = value;
+        this.selectivity = selectivity;
     }
 
     @Override
     public String sql(Scope scope) {
-        return " = ?";
+        return operator + " ?" + selectivity.map(scope.database().dialect()::selectivity).orElse("");
     }
 
     @Override
-    public Stream<Object> args() {
-        return Stream.of(dataType.toDatabase(value));
+    public Stream<Object> args(Scope scope) {
+        return Stream.of(dataType(scope).toDatabase(value));
+    }
+
+    private DataType<T> dataType(Scope scope){
+        return scope.database().getDataTypeOf(value);
     }
 }

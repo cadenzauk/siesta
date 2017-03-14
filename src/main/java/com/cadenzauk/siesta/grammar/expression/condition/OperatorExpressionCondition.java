@@ -20,28 +20,30 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression;
+package com.cadenzauk.siesta.grammar.expression.condition;
 
+import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.assignment.AssignmentValue;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.stream.Stream;
 
-public class Assignment {
-    private final Expression lhs;
-    private final AssignmentValue rhs;
+public class OperatorExpressionCondition<T> implements Condition<T> {
+    private final String operator;
+    private final TypedExpression<T> expression;
 
-    public Assignment(Expression lhs, AssignmentValue rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
+    public OperatorExpressionCondition(String operator, TypedExpression<T> expression) {
+        this.operator = operator;
+        this.expression = expression;
     }
 
+    @Override
     public String sql(Scope scope) {
-        return lhs.sql(scope) + rhs.sql(scope);
+        return operator + " " + expression.sql(scope);
     }
 
-    public Stream<Object> args() {
-        return Stream.concat(lhs.args(), rhs.args());
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return expression.args(scope);
     }
 }

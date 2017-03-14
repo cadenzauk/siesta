@@ -20,20 +20,30 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.assignment;
+package com.cadenzauk.siesta.grammar.expression.assignment;
 
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
-public class SetToNull implements AssignmentValue {
-    @Override
-    public String sql(Scope scope) {
-        return " = null";
+public class SetToValue<T> implements AssignmentValue {
+    private final T value;
+
+    public SetToValue(T value) {
+        Objects.requireNonNull(value);
+        this.value = value;
     }
 
     @Override
-    public Stream<Object> args() {
-        return Stream.empty();
+    public String sql(Scope scope) {
+        return " = ?";
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        DataType<T> dataType = scope.database().getDataTypeOf(value);
+        return Stream.of(dataType.toDatabase(value));
     }
 }

@@ -20,13 +20,20 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression;
+package com.cadenzauk.siesta.grammar.expression.assignment;
 
-import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 
-public interface TypedExpression<T> extends Expression {
-    String label(Scope scope);
+import java.util.stream.Stream;
 
-    RowMapper<T> rowMapper(Scope scope, String label);
+public class SetToNull implements AssignmentValue {
+    @Override
+    public String sql(Scope scope) {
+        return " = null";
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return Stream.empty();
+    }
 }

@@ -47,6 +47,7 @@
             <column name="NAME" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
+            <column name="CHECKED" type="DATE"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

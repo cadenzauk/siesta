@@ -33,9 +33,9 @@ import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.expression.AndExpression;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.AndExpression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class Select<RT> implements TypedExpression<RT> {
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
     private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
-    private Expression whereClause;
+    private BooleanExpression whereClause;
 
     Select(Scope scope, From from, RowMapper<RT> rowMapper, Projection projection) {
         this.scope = scope;
@@ -71,8 +71,13 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     @Override
-    public Stream<Object> args() {
-        return Stream.concat(from.args(), whereClauseArgs());
+    public Stream<Object> args(Scope scope) {
+        return Stream.concat(from.args(scope), whereClauseArgs());
+    }
+
+    @Override
+    public int precedence() {
+        return 0;
     }
 
     @Override
@@ -101,7 +106,7 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     List<RT> list(SqlExecutor sqlExecutor) {
-        Object[] args = args().toArray();
+        Object[] args = args(scope).toArray();
         String sql = sql();
         System.out.println(sql);
         return sqlExecutor.query(sql, args, rowMapper());
@@ -119,12 +124,12 @@ public class Select<RT> implements TypedExpression<RT> {
         orderByClauses.add(new Ordering<>(expression, order));
     }
 
-    InWhereExpectingAnd<RT> setWhereClause(Expression e) {
+    InWhereExpectingAnd<RT> setWhereClause(BooleanExpression e) {
         whereClause = e;
         return new InWhereExpectingAnd<>(this);
     }
 
-    void andWhere(Expression e) {
+    void andWhere(BooleanExpression e) {
         whereClause = new AndExpression(whereClause, e);
     }
 
@@ -132,7 +137,7 @@ public class Select<RT> implements TypedExpression<RT> {
     private Stream<Object> whereClauseArgs() {
         return whereClause == null
             ? Stream.empty()
-            : whereClause.args();
+            : whereClause.args(scope);
     }
 
     @NotNull

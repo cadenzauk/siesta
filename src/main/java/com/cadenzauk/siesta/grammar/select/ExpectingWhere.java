@@ -25,41 +25,46 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 
 public class ExpectingWhere<RT> extends ExpectingOrderBy<RT> {
     public ExpectingWhere(Select<RT> select) {
         super(select);
     }
 
+    public <T> InWhereExpectingAnd<RT> where(BooleanExpression expression) {
+        return statement.setWhereClause(expression);
+    }
+
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(database(), lhs, statement::setWhereClause);
+        return ExpressionBuilder.of(lhs, statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 
     public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(database(), ResolvedColumn.of(alias, lhs), statement::setWhereClause);
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), statement::setWhereClause);
     }
 }

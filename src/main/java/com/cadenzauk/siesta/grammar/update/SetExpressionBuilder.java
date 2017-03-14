@@ -22,23 +22,20 @@
 
 package com.cadenzauk.siesta.grammar.update;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.Assignment;
-import com.cadenzauk.siesta.expression.assignment.AssignmentValue;
-import com.cadenzauk.siesta.expression.assignment.SetToNull;
-import com.cadenzauk.siesta.expression.assignment.SetToValue;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
+import com.cadenzauk.siesta.grammar.expression.assignment.SetToNull;
+import com.cadenzauk.siesta.grammar.expression.assignment.SetToValue;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 public class SetExpressionBuilder<T, N> {
-    private final Database database;
     private final TypedExpression<T> lhs;
     private final Function<Assignment,N> onComplete;
 
-    private SetExpressionBuilder(Database database, TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
-        this.database = database;
+    private SetExpressionBuilder(TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
     }
@@ -49,7 +46,7 @@ public class SetExpressionBuilder<T, N> {
 
     public N to(Optional<T> value) {
         return value
-            .map(v -> complete(new SetToValue<>(database.getDataTypeOf(v), v)))
+            .map(v -> complete(new SetToValue<>(v)))
             .orElseGet(() -> complete(new SetToNull()));
     }
 
@@ -61,7 +58,7 @@ public class SetExpressionBuilder<T, N> {
         return onComplete.apply(new Assignment(lhs, rhs));
     }
 
-    public static <T, N> SetExpressionBuilder<T,N> of(Database database, TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
-        return new SetExpressionBuilder<>(database, lhs, onComplete);
+    public static <T, N> SetExpressionBuilder<T,N> of(TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
+        return new SetExpressionBuilder<>(lhs, onComplete);
     }
 }

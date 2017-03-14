@@ -98,7 +98,7 @@ public class TableIntegrationTest {
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
             .manufacturerId(2)
-            .name("Makers")
+            .name(Optional.of("Makers"))
             .build();
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(1)

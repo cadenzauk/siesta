@@ -24,15 +24,15 @@ package com.cadenzauk.siesta.grammar.update;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.Assignment;
 
 public interface UpdateStatement<U> {
     int execute(SqlExecutor sqlExecutor);
 
-    WhereClause<U> setWhereClause(Expression e);
+    WhereClause<U> setWhereClause(BooleanExpression e);
 
-    void andWhere(Expression newClause);
+    void andWhere(BooleanExpression newClause);
 
     String sql();
 

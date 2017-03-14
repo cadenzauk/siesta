@@ -26,7 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 public abstract class ExpectingOrderBy<RT> extends ExpectingEndOfStatement<RT> {
     public ExpectingOrderBy(Select<RT> select) {

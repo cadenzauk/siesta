@@ -29,8 +29,8 @@ import com.cadenzauk.core.tuple.Tuple4;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

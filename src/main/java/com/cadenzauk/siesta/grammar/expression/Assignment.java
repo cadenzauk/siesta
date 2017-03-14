@@ -20,14 +20,28 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.Expression;
+import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
 
 import java.util.stream.Stream;
 
-public interface Expression {
-    String sql(Scope scope);
+public class Assignment {
+    private final Expression lhs;
+    private final AssignmentValue rhs;
 
-    Stream<Object> args();
+    public Assignment(Expression lhs, AssignmentValue rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
+
+    public String sql(Scope scope) {
+        return lhs.sql(scope) + rhs.sql(scope);
+    }
+
+    public Stream<Object> args(Scope scope) {
+        return Stream.concat(lhs.args(scope), rhs.args(scope));
+    }
 }

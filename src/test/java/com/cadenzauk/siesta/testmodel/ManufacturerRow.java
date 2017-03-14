@@ -23,23 +23,31 @@
 package com.cadenzauk.siesta.testmodel;
 
 import javax.persistence.Table;
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Table(name = "MANUFACTURER", schema = "TEST")
 public class ManufacturerRow {
     private final long manufacturerId;
-    private final String name;
+    private final Optional<String> name;
+    private final Optional<LocalDate> checked;
 
     private ManufacturerRow(Builder builder) {
         manufacturerId = builder.manufacturerId;
         name = builder.name;
+        checked = builder.checked;
     }
 
     public long manufacturerId() {
         return manufacturerId;
     }
 
-    public String name() {
+    public Optional<String> name() {
         return name;
+    }
+
+    public Optional<LocalDate> checked() {
+        return checked;
     }
 
     public static Builder newBuilder() {
@@ -48,7 +56,8 @@ public class ManufacturerRow {
 
     public static final class Builder {
         private long manufacturerId;
-        private String name;
+        private Optional<String> name = Optional.empty();
+        private Optional<LocalDate> checked = Optional.empty();
 
         private Builder() {
         }
@@ -58,8 +67,13 @@ public class ManufacturerRow {
             return this;
         }
 
-        public Builder name(String val) {
+        public Builder name(Optional<String> val) {
             name = val;
+            return this;
+        }
+
+        public Builder checked(Optional<LocalDate> val) {
+            checked = val;
             return this;
         }
 

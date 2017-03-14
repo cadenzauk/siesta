@@ -28,5 +28,5 @@ import java.util.stream.Stream;
 public interface Condition<T> {
     String sql(Scope scope);
 
-    Stream<Object> args();
+    Stream<Object> args(Scope scope);
 }

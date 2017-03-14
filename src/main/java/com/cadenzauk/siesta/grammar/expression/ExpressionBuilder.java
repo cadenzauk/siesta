@@ -20,44 +20,35 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.expression.BooleanExpression;
-import com.cadenzauk.siesta.expression.Expression;
-import com.cadenzauk.siesta.expression.ResolvedColumn;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.expression.condition.OperatorExpressionCondition;
-import com.cadenzauk.siesta.expression.condition.InCondition;
-import com.cadenzauk.siesta.expression.condition.IsNullCondition;
-import com.cadenzauk.siesta.expression.condition.LikeCondition;
-import com.cadenzauk.siesta.expression.condition.OperatorValueCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.InCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.IsNullCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.LikeCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.OperatorExpressionCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.OperatorValueCondition;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 public class ExpressionBuilder<T, N> {
-    private final Database database;
     private final TypedExpression<T> lhs;
-    private final Function<Expression,N> onComplete;
+    private final Function<BooleanExpression,N> onComplete;
     private Optional<Double> selectivity = Optional.empty();
 
-    private ExpressionBuilder(Database database, TypedExpression<T> lhs, Function<Expression,N> onComplete) {
-        this.database = database;
+    private ExpressionBuilder(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
     }
 
     //---
     public N isEqualTo(T value) {
-        return complete(new OperatorValueCondition<>(database.getDataTypeOf(value), "=", value, selectivity));
+        return complete(new OperatorValueCondition<>("=", value, selectivity));
     }
 
     public N isEqualTo(TypedExpression<T> expression) {
@@ -90,7 +81,7 @@ public class ExpressionBuilder<T, N> {
 
     //---
     public N isNotEqualTo(T value) {
-        return complete(new OperatorValueCondition<>(database.getDataTypeOf(value), "<>", value, selectivity));
+        return complete(new OperatorValueCondition<>("<>", value, selectivity));
     }
 
     public N isNotEqualTo(TypedExpression<T> expression) {
@@ -123,7 +114,7 @@ public class ExpressionBuilder<T, N> {
 
     //---
     public N isGreaterThan(T value) {
-        return complete(new OperatorValueCondition<>(database.getDataTypeOf(value), ">", value, selectivity));
+        return complete(new OperatorValueCondition<>(">", value, selectivity));
     }
 
     public N isGreaterThan(TypedExpression<T> expression) {
@@ -154,9 +145,42 @@ public class ExpressionBuilder<T, N> {
         return complete(new OperatorExpressionCondition<>(">", ResolvedColumn.of(alias, getter)));
     }
 
+   //---
+    public N isLessThan(T value) {
+        return complete(new OperatorValueCondition<>("<", value, selectivity));
+    }
+
+    public N isLessThan(TypedExpression<T> expression) {
+        return complete(new OperatorExpressionCondition<>("<", expression));
+    }
+
+    public <R> N isLessThan(Function1<R,T> getter) {
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(getter)));
+    }
+
+    public <R> N isLessThan(FunctionOptional1<R,T> getter) {
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(getter)));
+    }
+
+    public <R> N isLessThan(String alias, Function1<R,T> getter) {
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, getter)));
+    }
+
+    public <R> N isLessThan(String alias, FunctionOptional1<R,T> getter) {
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, getter)));
+    }
+
+    public <R> N isLessThan(Alias<R> alias, Function1<R,T> getter) {
+        return complete(new OperatorExpressionCondition<>("<", ResolvedColumn.of(alias, getter)));
+    }
+
+    public <R> N isLessThan(Alias<R> alias, FunctionOptional1<R,T> getter) {
+        return complete(new OperatorExpressionCondition<>("<", ResolvedColumn.of(alias, getter)));
+    }
+
     //---
     public N isGreaterThanOrEqualTo(T value) {
-        return complete(new OperatorValueCondition<>(database.getDataTypeOf(value), ">=", value, selectivity));
+        return complete(new OperatorValueCondition<>(">=", value, selectivity));
     }
 
     public N isGreaterThanOrEqualTo(TypedExpression<T> expression) {
@@ -189,7 +213,7 @@ public class ExpressionBuilder<T, N> {
 
     //---
     public N isLessThanOrEqualTo(T value) {
-        return complete(new OperatorValueCondition<>(database.getDataTypeOf(value), "<=", value, selectivity));
+        return complete(new OperatorValueCondition<>("<=", value, selectivity));
     }
 
     public N isLessThanOrEqualTo(TypedExpression<T> expression) {
@@ -235,8 +259,7 @@ public class ExpressionBuilder<T, N> {
         if (values.length == 0) {
             throw new IllegalArgumentException("At least one value is required for an IN expression.");
         }
-        DataType<T> dataType = database.getDataTypeOf(values[0]);
-        return complete(new InCondition<>(dataType, operator, values));
+        return complete(new InCondition<>(operator, values));
     }
 
     //---
@@ -250,19 +273,19 @@ public class ExpressionBuilder<T, N> {
 
     //---
     public N isLike(T value) {
-        return complete(new LikeCondition<>(database.getDataTypeOf(value), "like", value, Optional.empty()));
+        return complete(new LikeCondition<>("like", value, Optional.empty()));
     }
 
     public N isLike(T value, String escape) {
-        return complete(new LikeCondition<>(database.getDataTypeOf(value), "like", value, OptionalUtil.ofBlankable(escape)));
+        return complete(new LikeCondition<>("like", value, OptionalUtil.ofBlankable(escape)));
     }
 
     public N isNotLike(T value) {
-        return complete(new LikeCondition<>(database.getDataTypeOf(value), "not like", value, Optional.empty()));
+        return complete(new LikeCondition<>("not like", value, Optional.empty()));
     }
 
     public N isNotLike(T value, String escape) {
-        return complete(new LikeCondition<>(database.getDataTypeOf(value), "not like", value, OptionalUtil.ofBlankable(escape)));
+        return complete(new LikeCondition<>("not like", value, OptionalUtil.ofBlankable(escape)));
     }
 
     //---
@@ -272,10 +295,10 @@ public class ExpressionBuilder<T, N> {
     }
 
     private N complete(Condition<T> rhs) {
-        return onComplete.apply(new BooleanExpression<>(lhs, rhs));
+        return onComplete.apply(new FullExpression<>(lhs, rhs));
     }
 
-    public static <T, N> ExpressionBuilder<T,N> of(Database database, TypedExpression<T> lhs, Function<Expression,N> onComplete) {
-        return new ExpressionBuilder<>(database, lhs, onComplete);
+    public static <T, N> ExpressionBuilder<T,N> of(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
+        return new ExpressionBuilder<>(lhs, onComplete);
     }
 }

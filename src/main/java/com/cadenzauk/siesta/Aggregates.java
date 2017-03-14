@@ -24,8 +24,8 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.siesta.expression.TypedExpression;
-import com.cadenzauk.siesta.expression.UnaryFunction;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.UnaryFunction;
 
 public class Aggregates {
     public static <T> TypedExpression<T> max(TypedExpression<T> arg) {

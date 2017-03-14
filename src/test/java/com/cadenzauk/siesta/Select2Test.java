@@ -136,7 +136,7 @@ public class Select2Test {
             .and(Row2::name).isNotEqualTo(Row1::name)
             .sql();
 
-        assertThat(sql, is("select r1.NAME as r1_NAME, r1.DESCRIPTION as r1_DESCRIPTION, r2.NAME as r2_NAME, r2.DESCRIPTION as r2_DESCRIPTION from TEST.ROW1 as r1 join TEST.ROW2 as r2 on r2.NAME = r1.NAME where (r1.DESCRIPTION > ?) and (r2.NAME <> r1.NAME)"));
+        assertThat(sql, is("select r1.NAME as r1_NAME, r1.DESCRIPTION as r1_DESCRIPTION, r2.NAME as r2_NAME, r2.DESCRIPTION as r2_DESCRIPTION from TEST.ROW1 as r1 join TEST.ROW2 as r2 on r2.NAME = r1.NAME where r1.DESCRIPTION > ? and r2.NAME <> r1.NAME"));
     }
 
 }

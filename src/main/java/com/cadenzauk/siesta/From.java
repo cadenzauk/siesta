@@ -22,18 +22,18 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.expression.Expression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 
 import java.util.stream.Stream;
 
 public abstract class From {
     public abstract String sql(Scope scope);
 
-    public abstract Stream<Object> args();
+    public abstract Stream<Object> args(Scope scope);
 
-    public abstract void on(Expression expression);
+    public abstract void on(BooleanExpression expression);
 
-    public abstract Expression on();
+    public abstract BooleanExpression on();
 
     private static class FromAlias extends From {
         private final Alias<?> alias;
@@ -48,17 +48,17 @@ public abstract class From {
         }
 
         @Override
-        public Stream<Object> args() {
+        public Stream<Object> args(Scope scope) {
             return Stream.empty();
         }
 
         @Override
-        public void on(Expression expression) {
+        public void on(BooleanExpression expression) {
 
         }
 
         @Override
-        public Expression on() {
+        public BooleanExpression on() {
             return null;
         }
     }
@@ -67,7 +67,7 @@ public abstract class From {
         private final From lhs;
         private final JoinType join;
         private final Alias<?> next;
-        private Expression onClause;
+        private BooleanExpression onClause;
 
         FromJoin(From lhs, JoinType join, Alias<?> next) {
             this.lhs = lhs;
@@ -85,17 +85,17 @@ public abstract class From {
         }
 
         @Override
-        public Stream<Object> args() {
-            return Stream.concat(lhs.args(), onClause.args());
+        public Stream<Object> args(Scope scope) {
+            return Stream.concat(lhs.args(scope), onClause.args(scope));
         }
 
         @Override
-        public void on(Expression expression) {
+        public void on(BooleanExpression expression) {
             onClause = expression;
         }
 
         @Override
-        public Expression on() {
+        public BooleanExpression on() {
             return onClause;
         }
     }

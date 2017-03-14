@@ -20,27 +20,33 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression.condition;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.*;
 
 import java.util.stream.Stream;
 
-public class IsNullCondition<T> implements Condition<T> {
-    private final String operator;
+public class FullExpression<T> implements BooleanExpression {
+    private final TypedExpression<T> lhs;
+    private final Condition<T> rhs;
 
-    public IsNullCondition(String operator) {
-        this.operator = operator;
+    public FullExpression(TypedExpression<T> lhs, Condition<T> rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
     }
 
     @Override
     public String sql(Scope scope) {
-        return "is " + operator + "null";
+        return lhs.sql(scope) + " " + rhs.sql(scope);
     }
 
     @Override
-    public Stream<Object> args() {
-        return Stream.empty();
+    public Stream<Object> args(Scope scope) {
+        return Stream.concat(lhs.args(scope), rhs.args(scope));
+    }
+
+    @Override
+    public int precedence() {
+        return 70;
     }
 }

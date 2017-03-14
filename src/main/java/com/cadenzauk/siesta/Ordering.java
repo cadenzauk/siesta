@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 public class Ordering<T, R> {
     private final TypedExpression<T> expression;

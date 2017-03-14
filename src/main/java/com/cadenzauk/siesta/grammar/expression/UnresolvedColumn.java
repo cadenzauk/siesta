@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.expression;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
@@ -54,8 +54,13 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     }
 
     @Override
-    public Stream<Object> args() {
+    public Stream<Object> args(Scope scope) {
         return Stream.empty();
+    }
+
+    @Override
+    public int precedence() {
+        return 100;
     }
 
     @Override

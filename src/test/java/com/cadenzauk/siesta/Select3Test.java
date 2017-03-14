@@ -75,7 +75,7 @@ public class Select3Test {
         assertThat(sql, is("select z.BAR_ID as z_BAR_ID " +
             "from TEST.FOO as f " +
             "join TEST.BAR as b on b.FOO_ID = f.ID " +
-            "join TEST.BAZ as z on (z.BAR_ID = b.ID) and (z.ID = ?)"));
+            "join TEST.BAZ as z on z.BAR_ID = b.ID and z.ID = ?"));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class Select3Test {
             "z.ID as z_ID, z.BAR_ID as z_BAR_ID " +
             "from TEST.FOO as f " +
             "join TEST.BAR as b on b.FOO_ID = f.ID " +
-            "join TEST.BAZ as z on (z.BAR_ID = b.ID) and (z.ID = ?) " +
+            "join TEST.BAZ as z on z.BAR_ID = b.ID and z.ID = ? " +
             "where z.ID > ?"));
     }
 
@@ -109,8 +109,8 @@ public class Select3Test {
             "z.ID as z_ID, z.BAR_ID as z_BAR_ID " +
             "from TEST.FOO as f " +
             "join TEST.BAR as b on b.FOO_ID = f.ID " +
-            "join TEST.BAZ as z on (z.BAR_ID = b.ID) and (z.ID = ?) " +
-            "where (z.ID > ?) and (b.FOO_ID <> ?)"));
+            "join TEST.BAZ as z on z.BAR_ID = b.ID and z.ID = ? " +
+            "where z.ID > ? and b.FOO_ID <> ?"));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class Select3Test {
             "z.ID as z_ID, z.BAR_ID as z_BAR_ID " +
             "from TEST.FOO as f " +
             "join TEST.BAR as b on b.FOO_ID = f.ID " +
-            "join TEST.BAZ as z on (z.BAR_ID = b.ID) and (z.ID = ?) " +
+            "join TEST.BAZ as z on z.BAR_ID = b.ID and z.ID = ? " +
             "order by b.FOO_ID descending, f.ID ascending"));
     }
 }
