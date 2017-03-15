@@ -26,6 +26,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.List;
@@ -62,8 +63,8 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
     }
 
     @Override
-    public int precedence() {
-        return 0;
+    public Precedence precedence() {
+        return Precedence.SELECT;
     }
 
     @Override

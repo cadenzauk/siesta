@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.Expression;
 import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
 
 import java.util.stream.Stream;

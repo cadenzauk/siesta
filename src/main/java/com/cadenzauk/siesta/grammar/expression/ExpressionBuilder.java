@@ -301,4 +301,32 @@ public class ExpressionBuilder<T, N> {
     public static <T, N> ExpressionBuilder<T,N> of(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         return new ExpressionBuilder<>(lhs, onComplete);
     }
+
+    public static <T> ExpressionBuilder<T,BooleanExpression> column(TypedExpression<T> lhs) {
+        return ExpressionBuilder.of(lhs, Function.identity());
+    }
+
+    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> lhs) {
+        return of(UnresolvedColumn.of(lhs), Function.identity());
+    }
+
+    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(FunctionOptional1<R,T> lhs) {
+        return of(UnresolvedColumn.of(lhs), Function.identity());
+    }
+
+    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, Function1<R,T> lhs) {
+        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, FunctionOptional1<R,T> lhs) {
+        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, Function1<R,T> lhs) {
+        return of(ResolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return of(ResolvedColumn.of(alias, lhs), Function.identity());
+    }
 }

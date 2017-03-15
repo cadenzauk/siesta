@@ -22,9 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.ArrayList;
@@ -33,12 +30,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class AndExpression implements BooleanExpression {
+public class AndExpression extends BooleanExpression {
     private final List<BooleanExpression> expressions = new ArrayList<>();
-
-    public AndExpression(BooleanExpression expression) {
-        expressions.add(expression);
-    }
 
     public AndExpression(BooleanExpression lhs, BooleanExpression rhs) {
         expressions.add(lhs);
@@ -59,68 +52,18 @@ public class AndExpression implements BooleanExpression {
     }
 
     @Override
-    public int precedence() {
-        return 50;
+    public Precedence precedence() {
+        return Precedence.AND;
     }
 
-    public <T> ExpressionBuilder<T,AndExpression> and(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, this::append);
+    @Override
+    public BooleanExpression appendOr(BooleanExpression expression) {
+        return new OrExpression(this, expression);
     }
 
-    public <T, R> ExpressionBuilder<T,AndExpression> and(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::append);
-    }
-
-    public <T, R> ExpressionBuilder<T,AndExpression> and(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::append);
-    }
-
-    public <T, R> ExpressionBuilder<T,AndExpression> and(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::append);
-    }
-
-    public <T, R> ExpressionBuilder<T,AndExpression> and(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::append);
-    }
-
-    public <T, R> ExpressionBuilder<T,AndExpression> and(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::append);
-    }
-
-    public <T, R> ExpressionBuilder<T,AndExpression> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::append);
-    }
-
-    private AndExpression append(BooleanExpression expression) {
+    @Override
+    public BooleanExpression appendAnd(BooleanExpression expression) {
         expressions.add(expression);
         return this;
-    }
-
-    public static <T> ExpressionBuilder<T,AndExpression> all(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, AndExpression::new);
-    }
-
-    public static <T, R> ExpressionBuilder<T,AndExpression> all(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), AndExpression::new);
-    }
-
-    public static <T, R> ExpressionBuilder<T,AndExpression> all(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), AndExpression::new);
-    }
-
-    public static <T, R> ExpressionBuilder<T,AndExpression> all(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), AndExpression::new);
-    }
-
-    public static <T, R> ExpressionBuilder<T,AndExpression> all(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), AndExpression::new);
-    }
-
-    public static <T, R> ExpressionBuilder<T,AndExpression> all(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), AndExpression::new);
-    }
-
-    public static <T, R> ExpressionBuilder<T,AndExpression> all(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), AndExpression::new);
     }
 }

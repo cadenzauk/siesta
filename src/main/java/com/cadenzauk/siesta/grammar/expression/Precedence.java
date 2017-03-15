@@ -22,41 +22,12 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.*;
-
-import java.util.stream.Stream;
-
-public class FullExpression<T> extends BooleanExpression {
-    private final TypedExpression<T> lhs;
-    private final Condition<T> rhs;
-
-    public FullExpression(TypedExpression<T> lhs, Condition<T> rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return lhs.sql(scope) + " " + rhs.sql(scope);
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.concat(lhs.args(scope), rhs.args(scope));
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.COMPARISON;
-    }
-
-    @Override
-    public BooleanExpression appendOr(BooleanExpression expression) {
-        return new OrExpression(this, expression);
-    }
-
-    @Override
-    public BooleanExpression appendAnd(BooleanExpression expression) {
-        return new AndExpression(this, expression);
-    }
+public enum Precedence {
+    PARENTHESES,
+    SELECT,
+    OR,
+    AND,
+    COMPARISON,
+    UNARY,
+    COLUMN
 }

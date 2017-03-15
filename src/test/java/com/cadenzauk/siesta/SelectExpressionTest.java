@@ -28,8 +28,7 @@ import org.junit.Test;
 
 import java.time.LocalDate;
 
-import static com.cadenzauk.siesta.grammar.expression.AndExpression.all;
-import static com.cadenzauk.siesta.grammar.expression.OrExpression.either;
+import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
 import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -168,10 +167,10 @@ public class SelectExpressionTest {
         Database database = testDatabase();
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         String sql = database.from(m)
-            .where(either(ManufacturerRow::checked).isLessThan(LocalDate.now())
+            .where(column(ManufacturerRow::checked).isLessThan(LocalDate.now())
                 .or(ManufacturerRow::checked).isGreaterThan(LocalDate.now())
                 .or(ManufacturerRow::name).isEqualTo("Fred"))
-            .and(either(ManufacturerRow::name).isEqualTo("Bob")
+            .and(column(ManufacturerRow::name).isEqualTo("Bob")
                 .or(ManufacturerRow::checked).isNull())
             .sql();
 
@@ -186,20 +185,31 @@ public class SelectExpressionTest {
         Database database = testDatabase();
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         String sql = database.from(m)
-            .where(
-                either(
-                    all(ManufacturerRow::checked).isLessThan(LocalDate.now())
-                        .and(ManufacturerRow::checked).isGreaterThan(LocalDate.now())
-                        .and(ManufacturerRow::name).isEqualTo("Fred")
-                ).or(
-                    all(ManufacturerRow::name).isEqualTo("Bob")
-                        .and(ManufacturerRow::checked).isNull()
-                )
-            ).sql();
+            .where(ManufacturerRow::checked).isLessThan(LocalDate.now())
+            .and(ManufacturerRow::name).isEqualTo("Fred")
+            .and(column(ManufacturerRow::name).isEqualTo("Bob")
+                .or(ManufacturerRow::checked).isNull()
+            )
+            .and(ManufacturerRow::checked).isGreaterThan(LocalDate.now())
+            .sql();
 
         assertThat(sql, is("select m.MANUFACTURER_ID as m_MANUFACTURER_ID, m.NAME as m_NAME, m.CHECKED as m_CHECKED " +
             "from TEST.MANUFACTURER as m " +
-            "where m.CHECKED < ? and m.CHECKED > ? " +
-            "and m.NAME = ? or m.NAME = ? and m.CHECKED is null"));
+            "where m.CHECKED < ? and m.NAME = ? and (m.NAME = ? or m.CHECKED is null) and m.CHECKED > ?"));
+    }
+
+    @Test
+    public void andAndOrsInWhere() {
+        Database database = testDatabase();
+        Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
+        String sql = database.from(m)
+            .where(ManufacturerRow::name).isEqualTo("Fred")
+            .or(ManufacturerRow::checked).isNull()
+            .and(ManufacturerRow::manufacturerId).isGreaterThan(3L)
+            .sql();
+
+        assertThat(sql, is("select m.MANUFACTURER_ID as m_MANUFACTURER_ID, m.NAME as m_NAME, m.CHECKED as m_CHECKED " +
+            "from TEST.MANUFACTURER as m " +
+            "where m.NAME = ? or m.CHECKED is null and m.MANUFACTURER_ID > ?"));
     }
 }

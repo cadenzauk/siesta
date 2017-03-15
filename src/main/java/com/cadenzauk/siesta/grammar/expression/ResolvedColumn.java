@@ -53,8 +53,8 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
     }
 
     @Override
-    public int precedence() {
-        return 100;
+    public Precedence precedence() {
+        return Precedence.COLUMN;
     }
 
     @Override

@@ -22,7 +22,75 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.grammar.Expression;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.Alias;
 
-public interface BooleanExpression extends Expression {
+public abstract class BooleanExpression implements Expression {
+    public abstract BooleanExpression appendOr(BooleanExpression expression);
+    public abstract BooleanExpression appendAnd(BooleanExpression expression);
+
+    public BooleanExpression and(BooleanExpression lhs) {
+        return this.appendAnd(lhs);
+    }
+
+    public <T> ExpressionBuilder<T,BooleanExpression> and(TypedExpression<T> lhs) {
+        return ExpressionBuilder.of(lhs, this::appendAnd);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> and(Function1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::appendAnd);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> and(FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::appendAnd);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> and(String alias, Function1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::appendAnd);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> and(String alias, FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::appendAnd);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> and(Alias<R> alias, Function1<R,T> lhs) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::appendAnd);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::appendAnd);
+    }
+
+    public BooleanExpression or(BooleanExpression lhs) {
+        return this.appendOr(lhs);
+    }
+
+    public <T> ExpressionBuilder<T,BooleanExpression> or(TypedExpression<T> lhs) {
+        return ExpressionBuilder.of(lhs, this::appendOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> or(Function1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::appendOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> or(FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::appendOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> or(String alias, Function1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::appendOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> or(String alias, FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::appendOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> or(Alias<R> alias, Function1<R,T> lhs) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::appendOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,BooleanExpression> or(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::appendOr);
+    }
 }

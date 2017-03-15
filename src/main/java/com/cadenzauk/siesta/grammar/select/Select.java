@@ -33,8 +33,8 @@ import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.grammar.expression.AndExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,17 +76,13 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     @Override
-    public int precedence() {
-        return 0;
+    public Precedence precedence() {
+        return Precedence.SELECT;
     }
 
     @Override
     public RowMapper<RT> rowMapper(Scope scope, String label) {
         return rowMapper();
-    }
-
-    ExpectingWhere<RT> expectingWhere() {
-        return new ExpectingWhere<>(this);
     }
 
     Projection projection() {
@@ -130,7 +126,11 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     void andWhere(BooleanExpression e) {
-        whereClause = new AndExpression(whereClause, e);
+        whereClause = whereClause.appendAnd(e);
+    }
+
+    void orWhere(BooleanExpression e) {
+        whereClause = whereClause.appendOr(e);
     }
 
     @NotNull

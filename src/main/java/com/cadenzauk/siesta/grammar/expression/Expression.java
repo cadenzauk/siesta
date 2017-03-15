@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.Scope;
 
@@ -31,10 +31,10 @@ public interface Expression {
 
     Stream<Object> args(Scope scope);
 
-    int precedence();
+    Precedence precedence();
 
     default String sql(Expression e, Scope scope) {
-        return e.precedence() < precedence()
+        return e.precedence().compareTo(precedence()) < 0
             ? "(" + e.sql(scope) + ")"
             : e.sql(scope);
     }

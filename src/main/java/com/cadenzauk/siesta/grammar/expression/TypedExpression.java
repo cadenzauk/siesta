@@ -24,7 +24,6 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.Expression;
 
 public interface TypedExpression<T> extends Expression {
     String label(Scope scope);

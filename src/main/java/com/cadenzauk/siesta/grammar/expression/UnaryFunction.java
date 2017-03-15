@@ -60,8 +60,8 @@ public class UnaryFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public int precedence() {
-        return 100;
+    public Precedence precedence() {
+        return Precedence.UNARY;
     }
 
     public static <T> UnaryFunction<T> of(TypedExpression<T> arg, String name) {

@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.ParenthesisedExpression;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -37,7 +38,11 @@ public class InWhereExpectingAnd<RT> extends ExpectingOrderBy<RT> {
     }
 
     public <T> InWhereExpectingAnd<RT> and(BooleanExpression expression) {
-        return andWhere(expression);
+        return andWhere(new ParenthesisedExpression(expression));
+    }
+
+    public <T> InWhereExpectingAnd<RT> or(BooleanExpression expression) {
+        return orWhere(new ParenthesisedExpression(expression));
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(TypedExpression<T> lhs) {
@@ -68,8 +73,17 @@ public class InWhereExpectingAnd<RT> extends ExpectingOrderBy<RT> {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
+    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
+    }
+
     private InWhereExpectingAnd<RT> andWhere(BooleanExpression newClause) {
         statement.andWhere(newClause);
+        return this;
+    }
+
+    private InWhereExpectingAnd<RT> orWhere(BooleanExpression newClause) {
+        statement.orWhere(newClause);
         return this;
     }
 }
