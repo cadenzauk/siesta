@@ -244,7 +244,7 @@ public class ExpressionBuilder<T, N> {
         return complete(new OperatorExpressionCondition<>("<=", ResolvedColumn.of(alias, getter)));
     }
 
-    //---
+    //--- IS [NOT] IN
     @SafeVarargs
     public final N isIn(T... values) {
         return isOpIn("in", values);
@@ -262,7 +262,7 @@ public class ExpressionBuilder<T, N> {
         return complete(new InCondition<>(operator, values));
     }
 
-    //---
+    //--- IS [NOT] NULL
     public N isNull() {
         return complete(new IsNullCondition<>(""));
     }
@@ -271,7 +271,7 @@ public class ExpressionBuilder<T, N> {
         return complete(new IsNullCondition<>("not "));
     }
 
-    //---
+    //--- [NOT] LIKE
     public N isLike(T value) {
         return complete(new LikeCondition<>("like", value, Optional.empty()));
     }
@@ -286,6 +286,15 @@ public class ExpressionBuilder<T, N> {
 
     public N isNotLike(T value, String escape) {
         return complete(new LikeCondition<>("not like", value, OptionalUtil.ofBlankable(escape)));
+    }
+
+    //--- BETWEEN
+    public BetweenBuilder<T,N> isBetween(T value) {
+        return new BetweenBuilder<>(lhs, value, "", onComplete);
+    }
+
+    public BetweenBuilder<T,N> notBetween(T value) {
+        return new BetweenBuilder<>(lhs, value, "not ", onComplete);
     }
 
     //---

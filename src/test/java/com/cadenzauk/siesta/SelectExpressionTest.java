@@ -212,4 +212,20 @@ public class SelectExpressionTest {
             "from TEST.MANUFACTURER as m " +
             "where m.NAME = ? or m.CHECKED is null and m.MANUFACTURER_ID > ?"));
     }
+
+    @Test
+    public void between() {
+        Database database = testDatabase();
+        Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
+        String sql = database.from(m)
+            .where(ManufacturerRow::name).isBetween("Fred").and("Barney")
+            .or(ManufacturerRow::checked).isNull()
+            .and(ManufacturerRow::manufacturerId).isGreaterThan(3L)
+            .sql();
+
+        assertThat(sql, is("select m.MANUFACTURER_ID as m_MANUFACTURER_ID, m.NAME as m_NAME, m.CHECKED as m_CHECKED " +
+            "from TEST.MANUFACTURER as m " +
+            "where m.NAME between ? and ? " +
+            "or m.CHECKED is null and m.MANUFACTURER_ID > ?"));
+    }
 }

@@ -22,13 +22,22 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-public enum Precedence {
-    PARENTHESES,
-    SELECT,
-    OR,
-    AND,
-    BETWEEN,
-    COMPARISON,
-    UNARY,
-    COLUMN
+import java.util.function.Function;
+
+public class BetweenBuilder<T,N> {
+    private final TypedExpression<T> lhs;
+    private final T lowValue;
+    private final String prefix;
+    private final Function<BooleanExpression,N> onComplete;
+
+    public BetweenBuilder(TypedExpression<T> lhs, T lowValue, String prefix, Function<BooleanExpression,N> onComplete) {
+        this.lhs = lhs;
+        this.lowValue = lowValue;
+        this.prefix = prefix;
+        this.onComplete = onComplete;
+    }
+
+    public N and(T highValue) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, highValue, prefix));
+    }
 }
