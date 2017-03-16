@@ -90,9 +90,13 @@ public class TableColumn<T, R, B> implements Column<T,R> {
         return primaryKey;
     }
 
-    public void extract(ResultSet rs, B builder, Optional<String> prefix) {
-        Optional<T> value = dataType.get(rs, prefix.map(s -> s + name).orElse(name));
+    public void extract(ResultSet rs, B builder, String label) {
+        Optional<T> value = dataType.get(rs, label);
         setter.accept(builder, value);
+    }
+
+    public String label(String prefix) {
+        return prefix + name;
     }
 
     public static <T, R, B> TableColumn<T,R,B> fromField(Database database, Class<R> rowClass, Class<B> builderClass, Field field) {

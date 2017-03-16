@@ -20,16 +20,30 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta.projection;
 
-import com.cadenzauk.siesta.Database;
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-public class TestDatabase {
-    public static Database testDatabase() {
-        return Database.newBuilder().defaultSchema("TEST")
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build))
-            .build();
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.stream.Collectors.joining;
+
+public class DynamicProjection implements Projection {
+    List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
+
+    @Override
+    public String sql(Scope scope) {
+        return columns.stream()
+            .map(p -> p.map((s, t) -> s.sql(scope) + " as " + t.label(scope)))
+            .collect(joining(", "));
+    }
+
+    public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {
+        columns.add(Tuple.of(source, target));
     }
 }

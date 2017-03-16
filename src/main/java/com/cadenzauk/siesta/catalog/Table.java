@@ -32,6 +32,7 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.google.common.collect.ImmutableList;
@@ -40,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.lang.reflect.Modifier;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -91,6 +93,10 @@ public class Table<R> {
 
     public RowMapper<R> rowMapper(String s) {
         return impl.rowMapper(Optional.of(s));
+    }
+
+    public DynamicRowMapper<R> dynamicRowMapper(String s) {
+        return impl.dynamicRowMapper(Optional.of(s));
     }
 
     public String qualifiedName() {
@@ -155,8 +161,29 @@ public class Table<R> {
         public RowMapper<R> rowMapper(Optional<String> prefix) {
             return (rs, i) -> {
                 B builder = newBuilder.get();
-                columns.forEach(c -> c.extract(rs, builder, prefix));
+                columns.forEach(c -> c.extract(rs, builder, prefix.orElse(tableName + "_") + c.name()));
                 return buildRow.apply(builder);
+            };
+        }
+
+        public DynamicRowMapper<R> dynamicRowMapper(Optional<String> prefix) {
+            return new DynamicRowMapper<R>() {
+                private final Set<String> labels = new HashSet<>();
+                private final String labelPrefix = prefix.orElse(tableName + "_");
+
+                @Override
+                public void add(String targetColumn) {
+                    labels.add(targetColumn);
+                }
+
+                @Override
+                public R mapRow(ResultSet rs, int rowNum) {
+                    B builder = newBuilder.get();
+                    columns.stream()
+                        .filter(c -> labels.contains(c.label(labelPrefix)))
+                        .forEach(c -> c.extract(rs, builder, c.label(labelPrefix)));
+                    return buildRow.apply(builder);
+                }
             };
         }
     }

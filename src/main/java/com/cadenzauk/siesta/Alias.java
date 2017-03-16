@@ -102,6 +102,10 @@ public class Alias<R> {
         return table.rowMapper(aliasName + "_");
     }
 
+    public DynamicRowMapper<R> dynamicRowMapper() {
+        return table.dynamicRowMapper(aliasName + "_");
+    }
+
     @SuppressWarnings("unchecked")
     <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {
         if (StringUtils.equals(requiredAlias, aliasName)) {

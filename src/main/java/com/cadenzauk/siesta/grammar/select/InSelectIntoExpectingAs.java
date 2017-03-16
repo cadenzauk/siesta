@@ -20,16 +20,29 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.siesta.Database;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
-public class TestDatabase {
-    public static Database testDatabase() {
-        return Database.newBuilder().defaultSchema("TEST")
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build))
-            .build();
+public class InSelectIntoExpectingAs<RT, T> {
+    private final InSelectIntoExpectingWith<RT> inSelectIntoExpectingWith;
+    private final TypedExpression<T> source;
+
+    public InSelectIntoExpectingAs(InSelectIntoExpectingWith<RT> inSelectIntoExpectingWith, TypedExpression<T> source) {
+        this.inSelectIntoExpectingWith = inSelectIntoExpectingWith;
+        this.source = source;
+    }
+
+    public InSelectIntoExpectingWith<RT> as(Function1<RT,T> methodReference) {
+        inSelectIntoExpectingWith.select(source, UnresolvedColumn.of(methodReference));
+        return inSelectIntoExpectingWith;
+    }
+
+    public InSelectIntoExpectingWith<RT> as(FunctionOptional1<RT,T> methodReference) {
+        inSelectIntoExpectingWith.select(source, UnresolvedColumn.of(methodReference));
+        return inSelectIntoExpectingWith;
     }
 }

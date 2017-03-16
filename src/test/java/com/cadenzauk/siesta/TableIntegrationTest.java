@@ -26,6 +26,7 @@ import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
+import com.cadenzauk.siesta.testmodel.WidgetViewRow;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -146,5 +147,38 @@ public class TableIntegrationTest {
 
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
         assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
+    }
+
+    @Test
+    public void selectIntoView() {
+        Database database = testDatabase();
+        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
+            .manufacturerId(5)
+            .name(Optional.of("Acme"))
+            .build();
+        WidgetRow aWidget = WidgetRow.newBuilder()
+            .widgetId(4)
+            .manufacturerId(5)
+            .name("Gizmo")
+            .description(Optional.of("Acme's Patent Gizmo"))
+            .build();
+        database.insert(sqlExecutor, aManufacturer);
+        database.insert(sqlExecutor, aWidget);
+
+        Optional<WidgetViewRow> gizmo = database
+            .from(WidgetRow.class, "w")
+            .leftJoin(ManufacturerRow.class, "m").on(ManufacturerRow::manufacturerId).isEqualTo(WidgetRow::manufacturerId)
+            .select(WidgetViewRow.class, "v")
+            .with(WidgetRow::widgetId).as(WidgetViewRow::widgetId)
+            .with(WidgetRow::name).as(WidgetViewRow::widgetName)
+            .with(WidgetRow::description).as(WidgetViewRow::description)
+            .with(WidgetRow::manufacturerId).as(WidgetViewRow::manufacturerId)
+            .with(ManufacturerRow::name).as(WidgetViewRow::manufacturerName)
+            .where(WidgetRow::widgetId).isEqualTo(4L)
+            .optional(sqlExecutor);
+
+        assertThat(gizmo.map(WidgetViewRow::widgetName), is(Optional.of("Gizmo")));
+        assertThat(gizmo.flatMap(WidgetViewRow::manufacturerName), is(Optional.of("Acme")));
     }
 }

@@ -20,16 +20,8 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.Database;
-
-public class TestDatabase {
-    public static Database testDatabase() {
-        return Database.newBuilder().defaultSchema("TEST")
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build))
-            .build();
-    }
+public interface DynamicRowMapper<R> extends RowMapper<R> {
+    void add(String label);
 }

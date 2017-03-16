@@ -25,10 +25,13 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.projection.DynamicProjection;
 
 import java.util.Optional;
 
@@ -59,6 +62,25 @@ public class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference, String label) {
         return select(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <R> InSelectIntoExpectingWith<R> select(Class<R> rowClass) {
+        Table<R> table = database().table(rowClass);
+        return select(table.as(table.tableName()));
+    }
+
+    public <R> InSelectIntoExpectingWith<R> select(Class<R> rowClass, String alias) {
+        return select(database().table(rowClass).as(alias));
+    }
+
+    public <R> InSelectIntoExpectingWith<R> select(Alias<R> alias) {
+        DynamicRowMapper<R> rowMapper = alias.dynamicRowMapper();
+        DynamicProjection projection = new DynamicProjection();
+        Select<R> select = new Select<>(scope().plus(alias),
+            statement.from(),
+            rowMapper,
+            projection);
+        return new InSelectIntoExpectingWith<>(select, rowMapper, projection);
     }
 
     private <T> InProjectionExpectingComma1<T> select(TypedExpression<T> column, Optional<String> label) {
