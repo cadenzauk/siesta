@@ -29,6 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -53,10 +54,11 @@ public class FactoryTest {
 
     @Test
     public void forClassOnClassWithNoDefaultConstructor() {
-        calling(() -> Factory.forClass(NoDefaultConstructor.class))
-            .shouldThrow(RuntimeException.class)
-            .withMessage(is("No default constructor for class com.cadenzauk.core.reflect.FactoryTest$NoDefaultConstructor"));
+        Supplier<NoDefaultConstructor> noDefaultConstructorSupplier = Factory.forClass(NoDefaultConstructor.class);
 
+        NoDefaultConstructor noDefaultConstructor = noDefaultConstructorSupplier.get();
+        assertThat(noDefaultConstructor, notNullValue());
+        assertThat(noDefaultConstructor, instanceOf(NoDefaultConstructor.class));
     }
 
     @SuppressWarnings("unused")

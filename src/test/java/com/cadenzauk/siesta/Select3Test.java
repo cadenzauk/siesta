@@ -118,7 +118,7 @@ public class Select3Test {
         String sql = database.from(Foo.class, "f")
             .join(Bar.class, "b").on(Bar::fooId).isEqualTo(Foo::id)
             .join(Baz.class, "z").on(Baz::barId).isEqualTo(Bar::id).and(Baz::id).isEqualTo(1)
-            .orderBy(Bar::fooId, Order.DESCENDING).then("f", Foo::id, Order.ASCENDING)
+            .orderBy(Bar::fooId, Order.DESC).then("f", Foo::id, Order.ASC)
             .sql();
 
         assertThat(sql, is("select f.ID as f_ID, " +
@@ -127,6 +127,6 @@ public class Select3Test {
             "from TEST.FOO as f " +
             "join TEST.BAR as b on b.FOO_ID = f.ID " +
             "join TEST.BAZ as z on z.BAR_ID = b.ID and z.ID = ? " +
-            "order by b.FOO_ID descending, f.ID ascending"));
+            "order by b.FOO_ID desc, f.ID asc"));
     }
 }

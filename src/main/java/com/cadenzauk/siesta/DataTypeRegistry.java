@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DataTypeRegistry {
-    private Map<Class<?>,DataType<?>> entries = new ConcurrentHashMap<>();
+    private final Map<Class<?>,DataType<?>> entries = new ConcurrentHashMap<>();
 
     public DataTypeRegistry() {
         register(DataType.BIG_DECIMAL);

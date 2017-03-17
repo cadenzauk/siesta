@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DynamicRowMapper;
@@ -52,7 +53,15 @@ public class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return select(UnresolvedColumn.of(methodReference));
     }
 
+    public <T, R> InProjectionExpectingComma1<T> select(FunctionOptional1<R, T> methodReference) {
+        return select(UnresolvedColumn.of(methodReference));
+    }
+
     public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference) {
+        return select(ResolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
         return select(ResolvedColumn.of(alias, methodReference));
     }
 
@@ -60,7 +69,15 @@ public class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return select(UnresolvedColumn.of(methodReference), label);
     }
 
+    public <T, R> InProjectionExpectingComma1<T> select(FunctionOptional1<R,T> methodReference, String label) {
+        return select(UnresolvedColumn.of(methodReference), label);
+    }
+
     public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference, String label) {
+        return select(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
         return select(ResolvedColumn.of(alias, methodReference), label);
     }
 

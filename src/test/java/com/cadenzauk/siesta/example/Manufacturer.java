@@ -20,13 +20,22 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.example;
 
-public enum Order {
-    ASC,
-    DESC;
+public class Manufacturer {
+    private long manufacturerId;
+    private String name;
 
-    public String sql() {
-        return name().toLowerCase();
+    public Manufacturer(long manufacturerId, String name) {
+        this.manufacturerId = manufacturerId;
+        this.name = name;
+    }
+
+    public long manufacturerId() {
+        return manufacturerId;
+    }
+
+    public String name() {
+        return name;
     }
 }

@@ -1,4 +1,4 @@
-# SIESTA [![Build Status](https://api.travis-ci.org/cadenzauk/siesta.svg?branch=master)](https://api.travis-ci.org/cadenzauk/siesta.svg?branch=master)
+# SIESTA [![Build Status](https://api.travis-ci.org/cadenzauk/siesta.svg?branch=master)](https://travis-ci.org/cadenzauk/siesta)
 **S**IESTA **I**s an **E**asy **S**QL **T**ypesafe **A**PI that lets you write SQL queries in Java.  
 
 It is Easy because the interface is discoverable with autocompletion guiding you as you program.  It is Typesafe 
@@ -113,3 +113,16 @@ Optional<Widget> oops = database.from(Widget.class)
     .where(Widget::widgetId).isEqualTo("Sprocket")  // Compile error
     .optional(sqlExecutor);
 ```
+
+Of course you can do joins and projections:
+
+```java
+List<Tuple2<String,String>> makersOfGizmos = database.from(Widget.class, "w")
+    .join(Manufacturer.class, "m").on(Manufacturer::manufacturerId).isEqualTo(Widget::manufacturerId)
+    .select(Manufacturer::name).comma(Widget::description)
+    .where(Widget::name).isEqualTo("Gizmo")
+    .orderBy(Widget::widgetId)
+    .list(sqlExecutor);
+```
+
+One difference you'll have noticed from SQL syntax is that we do projection via `select` *after* the `from` and `join` clauses.

@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.example;
 
+import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
@@ -92,5 +93,28 @@ public class InsertionExample {
         assertThat(widgetNumberOne.map(Widget::name), is(Optional.of("Sprocket")));
         assertThat(sprockets, hasSize(1));
         assertThat(sprockets.get(0).widgetId(), is(1001L));
+    }
+
+    @Test
+    public void insertSomeGizmosAndReadThemBack() {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
+        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        database.insert(sqlExecutor, new Manufacturer(2004L, "Gizmos Inc"));
+        database.insert(sqlExecutor, new Manufacturer(2005L, "Acme Inc"));
+        database.insert(sqlExecutor, new Widget(1003L, "Gizmo", 2004L, Optional.empty()));
+        database.insert(sqlExecutor, new Widget(1004L, "Gizmo", 2005L, Optional.of("Acme Gizmo")));
+        database.insert(sqlExecutor, new Widget(1005L, "Gizmo", 2005L, Optional.of("Acme Gizmo Mk II")));
+
+        List<Tuple2<String,String>> makersOfGizmos = database.from(Widget.class, "w")
+            .join(Manufacturer.class, "m").on(Manufacturer::manufacturerId).isEqualTo(Widget::manufacturerId)
+            .select(Manufacturer::name).comma(Widget::description)
+            .where(Widget::name).isEqualTo("Gizmo")
+            .orderBy(Widget::widgetId)
+            .list(sqlExecutor);
+
+        assertThat(makersOfGizmos, hasSize(3));
+        assertThat(makersOfGizmos.get(0).item1(), is("Gizmos Inc"));
+        assertThat(makersOfGizmos.get(1).item1(), is("Acme Inc"));
+        assertThat(makersOfGizmos.get(2).item1(), is("Acme Inc"));
     }
 }

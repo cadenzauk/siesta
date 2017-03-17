@@ -30,9 +30,6 @@ public class Widget {
     private long manufacturerId;
     private Optional<String> description;
 
-    private Widget() {
-    }
-
     public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
         this.widgetId = widgetId;
         this.name = name;

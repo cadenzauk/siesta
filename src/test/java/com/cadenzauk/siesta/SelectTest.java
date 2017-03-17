@@ -178,14 +178,14 @@ public class SelectTest {
 
         database.from(Row2.class, "x")
             .where(Row2::name).isEqualTo(Row2::comment)
-            .orderBy(Row2::description, Order.DESCENDING)
+            .orderBy(Row2::description, Order.DESC)
             .list(sqlExecutor);
 
         verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select x.NAME as x_NAME, x.DESCRIPTION as x_DESCRIPTION, x.COMMENT as x_COMMENT " +
             "from TEST.ROW2 as x " +
             "where x.NAME = x.COMMENT " +
-            "order by x.DESCRIPTION descending"));
+            "order by x.DESCRIPTION desc"));
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
@@ -226,31 +226,31 @@ public class SelectTest {
     @SuppressWarnings("unused")
     private Object[] parametersForOrderByOnSelect() {
         return new Object[]{
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment), "q.COMMENT ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::description), "q.DESCRIPTION ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::comment), "q.COMMENT ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::description), "q.DESCRIPTION ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::comment), "q.COMMENT ascending"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment), "q.COMMENT asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::comment), "q.COMMENT asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::comment), "q.COMMENT asc"),
 
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(min(Row2::comment), Order.DESCENDING), "min(q.COMMENT) descending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name, Order.ASCENDING), "q.NAME ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name, Order.DESCENDING), "q.NAME descending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment, Order.DESCENDING), "q.COMMENT descending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::name, Order.ASCENDING), "q.NAME ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::name, Order.DESCENDING), "q.NAME descending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::comment, Order.DESCENDING), "q.COMMENT descending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::name, Order.DESCENDING), "q.NAME descending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::comment, Order.DESCENDING), "q.COMMENT descending"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(min(Row2::comment), Order.DESC), "min(q.COMMENT) desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name, Order.ASC), "q.NAME asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment, Order.DESC), "q.COMMENT desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::name, Order.ASC), "q.NAME asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::comment, Order.DESC), "q.COMMENT desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(a, Row2::comment, Order.DESC), "q.COMMENT desc"),
 
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(max(Row2::description)), "q.NAME ascending, max(q.DESCRIPTION) ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Row2::description), "q.NAME ascending, q.DESCRIPTION ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Row2::comment), "q.NAME ascending, q.COMMENT ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME ascending, q.DESCRIPTION ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME ascending, q.COMMENT ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME ascending, q.DESCRIPTION ascending"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME ascending, q.COMMENT ascending"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(max(Row2::description)), "q.NAME asc, max(q.DESCRIPTION) asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Row2::comment), "q.NAME asc, q.COMMENT asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME asc, q.COMMENT asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME asc, q.COMMENT asc"),
         };
     }
 
@@ -274,31 +274,31 @@ public class SelectTest {
     @SuppressWarnings("unused")
     private Object[] parametersForOrderByOnWhereClause() {
         return new Object[]{
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::comment), "q.COMMENT ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::description), "q.DESCRIPTION ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::comment), "q.COMMENT ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::description), "q.DESCRIPTION ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::comment), "q.COMMENT ascending"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::comment), "q.COMMENT asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::comment), "q.COMMENT asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::comment), "q.COMMENT asc"),
 
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(min(Row2::comment), Order.DESCENDING), "min(q.COMMENT) descending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name, Order.ASCENDING), "q.NAME ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name, Order.DESCENDING), "q.NAME descending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::comment, Order.DESCENDING), "q.COMMENT descending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::name, Order.ASCENDING), "q.NAME ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::name, Order.DESCENDING), "q.NAME descending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::comment, Order.DESCENDING), "q.COMMENT descending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::name, Order.DESCENDING), "q.NAME descending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::comment, Order.DESCENDING), "q.COMMENT descending"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(min(Row2::comment), Order.DESC), "min(q.COMMENT) desc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name, Order.ASC), "q.NAME asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::comment, Order.DESC), "q.COMMENT desc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::name, Order.ASC), "q.NAME asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy("q", Row2::comment, Order.DESC), "q.COMMENT desc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(a, Row2::comment, Order.DESC), "q.COMMENT desc"),
 
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(max(Row2::description)), "q.NAME ascending, max(q.DESCRIPTION) ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(Row2::description), "q.NAME ascending, q.DESCRIPTION ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(Row2::comment), "q.NAME ascending, q.COMMENT ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME ascending, q.DESCRIPTION ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME ascending, q.COMMENT ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME ascending, q.DESCRIPTION ascending"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME ascending, q.COMMENT ascending"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(max(Row2::description)), "q.NAME asc, max(q.DESCRIPTION) asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(Row2::comment), "q.NAME asc, q.COMMENT asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME asc, q.COMMENT asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME asc, q.COMMENT asc"),
         };
     }
 

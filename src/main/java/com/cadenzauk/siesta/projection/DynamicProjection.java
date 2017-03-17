@@ -34,7 +34,7 @@ import java.util.List;
 import static java.util.stream.Collectors.joining;
 
 public class DynamicProjection implements Projection {
-    List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
+    final List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
 
     @Override
     public String sql(Scope scope) {
