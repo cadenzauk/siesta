@@ -1,5 +1,4 @@
-# SIESTA
-
+# SIESTA [![Build Status](https://api.travis-ci.org/cadenzauk/siesta.svg?branch=master)](https://api.travis-ci.org/cadenzauk/siesta.svg?branch=master)
 **S**IESTA **I**s an **E**asy **S**QL **T**ypesafe **A**PI that lets you write SQL queries in Java.  
 
 It is Easy because the interface is discoverable with autocompletion guiding you as you program.  It is Typesafe 
