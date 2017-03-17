@@ -1,0 +1,18 @@
+language: java
+
+sudo: required
+
+jdk:
+  - oraclejdk8
+
+script:
+  - sudo apt-get update && sudo apt-get install oracle-java8-installer
+  - java -version
+  - gradle clean build
+
+install: true
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer

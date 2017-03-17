@@ -77,11 +77,11 @@ public class InsertionExample {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
 
-        Widget sprocket = new Widget(1L, "Sprocket", 4L, Optional.empty());
+        Widget sprocket = new Widget(1001L, "Sprocket", 4L, Optional.empty());
         database.insert(sqlExecutor, sprocket);
 
         Optional<Widget> widgetNumberOne = database.from(Widget.class)
-            .where(Widget::widgetId).isEqualTo(1L)
+            .where(Widget::widgetId).isEqualTo(1001L)
             .optional(sqlExecutor);
 
         List<Widget> sprockets = database.from(Widget.class)
@@ -91,6 +91,6 @@ public class InsertionExample {
         assertThat(widgetNumberOne.isPresent(), is(true));
         assertThat(widgetNumberOne.map(Widget::name), is(Optional.of("Sprocket")));
         assertThat(sprockets, hasSize(1));
-        assertThat(sprockets.get(0).widgetId(), is(1L));
+        assertThat(sprockets.get(0).widgetId(), is(1001L));
     }
 }

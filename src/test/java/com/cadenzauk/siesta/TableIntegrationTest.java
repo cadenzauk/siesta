@@ -78,7 +78,7 @@ public class TableIntegrationTest {
         SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
 
         WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(2)
+            .widgetId(1)
             .manufacturerId(2)
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
@@ -87,7 +87,7 @@ public class TableIntegrationTest {
         database.insert(sqlExecutor, aWidget);
 
         Optional<WidgetRow> theSame = database.from(WidgetRow.class)
-            .where(WidgetRow::widgetId).isEqualTo(2L)
+            .where(WidgetRow::widgetId).isEqualTo(1L)
             .optional(sqlExecutor);
 
         assertThat(theSame, is(Optional.of(aWidget)));
@@ -102,7 +102,7 @@ public class TableIntegrationTest {
             .name(Optional.of("Makers"))
             .build();
         WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(1)
+            .widgetId(2)
             .manufacturerId(2)
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
@@ -116,7 +116,7 @@ public class TableIntegrationTest {
             .join(m)
             .on(m, ManufacturerRow::manufacturerId).isEqualTo(w, WidgetRow::manufacturerId)
             .where(w, WidgetRow::name).isEqualTo("Dodacky")
-            .and(w, WidgetRow::widgetId).isEqualTo(1L)
+            .and(w, WidgetRow::widgetId).isEqualTo(2L)
             .optional(sqlExecutor)
             .map(Tuple2::item1);
 
@@ -180,5 +180,6 @@ public class TableIntegrationTest {
 
         assertThat(gizmo.map(WidgetViewRow::widgetName), is(Optional.of("Gizmo")));
         assertThat(gizmo.flatMap(WidgetViewRow::manufacturerName), is(Optional.of("Acme")));
+        assertThat(gizmo.flatMap(WidgetViewRow::description), is(Optional.of("Acme's Patent Gizmo")));
     }
 }
