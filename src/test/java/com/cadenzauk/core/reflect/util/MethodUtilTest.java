@@ -51,7 +51,7 @@ public class MethodUtilTest {
     @Test
     public void invokeNoArgsVoid() throws Exception {
         TestClass mock = Mockito.mock(TestClass.class);
-        Method method1 = mock.getClass().getMethod("method1");
+        Method method1 = mock.getClass().getDeclaredMethod("method1");
 
         MethodUtil.invoke(method1, mock);
 
@@ -62,7 +62,7 @@ public class MethodUtilTest {
     public void invokeThrowsException() throws Exception {
         TestClass mock = Mockito.mock(TestClass.class);
         doThrow(IllegalFormatCodePointException.class).when(mock).method1();
-        Method method1 = mock.getClass().getMethod("method1");
+        Method method1 = mock.getClass().getDeclaredMethod("method1");
 
         calling(() -> MethodUtil.invoke(method1, mock))
             .shouldThrow(RuntimeException.class)
@@ -77,7 +77,7 @@ public class MethodUtilTest {
         TestClass mock = Mockito.mock(TestClass.class);
         Optional<String> expectedResult = Optional.of("The result");
         when(mock.method2()).thenReturn(expectedResult);
-        Method method2 = mock.getClass().getMethod("method2");
+        Method method2 = mock.getClass().getDeclaredMethod("method2");
 
         Object result = MethodUtil.invoke(method2, mock);
 
