@@ -20,25 +20,14 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.persistence.converter;
+package com.cadenzauk.core.time;
 
-import javax.persistence.AttributeConverter;
-import java.sql.Date;
+import com.cadenzauk.core.util.UtilityClass;
+
 import java.time.LocalDate;
-import java.util.Optional;
 
-public class LocalDateConverter implements AttributeConverter<LocalDate,Date> {
-    @Override
-    public Date convertToDatabaseColumn(LocalDate attribute) {
-        return Optional.ofNullable(attribute)
-            .map(Date::valueOf)
-            .orElse(null);
-    }
+import static java.time.Month.OCTOBER;
 
-    @Override
-    public LocalDate convertToEntityAttribute(Date dbData) {
-        return Optional.ofNullable(dbData)
-            .map(Date::toLocalDate)
-            .orElse(null);
-    }
+public class LocalDateUtil extends UtilityClass {
+    public static final LocalDate START_OF_GREGORIAN_CALENDAR = LocalDate.of(1582, OCTOBER, 15);
 }

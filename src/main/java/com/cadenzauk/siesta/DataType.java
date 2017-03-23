@@ -25,8 +25,8 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
-import com.cadenzauk.persistence.converter.LocalDateConverter;
-import com.cadenzauk.persistence.converter.ZonedDateTimeConverter;
+import com.cadenzauk.core.persistence.converter.LocalDateConverter;
+import com.cadenzauk.core.persistence.converter.ZonedDateTimeConverter;
 import com.google.common.collect.ImmutableMap;
 
 import javax.persistence.AttributeConverter;

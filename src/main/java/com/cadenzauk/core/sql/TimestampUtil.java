@@ -20,36 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.persistence.converter;
+package com.cadenzauk.core.sql;
 
-import javax.persistence.AttributeConverter;
+import com.cadenzauk.core.util.UtilityClass;
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
-public class ZonedDateTimeConverter implements AttributeConverter<ZonedDateTime,Timestamp>{
-    private final ZoneId zoneId;
+import static com.cadenzauk.core.time.LocalDateUtil.START_OF_GREGORIAN_CALENDAR;
 
-    public ZonedDateTimeConverter() {
-        zoneId = ZoneId.of("UTC");
+public class TimestampUtil extends UtilityClass {
+    @NotNull
+    public static Timestamp valueOf(@NotNull ZonedDateTime zonedDateTime) {
+        if (zonedDateTime.toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
+            throw new IllegalArgumentException("Cannot convert date/times before the start of the Gregorian calendar to timestamps.");
+        }
+        return Timestamp.valueOf(zonedDateTime.toLocalDateTime());
     }
 
-    public ZonedDateTimeConverter(ZoneId zoneId) {
-        this.zoneId = zoneId;
-    }
-
-    @Override
-    public Timestamp convertToDatabaseColumn(ZonedDateTime attribute) {
-        return Optional.ofNullable(attribute)
-            .map(zdt -> Timestamp.valueOf(zdt.toLocalDateTime()))
-            .orElse(null);
-    }
-
-    @Override
-    public ZonedDateTime convertToEntityAttribute(Timestamp dbData) {
-        return Optional.ofNullable(dbData)
-            .map(ts -> ZonedDateTime.ofInstant(ts.toInstant(), zoneId))
-            .orElse(null);
+    @NotNull
+    public static ZonedDateTime toZonedDateTime(@NotNull Timestamp timestamp, @NotNull ZoneId zoneId) {
+        if (ZonedDateTime.ofInstant(timestamp.toInstant(), zoneId).toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
+            throw new IllegalArgumentException("Cannot convert timestamps before the start of the Gregorian calendar to date/time.");
+        }
+        return ZonedDateTime.of(timestamp.toLocalDateTime(), zoneId);
     }
 }
