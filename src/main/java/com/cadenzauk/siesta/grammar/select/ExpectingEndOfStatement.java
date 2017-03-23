@@ -40,8 +40,16 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
         this.statement = statement;
     }
 
+    public List<RT> list() {
+        return list(defaultSqlExecutor());
+    }
+
     public List<RT> list(SqlExecutor sqlExecutor) {
         return statement.list(sqlExecutor);
+    }
+
+    public Optional<RT> optional() {
+        return statement.optional(defaultSqlExecutor());
     }
 
     public Optional<RT> optional(SqlExecutor sqlExecutor) {
@@ -83,5 +91,9 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
 
     protected Database database() {
         return statement.scope.database();
+    }
+
+    private SqlExecutor defaultSqlExecutor() {
+        return database().getDefaultSqlExecutor();
     }
 }

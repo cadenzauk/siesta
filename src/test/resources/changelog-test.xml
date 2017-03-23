@@ -38,6 +38,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="DESCRIPTION" type="VARCHAR(200)"/>
+            <column name="INSERTION_TS" type="TIMESTAMP"/>
         </createTable>
 
         <createTable tableName="MANUFACTURER" schemaName="TEST">
@@ -48,6 +49,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="CHECKED" type="DATE"/>
+            <column name="INSERTION_TS" type="TIMESTAMP"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

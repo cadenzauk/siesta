@@ -131,9 +131,9 @@ public class Table<R> {
     private class Impl<B> {
         private final Supplier<B> newBuilder;
         private final Function<B,R> buildRow;
-        private final List<TableColumn<?,R,B>> columns;
+        private final List<TableColumn<Object,R,B>> columns;
 
-        public Impl(Supplier<B> newBuilder, Function<B,R> buildRow, List<TableColumn<?,R,B>> columns) {
+        public Impl(Supplier<B> newBuilder, Function<B,R> buildRow, List<TableColumn<Object,R,B>> columns) {
             this.newBuilder = newBuilder;
             this.buildRow = buildRow;
             this.columns = ImmutableList.copyOf(columns);
@@ -148,7 +148,10 @@ public class Table<R> {
 
             Object[] args = columns
                 .stream()
-                .map(c -> c.getter().apply(row).orElse(null))
+                .map(c -> c.getter()
+                    .apply(row)
+                    .map(v -> c.dataType().toDatabase(v))
+                    .orElse(null))
                 .toArray();
 
             sqlExecutor.update(sql, args);
@@ -194,7 +197,7 @@ public class Table<R> {
         private final Class<B> builderClass;
         private final Function<B,R> buildRow;
         private final Set<String> excludedFields = new HashSet<>();
-        private final List<TableColumn<?,R,B>> columns = new ArrayList<>();
+        private final List<TableColumn<Object,R,B>> columns = new ArrayList<>();
         private String schema;
         private String tableName;
         private Supplier<B> newBuilder;
@@ -271,23 +274,25 @@ public class Table<R> {
             return optional(getter, setter, Optional.of(init));
         }
 
+        @SuppressWarnings("unchecked")
         private <T> Builder<R,B> mandatory(Function1<R,T> getter, BiConsumer<B,T> setter, Optional<Consumer<TableColumn.Builder<T,R,B>>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
             TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, database.getDataTypeOf(getterInfo), rowClass, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add(columnBuilder.build());
+            columns.add((TableColumn<Object,R,B>) columnBuilder.build());
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         private <T> Builder<R,B> optional(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Optional<Consumer<TableColumn.Builder<T,R,B>>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
             TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, database.getDataTypeOf(getterInfo), rowClass, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add(columnBuilder.build());
+            columns.add((TableColumn<Object,R,B>) columnBuilder.build());
             return this;
         }
     }

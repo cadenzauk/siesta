@@ -22,9 +22,8 @@
 
 package com.cadenzauk.siesta.example;
 
-import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Test;
@@ -38,6 +37,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,19 +76,21 @@ public class InsertionExample {
 
     @Test
     public void insertOneRowAndReadItBack() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        Database database = Database.newBuilder()
+            .defaultSchema("TEST")
+            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .build();
 
         Widget sprocket = new Widget(1001L, "Sprocket", 4L, Optional.empty());
-        database.insert(sqlExecutor, sprocket);
+        database.insert(sprocket);
 
         Optional<Widget> widgetNumberOne = database.from(Widget.class)
             .where(Widget::widgetId).isEqualTo(1001L)
-            .optional(sqlExecutor);
+            .optional();
 
         List<Widget> sprockets = database.from(Widget.class)
             .where(Widget::name).isEqualTo("Sprocket")
-            .list(sqlExecutor);
+            .list();
 
         assertThat(widgetNumberOne.isPresent(), is(true));
         assertThat(widgetNumberOne.map(Widget::name), is(Optional.of("Sprocket")));
@@ -97,24 +100,30 @@ public class InsertionExample {
 
     @Test
     public void insertSomeGizmosAndReadThemBack() {
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
-        database.insert(sqlExecutor, new Manufacturer(2004L, "Gizmos Inc"));
-        database.insert(sqlExecutor, new Manufacturer(2005L, "Acme Inc"));
-        database.insert(sqlExecutor, new Widget(1003L, "Gizmo", 2004L, Optional.empty()));
-        database.insert(sqlExecutor, new Widget(1004L, "Gizmo", 2005L, Optional.of("Acme Gizmo")));
-        database.insert(sqlExecutor, new Widget(1005L, "Gizmo", 2005L, Optional.of("Acme Gizmo Mk II")));
+        Database database = Database.newBuilder()
+            .defaultSchema("TEST")
+            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .build();
+        ZonedDateTime start = ZonedDateTime.now(ZoneOffset.UTC);
+        database.insert(new Manufacturer(2004L, "Gizmos Inc"));
+        database.insert(new Manufacturer(2005L, "Acme Inc"));
+        database.insert(new Widget(1003L, "Gizmo", 2004L, Optional.empty()));
+        database.insert(new Widget(1004L, "Gizmo", 2005L, Optional.of("Acme Gizmo")));
+        database.insert(new Widget(1005L, "Gizmo", 2005L, Optional.of("Acme Gizmo Mk II")));
+        ZonedDateTime end = ZonedDateTime.now(ZoneOffset.UTC);
 
-        List<Tuple2<String,String>> makersOfGizmos = database.from(Widget.class, "w")
+        List<Tuple3<String,String,ZonedDateTime>> makersOfGizmos = database.from(Widget.class, "w")
             .join(Manufacturer.class, "m").on(Manufacturer::manufacturerId).isEqualTo(Widget::manufacturerId)
-            .select(Manufacturer::name).comma(Widget::description)
+            .select(Manufacturer::name).comma(Widget::description).comma(Manufacturer::insertionTs)
             .where(Widget::name).isEqualTo("Gizmo")
             .orderBy(Widget::widgetId)
-            .list(sqlExecutor);
+            .list();
 
         assertThat(makersOfGizmos, hasSize(3));
         assertThat(makersOfGizmos.get(0).item1(), is("Gizmos Inc"));
         assertThat(makersOfGizmos.get(1).item1(), is("Acme Inc"));
         assertThat(makersOfGizmos.get(2).item1(), is("Acme Inc"));
+        assertThat(makersOfGizmos.get(0).item3().isBefore(start), is(false));
+        assertThat(makersOfGizmos.get(0).item3().isAfter(end), is(false));
     }
 }

@@ -22,13 +22,18 @@
 
 package com.cadenzauk.siesta.example;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 public class Manufacturer {
     private long manufacturerId;
     private String name;
+    private ZonedDateTime insertionTs;
 
     public Manufacturer(long manufacturerId, String name) {
         this.manufacturerId = manufacturerId;
         this.name = name;
+        insertionTs = ZonedDateTime.now(ZoneOffset.UTC);
     }
 
     public long manufacturerId() {
@@ -37,5 +42,9 @@ public class Manufacturer {
 
     public String name() {
         return name;
+    }
+
+    public ZonedDateTime insertionTs() {
+        return insertionTs;
     }
 }

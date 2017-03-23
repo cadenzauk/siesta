@@ -50,11 +50,13 @@ public class Database {
     private final String defaultSchema;
     private final NamingStrategy namingStrategy;
     private final Dialect dialect;
+    private final Optional<SqlExecutor> defaultSqlExecutor;
 
     private Database(Builder builder) {
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
         dialect = builder.dialect;
+        defaultSqlExecutor = builder.defaultSqlExecutor;
         builder.tables.forEach(t -> t.accept(this));
         builder.converters.forEach(dataTypeRegistry::register);
     }
@@ -148,10 +150,20 @@ public class Database {
         return table(methodInfo.declaringClass()).column(methodInfo);
     }
 
+    public SqlExecutor getDefaultSqlExecutor() {
+        return defaultSqlExecutor.orElseThrow(() -> new IllegalStateException("Default SQL executor has not been set."));
+    }
+
     @SuppressWarnings("unchecked")
     public <R> void insert(SqlExecutor sqlExecutor, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         table(rowClass).insert(sqlExecutor, row);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> void insert(R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        table(rowClass).insert(getDefaultSqlExecutor(), row);
     }
 
     public <R> ExpectingJoin1<R> from(Class<R> rowClass) {
@@ -178,6 +190,7 @@ public class Database {
         private String defaultSchema;
         private NamingStrategy namingStrategy = new UppercaseUnderscores();
         private Dialect dialect = new AnsiDialect();
+        private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
         private final List<Consumer<Database>> tables = new ArrayList<>();
         private final List<AttributeConverter<?,?>> converters = new ArrayList<>();
 
@@ -186,6 +199,11 @@ public class Database {
 
         public Builder defaultSchema(String val) {
             defaultSchema = val;
+            return this;
+        }
+
+        public Builder defaultSqlExecutor(SqlExecutor val) {
+            defaultSqlExecutor = Optional.ofNullable(val);
             return this;
         }
 
@@ -199,7 +217,7 @@ public class Database {
             return this;
         }
 
-        public <R,B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+        public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
             tables.add(database -> database.table(rowClass, init));
             return this;
         }
