@@ -23,13 +23,27 @@
 package com.cadenzauk.siesta.testmodel;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
+
+import javax.sql.DataSource;
 
 public class TestDatabase {
+    public static Database testDatabase(DataSource dataSource) {
+        return testDatabaseBuilder()
+            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .build();
+    }
+
     public static Database testDatabase() {
+        return testDatabaseBuilder()
+            .build();
+    }
+
+    private static Database.Builder testDatabaseBuilder() {
         return Database.newBuilder().defaultSchema("TEST")
             .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
             .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build))
-            .build();
+            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
+            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
     }
 }

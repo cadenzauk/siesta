@@ -22,12 +22,17 @@
 
 package com.cadenzauk.core.reflect.util;
 
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.core.util.UtilityClass;
 import com.google.common.collect.ImmutableMap;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.joining;
 
 public final class TypeUtil extends UtilityClass {
     private static final Map<Class<?>,Class<?>> PRIMITIVE_TO_BOXED = ImmutableMap.<Class<?>,Class<?>>builder()
@@ -43,11 +48,19 @@ public final class TypeUtil extends UtilityClass {
 
     @SuppressWarnings("unchecked")
     public static <V> Class<V> boxedType(Class<V> primitiveType) {
-        return Optional.ofNullable((Class<V>)PRIMITIVE_TO_BOXED.get(primitiveType))
+        return Optional.ofNullable((Class<V>) PRIMITIVE_TO_BOXED.get(primitiveType))
             .orElse(primitiveType);
     }
 
     public static Class<?> actualTypeArgument(ParameterizedType parameterizedType, int i) {
         return (Class<?>) parameterizedType.getActualTypeArguments()[i];
+    }
+
+    public static String toString(Type type) {
+        return OptionalUtil.as(ParameterizedType.class, type)
+            .map(p -> toString(p.getRawType()) + "<" + Arrays.stream(p.getActualTypeArguments()).map(TypeUtil::toString).collect(joining(",")) + ">")
+            .orElseGet(() -> OptionalUtil.as(Class.class, type)
+                .map(Class::getSimpleName)
+                .orElseGet(type::getTypeName));
     }
 }

@@ -36,6 +36,7 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.collect.Iterables;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -91,6 +92,10 @@ public class Select<RT> implements TypedExpression<RT> {
 
     Optional<RT> optional(SqlExecutor sqlExecutor) {
         return OptionalUtil.ofOnly(list(sqlExecutor));
+    }
+
+    public RT single(SqlExecutor sqlExecutor) {
+        return Iterables.getOnlyElement(list(sqlExecutor));
     }
 
     From from() {

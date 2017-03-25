@@ -24,6 +24,7 @@ package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
+import com.cadenzauk.core.reflect.util.TypeUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -49,6 +50,11 @@ public class FieldInfo<C, F> {
         this.field = field;
         this.effectiveType = effectiveType;
         this.optionalGetter = Getter.forField(declaringClass, effectiveType, field);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s.%s", TypeUtil.toString(field.getGenericType()), TypeUtil.toString(field.getDeclaringClass()), field.getName());
     }
 
     public Class<C> declaringClass() {

@@ -41,6 +41,18 @@
             <column name="INSERTION_TS" type="TIMESTAMP"/>
         </createTable>
 
+        <createTable tableName="PART" schemaName="TEST">
+            <column name="PART_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="WIDGET_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
         <createTable tableName="MANUFACTURER" schemaName="TEST">
             <column name="MANUFACTURER_ID" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>

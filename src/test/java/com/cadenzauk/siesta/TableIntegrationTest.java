@@ -27,55 +27,18 @@ import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import com.cadenzauk.siesta.testmodel.WidgetViewRow;
-import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.annotation.Resource;
-import javax.sql.DataSource;
 import java.util.Optional;
 
 import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-public class TableIntegrationTest {
-    @Configuration
-    public static class Config {
-        @Bean
-        public DataSource dataSource() {
-            EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-            return builder
-                .setType(EmbeddedDatabaseType.H2)
-                .addScript("classpath:/create-test-schema.ddl")
-                .build();
-        }
-
-        @Bean
-        public SpringLiquibase springLiquibase() {
-            SpringLiquibase springLiquibase = new SpringLiquibase();
-            springLiquibase.setDataSource(dataSource());
-            springLiquibase.setChangeLog("classpath:/changelog-test.xml");
-            springLiquibase.setDefaultSchema("TEST");
-            return springLiquibase;
-        }
-    }
-
-    @Resource
-    private DataSource dataSource;
-
+public class TableIntegrationTest extends IntegrationTest {
     @Test
     public void selectFromDatabaseOneTable() {
-        Database database = testDatabase();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        Database database = testDatabase(dataSource);
 
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(1)
@@ -84,19 +47,18 @@ public class TableIntegrationTest {
             .description(Optional.of("Thingamibob"))
             .build();
 
-        database.insert(sqlExecutor, aWidget);
+        database.insert(aWidget);
 
         Optional<WidgetRow> theSame = database.from(WidgetRow.class)
             .where(WidgetRow::widgetId).isEqualTo(1L)
-            .optional(sqlExecutor);
+            .optional();
 
         assertThat(theSame, is(Optional.of(aWidget)));
     }
 
     @Test
     public void selectFromDatabaseTwoTables() {
-        Database database = testDatabase();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        Database database = testDatabase(dataSource);
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
             .manufacturerId(2)
             .name(Optional.of("Makers"))
@@ -107,8 +69,8 @@ public class TableIntegrationTest {
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
-        database.insert(sqlExecutor, aManufacturer);
-        database.insert(sqlExecutor, aWidget);
+        database.insert(aManufacturer);
+        database.insert(aWidget);
 
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
@@ -117,7 +79,7 @@ public class TableIntegrationTest {
             .on(m, ManufacturerRow::manufacturerId).isEqualTo(w, WidgetRow::manufacturerId)
             .where(w, WidgetRow::name).isEqualTo("Dodacky")
             .and(w, WidgetRow::widgetId).isEqualTo(2L)
-            .optional(sqlExecutor)
+            .optional()
             .map(Tuple2::item1);
 
         assertThat(theSame, is(Optional.of(aWidget)));
@@ -125,25 +87,24 @@ public class TableIntegrationTest {
 
     @Test
     public void update() {
-        Database database = testDatabase();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        Database database = testDatabase(dataSource);
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(3)
             .manufacturerId(2)
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
-        database.insert(sqlExecutor, aWidget);
+        database.insert(aWidget);
 
         database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Sprocket")
             .set(WidgetRow::description).toNull()
             .where(WidgetRow::widgetId).isEqualTo(3L)
-            .execute(sqlExecutor);
+            .execute();
 
         Optional<WidgetRow> sprocket = database.from(WidgetRow.class)
             .where(WidgetRow::widgetId).isEqualTo(3L)
-            .optional(sqlExecutor);
+            .optional();
 
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
         assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
@@ -151,8 +112,7 @@ public class TableIntegrationTest {
 
     @Test
     public void selectIntoView() {
-        Database database = testDatabase();
-        SqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        Database database = testDatabase(dataSource);
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
             .manufacturerId(5)
             .name(Optional.of("Acme"))
@@ -163,8 +123,8 @@ public class TableIntegrationTest {
             .name("Gizmo")
             .description(Optional.of("Acme's Patent Gizmo"))
             .build();
-        database.insert(sqlExecutor, aManufacturer);
-        database.insert(sqlExecutor, aWidget);
+        database.insert(aManufacturer);
+        database.insert(aWidget);
 
         Optional<WidgetViewRow> gizmo = database
             .from(WidgetRow.class, "w")
@@ -176,7 +136,7 @@ public class TableIntegrationTest {
             .with(WidgetRow::manufacturerId).as(WidgetViewRow::manufacturerId)
             .with(ManufacturerRow::name).as(WidgetViewRow::manufacturerName)
             .where(WidgetRow::widgetId).isEqualTo(4L)
-            .optional(sqlExecutor);
+            .optional();
 
         assertThat(gizmo.map(WidgetViewRow::widgetName), is(Optional.of("Gizmo")));
         assertThat(gizmo.flatMap(WidgetViewRow::manufacturerName), is(Optional.of("Acme")));

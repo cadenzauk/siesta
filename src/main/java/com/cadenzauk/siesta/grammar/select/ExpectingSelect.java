@@ -36,7 +36,7 @@ import com.cadenzauk.siesta.projection.DynamicProjection;
 
 import java.util.Optional;
 
-public class ExpectingSelect<RT> extends ExpectingWhere<RT> {
+public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     public ExpectingSelect(Select<RT> select) {
         super(select);
     }

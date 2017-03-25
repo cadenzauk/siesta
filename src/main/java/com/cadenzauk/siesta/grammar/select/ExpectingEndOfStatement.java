@@ -56,6 +56,14 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
         return statement.optional(sqlExecutor);
     }
 
+    public RT single() {
+        return single(defaultSqlExecutor());
+    }
+
+    private RT single(SqlExecutor sqlExecutor) {
+        return statement.single(sqlExecutor);
+    }
+
     public String sql() {
         return statement.sql();
     }

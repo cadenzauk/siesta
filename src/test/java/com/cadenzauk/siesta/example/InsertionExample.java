@@ -24,19 +24,10 @@ package com.cadenzauk.siesta.example;
 
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.IntegrationTest;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
-import liquibase.integration.spring.SpringLiquibase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.annotation.Resource;
-import javax.sql.DataSource;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -46,34 +37,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-public class InsertionExample {
-    @Configuration
-    public static class Config {
-        @Bean
-        public DataSource dataSource() {
-            EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-            return builder
-                .setType(EmbeddedDatabaseType.H2)
-                .addScript("classpath:/create-test-schema.ddl")
-                .build();
-        }
-
-        @Bean
-        public SpringLiquibase springLiquibase() {
-            SpringLiquibase springLiquibase = new SpringLiquibase();
-            springLiquibase.setDataSource(dataSource());
-            springLiquibase.setChangeLog("classpath:/changelog-test.xml");
-            springLiquibase.setDefaultSchema("TEST");
-            springLiquibase.setDropFirst(true);
-            return springLiquibase;
-        }
-    }
-
-    @Resource
-    private DataSource dataSource;
-
+public class InsertionExample extends IntegrationTest {
     @Test
     public void insertOneRowAndReadItBack() {
         Database database = Database.newBuilder()

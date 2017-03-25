@@ -40,10 +40,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -228,8 +230,23 @@ public class Table<R> {
                 .filter(f -> !Modifier.isStatic(f.getModifiers()))
                 .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
                 .filter(f -> !excludedFields.contains(f.getName()))
-                .forEach(f -> columns.add(TableColumn.fromField(database, rowClass, builderClass, f)));
+                .filter(f -> Collection.class.isAssignableFrom(f.getType()))
+                .forEach(f -> excludedFields.add(f.getName()));
+            mappedClasses(rowClass)
+                .flatMap(cls -> Arrays.stream(cls.getDeclaredFields()))
+                .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
+                .filter(f -> !excludedFields.contains(f.getName()))
+                .forEach(this::addField);
             return new Table<>(this);
+        }
+
+        private void addField(Field field) {
+            if (Collection.class.isAssignableFrom(field.getType())) {
+                // TODO! add collection support
+                return;
+            }
+            columns.add(TableColumn.fromField(database, rowClass, builderClass, field));
         }
 
         private Stream<Class<?>> mappedClasses(Class<?> startingWith) {

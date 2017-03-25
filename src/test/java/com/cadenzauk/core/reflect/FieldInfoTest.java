@@ -43,6 +43,26 @@ import static org.mockito.Mockito.when;
 
 public class FieldInfoTest {
     @Test
+    public void toStringGeneric() throws Exception {
+        Field field = optionalStringField();
+        FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
+
+        String result = fieldInfo.toString();
+
+        assertThat(result, is("Optional<String> ClassWithField.optionalString"));
+    }
+
+    @Test
+    public void toStringNonGeneric() throws Exception {
+        Field field = stringField();
+        FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
+
+        String result = fieldInfo.toString();
+
+        assertThat(result, is("String ClassWithField.string"));
+    }
+
+    @Test
     public void optionalGetterOnOptionalField() {
         Field field = optionalStringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);

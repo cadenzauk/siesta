@@ -36,6 +36,10 @@ public abstract class Clause<U> {
         return statement.execute(sqlExecutor);
     }
 
+    public int execute() {
+        return statement.execute(database().getDefaultSqlExecutor());
+    }
+
     public String sql() {
         return statement.sql();
     }
