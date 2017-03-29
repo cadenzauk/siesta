@@ -51,6 +51,7 @@ public class Select<RT> implements TypedExpression<RT> {
     protected final From from;
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
+    private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
     private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
     private BooleanExpression whereClause;
 
@@ -121,6 +122,10 @@ public class Select<RT> implements TypedExpression<RT> {
         return rowMapper;
     }
 
+    <T> void addGroupBy(TypedExpression<T> expression) {
+        groupByClauses.add(expression);
+    }
+
     <T> void addOrderBy(TypedExpression<T> expression, Order order) {
         orderByClauses.add(new Ordering<>(expression, order));
     }
@@ -153,6 +158,13 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     @NotNull
+    private String groupByClauseSql(Scope scope) {
+        return groupByClauses.isEmpty()
+            ? ""
+            : " group by " + groupByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
+    }
+
+    @NotNull
     private String orderByClauseSql(Scope scope) {
         return orderByClauses.isEmpty()
             ? ""
@@ -160,10 +172,11 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     private String sqlImpl(Scope actualScope) {
-        return String.format("select %s from %s%s%s",
+        return String.format("select %s from %s%s%s%s",
             projection().sql(actualScope),
             from.sql(actualScope),
             whereClauseSql(actualScope),
+            groupByClauseSql(actualScope),
             orderByClauseSql(actualScope));
     }
 

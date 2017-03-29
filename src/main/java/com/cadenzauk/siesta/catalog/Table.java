@@ -230,13 +230,6 @@ public class Table<R> {
                 .filter(f -> !Modifier.isStatic(f.getModifiers()))
                 .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
                 .filter(f -> !excludedFields.contains(f.getName()))
-                .filter(f -> Collection.class.isAssignableFrom(f.getType()))
-                .forEach(f -> excludedFields.add(f.getName()));
-            mappedClasses(rowClass)
-                .flatMap(cls -> Arrays.stream(cls.getDeclaredFields()))
-                .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
-                .filter(f -> !excludedFields.contains(f.getName()))
                 .forEach(this::addField);
             return new Table<>(this);
         }

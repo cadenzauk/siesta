@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.grammar.select.ExpectingOrderBy;
+import com.cadenzauk.siesta.grammar.select.ExpectingGroupBy;
 import com.cadenzauk.siesta.grammar.select.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
@@ -219,7 +219,7 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingOrderBy<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
+    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingGroupBy<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
         return new Object[] { f, expected };
     }
 

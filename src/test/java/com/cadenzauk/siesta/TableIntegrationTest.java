@@ -23,14 +23,17 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
+import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import com.cadenzauk.siesta.testmodel.WidgetViewRow;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Optional;
 
+import static com.cadenzauk.siesta.Aggregates.max;
+import static com.cadenzauk.siesta.Aggregates.min;
 import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -141,5 +144,42 @@ public class TableIntegrationTest extends IntegrationTest {
         assertThat(gizmo.map(WidgetViewRow::widgetName), is(Optional.of("Gizmo")));
         assertThat(gizmo.flatMap(WidgetViewRow::manufacturerName), is(Optional.of("Acme")));
         assertThat(gizmo.flatMap(WidgetViewRow::description), is(Optional.of("Acme's Patent Gizmo")));
+    }
+
+    @Test
+    public void groupBy() {
+        Database database = testDatabase(dataSource);
+        WidgetRow aWidget1 = WidgetRow.newBuilder()
+            .widgetId(5)
+            .manufacturerId(7)
+            .name("Grouper 1")
+            .build();
+        WidgetRow aWidget2 = WidgetRow.newBuilder()
+            .widgetId(6)
+            .manufacturerId(7)
+            .name("Grouper 2")
+            .build();
+        WidgetRow aWidget3 = WidgetRow.newBuilder()
+            .widgetId(7)
+            .manufacturerId(8)
+            .name("Grouper 3")
+            .build();
+        database.insert(aWidget1);
+        database.insert(aWidget2);
+        database.insert(aWidget3);
+
+        List<Tuple3<Long,String,String>> result = database.from(WidgetRow.class)
+            .select(WidgetRow::manufacturerId).comma(max(WidgetRow::name)).comma(min(WidgetRow::name))
+            .where(WidgetRow::widgetId).isIn(5L, 6L, 7L)
+            .groupBy(WidgetRow::manufacturerId)
+            .orderBy(WidgetRow::manufacturerId, Order.DESC).then(max(WidgetRow::name)).then(min(WidgetRow::name))
+            .list();
+
+        assertThat(result.get(0).item1(), is(8L));
+        assertThat(result.get(0).item2(), is("Grouper 3"));
+        assertThat(result.get(0).item3(), is("Grouper 3"));
+        assertThat(result.get(1).item1(), is(7L));
+        assertThat(result.get(1).item2(), is("Grouper 2"));
+        assertThat(result.get(1).item3(), is("Grouper 1"));
     }
 }

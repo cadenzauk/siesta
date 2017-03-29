@@ -90,7 +90,7 @@ public class WidgetRow {
         private long widgetId;
         private String name;
         private long manufacturerId;
-        private Optional<String> description;
+        private Optional<String> description = Optional.empty();
 
         private Builder() {
         }

@@ -28,9 +28,9 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-public abstract class ExpectingOrderBy<RT> extends ExpectingEndOfStatement<RT> {
-    public ExpectingOrderBy(Select<RT> select) {
-        super(select);
+public class ExpectingOrderBy<RT> extends ExpectingEndOfStatement<RT> {
+    public ExpectingOrderBy(Select<RT> statement) {
+        super(statement);
     }
 
     public <T> InOrderByExpectingThen<RT> orderBy(TypedExpression<T> expression) {
