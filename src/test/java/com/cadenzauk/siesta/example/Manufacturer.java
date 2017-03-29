@@ -26,9 +26,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Manufacturer {
-    private long manufacturerId;
-    private String name;
-    private ZonedDateTime insertionTs;
+    private final long manufacturerId;
+    private final String name;
+    private final ZonedDateTime insertionTs;
 
     public Manufacturer(long manufacturerId, String name) {
         this.manufacturerId = manufacturerId;

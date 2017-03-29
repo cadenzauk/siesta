@@ -25,10 +25,10 @@ package com.cadenzauk.siesta.example;
 import java.util.Optional;
 
 public class Widget {
-    private long widgetId;
-    private String name;
-    private long manufacturerId;
-    private Optional<String> description;
+    private final long widgetId;
+    private final String name;
+    private final long manufacturerId;
+    private final Optional<String> description;
 
     public Widget(long widgetId, String name, long manufacturerId, Optional<String> description) {
         this.widgetId = widgetId;
