@@ -31,7 +31,10 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
+import static com.cadenzauk.siesta.Aggregates.count;
+import static com.cadenzauk.siesta.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.Aggregates.max;
 import static com.cadenzauk.siesta.Aggregates.min;
 import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
@@ -39,13 +42,15 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class TableIntegrationTest extends IntegrationTest {
+    private static AtomicLong ids = new AtomicLong();
+
     @Test
     public void selectFromDatabaseOneTable() {
         Database database = testDatabase(dataSource);
 
         WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(1)
-            .manufacturerId(2)
+            .widgetId(newId())
+            .manufacturerId(newId())
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
@@ -53,7 +58,7 @@ public class TableIntegrationTest extends IntegrationTest {
         database.insert(aWidget);
 
         Optional<WidgetRow> theSame = database.from(WidgetRow.class)
-            .where(WidgetRow::widgetId).isEqualTo(1L)
+            .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
             .optional();
 
         assertThat(theSame, is(Optional.of(aWidget)));
@@ -62,13 +67,14 @@ public class TableIntegrationTest extends IntegrationTest {
     @Test
     public void selectFromDatabaseTwoTables() {
         Database database = testDatabase(dataSource);
+        long manufacturerId = newId();
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
-            .manufacturerId(2)
+            .manufacturerId(manufacturerId)
             .name(Optional.of("Makers"))
             .build();
         WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(2)
-            .manufacturerId(2)
+            .widgetId(newId())
+            .manufacturerId(manufacturerId)
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
@@ -81,7 +87,7 @@ public class TableIntegrationTest extends IntegrationTest {
             .join(m)
             .on(m, ManufacturerRow::manufacturerId).isEqualTo(w, WidgetRow::manufacturerId)
             .where(w, WidgetRow::name).isEqualTo("Dodacky")
-            .and(w, WidgetRow::widgetId).isEqualTo(2L)
+            .and(w, WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
             .optional()
             .map(Tuple2::item1);
 
@@ -92,8 +98,8 @@ public class TableIntegrationTest extends IntegrationTest {
     public void update() {
         Database database = testDatabase(dataSource);
         WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(3)
-            .manufacturerId(2)
+            .widgetId(newId())
+            .manufacturerId(newId())
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
@@ -102,11 +108,11 @@ public class TableIntegrationTest extends IntegrationTest {
         database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Sprocket")
             .set(WidgetRow::description).toNull()
-            .where(WidgetRow::widgetId).isEqualTo(3L)
+            .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
             .execute();
 
         Optional<WidgetRow> sprocket = database.from(WidgetRow.class)
-            .where(WidgetRow::widgetId).isEqualTo(3L)
+            .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
             .optional();
 
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
@@ -116,13 +122,14 @@ public class TableIntegrationTest extends IntegrationTest {
     @Test
     public void selectIntoView() {
         Database database = testDatabase(dataSource);
+        long manufacturerId = newId();
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
-            .manufacturerId(5)
+            .manufacturerId(manufacturerId)
             .name(Optional.of("Acme"))
             .build();
         WidgetRow aWidget = WidgetRow.newBuilder()
-            .widgetId(4)
-            .manufacturerId(5)
+            .widgetId(newId())
+            .manufacturerId(manufacturerId)
             .name("Gizmo")
             .description(Optional.of("Acme's Patent Gizmo"))
             .build();
@@ -138,7 +145,7 @@ public class TableIntegrationTest extends IntegrationTest {
             .with(WidgetRow::description).as(WidgetViewRow::description)
             .with(WidgetRow::manufacturerId).as(WidgetViewRow::manufacturerId)
             .with(ManufacturerRow::name).as(WidgetViewRow::manufacturerName)
-            .where(WidgetRow::widgetId).isEqualTo(4L)
+            .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
             .optional();
 
         assertThat(gizmo.map(WidgetViewRow::widgetName), is(Optional.of("Gizmo")));
@@ -149,19 +156,21 @@ public class TableIntegrationTest extends IntegrationTest {
     @Test
     public void groupBy() {
         Database database = testDatabase(dataSource);
+        long manufacturer1 = newId();
+        long manufacturer2 = newId();
         WidgetRow aWidget1 = WidgetRow.newBuilder()
-            .widgetId(5)
-            .manufacturerId(7)
+            .widgetId(newId())
+            .manufacturerId(manufacturer1)
             .name("Grouper 1")
             .build();
         WidgetRow aWidget2 = WidgetRow.newBuilder()
-            .widgetId(6)
-            .manufacturerId(7)
+            .widgetId(newId())
+            .manufacturerId(manufacturer1)
             .name("Grouper 2")
             .build();
         WidgetRow aWidget3 = WidgetRow.newBuilder()
-            .widgetId(7)
-            .manufacturerId(8)
+            .widgetId(newId())
+            .manufacturerId(manufacturer2)
             .name("Grouper 3")
             .build();
         database.insert(aWidget1);
@@ -170,16 +179,59 @@ public class TableIntegrationTest extends IntegrationTest {
 
         List<Tuple3<Long,String,String>> result = database.from(WidgetRow.class)
             .select(WidgetRow::manufacturerId).comma(max(WidgetRow::name)).comma(min(WidgetRow::name))
-            .where(WidgetRow::widgetId).isIn(5L, 6L, 7L)
+            .where(WidgetRow::widgetId).isIn(aWidget1.widgetId(), aWidget2.widgetId(), aWidget3.widgetId())
             .groupBy(WidgetRow::manufacturerId)
             .orderBy(WidgetRow::manufacturerId, Order.DESC).then(max(WidgetRow::name)).then(min(WidgetRow::name))
             .list();
 
-        assertThat(result.get(0).item1(), is(8L));
+        assertThat(result.get(0).item1(), is(manufacturer2));
         assertThat(result.get(0).item2(), is("Grouper 3"));
         assertThat(result.get(0).item3(), is("Grouper 3"));
-        assertThat(result.get(1).item1(), is(7L));
+        assertThat(result.get(1).item1(), is(manufacturer1));
         assertThat(result.get(1).item2(), is("Grouper 2"));
         assertThat(result.get(1).item3(), is("Grouper 1"));
+    }
+
+    @Test
+    public void countAndCountDistinct() {
+        Database database = testDatabase(dataSource);
+        long manufacturer1 = newId();
+        long manufacturer2 = newId();
+        WidgetRow aWidget1 = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .manufacturerId(manufacturer1)
+            .name("Gizmo")
+            .build();
+        WidgetRow aWidget2 = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .manufacturerId(manufacturer1)
+            .name("Gizmo")
+            .build();
+        WidgetRow aWidget3 = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .manufacturerId(manufacturer2)
+            .name("Gizmo 2")
+            .build();
+        database.insert(aWidget1);
+        database.insert(aWidget2);
+        database.insert(aWidget3);
+
+        List<Tuple3<Long,Integer,Integer>> result = database.from(WidgetRow.class)
+            .select(WidgetRow::manufacturerId).comma(countDistinct(WidgetRow::name)).comma(count())
+            .where(WidgetRow::widgetId).isIn(aWidget1.widgetId(), aWidget2.widgetId(), aWidget3.widgetId())
+            .groupBy(WidgetRow::manufacturerId)
+            .orderBy(WidgetRow::manufacturerId, Order.ASC)
+            .list();
+
+        assertThat(result.get(0).item1(), is(manufacturer1));
+        assertThat(result.get(0).item2(), is(1));
+        assertThat(result.get(0).item3(), is(2));
+        assertThat(result.get(1).item1(), is(manufacturer2));
+        assertThat(result.get(1).item2(), is(1));
+        assertThat(result.get(1).item3(), is(1));
+    }
+
+    private static long newId() {
+        return ids.incrementAndGet();
     }
 }
