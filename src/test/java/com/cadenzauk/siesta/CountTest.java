@@ -34,7 +34,6 @@ import org.mockito.junit.MockitoRule;
 
 import static com.cadenzauk.siesta.Aggregates.count;
 import static com.cadenzauk.siesta.Aggregates.countDistinct;
-import static com.cadenzauk.siesta.Aggregates.max;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;

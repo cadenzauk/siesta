@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.example.Widget;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.TestDatabase;
 import com.cadenzauk.siesta.testmodel.WidgetRow;

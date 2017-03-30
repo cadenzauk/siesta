@@ -24,7 +24,9 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DynamicRowMapper;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.projection.DynamicProjection;
@@ -39,12 +41,32 @@ public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
         this.projection = projection;
     }
 
+    public <T> InSelectIntoExpectingAs<RT,T> with(TypedExpression<T> expression) {
+        return new InSelectIntoExpectingAs<>(this, expression);
+    }
+
     public <T, R> InSelectIntoExpectingAs<RT,T> with(Function1<R,T> methodReference) {
         return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(methodReference));
     }
 
     public <T, R> InSelectIntoExpectingAs<RT,T> with(FunctionOptional1<R,T> methodReference) {
         return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(methodReference));
+    }
+
+    public <T, R> InSelectIntoExpectingAs<RT,T> with(String alias, Function1<R,T> methodReference) {
+        return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InSelectIntoExpectingAs<RT,T> with(String alias, FunctionOptional1<R,T> methodReference) {
+        return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InSelectIntoExpectingAs<RT,T> with(Alias<R> alias, Function1<R,T> methodReference) {
+        return new InSelectIntoExpectingAs<>(this, ResolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InSelectIntoExpectingAs<RT,T> with(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return new InSelectIntoExpectingAs<>(this, ResolvedColumn.of(alias, methodReference));
     }
 
     <T> void select(TypedExpression<T> source, TypedExpression<T> target) {

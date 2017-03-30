@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -57,17 +58,30 @@ public class SelectProjectionTest {
     @Test
     public void projectColumns() {
         Database database = TestDatabase.testDatabase();
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
 
-        String sql = database.from(WidgetRow.class, "w")
-            .select(WidgetRow::name, "n").comma(WidgetRow::description, "d").comma(WidgetRow::manufacturerId, "m")
+        database.from(w)
+            .select(WidgetRow::name, "n1")
+            .comma(WidgetRow::description, "d1")
+            .comma(WidgetRow::manufacturerId, "m1")
+            .comma("w", WidgetRow::name, "n2")
+            .comma("w", WidgetRow::description, "d2")
+            .comma("w", WidgetRow::manufacturerId, "m2")
+            .comma(w, WidgetRow::name, "n3")
+            .comma(w, WidgetRow::description, "d3")
+            .comma(w, WidgetRow::manufacturerId, "m3")
             .where(WidgetRow::name).isEqualTo("Bob")
-            .sql();
+            .list(sqlExecutor);
 
-        assertThat(sql, is("select w.NAME as n, " +
-            "w.DESCRIPTION as d, " +
-            "w.MANUFACTURER_ID as m " +
+        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        assertThat(sql.getValue(), is("select " +
+            "w.NAME as n1, w.DESCRIPTION as d1, w.MANUFACTURER_ID as m1, " +
+            "w.NAME as n2, w.DESCRIPTION as d2, w.MANUFACTURER_ID as m2, " +
+            "w.NAME as n3, w.DESCRIPTION as d3, w.MANUFACTURER_ID as m3 " +
             "from TEST.WIDGET as w " +
             "where w.NAME = ?"));
+        assertThat(args.getValue(), arrayWithSize(1));
+        assertThat(args.getValue()[0], is("Bob"));
     }
 
     @Test
@@ -93,5 +107,6 @@ public class SelectProjectionTest {
             "m.NAME as v_MANUFACTURER_NAME " +
             "from TEST.WIDGET as w " +
             "join TEST.MANUFACTURER as m on m.MANUFACTURER_ID = w.MANUFACTURER_ID"));
+        assertThat(args.getValue(), arrayWithSize(0));
     }
 }
