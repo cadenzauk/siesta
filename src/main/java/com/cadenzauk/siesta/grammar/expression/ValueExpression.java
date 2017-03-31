@@ -20,36 +20,46 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.projection;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.tuple.Tuple;
-import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+public class ValueExpression<T> implements TypedExpression<T> {
+    private final T value;
 
-public class DynamicProjection implements Projection {
-    final List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
+    public ValueExpression(T value) {
+        this.value = value;
+        Objects.requireNonNull(value);
+    }
 
     @Override
     public String sql(Scope scope) {
-        return columns.stream()
-            .map(p -> p.map((s, t) -> s.sql(scope) + " as " + t.label(scope)))
-            .collect(joining(", "));
+        return "?";
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return columns.stream().flatMap(p -> p.item1().args(scope));
+        return Stream.of(scope.database().getDataTypeOf(value).toDatabase(value));
     }
 
-    public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {
-        columns.add(Tuple.of(source, target));
+    @Override
+    public Precedence precedence() {
+        return Precedence.COLUMN;
+    }
+
+    @Override
+    public String label(Scope scope) {
+        return "";
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        DataType<T> dataType = scope.database().getDataTypeOf(value);
+        return (rs, i) -> dataType.get(rs, label).orElse(null);
     }
 }

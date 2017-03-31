@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ExpressionProjection<T> implements Projection {
     private final TypedExpression<T> expression;
@@ -40,5 +41,10 @@ public class ExpressionProjection<T> implements Projection {
     @Override
     public String sql(Scope scope) {
         return String.format("%s as %s", expression.sql(scope), label.orElseGet(() -> expression.label(scope)));
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return expression.args(scope);
     }
 }

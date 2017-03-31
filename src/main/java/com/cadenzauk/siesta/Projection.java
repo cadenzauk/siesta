@@ -28,9 +28,12 @@ import com.cadenzauk.siesta.projection.ExpressionProjection;
 import com.cadenzauk.siesta.projection.ProjectionList;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface Projection {
     String sql(Scope scope);
+
+    Stream<Object> args(Scope scope);
 
     static <T> Projection of(TypedExpression<T> column) {
         return new ExpressionProjection<>(column, Optional.empty());

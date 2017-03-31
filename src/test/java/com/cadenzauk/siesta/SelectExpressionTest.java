@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import java.time.LocalDate;
 
+import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
 import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.is;
@@ -227,5 +228,19 @@ public class SelectExpressionTest {
             "from TEST.MANUFACTURER as m " +
             "where m.NAME between ? and ? " +
             "or m.CHECKED is null and m.MANUFACTURER_ID > ?"));
+    }
+
+    @Test
+    public void coalesceFunc() {
+        Database database = testDatabase();
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
+        String sql = database.from(w)
+            .select(coalesce(WidgetRow::name).orElse(WidgetRow::description).orElse("Bob"), "name")
+            .where(WidgetRow::manufacturerId).isEqualTo(2L)
+            .sql();
+
+        assertThat(sql, is("select coalesce(w.NAME, w.DESCRIPTION, ?) as name " +
+            "from TEST.WIDGET as w " +
+            "where w.MANUFACTURER_ID = ?"));
     }
 }

@@ -26,6 +26,7 @@ import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
@@ -41,5 +42,10 @@ public class ProjectionList implements Projection {
         return Arrays.stream(p)
             .map(x -> x.sql(scope))
             .collect(joining(", "));
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return Arrays.stream(p).flatMap(x -> x.args(scope));
     }
 }

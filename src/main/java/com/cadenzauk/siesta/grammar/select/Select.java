@@ -74,7 +74,9 @@ public class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Stream.concat(from.args(scope), whereClauseArgs());
+        return Stream.concat(
+            projection.args(scope),
+            Stream.concat(from.args(scope), whereClauseArgs()));
     }
 
     @Override

@@ -27,6 +27,8 @@ import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 
+import java.util.stream.Stream;
+
 import static java.util.stream.Collectors.joining;
 
 public class AliasColumns<R> implements Projection {
@@ -44,5 +46,10 @@ public class AliasColumns<R> implements Projection {
             .map(Column::name)
             .map(c -> String.format("%s as %s", alias.inSelectClauseSql(c), alias.inSelectClauseLabel(c)))
             .collect(joining(", "));
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return Stream.empty();
     }
 }
