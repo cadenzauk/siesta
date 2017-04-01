@@ -24,19 +24,19 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
-public class ConstructorUtilTest {
+class ConstructorUtilTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(ConstructorUtil.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
@@ -44,7 +44,7 @@ public class ConstructorUtilTest {
     }
 
     @Test
-    public void newInstanceWithNoArgs() throws Exception {
+    void newInstanceWithNoArgs() throws Exception {
         Constructor<ClassWithMultipleConstructors> constructor = ClassUtil.constructor(ClassWithMultipleConstructors.class)
             .orElseThrow(() -> new AssertionError("Failed to get constructor from " + ClassWithMultipleConstructors.class));
 
@@ -55,7 +55,7 @@ public class ConstructorUtilTest {
     }
 
     @Test
-    public void newInstanceWithArg() throws Exception {
+    void newInstanceWithArg() throws Exception {
         Constructor<ClassWithMultipleConstructors> constructor = ClassUtil.constructor(ClassWithMultipleConstructors.class, Integer.TYPE)
             .orElseThrow(() -> new AssertionError("Failed to get constructor from " + ClassWithMultipleConstructors.class));
 
@@ -66,7 +66,7 @@ public class ConstructorUtilTest {
     }
 
     @Test
-    public void newInstanceRethrowsIfConstructorThrows() {
+    void newInstanceRethrowsIfConstructorThrows() {
         Constructor<ClassWithMultipleConstructors> constructor = ClassUtil.constructor(ClassWithMultipleConstructors.class, String.class)
             .orElseThrow(() -> new AssertionError("Failed to get constructor from " + ClassWithMultipleConstructors.class));
 
@@ -77,7 +77,7 @@ public class ConstructorUtilTest {
     }
 
     @Test
-    public void newInstanceRethrowsIfNotInstantiated() {
+    void newInstanceRethrowsIfNotInstantiated() {
         Constructor<AnAbstractClass> constructor = ClassUtil.constructor(AnAbstractClass.class)
             .orElseThrow(() -> new AssertionError("Failed to get constructor from " + AnAbstractClass.class));
 

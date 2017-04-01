@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
@@ -30,28 +31,25 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AliasTest {
+class AliasTest extends MockitoTest {
     @Mock
     private Table<WidgetRow> widgetTable;
 
@@ -65,11 +63,10 @@ public class AliasTest {
     private Column<String,WidgetRow> widgetDescription;
 
     @Mock
-    private
-    RowMapper<WidgetRow> rowMapper;
+    private RowMapper<WidgetRow> rowMapper;
 
     @Test
-    public void inWhereClause() throws Exception {
+    void inWhereClause() throws Exception {
         when(widgetTable.qualifiedName()).thenReturn("SCHEMA.WIDGET");
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "bob");
 
@@ -79,7 +76,7 @@ public class AliasTest {
     }
 
     @Test
-    public void inSelectClauseSql() throws Exception {
+    void inSelectClauseSql() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
 
         String result = sut.inSelectClauseSql("WIDGET_ID");
@@ -88,7 +85,7 @@ public class AliasTest {
     }
 
     @Test
-    public void inSelectClauseLabel() throws Exception {
+    void inSelectClauseLabel() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
 
         String result = sut.inSelectClauseLabel("WIDGET_ID");
@@ -97,7 +94,7 @@ public class AliasTest {
     }
 
     @Test
-    public void col() throws Exception {
+    void col() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
@@ -110,7 +107,7 @@ public class AliasTest {
     }
 
     @Test
-    public void colOptional() throws Exception {
+    void colOptional() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
@@ -123,7 +120,7 @@ public class AliasTest {
     }
 
     @Test
-    public void columnDelegatesToTable() throws Exception {
+    void columnDelegatesToTable() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "joe");
         when(widgetTable.column(methodInfo)).thenReturn(widgetRowId);
 
@@ -135,7 +132,7 @@ public class AliasTest {
     }
 
     @Test
-    public void rowMapperDelegatesToTable() throws Exception {
+    void rowMapperDelegatesToTable() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "barney");
         when(widgetTable.rowMapper("barney_")).thenReturn(rowMapper);
 
@@ -148,7 +145,7 @@ public class AliasTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void asRightClassWithRightNameReturnsAlias() throws Exception {
+    void asRightClassWithRightNameReturnsAlias() throws Exception {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 
@@ -159,7 +156,7 @@ public class AliasTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void asDifferentClassWithWrongNameThrowsException() throws Exception {
+    void asDifferentClassWithWrongNameThrowsException() throws Exception {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 
@@ -171,7 +168,7 @@ public class AliasTest {
     }
 
     @Test
-    public void asRightClassWithDifferentNameReturnsEmpty() throws Exception {
+    void asRightClassWithDifferentNameReturnsEmpty() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "pebbles");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "dino").collect(toList());
@@ -180,7 +177,7 @@ public class AliasTest {
     }
 
     @Test
-    public void asDifferentClassWithDifferentNameReturnsEmpty() throws Exception {
+    void asDifferentClassWithDifferentNameReturnsEmpty() throws Exception {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "bambam");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class, "burt").collect(toList());
@@ -189,7 +186,7 @@ public class AliasTest {
     }
 
     @Test
-    public void asWithWrongClassReturnsEmpty() throws Exception {
+    void asWithWrongClassReturnsEmpty() throws Exception {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "bambam");
 
@@ -200,7 +197,7 @@ public class AliasTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void asWithSameClassReturnsAlias() throws Exception {
+    void asWithSameClassReturnsAlias() throws Exception {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 
@@ -211,7 +208,7 @@ public class AliasTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void asWithSuperClassReturnsAlias() throws Exception {
+    void asWithSuperClassReturnsAlias() throws Exception {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 

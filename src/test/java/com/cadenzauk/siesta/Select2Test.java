@@ -22,56 +22,57 @@
 
 package com.cadenzauk.siesta;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-public class Select2Test {
-    public static class Row1 {
+class Select2Test {
+    static class Row1 {
         private String name;
         private String description;
 
-        public String name() {
+        String name() {
             return name;
         }
 
-        public void setName(String name) {
+        void setName(String name) {
             this.name = name;
         }
 
-        public String description() {
+        String description() {
             return description;
         }
 
-        public void setDescription(String description) {
+        void setDescription(String description) {
             this.description = description;
         }
     }
 
-    public static class Row2 {
+    @SuppressWarnings("unused")
+    static class Row2 {
         private String name;
         private String description;
 
-        public String name() {
+        String name() {
             return name;
         }
 
-        public void setName(String name) {
+        void setName(String name) {
             this.name = name;
         }
 
-        public String description() {
+        String description() {
             return description;
         }
 
-        public void setDescription(String description) {
+        void setDescription(String description) {
             this.description = description;
         }
     }
 
     @Test
-    public void innerJoin() {
+    void innerJoin() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "r1")
@@ -82,7 +83,7 @@ public class Select2Test {
     }
 
     @Test
-    public void leftOuterJoin() {
+    void leftOuterJoin() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "r1")
@@ -93,7 +94,7 @@ public class Select2Test {
     }
 
     @Test
-    public void rightOuterJoin() {
+    void rightOuterJoin() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "r1")
@@ -104,7 +105,7 @@ public class Select2Test {
     }
 
     @Test
-    public void fullOuterJoin() {
+    void fullOuterJoin() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "r1")
@@ -115,7 +116,7 @@ public class Select2Test {
     }
 
     @Test
-    public void innerJoinWhereOneValue() {
+    void innerJoinWhereOneValue() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "r1")
@@ -127,7 +128,7 @@ public class Select2Test {
     }
 
     @Test
-    public void innerJoinWhereOneValueAndOneColumn() {
+    void innerJoinWhereOneValueAndOneColumn() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         String sql = database.from(Row1.class, "r1")

@@ -23,20 +23,20 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
-public class FactoryTest {
+class FactoryTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(Factory.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
@@ -44,7 +44,7 @@ public class FactoryTest {
 
     }
     @Test
-    public void forClassOnClassWithDefaultConstructor() {
+    void forClassOnClassWithDefaultConstructor() {
         Supplier<ClassWithMultipleConstructors> factory = Factory.forClass(ClassWithMultipleConstructors.class);
 
         ClassWithMultipleConstructors result = factory.get();
@@ -53,7 +53,7 @@ public class FactoryTest {
     }
 
     @Test
-    public void forClassOnClassWithNoDefaultConstructor() {
+    void forClassOnClassWithNoDefaultConstructor() {
         Supplier<NoDefaultConstructor> noDefaultConstructorSupplier = Factory.forClass(NoDefaultConstructor.class);
 
         NoDefaultConstructor noDefaultConstructor = noDefaultConstructorSupplier.get();

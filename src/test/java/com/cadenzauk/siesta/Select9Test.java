@@ -22,21 +22,22 @@
 
 package com.cadenzauk.siesta;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-public class Select9Test {
-    public static class Node {
+class Select9Test {
+    @SuppressWarnings("unused")
+    static class Node {
         private int id;
         private int parentId;
 
-        public int id() {
+        int id() {
             return id;
         }
 
-        public int parentId() {
+        int parentId() {
             return parentId;
         }
     }
@@ -44,7 +45,7 @@ public class Select9Test {
     private Database database = Database.newBuilder().defaultSchema("TEST9").build();
 
     @Test
-    public void canJoin9Tables() {
+    void canJoin9Tables() {
         Alias<Node> n1 = database.table(Node.class).as("n1");
         Alias<Node> n2 = database.table(Node.class).as("n2");
         Alias<Node> n3 = database.table(Node.class).as("n3");

@@ -22,32 +22,28 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin2;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
-@RunWith(JUnitParamsRunner.class)
-public class Select1Test {
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
-
+class Select1Test extends MockitoTest {
     @Mock
     private SqlExecutor sqlExecutor;
 
@@ -60,13 +56,12 @@ public class Select1Test {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private Object[] testCaseForJoin(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> f, String expected) {
-        return new Object[] { f, expected };
+    private Tuple2<BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>>,String> testCaseForJoin(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> f, String expected) {
+        return Tuple.of(f, expected);
     }
 
-    @SuppressWarnings("unused")
-    private Object[] parametersForJoin() {
-        return new Object[]{
+    private Stream<Tuple2<BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>>,String>> parametersForJoin() {
+        return Stream.of(
             testCaseForJoin((c, s) -> s.join(c).on(Parent::id).isEqualTo(Child::parentId), "join TEST.CHILD as c on p.ID = c.PARENT_ID"),
             testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "join TEST.CHILD as c on p.ID = c.PARENT_ID"),
             testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Child::aliasId).isEqualTo(Parent::id), "join TEST.CHILD as c on c.ALIAS_ID = p.ID"),
@@ -82,13 +77,18 @@ public class Select1Test {
             testCaseForJoin((c, s) -> s.rightJoin(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "right join TEST.CHILD as c on p.ID = c.PARENT_ID"),
 
             testCaseForJoin((c, s) -> s.fullOuterJoin(c).on(Parent::id).isEqualTo(Child::parentId), "full outer join TEST.CHILD as c on p.ID = c.PARENT_ID"),
-            testCaseForJoin((c, s) -> s.fullOuterJoin(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "full outer join TEST.CHILD as c on p.ID = c.PARENT_ID"),
-        };
+            testCaseForJoin((c, s) -> s.fullOuterJoin(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "full outer join TEST.CHILD as c on p.ID = c.PARENT_ID")
+        );
     }
 
-    @Test
-    @Parameters
-    public void join(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
+    @TestFactory
+    Stream<DynamicTest> join() {
+        return parametersForJoin().map(p -> DynamicTest.dynamicTest(p.toString(), () -> join(p.item1(), p.item2())));
+    }
+
+    private void join(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
+        MockitoAnnotations.initMocks(this);
+
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Parent> p = database.table(Parent.class).as("p");
         Alias<Child> c = database.table(Child.class).as("c");

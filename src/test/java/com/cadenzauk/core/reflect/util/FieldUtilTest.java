@@ -24,7 +24,7 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -33,13 +33,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-public class FieldUtilTest {
+class FieldUtilTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(FieldUtil.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
@@ -47,7 +47,7 @@ public class FieldUtilTest {
     }
 
     @Test
-    public void set() throws Exception {
+    void set() throws Exception {
         ClassWithStringField target = new ClassWithStringField();
         String value = UUID.randomUUID().toString();
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
@@ -58,7 +58,7 @@ public class FieldUtilTest {
     }
 
     @Test
-    public void get() throws Exception {
+    void get() throws Exception {
         ClassWithStringField target = new ClassWithStringField();
         String value = UUID.randomUUID().toString();
         target.setStringField(value);
@@ -70,7 +70,7 @@ public class FieldUtilTest {
     }
 
     @Test
-    public void hasAnnotationPresent() throws Exception {
+    void hasAnnotationPresent() throws Exception {
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
 
         boolean result = FieldUtil.hasAnnotation(XmlElement.class, field);
@@ -79,7 +79,7 @@ public class FieldUtilTest {
     }
 
     @Test
-    public void hasAnnotationNotPresent() throws Exception {
+    void hasAnnotationNotPresent() throws Exception {
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
 
         boolean result = FieldUtil.hasAnnotation(XmlAttribute.class, field);

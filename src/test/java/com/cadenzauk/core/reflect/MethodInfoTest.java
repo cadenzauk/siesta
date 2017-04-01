@@ -23,19 +23,19 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
-public class MethodInfoTest {
+class MethodInfoTest {
     @Test
-    public void annotationPresent() throws Exception {
+    void annotationPresent() throws Exception {
         MethodInfo<MethodInfoTestClass,String> methodInfo = MethodInfo.of(MethodInfoTestClass::methodWithAnnotation);
 
         Optional<XmlElement> annotation = methodInfo.annotation(XmlElement.class);
@@ -44,7 +44,7 @@ public class MethodInfoTest {
     }
 
     @Test
-    public void annotationNotPresent() throws Exception {
+    void annotationNotPresent() throws Exception {
         MethodInfo<MethodInfoTestClass,String> methodInfo = MethodInfo.of(MethodInfoTestClass::methodWithoutAnnotation);
 
         Optional<XmlElement> annotation = methodInfo.annotation(XmlElement.class);
@@ -53,7 +53,7 @@ public class MethodInfoTest {
     }
 
     @Test
-    public void findGetterForFieldNoPrefix() throws Exception {
+    void findGetterForFieldNoPrefix() throws Exception {
         Optional<MethodInfo<MethodInfoTestClass,String>> noprefix = MethodInfo.findGetterForField(FieldInfo.of(MethodInfoTestClass.class, "noprefix", String.class));
 
         assertThat(noprefix.isPresent(), is(true));
@@ -61,7 +61,7 @@ public class MethodInfoTest {
     }
 
     @Test
-    public void findGetterForFieldGetPrefix() throws Exception {
+    void findGetterForFieldGetPrefix() throws Exception {
         Optional<MethodInfo<MethodInfoTestClass,Integer>> noprefix = MethodInfo.findGetterForField(FieldInfo.of(MethodInfoTestClass.class, "prefixedWithGet", Integer.class));
 
         assertThat(noprefix.isPresent(), is(true));
@@ -69,7 +69,7 @@ public class MethodInfoTest {
     }
 
     @Test
-    public void findGetterForFieldIsPrefix() throws Exception {
+    void findGetterForFieldIsPrefix() throws Exception {
         Optional<MethodInfo<MethodInfoTestClass,Boolean>> noprefix = MethodInfo.findGetterForField(FieldInfo.of(MethodInfoTestClass.class, "prefixedWithIs", Boolean.TYPE));
 
         assertThat(noprefix.isPresent(), is(true));
@@ -77,7 +77,7 @@ public class MethodInfoTest {
     }
 
     @Test
-    public void ofNonOptional() throws Exception {
+    void ofNonOptional() throws Exception {
         MethodInfo<MethodInfoTestClass,String> result = MethodInfo.of(MethodInfoTestClass::string);
 
         assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
@@ -88,7 +88,7 @@ public class MethodInfoTest {
     }
 
     @Test
-    public void ofOptional() throws Exception {
+    void ofOptional() throws Exception {
         MethodInfo<MethodInfoTestClass,Integer> result = MethodInfo.of(MethodInfoTestClass::optionalInteger);
 
         assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
@@ -98,6 +98,7 @@ public class MethodInfoTest {
         assertThat(result.effectiveType(), equalTo(Integer.class));
     }
 
+    @SuppressWarnings("unused")
     private static class MethodInfoTestClass {
         private String noprefix;
         private Optional<Integer> prefixedWithGet;
@@ -120,15 +121,15 @@ public class MethodInfoTest {
             return "xmlElement";
         }
 
-        public String noprefix() {
+        String noprefix() {
             return noprefix;
         }
 
-        public Optional<Integer> getPrefixedWithGet() {
+        Optional<Integer> getPrefixedWithGet() {
             return prefixedWithGet;
         }
 
-        public boolean isPrefixedWithIs() {
+        boolean isPrefixedWithIs() {
             return prefixedWithIs;
         }
     }

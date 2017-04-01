@@ -24,48 +24,53 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.tuple.Tuple3;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitParamsRunner.class)
-public class TypeUtilTest {
+class TypeUtilTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(TypeUtil.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
             .withCause(RuntimeInstantiationException.class);
     }
 
-    @SuppressWarnings("unused")
-    private Object[] parametersForBoxedType() {
-        return new Object[]{
-            new Object[]{Long.TYPE, Long.class},
-            new Object[]{Integer.TYPE, Integer.class},
-            new Object[]{Short.TYPE, Short.class},
-            new Object[]{Byte.TYPE, Byte.class},
-            new Object[]{Double.TYPE, Double.class},
-            new Object[]{Float.TYPE, Float.class},
-            new Object[]{Character.TYPE, Character.class},
-            new Object[]{Boolean.TYPE, Boolean.class},
-        };
+    private Stream<Tuple2<Class<?>,Class<?>>> parametersForBoxedType() {
+        return Stream.of(
+            Tuple.of(Long.TYPE, Long.class),
+            Tuple.of(Integer.TYPE, Integer.class),
+            Tuple.of(Short.TYPE, Short.class),
+            Tuple.of(Byte.TYPE, Byte.class),
+            Tuple.of(Double.TYPE, Double.class),
+            Tuple.of(Float.TYPE, Float.class),
+            Tuple.of(Character.TYPE, Character.class),
+            Tuple.of(Boolean.TYPE, Boolean.class)
+        );
     }
 
-    @Test
-    @Parameters
-    public void boxedType(Class<?> unboxed, Class<?> expected) {
+    @TestFactory
+    Stream<DynamicTest> boxedType() {
+        return parametersForBoxedType().map(p -> DynamicTest.dynamicTest(p.toString(), () -> boxedType(p.item1(), p.item2())));
+    }
+
+    private void boxedType(Class<?> unboxed, Class<?> expected) {
         Class<?> result = TypeUtil.boxedType(unboxed);
 
         assertThat(result, equalTo(expected));
@@ -78,36 +83,22 @@ public class TypeUtilTest {
     @SuppressWarnings("unused")
     private List<Integer> integerList;
 
-    @SuppressWarnings("unused")
-    private Object[] parametersForActualTypeArgument() {
-        return new Object[]{
-            new Object[]{
-                ClassUtil.getDeclaredField(getClass(), "optionalString").getGenericType(),
-                0,
-                String.class
-            },
-            new Object[]{
-                ClassUtil.getDeclaredField(getClass(), "integerList").getGenericType(),
-                0,
-                Integer.class
-            },
-            new Object[]{
-                ClassUtil.getDeclaredField(getClass(), "longCharacterMap").getGenericType(),
-                0,
-                Long.class
-            },
-            new Object[]{
-                ClassUtil.getDeclaredField(getClass(), "longCharacterMap").getGenericType(),
-                1,
-                Character.class
-            },
-        };
+    private Stream<Tuple3<Type,Integer,Class<?>>> parametersForActualTypeArgument() {
+        return Stream.of(
+            Tuple.of(ClassUtil.getDeclaredField(getClass(), "optionalString").getGenericType(), 0, String.class),
+            Tuple.of(ClassUtil.getDeclaredField(getClass(), "integerList").getGenericType(), 0, Integer.class),
+            Tuple.of(ClassUtil.getDeclaredField(getClass(), "longCharacterMap").getGenericType(), 0, Long.class),
+            Tuple.of(ClassUtil.getDeclaredField(getClass(), "longCharacterMap").getGenericType(), 1, Character.class)
+        );
     }
 
-    @Test
-    @Parameters
-    public void actualTypeArgument(ParameterizedType input, int index, Class<?> expected) {
-        Class<?> result = TypeUtil.actualTypeArgument(input, index);
+    @TestFactory
+    Stream<DynamicTest> actualTypeArgument() {
+        return parametersForActualTypeArgument().map(p -> DynamicTest.dynamicTest(p.toString(), () -> actualTypeArgument(p.item1(), p.item2(), p.item3())));
+    }
+
+    private void actualTypeArgument(Type input, int index, Class<?> expected) {
+        Class<?> result = TypeUtil.actualTypeArgument((ParameterizedType) input, index);
 
         assertThat(result, equalTo(expected));
     }

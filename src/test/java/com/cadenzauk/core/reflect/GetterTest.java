@@ -23,7 +23,7 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -35,16 +35,16 @@ import java.util.function.Function;
 import static com.cadenzauk.core.reflect.util.ClassUtil.getDeclaredField;
 import static com.cadenzauk.core.reflect.util.MethodUtil.fromReference;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class GetterTest {
+class GetterTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(Getter.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
@@ -52,7 +52,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forFieldWithNoGetter() throws Exception {
+    void forFieldWithNoGetter() throws Exception {
         Function<GetterTestClass,Optional<String>> getter
             = Getter.forField(GetterTestClass.class, String.class, getDeclaredField(GetterTestClass.class, "fieldWithNoGetter"));
 
@@ -62,7 +62,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forFieldWithNoGetterGivenWrongType() {
+    void forFieldWithNoGetterGivenWrongType() {
         calling(() -> Getter.forField(GetterTestClass.class, Byte.class, getDeclaredField(GetterTestClass.class, "fieldWithNoGetter")))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Cannot convert private java.lang.String com.cadenzauk.core.reflect.GetterTest$GetterTestClass.fieldWithNoGetter " +
@@ -70,7 +70,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forOptionalFieldWithNoGetter() throws Exception {
+    void forOptionalFieldWithNoGetter() throws Exception {
         Function<GetterTestClass,Optional<Long>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Long.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithNoGetter"));
 
@@ -80,7 +80,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forFieldWithUnprefixedGetter() throws Exception {
+    void forFieldWithUnprefixedGetter() throws Exception {
         Function<GetterTestClass,Optional<BigDecimal>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, BigDecimal.class, getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -94,7 +94,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forOptionalFieldWithUnprefixedGetter() throws Exception {
+    void forOptionalFieldWithUnprefixedGetter() throws Exception {
         Function<GetterTestClass,Optional<Integer>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Integer.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithUnprefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -109,7 +109,7 @@ public class GetterTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void forFieldWithGetPrefixedGetter() throws Exception {
+    void forFieldWithGetPrefixedGetter() throws Exception {
         Function<GetterTestClass,Optional<Short>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Short.TYPE, getDeclaredField(GetterTestClass.class, "fieldWithGetPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -124,7 +124,7 @@ public class GetterTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void forOptionalFieldWithGetPrefixedGetter() throws Exception {
+    void forOptionalFieldWithGetPrefixedGetter() throws Exception {
         Function<GetterTestClass,Optional<LocalDate>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, LocalDate.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithGetPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -138,16 +138,16 @@ public class GetterTest {
     }
 
     @Test
-    public void forOptionalFieldWithGetPrefixedGetterGivenWrongType() {
+    void forOptionalFieldWithGetPrefixedGetterGivenWrongType() {
         calling(() -> Getter.forField(GetterTestClass.class, Byte.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithGetPrefixedGetter")))
             .shouldThrow(IllegalArgumentException.class)
-            .withMessage(is("Cannot convert public java.util.Optional com.cadenzauk.core.reflect.GetterTest$GetterTestClass.getOptionalFieldWithGetPrefixedGetter() " +
+            .withMessage(is("Cannot convert java.util.Optional com.cadenzauk.core.reflect.GetterTest$GetterTestClass.getOptionalFieldWithGetPrefixedGetter() " +
                 "into a Function<class com.cadenzauk.core.reflect.GetterTest$GetterTestClass,Optional<class java.lang.Byte>>."));
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void forFieldWithIsPrefixedGetter() throws Exception {
+    void forFieldWithIsPrefixedGetter() throws Exception {
         Function<GetterTestClass,Optional<Boolean>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Boolean.TYPE, getDeclaredField(GetterTestClass.class, "fieldWithIsPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -161,7 +161,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forOptionalFieldWithIsPrefixedGetter() throws Exception {
+    void forOptionalFieldWithIsPrefixedGetter() throws Exception {
         Function<GetterTestClass,Optional<Boolean>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Boolean.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithIsPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -175,7 +175,7 @@ public class GetterTest {
     }
 
     @Test
-    public void forFieldUsingSupertype() throws Exception {
+    void forFieldUsingSupertype() throws Exception {
         Function<GetterTestClass,Optional<Number>> getter
             = Getter.forField(GetterTestClass.class, Number.class, getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -189,7 +189,7 @@ public class GetterTest {
     }
 
     @Test
-    public void isGetter() throws Exception {
+    void isGetter() throws Exception {
         assertThat(Getter.isGetter(
             fromReference(GetterTestClass::fieldWithUnprefixedGetter),
             getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter")),
@@ -227,27 +227,27 @@ public class GetterTest {
         private boolean fieldWithIsPrefixedGetter;
         private Optional<Boolean> optionalFieldWithIsPrefixedGetter;
 
-        public BigDecimal fieldWithUnprefixedGetter() {
+        BigDecimal fieldWithUnprefixedGetter() {
             return fieldWithUnprefixedGetter;
         }
 
-        public Optional<Integer> optionalFieldWithUnprefixedGetter() {
+        Optional<Integer> optionalFieldWithUnprefixedGetter() {
             return optionalFieldWithUnprefixedGetter;
         }
 
-        public short getFieldWithGetPrefixedGetter() {
+        short getFieldWithGetPrefixedGetter() {
             return fieldWithGetPrefixedGetter;
         }
 
-        public Optional<LocalDate> getOptionalFieldWithGetPrefixedGetter() {
+        Optional<LocalDate> getOptionalFieldWithGetPrefixedGetter() {
             return optionalFieldWithGetPrefixedGetter;
         }
 
-        public boolean isFieldWithIsPrefixedGetter() {
+        boolean isFieldWithIsPrefixedGetter() {
             return fieldWithIsPrefixedGetter;
         }
 
-        public Optional<Boolean> isOptionalFieldWithIsPrefixedGetter() {
+        Optional<Boolean> isOptionalFieldWithIsPrefixedGetter() {
             return optionalFieldWithIsPrefixedGetter;
         }
     }

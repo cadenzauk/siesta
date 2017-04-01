@@ -22,42 +22,45 @@
 
 package com.cadenzauk.siesta;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-public class Select3Test {
-    public static class Foo {
+class Select3Test {
+    @SuppressWarnings("unused")
+    static class Foo {
         private int id;
 
-        public int id() {
+        int id() {
             return id;
         }
     }
 
-    public static class Bar {
+    @SuppressWarnings("unused")
+    static class Bar {
         private String id;
         private int fooId;
 
-        public String id() {
+        String id() {
             return id;
         }
 
-        public int fooId() {
+        int fooId() {
             return fooId;
         }
     }
 
-    public static class Baz {
+    @SuppressWarnings("unused")
+    static class Baz {
         private int id;
         private String barId;
 
-        public int id() {
+        int id() {
             return id;
         }
 
-        public String barId() {
+        String barId() {
             return barId;
         }
     }
@@ -65,7 +68,7 @@ public class Select3Test {
     private Database database = Database.newBuilder().defaultSchema("TEST").build();
 
     @Test
-    public void noWhereClause() {
+    void noWhereClause() {
         String sql = database.from(Foo.class, "f")
             .join(Bar.class, "b").on(Bar::fooId).isEqualTo(Foo::id)
             .join(Baz.class, "z").on(Baz::barId).isEqualTo(Bar::id).and(Baz::id).isEqualTo(1)
@@ -79,7 +82,7 @@ public class Select3Test {
     }
 
     @Test
-    public void whereClauseWithOneCondition() {
+    void whereClauseWithOneCondition() {
         String sql = database.from(Foo.class, "f")
             .join(Bar.class, "b").on(Bar::fooId).isEqualTo(Foo::id)
             .join(Baz.class, "z").on(Baz::barId).isEqualTo(Bar::id).and(Baz::id).isEqualTo(1)
@@ -96,7 +99,7 @@ public class Select3Test {
     }
 
     @Test
-    public void whereClauseWithTwoConditions() {
+    void whereClauseWithTwoConditions() {
         String sql = database.from(Foo.class, "f")
             .join(Bar.class, "b").on(Bar::fooId).isEqualTo(Foo::id)
             .join(Baz.class, "z").on(Baz::barId).isEqualTo(Bar::id).and(Baz::id).isEqualTo(1)
@@ -114,7 +117,7 @@ public class Select3Test {
     }
 
     @Test
-    public void whereClauseWithOrderBy() {
+    void whereClauseWithOrderBy() {
         String sql = database.from(Foo.class, "f")
             .join(Bar.class, "b").on(Bar::fooId).isEqualTo(Foo::id)
             .join(Baz.class, "z").on(Baz::barId).isEqualTo(Bar::id).and(Baz::id).isEqualTo(1)

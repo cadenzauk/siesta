@@ -23,11 +23,10 @@
 package com.cadenzauk.core.persistence.converter;
 
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple3;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -35,6 +34,7 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.stream.Stream;
 
 import static java.time.Month.DECEMBER;
 import static java.time.Month.FEBRUARY;
@@ -42,36 +42,37 @@ import static java.time.Month.JANUARY;
 import static java.time.Month.MARCH;
 import static java.time.Month.NOVEMBER;
 import static java.time.Month.OCTOBER;
-import static org.apache.commons.lang3.ArrayUtils.toArray;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitParamsRunner.class)
-public class LocalDateConverterTest extends TemporalConverterTest {
-    @SuppressWarnings("unused")
-    private Object[] parameters() {
-        return ArrayUtils.<Object>toArray(
-            toArray("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),
-            toArray("America/New_York", localDate(29, FEBRUARY, 2008), date(29, FEBRUARY, 2008, "America/New_York")),
-            toArray("America/New_York", localDate(3, NOVEMBER, 2007), date(3, NOVEMBER, 2007, "America/New_York")),
-            toArray("America/New_York", localDate(4, NOVEMBER, 2007), date(4, NOVEMBER, 2007, "America/New_York")),
-            toArray("America/New_York", localDate(5, NOVEMBER, 2007), date(5, NOVEMBER, 2007, "America/New_York")),
-            toArray("UTC", localDate(31, DECEMBER, 2010), date(31, DECEMBER, 2010, "UTC")),
-            toArray("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
-            toArray("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
-            toArray("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
-            toArray("UTC", localDate(15, OCTOBER, 1582), date(15, OCTOBER, 1582, "UTC")),
-            toArray("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
-            toArray("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
-            toArray("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),
-            toArray("Europe/Berlin", localDate(15, JANUARY, 2001), date(15, JANUARY, 2001, "Europe/Berlin")),
-            toArray("Pacific/Apia", localDate(31, DECEMBER, 2100), date(31, DECEMBER, 2100, "Pacific/Apia")),
-            toArray("Pacific/Apia", null, null)
+class LocalDateConverterTest extends TemporalConverterTest {
+    private Stream<Tuple3<String,LocalDate,Date>> parameters() {
+        return Stream.of(
+            Tuple.of("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),
+            Tuple.of("America/New_York", localDate(29, FEBRUARY, 2008), date(29, FEBRUARY, 2008, "America/New_York")),
+            Tuple.of("America/New_York", localDate(3, NOVEMBER, 2007), date(3, NOVEMBER, 2007, "America/New_York")),
+            Tuple.of("America/New_York", localDate(4, NOVEMBER, 2007), date(4, NOVEMBER, 2007, "America/New_York")),
+            Tuple.of("America/New_York", localDate(5, NOVEMBER, 2007), date(5, NOVEMBER, 2007, "America/New_York")),
+            Tuple.of("UTC", localDate(31, DECEMBER, 2010), date(31, DECEMBER, 2010, "UTC")),
+            Tuple.of("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
+            Tuple.of("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
+            Tuple.of("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
+            Tuple.of("UTC", localDate(15, OCTOBER, 1582), date(15, OCTOBER, 1582, "UTC")),
+            Tuple.of("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
+            Tuple.of("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
+            Tuple.of("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),
+            Tuple.of("Europe/Berlin", localDate(15, JANUARY, 2001), date(15, JANUARY, 2001, "Europe/Berlin")),
+            Tuple.of("Pacific/Apia", localDate(31, DECEMBER, 2100), date(31, DECEMBER, 2100, "Pacific/Apia")),
+            Tuple.of("Pacific/Apia", null, null)
         );
     }
-    @Test
-    @Parameters(method = "parameters")
-    public void convertToDatabaseColumn(String timeZone, LocalDate input, Date expected) {
+
+    @TestFactory
+    Stream<DynamicTest> convertToDatabaseColumn() {
+        return parameters().map(p -> DynamicTest.dynamicTest(p.toString(), () -> convertToDatabaseColumn(p.item1(), p.item2(), p.item3())));
+    }
+
+    private void convertToDatabaseColumn(String timeZone, LocalDate input, Date expected) {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateConverter sut = new LocalDateConverter();
 
@@ -81,9 +82,12 @@ public class LocalDateConverterTest extends TemporalConverterTest {
         }
     }
 
-    @Test
-    @Parameters(method = "parameters")
-    public void convertToEntityAttribute(String timeZone, LocalDate expected, Date input) throws Exception {
+    @TestFactory
+    Stream<DynamicTest> convertToEntityAttribute() {
+        return parameters().map(p -> DynamicTest.dynamicTest(p.toString(), () -> convertToEntityAttribute(p.item1(), p.item2(), p.item3())));
+    }
+
+    private void convertToEntityAttribute(String timeZone, LocalDate expected, Date input) throws Exception {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateConverter sut = new LocalDateConverter();
 

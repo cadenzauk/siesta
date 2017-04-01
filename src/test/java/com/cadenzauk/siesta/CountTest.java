@@ -22,27 +22,22 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.testmodel.TestDatabase;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
 import static com.cadenzauk.siesta.Aggregates.count;
 import static com.cadenzauk.siesta.Aggregates.countDistinct;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
-public class CountTest {
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
-
+class CountTest extends MockitoTest {
     @Mock
     private SqlExecutor sqlExecutor;
 
@@ -56,7 +51,7 @@ public class CountTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     @Test
-    public void countStar() {
+    void countStar() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")
@@ -72,7 +67,7 @@ public class CountTest {
         assertThat(args.getValue()[0], is(4002L));
     }
     @Test
-    public void countDistinct1() {
+    void countDistinct1() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")

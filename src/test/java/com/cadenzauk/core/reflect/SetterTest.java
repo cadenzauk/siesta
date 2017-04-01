@@ -24,7 +24,7 @@ package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -35,15 +35,15 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-public class SetterTest {
+class SetterTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(Setter.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
@@ -51,7 +51,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldNonOptionalWithNoSetter() throws Exception {
+    void forFieldNonOptionalWithNoSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<String>> setter
             = Setter.forField(SetterTestClass.class, String.class, ClassUtil.getDeclaredField(SetterTestClass.class, "string"));
         SetterTestClass target = new SetterTestClass();
@@ -62,7 +62,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldOptionalWithNoSetter() throws Exception {
+    void forFieldOptionalWithNoSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<Long>> setter
             = Setter.forField(SetterTestClass.class, Long.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalLong"));
         SetterTestClass target = new SetterTestClass();
@@ -73,7 +73,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldNonOptionalAndWithPrefixSetter() throws Exception {
+    void forFieldNonOptionalAndWithPrefixSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<LocalDate>> setter
             = Setter.forField(SetterTestClass.class, LocalDate.class, ClassUtil.getDeclaredField(SetterTestClass.class, "localDate"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -85,7 +85,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldOptionalAndWithPrefixSetter() throws Exception {
+    void forFieldOptionalAndWithPrefixSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<String>> setter
             = Setter.forField(SetterTestClass.class, String.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalString"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -97,7 +97,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldNonOptionalAndSetPrefixSetter() throws Exception {
+    void forFieldNonOptionalAndSetPrefixSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<Integer>> setter
             = Setter.forField(SetterTestClass.class, Integer.class, ClassUtil.getDeclaredField(SetterTestClass.class, "integer"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -109,7 +109,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldOptionalAndSetPrefixSetter() throws Exception {
+    void forFieldOptionalAndSetPrefixSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<BigDecimal>> setter
             = Setter.forField(SetterTestClass.class, BigDecimal.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalBigDecimal"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -121,7 +121,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldNonOptionalAndunprefixedSetter() throws Exception {
+    void forFieldNonOptionalAndunprefixedSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<Character>> setter
             = Setter.forField(SetterTestClass.class, Character.class, ClassUtil.getDeclaredField(SetterTestClass.class, "character"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -133,7 +133,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldOptionalAndSetUnprefixedSetter() throws Exception {
+    void forFieldOptionalAndSetUnprefixedSetter() throws Exception {
         BiConsumer<SetterTestClass,Optional<UUID>> setter
             = Setter.forField(SetterTestClass.class, UUID.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalUuid"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -146,7 +146,7 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldOfWrongTypeFieldThrows() {
+    void forFieldOfWrongTypeFieldThrows() {
         calling(() -> Setter.forField(SetterTestClass.class, Integer.class, ClassUtil.getDeclaredField(SetterTestClass.class, "string")))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Cannot convert private java.lang.String com.cadenzauk.core.reflect.SetterTest$SetterTestClass.string into " +
@@ -154,14 +154,15 @@ public class SetterTest {
     }
 
     @Test
-    public void forFieldOfWrongTypeMethodThrows() {
+    void forFieldOfWrongTypeMethodThrows() {
         calling(() -> Setter.forField(SetterTestClass.class, String.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalBigDecimal")))
             .shouldThrow(IllegalArgumentException.class)
-            .withMessage(is("Cannot convert public void com.cadenzauk.core.reflect.SetterTest$SetterTestClass.setOptionalBigDecimal(java.util.Optional) into " +
+            .withMessage(is("Cannot convert void com.cadenzauk.core.reflect.SetterTest$SetterTestClass.setOptionalBigDecimal(java.util.Optional) into " +
                 "a BiConsumer<class com.cadenzauk.core.reflect.SetterTest$SetterTestClass,Optional<class java.lang.String>>."));
     }
 
-    public static class SetterTestClass {
+    @SuppressWarnings({"unused", "UnusedReturnValue"})
+    static class SetterTestClass {
         private String string;
         private Optional<Long> optionalLong;
         private LocalDate localDate;
@@ -171,29 +172,29 @@ public class SetterTest {
         private Character character;
         private Optional<UUID> optionalUuid;
 
-        public SetterTestClass withLocalDate(LocalDate localDate) {
+        SetterTestClass withLocalDate(LocalDate localDate) {
             this.localDate = localDate;
             return this;
         }
 
-        public SetterTestClass withOptionalString(Optional<String> optionalString) {
+        SetterTestClass withOptionalString(Optional<String> optionalString) {
             this.optionalString = optionalString;
             return this;
         }
 
-        public void setInteger(Integer integer) {
+        void setInteger(Integer integer) {
             this.integer = integer;
         }
 
-        public void setOptionalBigDecimal(Optional<BigDecimal> optionalBigDecimal) {
+        void setOptionalBigDecimal(Optional<BigDecimal> optionalBigDecimal) {
             this.optionalBigDecimal = optionalBigDecimal;
         }
 
-        public void character(Character character) {
+        void character(Character character) {
             this.character = character;
         }
 
-        public void optionalUuid(Optional<UUID> optionalUuid) {
+        void optionalUuid(Optional<UUID> optionalUuid) {
             this.optionalUuid = optionalUuid;
         }
     }

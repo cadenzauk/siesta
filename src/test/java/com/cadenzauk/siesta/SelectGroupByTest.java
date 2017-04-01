@@ -22,27 +22,22 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.TestDatabase;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
 import static com.cadenzauk.siesta.Aggregates.max;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
-public class SelectGroupByTest {
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
-
+class SelectGroupByTest extends MockitoTest {
     @Mock
     private SqlExecutor sqlExecutor;
 
@@ -56,7 +51,7 @@ public class SelectGroupByTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     @Test
-    public void groupBy1() {
+    void groupBy1() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")
@@ -72,7 +67,7 @@ public class SelectGroupByTest {
     }
 
     @Test
-    public void groupBy2() {
+    void groupBy2() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")
@@ -88,7 +83,7 @@ public class SelectGroupByTest {
     }
 
     @Test
-    public void whereGroupBy() {
+    void whereGroupBy() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")
@@ -106,7 +101,7 @@ public class SelectGroupByTest {
     }
 
     @Test
-    public void joinGroupBy() {
+    void joinGroupBy() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")
@@ -127,7 +122,7 @@ public class SelectGroupByTest {
     }
 
     @Test
-    public void whereGroupByOrderBy() {
+    void whereGroupByOrderBy() {
         Database database = TestDatabase.testDatabase();
 
         database.from(WidgetRow.class, "w")

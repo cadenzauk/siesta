@@ -22,27 +22,22 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.TestDatabase;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
 import com.cadenzauk.siesta.testmodel.WidgetViewRow;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
-public class SelectProjectionTest {
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
-
+class SelectProjectionTest extends MockitoTest {
     @Mock
     private SqlExecutor sqlExecutor;
 
@@ -56,7 +51,7 @@ public class SelectProjectionTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     @Test
-    public void projectColumns() {
+    void projectColumns() {
         Database database = TestDatabase.testDatabase();
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
 
@@ -85,7 +80,7 @@ public class SelectProjectionTest {
     }
 
     @Test
-    public void projectIntoObject() {
+    void projectIntoObject() {
         Database database = TestDatabase.testDatabase();
 
         database

@@ -23,7 +23,7 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -32,18 +32,18 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class FieldInfoTest {
+class FieldInfoTest {
     @Test
-    public void toStringGeneric() throws Exception {
+    void toStringGeneric() throws Exception {
         Field field = optionalStringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
 
@@ -53,7 +53,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void toStringNonGeneric() throws Exception {
+    void toStringNonGeneric() throws Exception {
         Field field = stringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
 
@@ -63,7 +63,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void optionalGetterOnOptionalField() {
+    void optionalGetterOnOptionalField() {
         Field field = optionalStringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
         ClassWithField target = mock(ClassWithField.class);
@@ -77,7 +77,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void optionalGetterOnNonOptionalField() {
+    void optionalGetterOnNonOptionalField() {
         Field field = stringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
         ClassWithField target = mock(ClassWithField.class);
@@ -91,7 +91,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofOptionalWithoutType() throws Exception {
+    void ofOptionalWithoutType() throws Exception {
         Field field = optionalStringField();
 
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
@@ -104,7 +104,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofNonOptionalWithoutType() throws Exception {
+    void ofNonOptionalWithoutType() throws Exception {
         Field field = stringField();
 
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
@@ -117,7 +117,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofOptionalWithType() throws Exception {
+    void ofOptionalWithType() throws Exception {
         Field field = optionalStringField();
 
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, field, String.class);
@@ -130,7 +130,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofNonOptionalWithType() throws Exception {
+    void ofNonOptionalWithType() throws Exception {
         Field field = stringField();
 
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, field, String.class);
@@ -143,7 +143,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofOptionalByName() throws Exception {
+    void ofOptionalByName() throws Exception {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, "optionalString", String.class);
 
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
@@ -153,7 +153,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofNonOptionalByName() throws Exception {
+    void ofNonOptionalByName() throws Exception {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, "string", String.class);
 
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
@@ -163,14 +163,14 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofWrongTypeThrowsException() throws Exception {
+    void ofWrongTypeThrowsException() throws Exception {
         calling(() -> FieldInfo.of(ClassWithField.class, "string", Integer.class))
             .shouldThrow(NoSuchElementException.class)
             .withMessage(is("No field called string of type class java.lang.Integer in class com.cadenzauk.core.reflect.FieldInfoTest$ClassWithField"));
     }
 
     @Test
-    public void ofOptionalGetter() throws Exception {
+    void ofOptionalGetter() throws Exception {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::optionalString))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for optionalString but didn't"));
 
@@ -181,7 +181,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void ofGetter() throws Exception {
+    void ofGetter() throws Exception {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::string))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for string but didn't"));
 
@@ -192,7 +192,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void annotationPresent() throws Exception {
+    void annotationPresent() throws Exception {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::string))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for string but didn't"));
 
@@ -203,7 +203,7 @@ public class FieldInfoTest {
     }
 
     @Test
-    public void annotationNotPresent() throws Exception {
+    void annotationNotPresent() throws Exception {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::optionalString))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for optionalString but didn't"));
 
@@ -220,16 +220,17 @@ public class FieldInfoTest {
         return ClassUtil.getDeclaredField(ClassWithField.class, "optionalString");
     }
 
+    @SuppressWarnings("unused")
     private static class ClassWithField {
         private Optional<String> optionalString;
         @XmlElement(name = "horace")
         private String string;
 
-        public Optional<String> optionalString() {
+        Optional<String> optionalString() {
             return optionalString;
         }
 
-        public String string() {
+        String string() {
             return string;
         }
     }

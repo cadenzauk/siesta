@@ -22,44 +22,42 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.grammar.select.ExpectingGroupBy;
-import com.cadenzauk.siesta.grammar.select.ExpectingWhere;
+import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
-import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.google.common.collect.ImmutableList;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.MockitoAnnotations;
 
 import javax.persistence.MappedSuperclass;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
+import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static com.cadenzauk.siesta.Aggregates.max;
 import static com.cadenzauk.siesta.Aggregates.min;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(JUnitParamsRunner.class)
-public class SelectTest {
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule();
-
+class SelectTest extends MockitoTest {
     @SuppressWarnings("unused")
     @MappedSuperclass
     public static class Row1 {
@@ -97,7 +95,7 @@ public class SelectTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     @Test
-    public void whereIsEqualToOneColumnWithoutAlias() {
+    void whereIsEqualToOneColumnWithoutAlias() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         database.from(Row1.class)
@@ -112,7 +110,7 @@ public class SelectTest {
     }
 
     @Test
-    public void whereIsEqualToOneColumnWithDefaultAlias() {
+    void whereIsEqualToOneColumnWithDefaultAlias() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         database.from(Row1.class, "w")
@@ -127,7 +125,7 @@ public class SelectTest {
     }
 
     @Test
-    public void whereIsEqualToOneColumnWithAlias() {
+    void whereIsEqualToOneColumnWithAlias() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         database.from(Row1.class, "w")
@@ -142,7 +140,7 @@ public class SelectTest {
     }
 
     @Test
-    public void whereIsEqualToOneValue() {
+    void whereIsEqualToOneValue() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         database.from(Row1.class, "w")
@@ -157,7 +155,7 @@ public class SelectTest {
     }
 
     @Test
-    public void whereIsEqualToTwoValues() {
+    void whereIsEqualToTwoValues() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         database.from(Row1.class, "w")
@@ -173,7 +171,7 @@ public class SelectTest {
     }
 
     @Test
-    public void optionalColumnInCondition() {
+    void optionalColumnInCondition() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         database.from(Row2.class, "x")
@@ -189,26 +187,29 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForWhere(BiFunction<Alias<Row2>,ExpectingWhere<Row2>,InWhereExpectingAnd<Row2>> f, String expected) {
-        return new Object[] { f, expected };
+    private Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>>,String> testCaseForWhere(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> f, String expected) {
+        return Tuple.of(f, expected);
     }
 
-    @SuppressWarnings("unused")
-    private Object[] parametersForWhere() {
-        return new Object[]{
+    private Stream<Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>>,String>> parametersForWhere() {
+        return Stream.of(
             testCaseForWhere((a, s) -> s.where(max(Row2::description)).isEqualTo(a, Row2::name), "where max(q.DESCRIPTION) = q.NAME"),
             testCaseForWhere((a, s) -> s.where(Row2::description).isNotEqualTo(Row2::name), "where q.DESCRIPTION <> q.NAME"),
             testCaseForWhere((a, s) -> s.where(Row2::comment).isNotEqualTo(Row2::name), "where q.COMMENT <> q.NAME"),
             testCaseForWhere((a, s) -> s.where("q", Row2::description).isGreaterThan(Row2::name), "where q.DESCRIPTION > q.NAME"),
             testCaseForWhere((a, s) -> s.where("q", Row2::comment).isEqualTo(Row2::name), "where q.COMMENT = q.NAME"),
             testCaseForWhere((a, s) -> s.where(a, Row2::description).isEqualTo(Row2::name), "where q.DESCRIPTION = q.NAME"),
-            testCaseForWhere((a, s) -> s.where(a, Row2::comment).isEqualTo(Row2::name), "where q.COMMENT = q.NAME"),
-        };
+            testCaseForWhere((a, s) -> s.where(a, Row2::comment).isEqualTo(Row2::name), "where q.COMMENT = q.NAME")
+        );
     }
 
-    @Test
-    @Parameters
-    public void where(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
+    @TestFactory
+    Stream<DynamicTest> where() {
+        return parametersForWhere().map(p -> dynamicTest(p.toString(), () -> where(p.item1(), p.item2())));
+    }
+
+    private void where(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
+        MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder().defaultSchema("TEST").build();
 
         Alias<Row2> alias = database.table(Row2.class).as("q");
@@ -219,13 +220,12 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingGroupBy<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
-        return new Object[] { f, expected };
+    private Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>>,String> testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
+        return Tuple.of(f, expected);
     }
 
-    @SuppressWarnings("unused")
-    private Object[] parametersForOrderByOnSelect() {
-        return new Object[]{
+    private Stream<Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>>,String>> parametersForOrderByOnSelect() {
+        return Stream.of(
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment), "q.COMMENT asc"),
@@ -250,13 +250,17 @@ public class SelectTest {
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME asc, q.COMMENT asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
-            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME asc, q.COMMENT asc"),
-        };
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME asc, q.COMMENT asc")
+        );
     }
 
-    @Test
-    @Parameters
-    public void orderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
+    @TestFactory
+    Stream<DynamicTest> orderByOnSelect() {
+        return parametersForOrderByOnSelect().map(p -> dynamicTest(p.toString(), () -> orderByOnSelect(p.item1(), p.item2())));
+    }
+
+    private void orderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
+        MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
@@ -267,13 +271,12 @@ public class SelectTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Object[] testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
-        return new Object[] { f, expected };
+    private Tuple2<BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>>,String> testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
+        return Tuple.of(f, expected);
     }
 
-    @SuppressWarnings("unused")
-    private Object[] parametersForOrderByOnWhereClause() {
-        return new Object[]{
+    private Stream<Tuple2<BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>>,String>> parametersForOrderByOnWhereClause() {
+        return Stream.of(
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::comment), "q.COMMENT asc"),
@@ -298,13 +301,19 @@ public class SelectTest {
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME asc, q.COMMENT asc"),
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
-            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME asc, q.COMMENT asc"),
-        };
+            testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::name).then(a, Row2::comment), "q.NAME asc, q.COMMENT asc")
+        );
     }
 
-    @Test
-    @Parameters
-    public void orderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
+    @TestFactory
+    Stream<DynamicTest> orderByOnWhereClause() {
+        return parametersForOrderByOnWhereClause().map(p -> dynamicTest(p.toString(), () -> orderByOnWhereClause(p.item1(), p.item2())));
+
+    }
+
+    private void orderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
+        MockitoAnnotations.initMocks(this);
+
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
@@ -316,7 +325,7 @@ public class SelectTest {
     }
 
     @Test
-    public void optionalOfNoRowsIsEmpty() throws Exception {
+    void optionalOfNoRowsIsEmpty() throws Exception {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of());
 
@@ -327,7 +336,7 @@ public class SelectTest {
     }
 
     @Test
-    public void optionalOfOneRowIsRow() throws Exception {
+    void optionalOfOneRowIsRow() throws Exception {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Row1 row1 = new Row1();
         when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1));
@@ -339,21 +348,21 @@ public class SelectTest {
         assertThat(result, is(Optional.of(row1)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void optionalOfTwoRowsIsException() throws Exception {
+    @Test
+    void optionalOfTwoRowsIsException() throws Exception {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Row1 row1 = new Row1();
         when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1, row1));
 
-        Optional<Row1> result = database.from(Row1.class, "w")
-            .optional(sqlExecutor);
+        calling(() -> database.from(Row1.class, "w").optional(sqlExecutor))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage(startsWith("expected one element but was: "));
 
         verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(result, is(Optional.of(row1)));
     }
 
     @Test
-    public void list() throws Exception {
+    void list() throws Exception {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Row1 row1 = new Row1();
         Row1 row2 = new Row1();

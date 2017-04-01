@@ -24,7 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
@@ -32,9 +32,10 @@ import java.util.Optional;
 
 import static com.cadenzauk.siesta.Aggregates.max;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-public class DatabaseTest {
+class DatabaseTest {
+    @SuppressWarnings("unused")
     @Table(name = "CUSTOMER")
     public static class Person {
         private int id;
@@ -61,7 +62,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void from() throws Exception {
+    void from() throws Exception {
         Database customers = siesta();
 
         String sql = customers.from(Person.class)
@@ -77,7 +78,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void project() {
+    void project() {
         Database customers = siesta();
 
         String sql = customers.from(Person.class)
@@ -91,7 +92,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void aggregate() {
+    void aggregate() {
         Database customers = siesta();
 
         String sql = customers.from(Person.class)
@@ -105,7 +106,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void subQuery() {
+    void subQuery() {
         Database database = siesta();
         Alias<Person> outer = database.table(Person.class).as("outer");
         Alias<Person> inner = database.table(Person.class).as("inner");
@@ -125,7 +126,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void columnsFromMethodReferences() {
+    void columnsFromMethodReferences() {
         Database database = siesta();
 
         Alias<Person> p = database.table(Person.class).as("p");

@@ -25,7 +25,7 @@ package com.cadenzauk.core.reflect.util;
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -38,15 +38,15 @@ import java.util.Optional;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
-public class ClassUtilTest {
+class ClassUtilTest {
     @Test
-    public void cannotInstantiate() {
+    void cannotInstantiate() {
         calling(() -> Factory.forClass(ClassUtil.class).get())
             .shouldThrow(RuntimeException.class)
             .withCause(InvocationTargetException.class)
@@ -54,13 +54,13 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void forObject() {
+    void forObject() {
         Class<Number> numberClass = ClassUtil.forObject(BigDecimal.ONE);
         assertThat(numberClass, equalTo(BigDecimal.class));
     }
 
     @Test
-    public void getDeclaredMethodForMethodThatExistsIsTheMethod() {
+    void getDeclaredMethodForMethodThatExistsIsTheMethod() {
         Method method0 = ClassUtil.getDeclaredMethod(TestingTarget.class, "method");
 
         assertThat(method0, notNullValue());
@@ -68,14 +68,14 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void getDeclaredMethodForMethodWithWrongParametersThrows() {
+    void getDeclaredMethodForMethodWithWrongParametersThrows() {
         calling(() -> ClassUtil.getDeclaredMethod(TestingTarget.class, "method", Integer.class))
             .shouldThrow(NoSuchElementException.class)
             .withMessage(is("No such method as method(class java.lang.Integer) in class com.cadenzauk.core.reflect.util.ClassUtilTest$TestingTarget"));
     }
 
     @Test
-    public void declaredMethodForMethodThatExistsIsTheMethod() {
+    void declaredMethodForMethodThatExistsIsTheMethod() {
         Optional<Method> method0 = ClassUtil.declaredMethod(TestingTarget.class, "method");
 
         assertThat(method0.isPresent(), is(true));
@@ -83,28 +83,28 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void declaredMethodForMethodWithWrongParametersIsEmpty() {
+    void declaredMethodForMethodWithWrongParametersIsEmpty() {
         Optional<Method> method0 = ClassUtil.declaredMethod(TestingTarget.class, "method", Integer.class);
 
         assertThat(method0, is(Optional.empty()));
     }
 
     @Test
-    public void forNameOfClassThatExists() {
+    void forNameOfClassThatExists() {
         Optional<Class<?>> result = ClassUtil.forName(TestingTarget.class.getName());
 
         assertThat(result, is(Optional.of(TestingTarget.class)));
     }
 
     @Test
-    public void forNameOfNonClassIsEmpty() {
+    void forNameOfNonClassIsEmpty() {
         Optional<Class<?>> result = ClassUtil.forName("com.dodgy.nothing.to.see.here.Bob");
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
-    public void getDeclaredFieldPresentIsReturned() {
+    void getDeclaredFieldPresentIsReturned() {
         Field result = ClassUtil.getDeclaredField(TestingTarget.class, "stringField");
 
         assertThat(result, notNullValue());
@@ -112,14 +112,14 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void getDeclaredFieldNotPresentThrows() {
+    void getDeclaredFieldNotPresentThrows() {
         calling(() -> ClassUtil.getDeclaredField(TestingTarget.class, "nothingToSeeHere"))
             .shouldThrow(NoSuchElementException.class)
             .withMessage(is("No such field as nothingToSeeHere in class com.cadenzauk.core.reflect.util.ClassUtilTest$TestingTarget"));
     }
 
     @Test
-    public void declaredFieldPresentIsReturned() {
+    void declaredFieldPresentIsReturned() {
         Optional<Field> result = ClassUtil.declaredField(TestingTarget.class, "stringField");
 
         assertThat(result.isPresent(), equalTo(true));
@@ -127,14 +127,14 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void declaredFieldNotPresentIsEmpty() {
+    void declaredFieldNotPresentIsEmpty() {
         Optional<Field> result = ClassUtil.declaredField(TestingTarget.class, "nothingToSeeHere");
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
-    public void findFieldInTargetFound() {
+    void findFieldInTargetFound() {
         Optional<Field> result = ClassUtil.findField(TestingTarget.class, "stringField");
 
         assertThat(result.isPresent(), is(true));
@@ -142,7 +142,7 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void findFieldInBaseFound() {
+    void findFieldInBaseFound() {
         Optional<Field> result = ClassUtil.findField(TestingTarget.class, "baseField");
 
         assertThat(result.isPresent(), is(true));
@@ -150,28 +150,28 @@ public class ClassUtilTest {
     }
 
     @Test
-    public void findFieldNotFound() {
+    void findFieldNotFound() {
         Optional<Field> result = ClassUtil.findField(TestingTarget.class, "yesWeHaveNoBananas");
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
-    public void superclassOfNonObjectIsPresent() {
+    void superclassOfNonObjectIsPresent() {
         Optional<Class<?>> result = ClassUtil.superclass(TestingTargetBase.class);
 
         assertThat(result, is(Optional.of(Object.class)));
     }
 
     @Test
-    public void superclassOfObjectIsEmpty() {
+    void superclassOfObjectIsEmpty() {
         Optional<Class<?>> result = ClassUtil.superclass(Object.class);
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
-    public void superclassOfInterfaceIsEmpty() {
+    void superclassOfInterfaceIsEmpty() {
         Optional<Class<?>> result = ClassUtil.superclass(TestingInterface.class);
 
         assertThat(result, is(Optional.empty()));
@@ -179,7 +179,7 @@ public class ClassUtilTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void superclasses() {
+    void superclasses() {
         List<Class<?>> result = ClassUtil.superclasses(TestingTarget.class).collect(toList());
 
         assertThat(result, contains(TestingTarget.class, TestingTargetBase.class, Object.class));
@@ -187,7 +187,7 @@ public class ClassUtilTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void superclassesOfObject() {
+    void superclassesOfObject() {
         List<Class<?>> result = ClassUtil.superclasses(Object.class).collect(toList());
 
         assertThat(result, contains(Object.class));
@@ -195,7 +195,7 @@ public class ClassUtilTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void superclassesOfInterface() {
+    void superclassesOfInterface() {
         List<Class<?>> result = ClassUtil.superclasses(TestingBaseInterface.class).collect(toList());
 
         assertThat(result, contains(TestingBaseInterface.class));
@@ -203,57 +203,56 @@ public class ClassUtilTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void superclassesOfDerivedInterface() {
+    void superclassesOfDerivedInterface() {
         List<Class<?>> result = ClassUtil.superclasses(TestingInterface.class).collect(toList());
 
         assertThat(result, contains(TestingInterface.class));
     }
 
     @Test
-    public void hasAnnotationThatIsPresent() {
+    void hasAnnotationThatIsPresent() {
         boolean result = ClassUtil.hasAnnotation(TestingTarget.class, Ignore.class);
 
         assertThat(result, is(true));
     }
 
     @Test
-
-    public void hasAnnotationThatIsNotPresent() {
+    void hasAnnotationThatIsNotPresent() {
         boolean result = ClassUtil.hasAnnotation(TestingTargetBase.class, Ignore.class);
 
         assertThat(result, is(false));
     }
 
     @Test
-    public void annotationThatIsPresent() {
+    void annotationThatIsPresent() {
         Optional<Ignore> result = ClassUtil.annotation(TestingTarget.class, Ignore.class);
 
         assertThat(result.isPresent(), is(true));
     }
 
     @Test
-    public void annotationThatIsNotPresent() {
+    void annotationThatIsNotPresent() {
         Optional<Ignore> result = ClassUtil.annotation(TestingTargetBase.class, Ignore.class);
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
-    public void defaultConstructorPresent() {
+    void defaultConstructorPresent() {
         Optional<Constructor<TestingTargetBase>> result = ClassUtil.constructor(TestingTargetBase.class);
 
         assertThat(result.isPresent(), is(true));
     }
 
     @Test
-    public void defaultConstructorNotPresent() {
+    void defaultConstructorNotPresent() {
         Optional<Constructor<TestingTarget>> result = ClassUtil.constructor(TestingTarget.class);
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
-    public void constructorWithArgsPresent() {
+    void constructorWithArgsPresent() {
         Optional<Constructor<TestingTarget>> result = ClassUtil.constructor(TestingTarget.class, String.class);
 
         assertThat(result.isPresent(), is(true));

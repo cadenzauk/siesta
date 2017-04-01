@@ -23,12 +23,13 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.dialect.Db2Dialect;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-public class DialectTest {
+class DialectTest {
+    @SuppressWarnings("unused")
     public static class Invoice {
         private int id;
 
@@ -38,7 +39,7 @@ public class DialectTest {
     }
 
     @Test
-    public void selectivityDb2() {
+    void selectivityDb2() {
         Database database = Database.newBuilder()
             .defaultSchema("AP")
             .dialect(new Db2Dialect())
@@ -52,7 +53,7 @@ public class DialectTest {
     }
 
     @Test
-    public void selectivityStandard() {
+    void selectivityStandard() {
         Database database = Database.newBuilder()
             .defaultSchema("AP")
             .build();

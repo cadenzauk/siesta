@@ -24,15 +24,15 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.testmodel.ManufacturerRow;
 import com.cadenzauk.siesta.testmodel.WidgetRow;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
 import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class SelectExpressionTest {
     @Test

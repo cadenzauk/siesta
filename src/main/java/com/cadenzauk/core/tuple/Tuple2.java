@@ -22,6 +22,9 @@
 
 package com.cadenzauk.core.tuple;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.util.function.BiFunction;
 
 public class Tuple2<T1,T2> implements Tuple {
@@ -31,6 +34,33 @@ public class Tuple2<T1,T2> implements Tuple {
     public Tuple2(T1 item1, T2 item2) {
         this.item1 = item1;
         this.item2 = item2;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + item1 + ", " + item2 + ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tuple2<?,?> tuple2 = (Tuple2<?,?>) o;
+
+        return new EqualsBuilder()
+            .append(item1, tuple2.item1)
+            .append(item2, tuple2.item2)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(item1)
+            .append(item2)
+            .toHashCode();
     }
 
     public T1 item1() {
