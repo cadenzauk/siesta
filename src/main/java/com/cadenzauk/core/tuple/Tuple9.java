@@ -23,6 +23,8 @@
 package com.cadenzauk.core.tuple;
 
 import com.cadenzauk.core.function.Function9;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
     private final T1 item1;
@@ -45,6 +47,56 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
         this.item7 = item7;
         this.item8 = item8;
         this.item9 = item9;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + item1 +
+            ", " + item2 +
+            ", " + item3 +
+            ", " + item4 +
+            ", " + item5 +
+            ", " + item6 +
+            ", " + item7 +
+            ", " + item8 +
+            ", " + item9 +
+            ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tuple9<?,?,?,?,?,?,?,?,?> tuple9 = (Tuple9<?,?,?,?,?,?,?,?,?>) o;
+
+        return new EqualsBuilder()
+            .append(item1, tuple9.item1)
+            .append(item2, tuple9.item2)
+            .append(item3, tuple9.item3)
+            .append(item4, tuple9.item4)
+            .append(item5, tuple9.item5)
+            .append(item6, tuple9.item6)
+            .append(item7, tuple9.item7)
+            .append(item8, tuple9.item8)
+            .append(item9, tuple9.item9)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(item1)
+            .append(item2)
+            .append(item3)
+            .append(item4)
+            .append(item5)
+            .append(item6)
+            .append(item7)
+            .append(item8)
+            .append(item9)
+            .toHashCode();
     }
 
     public T1 item1() {

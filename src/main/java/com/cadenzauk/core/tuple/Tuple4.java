@@ -23,6 +23,8 @@
 package com.cadenzauk.core.tuple;
 
 import com.cadenzauk.core.function.Function4;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Tuple4<T1, T2, T3, T4> implements Tuple {
     private final T1 item1;
@@ -35,6 +37,41 @@ public class Tuple4<T1, T2, T3, T4> implements Tuple {
         this.item2 = item2;
         this.item3 = item3;
         this.item4 = item4;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + item1 +
+            ", " + item2 +
+            ", " + item3 +
+            ", " + item4 +
+            ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tuple4<?,?,?,?> tuple4 = (Tuple4<?,?,?,?>) o;
+
+        return new EqualsBuilder()
+            .append(item1, tuple4.item1)
+            .append(item2, tuple4.item2)
+            .append(item3, tuple4.item3)
+            .append(item4, tuple4.item4)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(item1)
+            .append(item2)
+            .append(item3)
+            .append(item4)
+            .toHashCode();
     }
 
     public T1 item1() {
