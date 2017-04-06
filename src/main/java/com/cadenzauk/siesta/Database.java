@@ -155,15 +155,17 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> void insert(SqlExecutor sqlExecutor, R row) {
-        Class<R> rowClass = (Class<R>) row.getClass();
-        table(rowClass).insert(sqlExecutor, row);
+    public <R> void insert(SqlExecutor sqlExecutor, R... rows) {
+        if (rows.length == 0) {
+            return;
+        }
+        Class<R> rowClass = (Class<R>) rows[0].getClass();
+        table(rowClass).insert(sqlExecutor, rows);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> void insert(R row) {
-        Class<R> rowClass = (Class<R>) row.getClass();
-        table(rowClass).insert(getDefaultSqlExecutor(), row);
+    public <R> void insert(R... rows) {
+        insert(getDefaultSqlExecutor(), rows);
     }
 
     public <R> ExpectingJoin1<R> from(Class<R> rowClass) {

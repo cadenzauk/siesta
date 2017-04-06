@@ -35,15 +35,10 @@ public class TestDatabase {
     }
 
     public static Database testDatabase() {
-        return testDatabaseBuilder()
-            .build();
+        return testDatabaseBuilder().build();
     }
 
     private static Database.Builder testDatabaseBuilder() {
-        return Database.newBuilder().defaultSchema("TEST")
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
+        return Database.newBuilder().defaultSchema("TEST");
     }
 }

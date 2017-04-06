@@ -54,6 +54,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -109,8 +110,8 @@ public class Table<R> {
         return new Alias<>(this, alias);
     }
 
-    public void insert(SqlExecutor sqlExecutor, R row) {
-        impl.insert(sqlExecutor, row);
+    public void insert(SqlExecutor sqlExecutor, R[] rows) {
+        impl.insert(sqlExecutor, rows);
     }
 
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
@@ -141,19 +142,27 @@ public class Table<R> {
             this.columns = ImmutableList.copyOf(columns);
         }
 
-        public void insert(SqlExecutor sqlExecutor, R row) {
-            String sql = String.format("insert into %s.%s (%s) values (%s)",
+        public void insert(SqlExecutor sqlExecutor, R[] rows) {
+            if (rows.length == 0) {
+                return;
+            }
+            int nCols = columns.size();
+            String sql = String.format("insert into %s.%s (%s) values %s",
                 schema,
                 tableName,
                 columns.stream().map(Column::name).collect(joining(", ")),
-                columns.stream().map(c -> "?").collect(joining(", ")));
+                IntStream.range(0, rows.length)
+                    .mapToObj(i -> "(" + IntStream.range(0, nCols).mapToObj(j -> "?").collect(joining(", ")) + ")")
+                    .collect(joining(", ")));
+            System.out.println(sql);
 
-            Object[] args = columns
-                .stream()
-                .map(c -> c.getter()
-                    .apply(row)
-                    .map(v -> c.dataType().toDatabase(v))
-                    .orElse(null))
+            Object[] args = Arrays.stream(rows)
+                .flatMap(r -> columns
+                    .stream()
+                    .map(c -> c.getter()
+                        .apply(r)
+                        .map(v -> c.dataType().toDatabase(v))
+                        .orElse(null)))
                 .toArray();
 
             sqlExecutor.update(sql, args);

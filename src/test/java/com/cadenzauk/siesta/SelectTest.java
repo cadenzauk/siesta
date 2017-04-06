@@ -23,8 +23,6 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
-import com.cadenzauk.core.tuple.Tuple;
-import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
@@ -187,11 +185,8 @@ class SelectTest extends MockitoTest {
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
-    private Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>>,String> testCaseForWhere(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> f, String expected) {
-        return Tuple.of(f, expected);
-    }
-
-    private Stream<Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>>,String>> parametersForWhere() {
+    @TestFactory
+    Stream<DynamicTest> where() {
         return Stream.of(
             testCaseForWhere((a, s) -> s.where(max(Row2::description)).isEqualTo(a, Row2::name), "where max(q.DESCRIPTION) = q.NAME"),
             testCaseForWhere((a, s) -> s.where(Row2::description).isNotEqualTo(Row2::name), "where q.DESCRIPTION <> q.NAME"),
@@ -203,28 +198,22 @@ class SelectTest extends MockitoTest {
         );
     }
 
+    private DynamicTest testCaseForWhere(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
+        return dynamicTest(expected, () -> {
+            MockitoAnnotations.initMocks(this);
+            Database database = Database.newBuilder().defaultSchema("TEST").build();
+
+            Alias<Row2> alias = database.table(Row2.class).as("q");
+            where.apply(alias, database.from(Row2.class, "q")).list(sqlExecutor);
+
+            verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+            assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q " + expected));
+            assertThat(args.getValue(), arrayWithSize(0));
+        });
+    }
+
     @TestFactory
-    Stream<DynamicTest> where() {
-        return parametersForWhere().map(p -> dynamicTest(p.toString(), () -> where(p.item1(), p.item2())));
-    }
-
-    private void where(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
-        MockitoAnnotations.initMocks(this);
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-
-        Alias<Row2> alias = database.table(Row2.class).as("q");
-        where.apply(alias, database.from(Row2.class, "q")).list(sqlExecutor);
-
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q " + expected));
-        assertThat(args.getValue(), arrayWithSize(0));
-    }
-
-    private Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>>,String> testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
-        return Tuple.of(f, expected);
-    }
-
-    private Stream<Tuple2<BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>>,String>> parametersForOrderByOnSelect() {
+    Stream<DynamicTest> orderByOnSelect() {
         return Stream.of(
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
@@ -254,28 +243,22 @@ class SelectTest extends MockitoTest {
         );
     }
 
+    private DynamicTest testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
+        return dynamicTest(expected, () -> {
+            MockitoAnnotations.initMocks(this);
+            Database database = Database.newBuilder().defaultSchema("TEST").build();
+            Alias<Row2> alias = database.table(Row2.class).as("q");
+
+            orderBy.apply(alias, database.from(alias)).optional(sqlExecutor);
+
+            verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+            assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q order by " + expected));
+            assertThat(args.getValue(), arrayWithSize(0));
+        });
+    }
+
     @TestFactory
-    Stream<DynamicTest> orderByOnSelect() {
-        return parametersForOrderByOnSelect().map(p -> dynamicTest(p.toString(), () -> orderByOnSelect(p.item1(), p.item2())));
-    }
-
-    private void orderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        MockitoAnnotations.initMocks(this);
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-        Alias<Row2> alias = database.table(Row2.class).as("q");
-
-        orderBy.apply(alias, database.from(alias)).optional(sqlExecutor);
-
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q order by " + expected));
-        assertThat(args.getValue(), arrayWithSize(0));
-    }
-
-    private Tuple2<BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>>,String> testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> f, String expected) {
-        return Tuple.of(f, expected);
-    }
-
-    private Stream<Tuple2<BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>>,String>> parametersForOrderByOnWhereClause() {
+    Stream<DynamicTest> orderByOnWhereClause() {
         return Stream.of(
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
@@ -305,23 +288,19 @@ class SelectTest extends MockitoTest {
         );
     }
 
-    @TestFactory
-    Stream<DynamicTest> orderByOnWhereClause() {
-        return parametersForOrderByOnWhereClause().map(p -> dynamicTest(p.toString(), () -> orderByOnWhereClause(p.item1(), p.item2())));
+    private DynamicTest testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
+        return dynamicTest(expected, () -> {
+            MockitoAnnotations.initMocks(this);
 
-    }
+            Database database = Database.newBuilder().defaultSchema("TEST").build();
+            Alias<Row2> alias = database.table(Row2.class).as("q");
 
-    private void orderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        MockitoAnnotations.initMocks(this);
+            orderBy.apply(alias, database.from(alias).where(Row2::name).isEqualTo("joe")).optional(sqlExecutor);
 
-        Database database = Database.newBuilder().defaultSchema("TEST").build();
-        Alias<Row2> alias = database.table(Row2.class).as("q");
-
-        orderBy.apply(alias, database.from(alias).where(Row2::name).isEqualTo("joe")).optional(sqlExecutor);
-
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q where q.NAME = ? order by " + expected));
-        assertThat(args.getValue(), arrayContaining("joe"));
+            verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+            assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from TEST.ROW2 as q where q.NAME = ? order by " + expected));
+            assertThat(args.getValue(), arrayContaining("joe"));
+        });
     }
 
     @Test

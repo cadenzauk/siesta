@@ -126,3 +126,78 @@ List<Tuple2<String,String>> makersOfGizmos = database.from(Widget.class, "w")
 ```
 
 One difference you'll have noticed from SQL syntax is that we do projection via `select` *after* the `from` and `join` clauses.
+
+### Complex Queries
+
+Suppose we have some more rows in our database (yes, you can insert multiple rows in a single
+statement if they're the same type):
+
+```java
+database.insert(
+    new Manufacturer(2006L, "Spacely Space Sprockets, Inc"),
+    new Manufacturer(2007L, "Cogswell's Cogs"),
+    new Manufacturer(2008L, "Orbit City Gears"));
+database.insert(
+    new Widget(1006L, "Cog", 2006L, Optional.of("Spacely Sprocket")),
+    new Widget(1007L, "Cog", 2007L, Optional.of("Cogswell Cog")),
+    new Widget(1008L, "Cog", 2007L, Optional.of("Cogswell Sprocket")));
+
+```
+
+We can do more complicated queries such as using aggregate functions and grouping like this:
+
+```java
+List<Tuple2<String,Integer>> partCountsBySupplier = database.from(Manufacturer.class, "m")
+    .leftJoin(Widget.class, "w").on(Widget::manufacturerId).isEqualTo(Manufacturer::manufacturerId)
+    .select(Manufacturer::name).comma(countDistinct(Widget::widgetId))
+    .where(Manufacturer::manufacturerId).isIn(2006L, 2007L, 2008L)
+    .groupBy(Manufacturer::manufacturerId)
+    .orderBy(Manufacturer::manufacturerId)
+    .list();
+```
+
+When we select columns the results are returned as tuples, which isn't always convenient - `item1()` is 
+not as nice as being able to refer to `name()`.  It is also quite limiting since we currently only have tuples
+up to `Tuple9` so you can only have nine columns in your result set this way.
+
+An alternative is to define an class to hold your results:
+
+```java
+public class ManufacturerSummary {
+    private final String name;
+    private final int numberOfPartsSupplied;
+
+    public ManufacturerSummary(String name, int numberOfPartsSupplied) {
+        this.name = name;
+        this.numberOfPartsSupplied = numberOfPartsSupplied;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public int numberOfPartsSupplied() {
+        return numberOfPartsSupplied;
+    }
+}
+
+```
+
+Now you can map your results into this class as part of the query.
+
+```java
+List<ManufacturerSummary> manufacturerSummaries = database.from(Manufacturer.class, "m")
+    .leftJoin(Widget.class, "w").on(Widget::manufacturerId).isEqualTo(Manufacturer::manufacturerId)
+    .select(ManufacturerSummary.class)
+    .with(Manufacturer::name).as(ManufacturerSummary::name)
+    .with(countDistinct(Widget::widgetId)).as(ManufacturerSummary::numberOfPartsSupplied)
+    .where(Manufacturer::manufacturerId).isIn(2006L, 2007L, 2008L)
+    .groupBy(Manufacturer::manufacturerId)
+    .orderBy(Manufacturer::manufacturerId)
+    .list();
+```
+
+## Example Code
+
+Complete working tests for the examples shown here can be found in 
+[SiestaExample.java](https://github.com/cadenzauk/siesta/blob/master/src/test/java/com/cadenzauk/siesta/example/SiestaExample.java) 

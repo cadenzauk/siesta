@@ -116,7 +116,6 @@ public class TableIntegrationTest extends IntegrationTest {
         Optional<WidgetRow> sprocket = database.from(WidgetRow.class)
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
             .optional();
-
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
         assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
     }
@@ -175,9 +174,7 @@ public class TableIntegrationTest extends IntegrationTest {
             .manufacturerId(manufacturer2)
             .name("Grouper 3")
             .build();
-        database.insert(aWidget1);
-        database.insert(aWidget2);
-        database.insert(aWidget3);
+        database.insert(aWidget1, aWidget2, aWidget3);
 
         List<Tuple3<Long,String,String>> result = database.from(WidgetRow.class)
             .select(WidgetRow::manufacturerId).comma(max(WidgetRow::name)).comma(min(WidgetRow::name))
@@ -214,9 +211,7 @@ public class TableIntegrationTest extends IntegrationTest {
             .manufacturerId(manufacturer2)
             .name("Gizmo 2")
             .build();
-        database.insert(aWidget1);
-        database.insert(aWidget2);
-        database.insert(aWidget3);
+        database.insert(aWidget1, aWidget2, aWidget3);
 
         List<Tuple3<Long,Integer,Integer>> result = database.from(WidgetRow.class)
             .select(WidgetRow::manufacturerId).comma(countDistinct(WidgetRow::name)).comma(count())
