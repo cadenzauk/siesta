@@ -42,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -51,9 +52,10 @@ public class Select<RT> implements TypedExpression<RT> {
     protected final From from;
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
-    private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
-    private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
     private BooleanExpression whereClause;
+    private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
+    private BooleanExpression havingClause;
+    private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
 
     Select(Scope scope, From from, RowMapper<RT> rowMapper, Projection projection) {
         this.scope = scope;
@@ -74,9 +76,13 @@ public class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Stream.concat(
+        return Stream.of(
             projection.args(scope),
-            Stream.concat(from.args(scope), whereClauseArgs()));
+            from.args(scope),
+            whereClauseArgs(),
+            groupByClauseArgs(),
+            havingClauseArgs()
+        ).flatMap(Function.identity());
     }
 
     @Override
@@ -145,6 +151,19 @@ public class Select<RT> implements TypedExpression<RT> {
         whereClause = whereClause.appendOr(e);
     }
 
+    InHavingExpectingAnd<RT> setHavingClause(BooleanExpression e) {
+        havingClause = e;
+        return new InHavingExpectingAnd<>(this);
+    }
+
+    void andHaving(BooleanExpression e) {
+        havingClause = havingClause.appendAnd(e);
+    }
+
+    void orHaving(BooleanExpression e) {
+        havingClause = havingClause.appendOr(e);
+    }
+
     @NotNull
     private Stream<Object> whereClauseArgs() {
         return whereClause == null
@@ -160,10 +179,31 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     @NotNull
+    private Stream<Object> groupByClauseArgs() {
+        return groupByClauses
+            .stream()
+            .flatMap(g -> g.args(scope));
+    }
+
+    @NotNull
     private String groupByClauseSql(Scope scope) {
         return groupByClauses.isEmpty()
             ? ""
             : " group by " + groupByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
+    }
+
+    @NotNull
+    private Stream<Object> havingClauseArgs() {
+        return havingClause == null
+            ? Stream.empty()
+            : havingClause.args(scope);
+    }
+
+    @NotNull
+    private String havingClauseSql(Scope scope) {
+        return havingClause == null
+            ? ""
+            : " having " + havingClause.sql(scope);
     }
 
     @NotNull
@@ -174,11 +214,12 @@ public class Select<RT> implements TypedExpression<RT> {
     }
 
     private String sqlImpl(Scope actualScope) {
-        return String.format("select %s from %s%s%s%s",
+        return String.format("select %s from %s%s%s%s%s",
             projection().sql(actualScope),
             from.sql(actualScope),
             whereClauseSql(actualScope),
             groupByClauseSql(actualScope),
+            havingClauseSql(actualScope),
             orderByClauseSql(actualScope));
     }
 

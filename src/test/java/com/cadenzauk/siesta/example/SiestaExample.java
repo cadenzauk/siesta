@@ -144,6 +144,16 @@ public class SiestaExample extends IntegrationTest {
             .groupBy(Manufacturer::manufacturerId)
             .orderBy(Manufacturer::manufacturerId)
             .list();
+        List<ManufacturerSummary> nonSuppliers = database.from(Manufacturer.class, "m")
+            .leftJoin(Widget.class, "w").on(Widget::manufacturerId).isEqualTo(Manufacturer::manufacturerId)
+            .select(ManufacturerSummary.class)
+            .with(Manufacturer::name).as(ManufacturerSummary::name)
+            .with(countDistinct(Widget::widgetId)).as(ManufacturerSummary::numberOfPartsSupplied)
+            .where(Manufacturer::manufacturerId).isIn(2006L, 2007L, 2008L)
+            .groupBy(Manufacturer::manufacturerId)
+            .having(countDistinct(Widget::widgetId)).isEqualTo(0)
+            .orderBy(Manufacturer::manufacturerId)
+            .list();
 
         assertThat(partCountsBySupplier, hasSize(3));
         assertThat(partCountsBySupplier.get(0).item1(), is("Spacely Space Sprockets, Inc"));
@@ -160,5 +170,9 @@ public class SiestaExample extends IntegrationTest {
         assertThat(manufacturerSummaries.get(0).numberOfPartsSupplied(), is(1));
         assertThat(manufacturerSummaries.get(1).numberOfPartsSupplied(), is(2));
         assertThat(manufacturerSummaries.get(2).numberOfPartsSupplied(), is(0));
+
+        assertThat(nonSuppliers, hasSize(1));
+        assertThat(nonSuppliers.get(0).name(), is("Orbit City Gears"));
+
     }
 }

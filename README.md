@@ -160,7 +160,7 @@ When we select columns the results are returned as tuples, which isn't always co
 not as nice as being able to refer to `name()`.  It is also quite limiting since we currently only have tuples
 up to `Tuple9` so you can only have nine columns in your result set this way.
 
-An alternative is to define an class to hold your results:
+An alternative is to define a class to hold your results:
 
 ```java
 public class ManufacturerSummary {
@@ -195,6 +195,22 @@ List<ManufacturerSummary> manufacturerSummaries = database.from(Manufacturer.cla
     .groupBy(Manufacturer::manufacturerId)
     .orderBy(Manufacturer::manufacturerId)
     .list();
+```
+
+Of course, you could also add a HAVING clause as follows.
+
+```java
+List<ManufacturerSummary> nonSuppliers = database.from(Manufacturer.class, "m")
+    .leftJoin(Widget.class, "w").on(Widget::manufacturerId).isEqualTo(Manufacturer::manufacturerId)
+    .select(ManufacturerSummary.class)
+    .with(Manufacturer::name).as(ManufacturerSummary::name)
+    .with(countDistinct(Widget::widgetId)).as(ManufacturerSummary::numberOfPartsSupplied)
+    .where(Manufacturer::manufacturerId).isIn(2006L, 2007L, 2008L)
+    .groupBy(Manufacturer::manufacturerId)
+    .having(countDistinct(Widget::widgetId)).isEqualTo(0)
+    .orderBy(Manufacturer::manufacturerId)
+    .list();
+
 ```
 
 ## Example Code

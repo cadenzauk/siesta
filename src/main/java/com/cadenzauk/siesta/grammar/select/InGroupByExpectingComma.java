@@ -29,7 +29,7 @@ import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
-public class InGroupByExpectingComma<RT> extends ExpectingOrderBy<RT> {
+public class InGroupByExpectingComma<RT> extends ExpectingHaving<RT> {
     public InGroupByExpectingComma(Select<RT> statement) {
         super(statement);
     }

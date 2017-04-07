@@ -32,7 +32,6 @@ public class ExpectingOrderBy<RT> extends ExpectingEndOfStatement<RT> {
     public ExpectingOrderBy(Select<RT> statement) {
         super(statement);
     }
-
     public <T> InOrderByExpectingThen<RT> orderBy(TypedExpression<T> expression) {
         return new InOrderByExpectingThen<>(statement).then(expression);
     }
