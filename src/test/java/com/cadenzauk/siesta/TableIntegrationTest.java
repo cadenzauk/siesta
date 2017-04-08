@@ -41,6 +41,7 @@ import static com.cadenzauk.siesta.Aggregates.min;
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
 import static com.cadenzauk.siesta.test.model.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -50,14 +51,12 @@ public class TableIntegrationTest extends IntegrationTest {
     @Test
     public void selectFromDatabaseOneTable() {
         Database database = testDatabase(dataSource);
-
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(newId())
             .manufacturerId(newId())
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
-
         database.insert(aWidget);
 
         Optional<WidgetRow> theSame = database.from(WidgetRow.class)
@@ -275,6 +274,40 @@ public class TableIntegrationTest extends IntegrationTest {
         assertThat(result.get(1).item2(), is("Description 2"));
         assertThat(result.get(2).item1(), is("No Parts"));
         assertThat(result.get(2).item2(), is("-- no parts --"));
+    }
+
+    @Test
+    public void leftJoinOfMissingIsNull() {
+        Database database = testDatabase(dataSource);
+        long manufacturer1 = newId();
+        long manufacturer2 = newId();
+        ManufacturerRow twoParts = ManufacturerRow.newBuilder()
+            .manufacturerId(manufacturer1)
+            .name(Optional.of("Has a Part"))
+            .build();
+        ManufacturerRow noParts = ManufacturerRow.newBuilder()
+            .manufacturerId(manufacturer2)
+            .name(Optional.of("Has No Parts"))
+            .build();
+        WidgetRow aWidget1 = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .manufacturerId(manufacturer1)
+            .name("Name 1")
+            .build();
+        database.insert(noParts, twoParts);
+        database.insert(aWidget1);
+
+        List<Tuple2<ManufacturerRow,WidgetRow>> result = database.from(ManufacturerRow.class, "m")
+            .leftJoin(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
+            .where(ManufacturerRow::manufacturerId).isIn(manufacturer1, manufacturer2)
+            .orderBy(ManufacturerRow::manufacturerId)
+            .list();
+
+        assertThat(result, hasSize(2));
+        assertThat(result.get(0).item1().name(), is(Optional.of("Has a Part")));
+        assertThat(result.get(0).item2().name(), is("Name 1"));
+        assertThat(result.get(1).item1().name(), is(Optional.of("Has No Parts")));
+        assertThat(result.get(1).item2(), nullValue());
     }
 
     private static long newId() {

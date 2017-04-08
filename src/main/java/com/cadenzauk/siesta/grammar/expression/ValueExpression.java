@@ -60,6 +60,6 @@ public class ValueExpression<T> implements TypedExpression<T> {
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return (rs, i) -> dataType.get(rs, label).orElse(null);
+        return rs -> dataType.get(rs, label).orElse(null);
     }
 }

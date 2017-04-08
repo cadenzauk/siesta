@@ -38,7 +38,7 @@ public class JdbcTemplateSqlExecutor implements SqlExecutor {
 
     @Override
     public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return jdbcTemplate.query(sql, args, rowMapper::mapRow);
+        return jdbcTemplate.query(sql, args, (rs, rowNum) -> rowMapper.mapRow(rs));
     }
 
     @Override

@@ -59,6 +59,6 @@ public class CountFunction implements TypedExpression<Integer> {
 
     @Override
     public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return (rs,i) -> DataType.INTEGER.get(rs, label).orElse(null);
+        return rs -> DataType.INTEGER.get(rs, label).orElse(null);
     }
 }

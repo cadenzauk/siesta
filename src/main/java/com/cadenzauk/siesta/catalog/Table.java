@@ -35,6 +35,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 
@@ -58,6 +59,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class Table<R> {
     private final Database database;
@@ -173,11 +175,20 @@ public class Table<R> {
         }
 
         public RowMapper<R> rowMapper(Optional<String> prefix) {
-            return (rs, i) -> {
-                B builder = newBuilder.get();
-                columns.forEach(c -> c.extract(rs, builder, prefix.orElse(tableName + "_") + c.name()));
-                return buildRow.apply(builder);
+            return rs -> {
+                List<ResultSetValue<B>> values = columns.stream()
+                    .map(c -> c.extract(rs, prefix.orElse(tableName + "_") + c.name()))
+                    .collect(toList());
+                return values.stream().noneMatch(ResultSetValue::isPresent)
+                    ? null
+                    :  build(values);
             };
+        }
+
+        private R build(List<ResultSetValue<B>> values) {
+            B builder = newBuilder.get();
+            values.forEach(v -> v.apply(builder));
+            return buildRow.apply(builder);
         }
 
         public DynamicRowMapper<R> dynamicRowMapper(Optional<String> prefix) {
@@ -191,12 +202,14 @@ public class Table<R> {
                 }
 
                 @Override
-                public R mapRow(ResultSet rs, int rowNum) {
-                    B builder = newBuilder.get();
-                    columns.stream()
+                public R mapRow(ResultSet rs) {
+                    List<ResultSetValue<B>> values = columns.stream()
                         .filter(c -> labels.contains(c.label(labelPrefix)))
-                        .forEach(c -> c.extract(rs, builder, c.label(labelPrefix)));
-                    return buildRow.apply(builder);
+                        .map(c -> c.extract(rs, prefix.orElse(tableName + "_") + c.name()))
+                        .collect(toList());
+                    return values.stream().noneMatch(ResultSetValue::isPresent)
+                        ? null
+                        :  build(values);
                 }
             };
         }

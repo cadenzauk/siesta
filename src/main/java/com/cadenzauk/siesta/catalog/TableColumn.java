@@ -70,7 +70,7 @@ public class TableColumn<T, R, B> implements Column<T,R> {
 
     @Override
     public RowMapper<T> rowMapper(String label) {
-        return (rs, i) -> dataType.get(rs, label).orElse(null);
+        return rs -> dataType.get(rs, label).orElse(null);
     }
 
     @Override
@@ -90,9 +90,19 @@ public class TableColumn<T, R, B> implements Column<T,R> {
         return primaryKey;
     }
 
-    public void extract(ResultSet rs, B builder, String label) {
+    public ResultSetValue<B> extract(ResultSet rs, String label) {
         Optional<T> value = dataType.get(rs, label);
-        setter.accept(builder, value);
+        return new ResultSetValue<B>() {
+            @Override
+            public boolean isPresent() {
+                return value.isPresent();
+            }
+
+            @Override
+            public void apply(B builder) {
+                setter.accept(builder, value);
+            }
+        };
     }
 
     public String label(String prefix) {
@@ -146,5 +156,11 @@ public class TableColumn<T, R, B> implements Column<T,R> {
         public TableColumn<T,R,B> build() {
             return new TableColumn<>(this);
         }
+    }
+
+    interface ResultSetValue<B> {
+        boolean isPresent();
+
+        void apply(B builder);
     }
 }

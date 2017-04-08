@@ -64,7 +64,7 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
 
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
-        return (rs, i) -> column.dataType().get(rs, label).orElse(null);
+        return rs -> column.dataType().get(rs, label).orElse(null);
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, Function1<R,T> getterReference) {
