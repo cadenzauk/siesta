@@ -23,10 +23,10 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
-import com.cadenzauk.siesta.testmodel.ManufacturerRow;
-import com.cadenzauk.siesta.testmodel.TestDatabase;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
-import com.cadenzauk.siesta.testmodel.WidgetViewRow;
+import com.cadenzauk.siesta.test.model.ManufacturerRow;
+import com.cadenzauk.siesta.test.model.TestDatabase;
+import com.cadenzauk.siesta.test.model.WidgetRow;
+import com.cadenzauk.siesta.test.model.WidgetViewRow;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -82,11 +82,12 @@ class SelectProjectionTest extends MockitoTest {
     @Test
     void projectIntoObject() {
         Database database = TestDatabase.testDatabase();
+        Alias<WidgetViewRow> v = database.table(WidgetViewRow.class).as("v");
 
         database
             .from(WidgetRow.class, "w")
             .join(ManufacturerRow.class, "m").on(ManufacturerRow::manufacturerId).isEqualTo(WidgetRow::manufacturerId)
-            .select(WidgetViewRow.class, "v")
+            .select(v)
             .with(WidgetRow::widgetId).as(WidgetViewRow::widgetId)
             .with(WidgetRow::name).as(WidgetViewRow::widgetName)
             .with(WidgetRow::description).as(WidgetViewRow::description)

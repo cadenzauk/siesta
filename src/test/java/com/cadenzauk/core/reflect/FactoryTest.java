@@ -39,6 +39,7 @@ class FactoryTest {
     void cannotInstantiate() {
         calling(() -> Factory.forClass(Factory.class).get())
             .shouldThrow(RuntimeException.class)
+            .withMessage(is("java.lang.reflect.InvocationTargetException"))
             .withCause(InvocationTargetException.class)
             .withCause(RuntimeInstantiationException.class);
 

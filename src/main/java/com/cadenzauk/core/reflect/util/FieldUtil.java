@@ -49,7 +49,7 @@ public final class FieldUtil extends UtilityClass {
         }
     }
 
-    public static Optional<ParameterizedType> genericType(Field field) {
+    private static Optional<ParameterizedType> genericType(Field field) {
         return OptionalUtil.as(ParameterizedType.class, field.getGenericType());
     }
 

@@ -28,8 +28,8 @@ import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import com.cadenzauk.siesta.testmodel.ManufacturerRow;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
+import com.cadenzauk.siesta.test.model.ManufacturerRow;
+import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -66,7 +66,7 @@ class AliasTest extends MockitoTest {
     private RowMapper<WidgetRow> rowMapper;
 
     @Test
-    void inWhereClause() throws Exception {
+    void inWhereClause()  {
         when(widgetTable.qualifiedName()).thenReturn("SCHEMA.WIDGET");
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "bob");
 
@@ -76,7 +76,7 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void inSelectClauseSql() throws Exception {
+    void inSelectClauseSql()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
 
         String result = sut.inSelectClauseSql("WIDGET_ID");
@@ -85,7 +85,7 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void inSelectClauseLabel() throws Exception {
+    void inSelectClauseLabel()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
 
         String result = sut.inSelectClauseLabel("WIDGET_ID");
@@ -94,20 +94,20 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void col() throws Exception {
+    void col()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
-        when(widgetDescription.name()).thenReturn("DESCR");
+        when(widgetDescription.name()).thenReturn("D");
 
         TypedExpression<Long> col = sut.col(WidgetRow::widgetId);
 
         assertThat(col, instanceOf(ResolvedColumn.class));
-        assertThat(col.label(scope), is("fred_DESCR"));
+        assertThat(col.label(scope), is("fred_D"));
     }
 
     @Test
-    void colOptional() throws Exception {
+    void colOptional()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
@@ -120,7 +120,7 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void columnDelegatesToTable() throws Exception {
+    void columnDelegatesToTable()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "joe");
         when(widgetTable.column(methodInfo)).thenReturn(widgetRowId);
 
@@ -132,7 +132,7 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void rowMapperDelegatesToTable() throws Exception {
+    void rowMapperDelegatesToTable()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "barney");
         when(widgetTable.rowMapper("barney_")).thenReturn(rowMapper);
 
@@ -145,7 +145,7 @@ class AliasTest extends MockitoTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void asRightClassWithRightNameReturnsAlias() throws Exception {
+    void asRightClassWithRightNameReturnsAlias()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 
@@ -156,19 +156,19 @@ class AliasTest extends MockitoTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void asDifferentClassWithWrongNameThrowsException() throws Exception {
+    void asDifferentClassWithWrongNameThrowsException()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 
         calling(() -> sut.as(ManufacturerRow.class, "wilma"))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Alias wilma is an alias for " +
-                "class com.cadenzauk.siesta.testmodel.WidgetRow and not " +
-                "class com.cadenzauk.siesta.testmodel.ManufacturerRow"));
+                "class com.cadenzauk.siesta.test.model.WidgetRow and not " +
+                "class com.cadenzauk.siesta.test.model.ManufacturerRow"));
     }
 
     @Test
-    void asRightClassWithDifferentNameReturnsEmpty() throws Exception {
+    void asRightClassWithDifferentNameReturnsEmpty()  {
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "pebbles");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "dino").collect(toList());
@@ -177,8 +177,8 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void asDifferentClassWithDifferentNameReturnsEmpty() throws Exception {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "bambam");
+    void asDifferentClassWithDifferentNameReturnsEmpty()  {
+        Alias<WidgetRow> sut = new Alias<>(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class, "burt").collect(toList());
 
@@ -186,9 +186,9 @@ class AliasTest extends MockitoTest {
     }
 
     @Test
-    void asWithWrongClassReturnsEmpty() throws Exception {
+    void asWithWrongClassReturnsEmpty()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "bambam");
+        Alias<WidgetRow> sut = new Alias<>(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class).collect(toList());
 
@@ -197,7 +197,7 @@ class AliasTest extends MockitoTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void asWithSameClassReturnsAlias() throws Exception {
+    void asWithSameClassReturnsAlias()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 
@@ -208,7 +208,7 @@ class AliasTest extends MockitoTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void asWithSuperClassReturnsAlias() throws Exception {
+    void asWithSuperClassReturnsAlias()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
         Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
 

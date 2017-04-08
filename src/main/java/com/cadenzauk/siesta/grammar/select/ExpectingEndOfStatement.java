@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT> {
     protected final Select<RT> statement;
 
-    public ExpectingEndOfStatement(Select<RT> statement) {
+    protected ExpectingEndOfStatement(Select<RT> statement) {
         this.statement = statement;
     }
 

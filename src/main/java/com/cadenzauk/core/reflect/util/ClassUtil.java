@@ -52,63 +52,63 @@ public final class ClassUtil extends UtilityClass {
         }
     }
 
-    public static Method getDeclaredMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
-        return declaredMethod(klass, name, parameterTypes)
+    public static Method getDeclaredMethod(Class<?> aClass, String name, Class<?>... parameterTypes) {
+        return declaredMethod(aClass, name, parameterTypes)
             .orElseThrow(() -> new NoSuchElementException(String.format("No such method as %s(%s) in %s",
-                name, Arrays.stream(parameterTypes).map(Object::toString).collect(joining(", ")), klass)));
+                name, Arrays.stream(parameterTypes).map(Object::toString).collect(joining(", ")), aClass)));
     }
 
-    public static Optional<Method> declaredMethod(Class<?> klass, String name, Class<?>... parameterTypes) {
+    public static Optional<Method> declaredMethod(Class<?> aClass, String name, Class<?>... parameterTypes) {
         try {
-            return Optional.of(klass.getDeclaredMethod(name, parameterTypes));
+            return Optional.of(aClass.getDeclaredMethod(name, parameterTypes));
         } catch (NoSuchMethodException e) {
             return Optional.empty();
         }
     }
 
-    public static Stream<Method> declaredMethods(Class<?> klass) {
-        return Arrays.stream(klass.getDeclaredMethods());
+    public static Stream<Method> declaredMethods(Class<?> aClass) {
+        return Arrays.stream(aClass.getDeclaredMethods());
     }
 
-    public static Field getDeclaredField(Class<?> klass, String fieldName) {
-        return declaredField(klass, fieldName)
-            .orElseThrow(() -> new NoSuchElementException("No such field as " + fieldName + " in " + klass));
+    public static Field getDeclaredField(Class<?> aClass, String fieldName) {
+        return declaredField(aClass, fieldName)
+            .orElseThrow(() -> new NoSuchElementException("No such field as " + fieldName + " in " + aClass));
     }
 
-    public static Optional<Field> declaredField(Class<?> klass, String fieldName) {
+    public static Optional<Field> declaredField(Class<?> aClass, String fieldName) {
         try {
-            return Optional.of(klass.getDeclaredField(fieldName));
+            return Optional.of(aClass.getDeclaredField(fieldName));
         } catch (NoSuchFieldException e) {
             return Optional.empty();
         }
     }
 
-    public static Optional<Field> findField(Class<?> klass, String fieldName) {
-        return superclasses(klass)
+    public static Optional<Field> findField(Class<?> aClass, String fieldName) {
+        return superclasses(aClass)
             .map(cls -> declaredField(cls, fieldName))
             .flatMap(StreamUtil::of)
             .findFirst();
     }
 
-    public static Optional<Class<?>> superclass(Class<?> klass) {
-        return Optional.ofNullable(klass.getSuperclass());
+    public static Optional<Class<?>> superclass(Class<?> aClass) {
+        return Optional.ofNullable(aClass.getSuperclass());
     }
 
-    public static Stream<Class<?>> superclasses(Class<?> klass) {
-        return Stream.concat(Stream.of(klass), superclass(klass).map(ClassUtil::superclasses).orElseGet(Stream::empty));
+    public static Stream<Class<?>> superclasses(Class<?> aClass) {
+        return Stream.concat(Stream.of(aClass), superclass(aClass).map(ClassUtil::superclasses).orElseGet(Stream::empty));
     }
 
-    public static <A extends Annotation> boolean hasAnnotation(Class<?> klass, Class<A> annotationClass) {
-        return klass.getAnnotation(annotationClass) != null;
+    public static <A extends Annotation> boolean hasAnnotation(Class<?> aClass, Class<A> annotationClass) {
+        return aClass.getAnnotation(annotationClass) != null;
     }
 
-    public static <A extends Annotation, T> Optional<A> annotation(Class<T> klass, Class<A> annotationClass) {
-        return Optional.ofNullable(klass.getAnnotation(annotationClass));
+    public static <A extends Annotation, T> Optional<A> annotation(Class<T> aClass, Class<A> annotationClass) {
+        return Optional.ofNullable(aClass.getAnnotation(annotationClass));
     }
 
-    public static <T> Optional<Constructor<T>> constructor(Class<T> klass, Class<?>... parameterTypes) {
+    public static <T> Optional<Constructor<T>> constructor(Class<T> aClass, Class<?>... parameterTypes) {
         try {
-            return Optional.of(klass.getDeclaredConstructor(parameterTypes));
+            return Optional.of(aClass.getDeclaredConstructor(parameterTypes));
         } catch (NoSuchMethodException e) {
             return Optional.empty();
         }

@@ -65,7 +65,7 @@ class Select3Test {
         }
     }
 
-    private Database database = Database.newBuilder().defaultSchema("TEST").build();
+    private final Database database = Database.newBuilder().defaultSchema("TEST").build();
 
     @Test
     void noWhereClause() {

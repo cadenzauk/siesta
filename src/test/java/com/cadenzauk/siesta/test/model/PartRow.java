@@ -20,43 +20,34 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta.test.model;
 
-import java.util.Optional;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-public class WidgetViewRow {
+@Table(name = "PART", schema = "TEST")
+public class PartRow {
+    @Id
+    private final long partId;
     private final long widgetId;
-    private final String widgetName;
-    private final long manufacturerId;
-    private final Optional<String> description;
-    private final Optional<String> manufacturerName;
+    private final String description;
 
-    private WidgetViewRow(Builder builder) {
+    private PartRow(Builder builder) {
+        partId = builder.partId;
         widgetId = builder.widgetId;
-        widgetName = builder.widgetName;
-        manufacturerId = builder.manufacturerId;
         description = builder.description;
-        manufacturerName = builder.manufacturerName;
+    }
+
+    public long partId() {
+        return partId;
     }
 
     public long widgetId() {
         return widgetId;
     }
 
-    public String widgetName() {
-        return widgetName;
-    }
-
-    public long manufacturerId() {
-        return manufacturerId;
-    }
-
-    public Optional<String> description() {
+    public String description() {
         return description;
-    }
-
-    public Optional<String> manufacturerName() {
-        return manufacturerName;
     }
 
     public static Builder newBuilder() {
@@ -64,13 +55,16 @@ public class WidgetViewRow {
     }
 
     public static final class Builder {
+        private long partId;
         private long widgetId;
-        private String widgetName;
-        private long manufacturerId;
-        private Optional<String> description;
-        private Optional<String> manufacturerName;
+        private String description;
 
         private Builder() {
+        }
+
+        public Builder partId(long val) {
+            partId = val;
+            return this;
         }
 
         public Builder widgetId(long val) {
@@ -78,28 +72,13 @@ public class WidgetViewRow {
             return this;
         }
 
-        public Builder widgetName(String val) {
-            widgetName = val;
-            return this;
-        }
-
-        public Builder manufacturerId(long val) {
-            manufacturerId = val;
-            return this;
-        }
-
-        public Builder description(Optional<String> val) {
+        public Builder description(String val) {
             description = val;
             return this;
         }
 
-        public Builder manufacturerName(Optional<String> val) {
-            manufacturerName = val;
-            return this;
-        }
-
-        public WidgetViewRow build() {
-            return new WidgetViewRow(this);
+        public PartRow build() {
+            return new PartRow(this);
         }
     }
 }

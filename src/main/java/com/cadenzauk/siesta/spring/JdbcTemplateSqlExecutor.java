@@ -32,7 +32,7 @@ import java.util.List;
 public class JdbcTemplateSqlExecutor implements SqlExecutor {
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcTemplateSqlExecutor(JdbcTemplate jdbcTemplate) {
+    private JdbcTemplateSqlExecutor(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

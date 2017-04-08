@@ -22,15 +22,17 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.testmodel.WidgetRow;
+import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class UpdateTest {
     @Test
-    public void update() {
+    void update() {
         Database database = Database.newBuilder()
             .defaultSchema("TEST")
             .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
@@ -38,7 +40,7 @@ public class UpdateTest {
 
         String sql = database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Fred")
-            .set(WidgetRow::description).to("Bob")
+            .set(WidgetRow::description).to(Optional.of("Bob"))
             .where(WidgetRow::widgetId).isEqualTo(1L)
             .sql();
 

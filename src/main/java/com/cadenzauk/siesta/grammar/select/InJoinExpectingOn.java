@@ -34,7 +34,7 @@ import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import java.util.function.Function;
 
 public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
-    protected final Select<RT> statement;
+    private final Select<RT> statement;
     private final Function<Select<RT>,J> newJoinClause;
 
     protected InJoinExpectingOn(Select<RT> statement, Function<Select<RT>,J> newJoinClause) {

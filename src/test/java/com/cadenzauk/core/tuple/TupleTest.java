@@ -31,7 +31,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -311,9 +310,7 @@ class TupleTest {
 
     private static <T extends Tuple> DynamicTest itemTestCase(T sut, Function<T,Integer> getter, int expected) {
         Integer actual = getter.apply(sut);
-        return dynamicTest(sut + " -> " + expected, () -> {
-            assertThat(actual, is(expected));
-        });
+        return dynamicTest(sut + " -> " + expected, () -> assertThat(actual, is(expected)));
     }
 
     @TestFactory

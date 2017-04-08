@@ -51,7 +51,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldNonOptionalWithNoSetter() throws Exception {
+    void forFieldNonOptionalWithNoSetter() {
         BiConsumer<SetterTestClass,Optional<String>> setter
             = Setter.forField(SetterTestClass.class, String.class, ClassUtil.getDeclaredField(SetterTestClass.class, "string"));
         SetterTestClass target = new SetterTestClass();
@@ -62,7 +62,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldOptionalWithNoSetter() throws Exception {
+    void forFieldOptionalWithNoSetter() {
         BiConsumer<SetterTestClass,Optional<Long>> setter
             = Setter.forField(SetterTestClass.class, Long.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalLong"));
         SetterTestClass target = new SetterTestClass();
@@ -73,7 +73,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldNonOptionalAndWithPrefixSetter() throws Exception {
+    void forFieldNonOptionalAndWithPrefixSetter() {
         BiConsumer<SetterTestClass,Optional<LocalDate>> setter
             = Setter.forField(SetterTestClass.class, LocalDate.class, ClassUtil.getDeclaredField(SetterTestClass.class, "localDate"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -85,7 +85,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldOptionalAndWithPrefixSetter() throws Exception {
+    void forFieldOptionalAndWithPrefixSetter() {
         BiConsumer<SetterTestClass,Optional<String>> setter
             = Setter.forField(SetterTestClass.class, String.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalString"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -97,7 +97,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldNonOptionalAndSetPrefixSetter() throws Exception {
+    void forFieldNonOptionalAndSetPrefixSetter() {
         BiConsumer<SetterTestClass,Optional<Integer>> setter
             = Setter.forField(SetterTestClass.class, Integer.class, ClassUtil.getDeclaredField(SetterTestClass.class, "integer"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -109,7 +109,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldOptionalAndSetPrefixSetter() throws Exception {
+    void forFieldOptionalAndSetPrefixSetter() {
         BiConsumer<SetterTestClass,Optional<BigDecimal>> setter
             = Setter.forField(SetterTestClass.class, BigDecimal.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalBigDecimal"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -121,7 +121,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldNonOptionalAndunprefixedSetter() throws Exception {
+    void forFieldNonOptionalAndUnprefixedSetter() {
         BiConsumer<SetterTestClass,Optional<Character>> setter
             = Setter.forField(SetterTestClass.class, Character.class, ClassUtil.getDeclaredField(SetterTestClass.class, "character"));
         SetterTestClass target = mock(SetterTestClass.class);
@@ -133,7 +133,7 @@ class SetterTest {
     }
 
     @Test
-    void forFieldOptionalAndSetUnprefixedSetter() throws Exception {
+    void forFieldOptionalAndSetUnprefixedSetter() {
         BiConsumer<SetterTestClass,Optional<UUID>> setter
             = Setter.forField(SetterTestClass.class, UUID.class, ClassUtil.getDeclaredField(SetterTestClass.class, "optionalUuid"));
         SetterTestClass target = mock(SetterTestClass.class);

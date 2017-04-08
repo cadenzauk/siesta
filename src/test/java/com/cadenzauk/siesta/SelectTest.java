@@ -304,7 +304,7 @@ class SelectTest extends MockitoTest {
     }
 
     @Test
-    void optionalOfNoRowsIsEmpty() throws Exception {
+    void optionalOfNoRowsIsEmpty() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of());
 
@@ -315,7 +315,7 @@ class SelectTest extends MockitoTest {
     }
 
     @Test
-    void optionalOfOneRowIsRow() throws Exception {
+    void optionalOfOneRowIsRow() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Row1 row1 = new Row1();
         when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1));
@@ -328,7 +328,7 @@ class SelectTest extends MockitoTest {
     }
 
     @Test
-    void optionalOfTwoRowsIsException() throws Exception {
+    void optionalOfTwoRowsIsException() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Row1 row1 = new Row1();
         when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1, row1));
@@ -341,7 +341,7 @@ class SelectTest extends MockitoTest {
     }
 
     @Test
-    void list() throws Exception {
+    void list() {
         Database database = Database.newBuilder().defaultSchema("TEST").build();
         Row1 row1 = new Row1();
         Row1 row2 = new Row1();

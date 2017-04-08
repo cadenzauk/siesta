@@ -49,7 +49,7 @@ class MethodUtilTest {
     }
 
     @Test
-    void invokeNoArgsVoid() throws Exception {
+    void invokeNoArgsVoid() throws NoSuchMethodException {
         TestClass mock = Mockito.mock(TestClass.class);
         Method method1 = mock.getClass().getDeclaredMethod("method1");
 
@@ -59,7 +59,7 @@ class MethodUtilTest {
     }
 
     @Test
-    void invokeThrowsException() throws Exception {
+    void invokeThrowsException() throws NoSuchMethodException {
         TestClass mock = Mockito.mock(TestClass.class);
         doThrow(IllegalFormatCodePointException.class).when(mock).method1();
         Method method1 = mock.getClass().getDeclaredMethod("method1");
@@ -73,7 +73,7 @@ class MethodUtilTest {
     }
 
     @Test
-    void invokeNoArgsWithResult() throws Exception {
+    void invokeNoArgsWithResult() throws NoSuchMethodException {
         TestClass mock = Mockito.mock(TestClass.class);
         Optional<String> expectedResult = Optional.of("The result");
         when(mock.method2()).thenReturn(expectedResult);
@@ -86,14 +86,14 @@ class MethodUtilTest {
     }
 
     @Test
-    void fromReference() throws Exception {
+    void fromReference() {
         Method method = MethodUtil.fromReference(TestClass.class, TestClass::method2);
 
         assertThat(method.getName(), is("method2"));
     }
 
     @Test
-    void fromReferenceToMethodWithoutClass() throws Exception {
+    void fromReferenceToMethodWithoutClass() {
         Method method = MethodUtil.fromReference(TestDerivedClass::derivedMethod);
 
         assertThat(method.getName(), is("derivedMethod"));
@@ -101,7 +101,7 @@ class MethodUtilTest {
     }
 
     @Test
-    void fromReferenceToOptionalMethodWithoutClass() throws Exception {
+    void fromReferenceToOptionalMethodWithoutClass() {
         Method method = MethodUtil.fromReference(TestClass::method2);
 
         assertThat(method.getName(), is("method2"));
@@ -109,7 +109,7 @@ class MethodUtilTest {
     }
 
     @Test
-    void fromReferenceToBaseOptionalMethodWithoutClass() throws Exception {
+    void fromReferenceToBaseOptionalMethodWithoutClass() {
         Method method = MethodUtil.fromReference(TestDerivedClass::method2);
 
         assertThat(method.getName(), is("method2"));
@@ -117,7 +117,7 @@ class MethodUtilTest {
     }
 
     @Test
-    void fromReferenceToBaseOptionalMethodGivenDerivedClass() throws Exception {
+    void fromReferenceToBaseOptionalMethodGivenDerivedClass() {
         Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
 
         assertThat(method.getName(), is("method2"));
@@ -130,8 +130,10 @@ class MethodUtilTest {
         }
 
         void method1() {
+            System.out.println("method1");
         }
 
+        @SuppressWarnings("SameReturnValue")
         Optional<String> method2() {
             return null;
         }
@@ -142,6 +144,7 @@ class MethodUtilTest {
             super(ignored);
         }
 
+        @SuppressWarnings("SameReturnValue")
         String derivedMethod() {
             return "";
         }

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta.test.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

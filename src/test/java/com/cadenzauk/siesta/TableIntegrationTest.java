@@ -24,9 +24,10 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.siesta.testmodel.ManufacturerRow;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
-import com.cadenzauk.siesta.testmodel.WidgetViewRow;
+import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
+import com.cadenzauk.siesta.test.model.ManufacturerRow;
+import com.cadenzauk.siesta.test.model.WidgetRow;
+import com.cadenzauk.siesta.test.model.WidgetViewRow;
 import org.junit.Test;
 
 import java.util.List;
@@ -38,13 +39,13 @@ import static com.cadenzauk.siesta.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.Aggregates.max;
 import static com.cadenzauk.siesta.Aggregates.min;
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
-import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
+import static com.cadenzauk.siesta.test.model.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class TableIntegrationTest extends IntegrationTest {
-    private static AtomicLong ids = new AtomicLong();
+    private static final AtomicLong ids = new AtomicLong();
 
     @Test
     public void selectFromDatabaseOneTable() {
@@ -98,26 +99,28 @@ public class TableIntegrationTest extends IntegrationTest {
 
     @Test
     public void update() {
-        Database database = testDatabase(dataSource);
+        Database database = testDatabase();
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(newId())
             .manufacturerId(newId())
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
-        database.insert(aWidget);
+        JdbcTemplateSqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
+        database.insert(sqlExecutor, aWidget);
 
-        database.update(WidgetRow.class)
+        int updated = database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Sprocket")
             .set(WidgetRow::description).toNull()
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
-            .execute();
+            .execute(sqlExecutor);
 
         Optional<WidgetRow> sprocket = database.from(WidgetRow.class)
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
-            .optional();
+            .optional(sqlExecutor);
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
         assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
+        assertThat(updated, is(1));
     }
 
     @Test

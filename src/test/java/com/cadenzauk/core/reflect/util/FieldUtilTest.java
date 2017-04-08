@@ -47,7 +47,7 @@ class FieldUtilTest {
     }
 
     @Test
-    void set() throws Exception {
+    void set() {
         ClassWithStringField target = new ClassWithStringField();
         String value = UUID.randomUUID().toString();
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
@@ -58,7 +58,7 @@ class FieldUtilTest {
     }
 
     @Test
-    void get() throws Exception {
+    void get() {
         ClassWithStringField target = new ClassWithStringField();
         String value = UUID.randomUUID().toString();
         target.setStringField(value);
@@ -70,7 +70,7 @@ class FieldUtilTest {
     }
 
     @Test
-    void hasAnnotationPresent() throws Exception {
+    void hasAnnotationPresent() {
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
 
         boolean result = FieldUtil.hasAnnotation(XmlElement.class, field);
@@ -79,7 +79,7 @@ class FieldUtilTest {
     }
 
     @Test
-    void hasAnnotationNotPresent() throws Exception {
+    void hasAnnotationNotPresent() {
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
 
         boolean result = FieldUtil.hasAnnotation(XmlAttribute.class, field);

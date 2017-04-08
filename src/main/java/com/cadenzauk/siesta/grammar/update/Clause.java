@@ -28,7 +28,7 @@ import com.cadenzauk.siesta.SqlExecutor;
 public abstract class Clause<U> {
     protected final UpdateStatement<U> statement;
 
-    public Clause(UpdateStatement<U> statement) {
+    protected Clause(UpdateStatement<U> statement) {
         this.statement = statement;
     }
 
@@ -44,7 +44,7 @@ public abstract class Clause<U> {
         return statement.sql();
     }
 
-    protected Database database() {
+    private Database database() {
         return statement.database();
     }
 }

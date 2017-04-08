@@ -23,9 +23,9 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
-import com.cadenzauk.siesta.testmodel.ManufacturerRow;
-import com.cadenzauk.siesta.testmodel.TestDatabase;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
+import com.cadenzauk.siesta.test.model.ManufacturerRow;
+import com.cadenzauk.siesta.test.model.TestDatabase;
+import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

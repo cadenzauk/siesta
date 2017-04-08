@@ -27,7 +27,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
+import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -37,7 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
-import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
+import static com.cadenzauk.siesta.test.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;

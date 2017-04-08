@@ -42,7 +42,7 @@ class Select9Test {
         }
     }
 
-    private Database database = Database.newBuilder().defaultSchema("TEST9").build();
+    private final Database database = Database.newBuilder().defaultSchema("TEST9").build();
 
     @Test
     void canJoin9Tables() {

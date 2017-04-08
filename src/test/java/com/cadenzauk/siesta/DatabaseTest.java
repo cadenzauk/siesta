@@ -62,7 +62,7 @@ class DatabaseTest {
     }
 
     @Test
-    void from() throws Exception {
+    void from() {
         Database customers = siesta();
 
         String sql = customers.from(Person.class)

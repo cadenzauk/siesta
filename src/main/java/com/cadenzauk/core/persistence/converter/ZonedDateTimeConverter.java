@@ -48,6 +48,7 @@ public class ZonedDateTimeConverter implements AttributeConverter<ZonedDateTime,
             .orElse(null);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public ZonedDateTime convertToEntityAttribute(Timestamp dbData) {
         return Optional.ofNullable(dbData)

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta.test.model;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
@@ -39,6 +39,10 @@ public class TestDatabase {
     }
 
     private static Database.Builder testDatabaseBuilder() {
-        return Database.newBuilder().defaultSchema("TEST");
+        return Database.newBuilder().defaultSchema("TEST")
+            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
+            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
+            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
+            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
     }
 }

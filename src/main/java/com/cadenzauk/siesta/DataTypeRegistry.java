@@ -48,7 +48,7 @@ public class DataTypeRegistry {
         register(DataType.ZONED_DATE_TIME);
     }
 
-    public <T> void register(DataType<T> dataType) {
+    private <T> void register(DataType<T> dataType) {
         entries.put(dataType.javaClass(), dataType);
     }
 
@@ -59,8 +59,8 @@ public class DataTypeRegistry {
 
     public <T> Optional<DataType<T>> dataTypeOf(T value) {
         Objects.requireNonNull(value);
-        Class<T> klass = ClassUtil.forObject(value);
-        return dataTypeOf(klass);
+        Class<T> aClass = ClassUtil.forObject(value);
+        return dataTypeOf(aClass);
     }
 
     @SuppressWarnings("unchecked")

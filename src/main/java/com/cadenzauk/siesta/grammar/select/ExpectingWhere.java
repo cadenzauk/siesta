@@ -33,7 +33,7 @@ import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 
 public class ExpectingWhere<RT> extends ExpectingGroupBy<RT> {
-    public ExpectingWhere(Select<RT> select) {
+    protected ExpectingWhere(Select<RT> select) {
         super(select);
     }
 

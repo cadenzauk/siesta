@@ -280,6 +280,7 @@ class ClassUtilTest {
         }
 
         public void method() {
+            System.out.println("method called");
         }
     }
 }

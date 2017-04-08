@@ -20,34 +20,34 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.testmodel;
+package com.cadenzauk.siesta.test.model;
 
-import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDate;
+import java.util.Optional;
 
-@Table(name = "PART", schema = "TEST")
-public class PartRow {
-    @Id
-    private final long partId;
-    private final long widgetId;
-    private final String description;
+@Table(name = "MANUFACTURER", schema = "TEST")
+public class ManufacturerRow {
+    private final long manufacturerId;
+    private final Optional<String> name;
+    private final Optional<LocalDate> checked;
 
-    private PartRow(Builder builder) {
-        partId = builder.partId;
-        widgetId = builder.widgetId;
-        description = builder.description;
+    private ManufacturerRow(Builder builder) {
+        manufacturerId = builder.manufacturerId;
+        name = builder.name;
+        checked = builder.checked;
     }
 
-    public long partId() {
-        return partId;
+    public long manufacturerId() {
+        return manufacturerId;
     }
 
-    public long widgetId() {
-        return widgetId;
+    public Optional<String> name() {
+        return name;
     }
 
-    public String description() {
-        return description;
+    public Optional<LocalDate> checked() {
+        return checked;
     }
 
     public static Builder newBuilder() {
@@ -55,30 +55,30 @@ public class PartRow {
     }
 
     public static final class Builder {
-        private long partId;
-        private long widgetId;
-        private String description;
+        private long manufacturerId;
+        private Optional<String> name = Optional.empty();
+        private Optional<LocalDate> checked = Optional.empty();
 
         private Builder() {
         }
 
-        public Builder partId(long val) {
-            partId = val;
+        public Builder manufacturerId(long val) {
+            manufacturerId = val;
             return this;
         }
 
-        public Builder widgetId(long val) {
-            widgetId = val;
+        public Builder name(Optional<String> val) {
+            name = val;
             return this;
         }
 
-        public Builder description(String val) {
-            description = val;
+        public Builder checked(Optional<LocalDate> val) {
+            checked = val;
             return this;
         }
 
-        public PartRow build() {
-            return new PartRow(this);
+        public ManufacturerRow build() {
+            return new ManufacturerRow(this);
         }
     }
 }

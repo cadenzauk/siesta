@@ -44,7 +44,7 @@ class ConstructorUtilTest {
     }
 
     @Test
-    void newInstanceWithNoArgs() throws Exception {
+    void newInstanceWithNoArgs() {
         Constructor<ClassWithMultipleConstructors> constructor = ClassUtil.constructor(ClassWithMultipleConstructors.class)
             .orElseThrow(() -> new AssertionError("Failed to get constructor from " + ClassWithMultipleConstructors.class));
 
@@ -55,7 +55,7 @@ class ConstructorUtilTest {
     }
 
     @Test
-    void newInstanceWithArg() throws Exception {
+    void newInstanceWithArg() {
         Constructor<ClassWithMultipleConstructors> constructor = ClassUtil.constructor(ClassWithMultipleConstructors.class, Integer.TYPE)
             .orElseThrow(() -> new AssertionError("Failed to get constructor from " + ClassWithMultipleConstructors.class));
 

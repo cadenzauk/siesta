@@ -79,7 +79,7 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    public <R, B> Table<R> table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+    private <R, B> Table<R> table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
         return (Table<R>) metadataCache.computeIfAbsent(rowClass, k -> {
             Table.Builder<R,R> builder = new Table.Builder<>(this, rowClass, rowClass, Function.identity());
             return init.apply(builder).build();

@@ -22,21 +22,21 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.testmodel.ManufacturerRow;
-import com.cadenzauk.siesta.testmodel.WidgetRow;
+import com.cadenzauk.siesta.test.model.ManufacturerRow;
+import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
-import static com.cadenzauk.siesta.testmodel.TestDatabase.testDatabase;
+import static com.cadenzauk.siesta.test.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class SelectExpressionTest {
     @Test
-    public void isNull() {
+    void isNull() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -52,7 +52,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isNotNull() {
+    void isNotNull() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -68,7 +68,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isIn() {
+    void isIn() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -84,7 +84,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isNotIn() {
+    void isNotIn() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -100,7 +100,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isLike() {
+    void isLike() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -116,7 +116,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isLikeEscape() {
+    void isLikeEscape() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -132,7 +132,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isNotLike() {
+    void isNotLike() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -148,7 +148,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void isNotLikeEscape() {
+    void isNotLikeEscape() {
         Database database = testDatabase();
 
         String sql = database.from(WidgetRow.class)
@@ -164,7 +164,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void orExpression() {
+    void orExpression() {
         Database database = testDatabase();
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         String sql = database.from(m)
@@ -182,7 +182,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void andExpression() {
+    void andExpression() {
         Database database = testDatabase();
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         String sql = database.from(m)
@@ -200,7 +200,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void andAndOrsInWhere() {
+    void andAndOrsInWhere() {
         Database database = testDatabase();
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         String sql = database.from(m)
@@ -215,7 +215,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void between() {
+    void between() {
         Database database = testDatabase();
         Alias<ManufacturerRow> m = database.table(ManufacturerRow.class).as("m");
         String sql = database.from(m)
@@ -231,7 +231,7 @@ public class SelectExpressionTest {
     }
 
     @Test
-    public void coalesceFunc() {
+    void coalesceFunc() {
         Database database = testDatabase();
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
         String sql = database.from(w)

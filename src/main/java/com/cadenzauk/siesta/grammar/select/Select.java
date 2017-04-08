@@ -49,7 +49,7 @@ import static java.util.stream.Collectors.joining;
 
 public class Select<RT> implements TypedExpression<RT> {
     protected final Scope scope;
-    protected final From from;
+    private final From from;
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
     private BooleanExpression whereClause;

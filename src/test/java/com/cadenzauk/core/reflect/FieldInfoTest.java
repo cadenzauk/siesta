@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 
 class FieldInfoTest {
     @Test
-    void toStringGeneric() throws Exception {
+    void toStringGeneric() {
         Field field = optionalStringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
 
@@ -53,7 +53,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void toStringNonGeneric() throws Exception {
+    void toStringNonGeneric() {
         Field field = stringField();
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
 
@@ -91,7 +91,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofOptionalWithoutType() throws Exception {
+    void ofOptionalWithoutType() {
         Field field = optionalStringField();
 
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
@@ -104,7 +104,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofNonOptionalWithoutType() throws Exception {
+    void ofNonOptionalWithoutType() {
         Field field = stringField();
 
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
@@ -117,7 +117,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofOptionalWithType() throws Exception {
+    void ofOptionalWithType() {
         Field field = optionalStringField();
 
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, field, String.class);
@@ -130,7 +130,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofNonOptionalWithType() throws Exception {
+    void ofNonOptionalWithType() {
         Field field = stringField();
 
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, field, String.class);
@@ -143,7 +143,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofOptionalByName() throws Exception {
+    void ofOptionalByName() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, "optionalString", String.class);
 
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
@@ -153,7 +153,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofNonOptionalByName() throws Exception {
+    void ofNonOptionalByName() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, "string", String.class);
 
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
@@ -163,14 +163,14 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofWrongTypeThrowsException() throws Exception {
+    void ofWrongTypeThrowsException() {
         calling(() -> FieldInfo.of(ClassWithField.class, "string", Integer.class))
             .shouldThrow(NoSuchElementException.class)
             .withMessage(is("No field called string of type class java.lang.Integer in class com.cadenzauk.core.reflect.FieldInfoTest$ClassWithField"));
     }
 
     @Test
-    void ofOptionalGetter() throws Exception {
+    void ofOptionalGetter() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::optionalString))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for optionalString but didn't"));
 
@@ -181,7 +181,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void ofGetter() throws Exception {
+    void ofGetter() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::string))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for string but didn't"));
 
@@ -192,7 +192,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void annotationPresent() throws Exception {
+    void annotationPresent() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::string))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for string but didn't"));
 
@@ -203,7 +203,7 @@ class FieldInfoTest {
     }
 
     @Test
-    void annotationNotPresent() throws Exception {
+    void annotationNotPresent() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::optionalString))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for optionalString but didn't"));
 

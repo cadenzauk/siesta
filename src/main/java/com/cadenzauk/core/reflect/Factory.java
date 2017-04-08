@@ -31,10 +31,10 @@ import java.lang.reflect.Constructor;
 import java.util.function.Supplier;
 
 public final class Factory extends UtilityClass {
-    public static <T> Supplier<T> forClass(Class<T> klass) {
-        return ClassUtil.constructor(klass)
+    public static <T> Supplier<T> forClass(Class<T> aClass) {
+        return ClassUtil.constructor(aClass)
             .map(Factory::invoke)
-            .orElseGet(() -> () -> ObjenesisHelper.newInstance(klass));
+            .orElseGet(() -> () -> ObjenesisHelper.newInstance(aClass));
     }
 
     private static <T> Supplier<T> invoke(Constructor<T> ctor) {

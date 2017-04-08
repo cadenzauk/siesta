@@ -52,7 +52,7 @@ class GetterTest {
     }
 
     @Test
-    void forFieldWithNoGetter() throws Exception {
+    void forFieldWithNoGetter() {
         Function<GetterTestClass,Optional<String>> getter
             = Getter.forField(GetterTestClass.class, String.class, getDeclaredField(GetterTestClass.class, "fieldWithNoGetter"));
 
@@ -70,7 +70,7 @@ class GetterTest {
     }
 
     @Test
-    void forOptionalFieldWithNoGetter() throws Exception {
+    void forOptionalFieldWithNoGetter() {
         Function<GetterTestClass,Optional<Long>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Long.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithNoGetter"));
 
@@ -80,7 +80,7 @@ class GetterTest {
     }
 
     @Test
-    void forFieldWithUnprefixedGetter() throws Exception {
+    void forFieldWithUnprefixedGetter() {
         Function<GetterTestClass,Optional<BigDecimal>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, BigDecimal.class, getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -94,7 +94,7 @@ class GetterTest {
     }
 
     @Test
-    void forOptionalFieldWithUnprefixedGetter() throws Exception {
+    void forOptionalFieldWithUnprefixedGetter() {
         Function<GetterTestClass,Optional<Integer>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Integer.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithUnprefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -109,7 +109,7 @@ class GetterTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    void forFieldWithGetPrefixedGetter() throws Exception {
+    void forFieldWithGetPrefixedGetter() {
         Function<GetterTestClass,Optional<Short>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Short.TYPE, getDeclaredField(GetterTestClass.class, "fieldWithGetPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -124,7 +124,7 @@ class GetterTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    void forOptionalFieldWithGetPrefixedGetter() throws Exception {
+    void forOptionalFieldWithGetPrefixedGetter() {
         Function<GetterTestClass,Optional<LocalDate>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, LocalDate.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithGetPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -147,7 +147,7 @@ class GetterTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    void forFieldWithIsPrefixedGetter() throws Exception {
+    void forFieldWithIsPrefixedGetter() {
         Function<GetterTestClass,Optional<Boolean>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Boolean.TYPE, getDeclaredField(GetterTestClass.class, "fieldWithIsPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -161,7 +161,7 @@ class GetterTest {
     }
 
     @Test
-    void forOptionalFieldWithIsPrefixedGetter() throws Exception {
+    void forOptionalFieldWithIsPrefixedGetter() {
         Function<GetterTestClass,Optional<Boolean>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, Boolean.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithIsPrefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -175,7 +175,7 @@ class GetterTest {
     }
 
     @Test
-    void forFieldUsingSupertype() throws Exception {
+    void forFieldUsingSupertype() {
         Function<GetterTestClass,Optional<Number>> getter
             = Getter.forField(GetterTestClass.class, Number.class, getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter"));
         GetterTestClass mock = mock(GetterTestClass.class);
@@ -189,7 +189,7 @@ class GetterTest {
     }
 
     @Test
-    void isGetter() throws Exception {
+    void isGetter() {
         assertThat(Getter.isGetter(
             fromReference(GetterTestClass::fieldWithUnprefixedGetter),
             getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter")),

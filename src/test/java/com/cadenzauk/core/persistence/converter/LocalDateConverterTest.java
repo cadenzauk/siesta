@@ -87,7 +87,7 @@ class LocalDateConverterTest extends TemporalConverterTest {
         return parameters().map(p -> DynamicTest.dynamicTest(p.toString(), () -> convertToEntityAttribute(p.item1(), p.item2(), p.item3())));
     }
 
-    private void convertToEntityAttribute(String timeZone, LocalDate expected, Date input) throws Exception {
+    private void convertToEntityAttribute(String timeZone, LocalDate expected, Date input) {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateConverter sut = new LocalDateConverter();
 
