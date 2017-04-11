@@ -30,6 +30,8 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.AndExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.Assignment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class Update<U> {
+    private final static Logger LOG = LoggerFactory.getLogger(Update.class);
     private final UpdateStatement<U> statement = new Statement();
     private final Scope scope;
     private final Alias<U> alias;
@@ -60,7 +63,7 @@ public class Update<U> {
     private int execute(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        System.out.println(sql);
+        LOG.debug(sql);
         return sqlExecutor.update(sql, args);
     }
 

@@ -38,6 +38,8 @@ import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
@@ -62,6 +64,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class Table<R> {
+    private static final Logger LOG = LoggerFactory.getLogger(Table.class);
     private final Database database;
     private final Class<R> rowClass;
     private final String schema;
@@ -156,7 +159,7 @@ public class Table<R> {
                 IntStream.range(0, rows.length)
                     .mapToObj(i -> "(" + IntStream.range(0, nCols).mapToObj(j -> "?").collect(joining(", ")) + ")")
                     .collect(joining(", ")));
-            System.out.println(sql);
+            LOG.debug(sql);
 
             Object[] args = Arrays.stream(rows)
                 .flatMap(r -> columns

@@ -38,6 +38,8 @@ import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.Iterables;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +50,8 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class Select<RT> implements TypedExpression<RT> {
+    private static final Logger LOG = LoggerFactory.getLogger(Select.class);
+
     protected final Scope scope;
     private final From from;
     private final RowMapper<RT> rowMapper;
@@ -118,7 +122,7 @@ public class Select<RT> implements TypedExpression<RT> {
     List<RT> list(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        System.out.println(sql);
+        LOG.debug(sql);
         return sqlExecutor.query(sql, args, rowMapper());
     }
 
