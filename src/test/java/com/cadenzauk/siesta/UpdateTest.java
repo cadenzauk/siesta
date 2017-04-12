@@ -22,15 +22,32 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.test.model.WidgetRow;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 
 import java.util.Optional;
 
+import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
+import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
 
-public class UpdateTest {
+public class UpdateTest extends MockitoTest {
+    @Mock
+    private SqlExecutor sqlExecutor;
+
+    @Captor
+    private ArgumentCaptor<String> sql;
+
+    @Captor
+    private ArgumentCaptor<Object[]> args;
+
     @Test
     void update() {
         Database database = Database.newBuilder()
@@ -38,12 +55,20 @@ public class UpdateTest {
             .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
             .build();
 
-        String sql = database.update(WidgetRow.class)
+        database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Fred")
             .set(WidgetRow::description).to(Optional.of("Bob"))
             .where(WidgetRow::widgetId).isEqualTo(1L)
-            .sql();
+            .and(column(WidgetRow::description).isBetween("A").and("B")
+                .or(column(WidgetRow::description).isNull()))
+            .execute(sqlExecutor);
 
-        assertThat(sql, is("update TEST.WIDGET as WIDGET set WIDGET.NAME = ?, WIDGET.DESCRIPTION = ? where WIDGET.WIDGET_ID = ?"));
+        verify(sqlExecutor).update(sql.capture(), args.capture());
+        assertThat(sql.getValue(), is("update TEST.WIDGET as WIDGET " +
+            "set WIDGET.NAME = ?, WIDGET.DESCRIPTION = ? " +
+            "where WIDGET.WIDGET_ID = ? " +
+            "and (WIDGET.DESCRIPTION between ? and ? " +
+            "or WIDGET.DESCRIPTION is null)"));
+        assertThat(args.getValue(), is(toArray("Fred", "Bob", 1L, "A", "B")));
     }
 }

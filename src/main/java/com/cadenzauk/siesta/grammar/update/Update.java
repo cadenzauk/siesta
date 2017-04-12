@@ -27,9 +27,8 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.grammar.expression.AndExpression;
-import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,6 @@ import static java.util.stream.Collectors.joining;
 
 public class Update<U> {
     private final static Logger LOG = LoggerFactory.getLogger(Update.class);
-    private final UpdateStatement<U> statement = new Statement();
     private final Scope scope;
     private final Alias<U> alias;
     private final List<Assignment> sets = new ArrayList<>();
@@ -52,7 +50,11 @@ public class Update<U> {
         scope = new Scope(database, alias);
     }
 
-    private String sql() {
+    Database database() {
+        return scope.database();
+    }
+
+    String sql() {
         return String.format("update %s as %s set %s%s",
             alias.table().qualifiedName(),
             alias.aliasName(),
@@ -60,16 +62,16 @@ public class Update<U> {
             whereClauseSql());
     }
 
-    private int execute(SqlExecutor sqlExecutor) {
+    int execute(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
         return sqlExecutor.update(sql, args);
     }
 
-    private SetClause<U> addSet(Assignment expression) {
+    InSetExpectingWhere<U> addSet(Assignment expression) {
         sets.add(expression);
-        return new SetClause<>(statement);
+        return new InSetExpectingWhere<>(this);
     }
 
     private String whereClauseSql() {
@@ -83,52 +85,24 @@ public class Update<U> {
         );
     }
 
-    private WhereClause<U> setWhereClause(BooleanExpression e) {
+    InWhereExpectingAnd<U> setWhereClause(BooleanExpression e) {
         whereClause = e;
-        return new WhereClause<>(statement);
+        return new InWhereExpectingAnd<>(this);
     }
 
-    private void andWhere(BooleanExpression newClause) {
-        whereClause = new AndExpression(whereClause, newClause);
+    void andWhere(BooleanExpression newClause) {
+        whereClause = whereClause.appendAnd(newClause);
     }
 
-    private SetClause<U> setClause() {
-        return new SetClause<>(statement);
+    void orWhere(BooleanExpression newClause) {
+        whereClause = whereClause.appendOr(newClause);
     }
 
-    public static <U> SetClause<U> update(Database database, Table<U> table) {
+    private InSetExpectingWhere<U> setClause() {
+        return new InSetExpectingWhere<>(this);
+    }
+
+    public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
         return new Update<>(database, table.as(table.tableName())).setClause();
-    }
-
-    private class Statement implements UpdateStatement<U> {
-        @Override
-        public int execute(SqlExecutor sqlExecutor) {
-            return Update.this.execute(sqlExecutor);
-        }
-
-        @Override
-        public WhereClause<U> setWhereClause(BooleanExpression e) {
-            return Update.this.setWhereClause(e);
-        }
-
-        @Override
-        public void andWhere(BooleanExpression newClause) {
-            Update.this.andWhere(newClause);
-        }
-
-        @Override
-        public SetClause<U> addSet(Assignment assignment) {
-            return Update.this.addSet(assignment);
-        }
-
-        @Override
-        public Database database() {
-            return Update.this.scope.database();
-        }
-
-        @Override
-        public String sql() {
-            return Update.this.sql();
-        }
     }
 }

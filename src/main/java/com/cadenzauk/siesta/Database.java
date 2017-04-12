@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.Select;
-import com.cadenzauk.siesta.grammar.update.SetClause;
+import com.cadenzauk.siesta.grammar.update.InSetExpectingWhere;
 import com.cadenzauk.siesta.grammar.update.Update;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
@@ -180,7 +180,7 @@ public class Database {
         return Select.from(this, table(rowClass).as(alias));
     }
 
-    public <U> SetClause<U> update(Class<U> rowClass) {
+    public <U> InSetExpectingWhere<U> update(Class<U> rowClass) {
         return Update.update(this, table(rowClass));
     }
 

@@ -26,9 +26,9 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
 
 public abstract class Clause<U> {
-    protected final UpdateStatement<U> statement;
+    protected final Update<U> statement;
 
-    protected Clause(UpdateStatement<U> statement) {
+    protected Clause(Update<U> statement) {
         this.statement = statement;
     }
 

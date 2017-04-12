@@ -34,6 +34,7 @@ public class OperatorValueCondition<T> implements Condition<T> {
     private final String operator;
     private final T value;
     private final Optional<Double> selectivity;
+
     public OperatorValueCondition(String operator, T value, Optional<Double> selectivity) {
         Objects.requireNonNull(value);
         this.operator = operator;
