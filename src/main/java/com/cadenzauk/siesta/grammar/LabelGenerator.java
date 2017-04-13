@@ -20,39 +20,23 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.condition;
+package com.cadenzauk.siesta.grammar;
 
-import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Scope;
+import java.util.concurrent.atomic.AtomicLong;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
+public class LabelGenerator {
+    private static final AtomicLong counter = new AtomicLong();
+    private final String prefix;
+    private String label;
 
-public class OperatorValueCondition<T> implements Condition<T> {
-    private final String operator;
-    private final T value;
-    private final Optional<Double> selectivity;
-
-    public OperatorValueCondition(String operator, T value, Optional<Double> selectivity) {
-        Objects.requireNonNull(value);
-        this.operator = operator;
-        this.value = value;
-        this.selectivity = selectivity;
+    public LabelGenerator(String prefix) {
+        this.prefix = prefix;
     }
 
-    @Override
-    public String sql(Scope scope) {
-        return operator + " ?" + selectivity.map(scope.database().dialect()::selectivity).orElse("");
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.of(dataType(scope).toDatabase(value));
-    }
-
-    private DataType<T> dataType(Scope scope){
-        return scope.database().getDataTypeOf(value);
+    public String label() {
+        if (label == null) {
+            label = prefix + counter.incrementAndGet();
+        }
+        return label;
     }
 }

@@ -22,15 +22,19 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.Alias;
+
 import java.util.function.Function;
 
 public class BetweenBuilder<T,N> {
     private final TypedExpression<T> lhs;
-    private final T lowValue;
+    private final TypedExpression<T> lowValue;
     private final String prefix;
     private final Function<BooleanExpression,N> onComplete;
 
-    public BetweenBuilder(TypedExpression<T> lhs, T lowValue, String prefix, Function<BooleanExpression,N> onComplete) {
+    public BetweenBuilder(TypedExpression<T> lhs, TypedExpression<T> lowValue, String prefix, Function<BooleanExpression,N> onComplete) {
         this.lhs = lhs;
         this.lowValue = lowValue;
         this.prefix = prefix;
@@ -38,6 +42,34 @@ public class BetweenBuilder<T,N> {
     }
 
     public N and(T highValue) {
-        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, highValue, prefix));
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, ValueExpression.of(highValue), prefix));
+    }
+
+    public N and(TypedExpression<T> expression) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, expression, prefix));
+    }
+
+    public <R> N and(Function1<R,T> getter) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, UnresolvedColumn.of(getter), prefix));
+    }
+
+    public <R> N and(FunctionOptional1<R,T> getter) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, UnresolvedColumn.of(getter), prefix));
+    }
+
+    public <R> N and(String alias, Function1<R,T> getter) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, UnresolvedColumn.of(alias, getter), prefix));
+    }
+
+    public <R> N and(String alias, FunctionOptional1<R,T> getter) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, UnresolvedColumn.of(alias, getter), prefix));
+    }
+
+    public <R> N and(Alias<R> alias, Function1<R,T> getter) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, ResolvedColumn.of(alias, getter), prefix));
+    }
+
+    public <R> N and(Alias<R> alias, FunctionOptional1<R,T> getter) {
+        return onComplete.apply(new BetweenExpression<>(lhs, lowValue, ResolvedColumn.of(alias, getter), prefix));
     }
 }

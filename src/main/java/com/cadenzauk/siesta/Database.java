@@ -180,8 +180,16 @@ public class Database {
         return Select.from(this, table(rowClass).as(alias));
     }
 
+    public <U> InSetExpectingWhere<U> update(Alias<U> alias) {
+        return Update.update(this, alias);
+    }
+
     public <U> InSetExpectingWhere<U> update(Class<U> rowClass) {
         return Update.update(this, table(rowClass));
+    }
+
+    public <U> InSetExpectingWhere<U> update(Class<U> rowClass, String alias) {
+        return Update.update(this, table(rowClass).as(alias));
     }
 
     public static Builder newBuilder() {

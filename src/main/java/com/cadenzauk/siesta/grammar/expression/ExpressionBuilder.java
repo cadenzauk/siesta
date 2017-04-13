@@ -31,7 +31,6 @@ import com.cadenzauk.siesta.grammar.expression.condition.InCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.IsNullCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.LikeCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.OperatorExpressionCondition;
-import com.cadenzauk.siesta.grammar.expression.condition.OperatorValueCondition;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -48,200 +47,200 @@ public class ExpressionBuilder<T, N> {
 
     //---
     public N isEqualTo(T value) {
-        return complete(new OperatorValueCondition<>("=", value, selectivity));
+        return complete(new OperatorExpressionCondition<>("=", ValueExpression.of(value), selectivity));
     }
 
     public N isEqualTo(TypedExpression<T> expression) {
-        return complete(new OperatorExpressionCondition<>("=", expression));
+        return complete(new OperatorExpressionCondition<>("=", expression, selectivity));
     }
 
     public <R> N isEqualTo(Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isEqualTo(FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isEqualTo(String alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isEqualTo(String alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isEqualTo(Alias<R> alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("=", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("=", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isEqualTo(Alias<R> alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("=", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("=", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     //---
     public N isNotEqualTo(T value) {
-        return complete(new OperatorValueCondition<>("<>", value, selectivity));
+        return complete(new OperatorExpressionCondition<>("<>", ValueExpression.of(value), selectivity));
     }
 
     public N isNotEqualTo(TypedExpression<T> expression) {
-        return complete(new OperatorExpressionCondition<>("<>", expression));
+        return complete(new OperatorExpressionCondition<>("<>", expression, selectivity));
     }
 
     public <R> N isNotEqualTo(Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isNotEqualTo(FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isNotEqualTo(String alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isNotEqualTo(String alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isNotEqualTo(Alias<R> alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<>", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<>", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isNotEqualTo(Alias<R> alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<>", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<>", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     //---
     public N isGreaterThan(T value) {
-        return complete(new OperatorValueCondition<>(">", value, selectivity));
+        return complete(new OperatorExpressionCondition<>(">", ValueExpression.of(value), selectivity));
     }
 
     public N isGreaterThan(TypedExpression<T> expression) {
-        return complete(new OperatorExpressionCondition<>(">", expression));
+        return complete(new OperatorExpressionCondition<>(">", expression, selectivity));
     }
 
     public <R> N isGreaterThan(Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isGreaterThan(FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isGreaterThan(String alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isGreaterThan(String alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isGreaterThan(Alias<R> alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isGreaterThan(Alias<R> alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">", ResolvedColumn.of(alias, getter), selectivity));
     }
 
    //---
     public N isLessThan(T value) {
-        return complete(new OperatorValueCondition<>("<", value, selectivity));
+        return complete(new OperatorExpressionCondition<>("<", ValueExpression.of(value), selectivity));
     }
 
     public N isLessThan(TypedExpression<T> expression) {
-        return complete(new OperatorExpressionCondition<>("<", expression));
+        return complete(new OperatorExpressionCondition<>("<", expression, selectivity));
     }
 
     public <R> N isLessThan(Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isLessThan(FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isLessThan(String alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isLessThan(String alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isLessThan(Alias<R> alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isLessThan(Alias<R> alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     //---
     public N isGreaterThanOrEqualTo(T value) {
-        return complete(new OperatorValueCondition<>(">=", value, selectivity));
+        return complete(new OperatorExpressionCondition<>(">=", ValueExpression.of(value), selectivity));
     }
 
     public N isGreaterThanOrEqualTo(TypedExpression<T> expression) {
-        return complete(new OperatorExpressionCondition<>(">=", expression));
+        return complete(new OperatorExpressionCondition<>(">=", expression, selectivity));
     }
 
     public <R> N isGreaterThanOrEqualTo(Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isGreaterThanOrEqualTo(FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isGreaterThanOrEqualTo(String alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isGreaterThanOrEqualTo(String alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isGreaterThanOrEqualTo(Alias<R> alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">=", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">=", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isGreaterThanOrEqualTo(Alias<R> alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>(">=", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>(">=", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     //---
     public N isLessThanOrEqualTo(T value) {
-        return complete(new OperatorValueCondition<>("<=", value, selectivity));
+        return complete(new OperatorExpressionCondition<>("<=", ValueExpression.of(value), selectivity));
     }
 
     public N isLessThanOrEqualTo(TypedExpression<T> expression) {
-        return complete(new OperatorExpressionCondition<>("<=", expression));
+        return complete(new OperatorExpressionCondition<>("<=", expression, selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(getter)));
+        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(getter), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(String alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(String alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(Alias<R> alias, Function1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<=", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<=", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(Alias<R> alias, FunctionOptional1<R,T> getter) {
-        return complete(new OperatorExpressionCondition<>("<=", ResolvedColumn.of(alias, getter)));
+        return complete(new OperatorExpressionCondition<>("<=", ResolvedColumn.of(alias, getter), selectivity));
     }
 
     //--- IS [NOT] IN
@@ -290,11 +289,67 @@ public class ExpressionBuilder<T, N> {
 
     //--- BETWEEN
     public BetweenBuilder<T,N> isBetween(T value) {
-        return new BetweenBuilder<>(lhs, value, "", onComplete);
+        return new BetweenBuilder<>(lhs, ValueExpression.of(value), "", onComplete);
+    }
+
+    public BetweenBuilder<T,N> isBetween(TypedExpression<T> expression) {
+        return new BetweenBuilder<>(lhs, expression, "", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> isBetween(Function1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(getter), "", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> isBetween(FunctionOptional1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(getter), "", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> isBetween(String alias, Function1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(alias, getter), "", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> isBetween(String alias, FunctionOptional1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(alias, getter), "", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> isBetween(Alias<R> alias, Function1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> isBetween(Alias<R> alias, FunctionOptional1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "", onComplete);
     }
 
     public BetweenBuilder<T,N> notBetween(T value) {
-        return new BetweenBuilder<>(lhs, value, "not ", onComplete);
+        return new BetweenBuilder<>(lhs, ValueExpression.of(value), "not ", onComplete);
+    }
+
+    public BetweenBuilder<T,N> notBetween(TypedExpression<T> expression) {
+        return new BetweenBuilder<>(lhs, expression, "not ", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> notBetween(Function1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(getter), "not ", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> notBetween(FunctionOptional1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(getter), "not ", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> notBetween(String alias, Function1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(alias, getter), "not ", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> notBetween(String alias, FunctionOptional1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, UnresolvedColumn.of(alias, getter), "not ", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> notBetween(Alias<R> alias, Function1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "not ", onComplete);
+    }
+
+    public <R> BetweenBuilder<T,N> notBetween(Alias<R> alias, FunctionOptional1<R,T> getter) {
+        return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "not ", onComplete);
     }
 
     //---

@@ -24,7 +24,6 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.test.model.WidgetRow;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -55,20 +54,23 @@ public class UpdateTest extends MockitoTest {
             .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
             .build();
 
-        database.update(WidgetRow.class)
+        database.update(WidgetRow.class, "w")
             .set(WidgetRow::name).to("Fred")
             .set(WidgetRow::description).to(Optional.of("Bob"))
             .where(WidgetRow::widgetId).isEqualTo(1L)
-            .and(column(WidgetRow::description).isBetween("A").and("B")
+            .and(column(WidgetRow::description).isBetween("A").and("w", WidgetRow::name)
                 .or(column(WidgetRow::description).isNull()))
             .execute(sqlExecutor);
 
         verify(sqlExecutor).update(sql.capture(), args.capture());
-        assertThat(sql.getValue(), is("update TEST.WIDGET as WIDGET " +
-            "set WIDGET.NAME = ?, WIDGET.DESCRIPTION = ? " +
-            "where WIDGET.WIDGET_ID = ? " +
-            "and (WIDGET.DESCRIPTION between ? and ? " +
-            "or WIDGET.DESCRIPTION is null)"));
-        assertThat(args.getValue(), is(toArray("Fred", "Bob", 1L, "A", "B")));
+        assertThat(sql.getValue(), is("update TEST.WIDGET as w " +
+            "set w.NAME = ?, " +
+            "w.DESCRIPTION = ? " +
+            "where w.WIDGET_ID = ? " +
+            "and (" +
+            "w.DESCRIPTION between ? and w.NAME " +
+            "or w.DESCRIPTION is null" +
+            ")"));
+        assertThat(args.getValue(), is(toArray("Fred", "Bob", 1L, "A")));
     }
 }

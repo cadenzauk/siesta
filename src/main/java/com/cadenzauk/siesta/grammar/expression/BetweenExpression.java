@@ -22,18 +22,17 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.stream.Stream;
 
 public class BetweenExpression<T> extends BooleanExpression {
     private final TypedExpression<T> lhs;
-    private final T lowValue;
-    private final T highValue;
+    private final TypedExpression<T> lowValue;
+    private final TypedExpression<T> highValue;
     private final String prefix;
 
-    public BetweenExpression(TypedExpression<T> lhs, T lowValue, T highValue, String prefix) {
+    public BetweenExpression(TypedExpression<T> lhs, TypedExpression<T> lowValue, TypedExpression<T> highValue, String prefix) {
         this.lhs = lhs;
         this.lowValue = lowValue;
         this.highValue = highValue;
@@ -42,17 +41,12 @@ public class BetweenExpression<T> extends BooleanExpression {
 
     @Override
     public String sql(Scope scope) {
-        return lhs.sql(scope) + " " + prefix + "between ? and ?";
+        return String.format("%s %sbetween %s and %s", lhs.sql(scope), prefix, lowValue.sql(scope), highValue.sql(scope));
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(lowValue);
-        return Stream.concat(
-            lhs.args(scope),
-            Stream.of(
-                dataType.toDatabase(lowValue),
-                dataType.toDatabase(highValue)));
+        return Stream.of(lhs, lowValue, highValue).flatMap(v -> v.args(scope));
     }
 
     @Override

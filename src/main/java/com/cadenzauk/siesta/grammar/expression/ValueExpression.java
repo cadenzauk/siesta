@@ -25,16 +25,18 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
 
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class ValueExpression<T> implements TypedExpression<T> {
+    private final LabelGenerator labelGenerator = new LabelGenerator("value_");
     private final T value;
 
-    public ValueExpression(T value) {
-        this.value = value;
+    private ValueExpression(T value) {
         Objects.requireNonNull(value);
+        this.value = value;
     }
 
     @Override
@@ -54,12 +56,16 @@ public class ValueExpression<T> implements TypedExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        return "";
+        return labelGenerator.label();
     }
 
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         DataType<T> dataType = scope.database().getDataTypeOf(value);
         return rs -> dataType.get(rs, label).orElse(null);
+    }
+
+    public static <T> ValueExpression<T> of(T value) {
+        return new ValueExpression<>(value);
     }
 }

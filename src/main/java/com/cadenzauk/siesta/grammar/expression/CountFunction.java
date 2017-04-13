@@ -25,17 +25,12 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 public class CountFunction implements TypedExpression<Integer> {
-    private static final AtomicLong labelCounter = new AtomicLong();
-    private final String defaultLabel;
-
-    public CountFunction() {
-        defaultLabel = "count_" + labelCounter.incrementAndGet();
-    }
+    private final LabelGenerator labelGenerator = new LabelGenerator("count_");
 
     @Override
     public String sql(Scope scope) {
@@ -54,7 +49,7 @@ public class CountFunction implements TypedExpression<Integer> {
 
     @Override
     public String label(Scope scope) {
-        return defaultLabel;
+        return labelGenerator.label();
     }
 
     @Override

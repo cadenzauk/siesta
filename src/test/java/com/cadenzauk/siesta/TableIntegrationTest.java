@@ -108,7 +108,7 @@ public class TableIntegrationTest extends IntegrationTest {
         JdbcTemplateSqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
         database.insert(sqlExecutor, aWidget);
 
-        int updated = database.update(WidgetRow.class)
+        int updated = database.update(WidgetRow.class, "w")
             .set(WidgetRow::name).to("Sprocket")
             .set(WidgetRow::description).toNull()
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())

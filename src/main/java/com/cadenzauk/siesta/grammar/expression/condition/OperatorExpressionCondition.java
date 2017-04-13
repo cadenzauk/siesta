@@ -26,20 +26,23 @@ import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class OperatorExpressionCondition<T> implements Condition<T> {
     private final String operator;
     private final TypedExpression<T> expression;
+    private final Optional<Double> selectivity;
 
-    public OperatorExpressionCondition(String operator, TypedExpression<T> expression) {
+    public OperatorExpressionCondition(String operator, TypedExpression<T> expression, Optional<Double> selectivity) {
         this.operator = operator;
         this.expression = expression;
+        this.selectivity = selectivity;
     }
 
     @Override
     public String sql(Scope scope) {
-        return operator + " " + expression.sql(scope);
+        return operator + " " + expression.sql(scope) + selectivity.map(scope.database().dialect()::selectivity).orElse("");
     }
 
     @Override

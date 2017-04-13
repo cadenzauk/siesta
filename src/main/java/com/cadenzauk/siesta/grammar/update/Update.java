@@ -103,6 +103,9 @@ public class Update<U> {
     }
 
     public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
-        return new Update<>(database, table.as(table.tableName())).setClause();
+        return update(database, table.as(table.tableName()));
+    }
+    public static <U> InSetExpectingWhere<U> update(Database database, Alias<U> alias) {
+        return new Update<>(database, alias).setClause();
     }
 }

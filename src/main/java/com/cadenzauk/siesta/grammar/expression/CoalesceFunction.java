@@ -27,23 +27,21 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 public class CoalesceFunction<T> implements TypedExpression<T> {
-    private static final AtomicLong labelCounter = new AtomicLong();
+    private final LabelGenerator labelGenerator = new LabelGenerator("coalesce_");
     private final List<TypedExpression<T>> terms = new ArrayList<>();
-    private final String defaultLabel;
 
     private CoalesceFunction(TypedExpression<T> expression) {
         terms.add(expression);
-        defaultLabel = "coalesce_" + labelCounter.incrementAndGet();
     }
 
     @Override
@@ -63,7 +61,7 @@ public class CoalesceFunction<T> implements TypedExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        return defaultLabel;
+        return labelGenerator.label();
     }
 
     @Override
@@ -73,7 +71,7 @@ public class CoalesceFunction<T> implements TypedExpression<T> {
 
     @NotNull
     public CoalesceFunction<T> orElse(T value) {
-        terms.add(new ValueExpression<>(value));
+        terms.add(ValueExpression.of(value));
         return this;
     }
 
