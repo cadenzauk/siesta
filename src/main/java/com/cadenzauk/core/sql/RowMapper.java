@@ -20,13 +20,10 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.core.sql;
 
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Scope;
+import java.sql.ResultSet;
 
-public interface TypedExpression<T> extends Expression {
-    String label(Scope scope);
-
-    RowMapper<T> rowMapper(Scope scope, String label);
+public interface RowMapper<T> {
+    T mapRow(ResultSet rs);
 }

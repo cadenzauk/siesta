@@ -61,6 +61,11 @@ public class FluentAssert {
             return this;
         }
 
+        public ThrowableMatcher<T> withSuppressed(Matcher<Throwable[]> matcher) {
+            assertThat(actual.getSuppressed(), matcher);
+            return this;
+        }
+
         public <C extends Throwable> ThrowableMatcher<C> withCause(Class<C> causeClass) {
             return OptionalUtil.as(causeClass, Optional.ofNullable(actual.getCause()))
                 .map(ThrowableMatcher::new)

@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;

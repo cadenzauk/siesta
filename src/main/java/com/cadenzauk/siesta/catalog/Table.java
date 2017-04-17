@@ -33,7 +33,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;

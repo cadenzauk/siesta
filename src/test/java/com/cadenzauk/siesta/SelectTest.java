@@ -23,6 +23,8 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import javax.persistence.MappedSuperclass;
@@ -45,6 +48,7 @@ import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static com.cadenzauk.siesta.Aggregates.max;
 import static com.cadenzauk.siesta.Aggregates.min;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.startsWith;
@@ -82,6 +86,9 @@ class SelectTest extends MockitoTest {
 
     @Mock
     private SqlExecutor sqlExecutor;
+
+    @Mock
+    private Stream<Row1> stream;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -350,5 +357,19 @@ class SelectTest extends MockitoTest {
         List<Row1> result = database.from(Row1.class, "w").list(sqlExecutor);
 
         assertThat(result, contains(row1, row2));
+    }
+
+    @Test
+    void stream() {
+        Database database = Database.newBuilder().defaultSchema("TEST").build();
+        when(sqlExecutor.stream(any(), any(), Mockito.<RowMapper<Row1>>any())).thenReturn(stream);
+
+        Stream<Row1> result;
+        try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
+            result = database.from(Row1.class, "w").stream(sqlExecutor, autoCloseable);
+        }
+
+        assertThat(result, sameInstance(stream));
+        verify(stream).close();
     }
 }

@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.test.model.ManufacturerRow;
 import com.cadenzauk.siesta.test.model.TestDatabase;
 import com.cadenzauk.siesta.test.model.WidgetRow;

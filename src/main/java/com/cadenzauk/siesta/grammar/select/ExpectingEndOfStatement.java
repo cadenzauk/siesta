@@ -22,8 +22,9 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
@@ -54,6 +55,14 @@ public abstract class ExpectingEndOfStatement<RT> implements TypedExpression<RT>
 
     public Optional<RT> optional(SqlExecutor sqlExecutor) {
         return statement.optional(sqlExecutor);
+    }
+
+    public Stream<RT> stream(CompositeAutoCloseable compositeAutoCloseable) {
+        return statement.stream(defaultSqlExecutor(), compositeAutoCloseable);
+    }
+
+    public Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable compositeAutoCloseable) {
+        return statement.stream(sqlExecutor, compositeAutoCloseable);
     }
 
     public RT single() {

@@ -25,6 +25,7 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;

@@ -27,7 +27,7 @@ import com.cadenzauk.core.reflect.FieldInfo;
 import com.cadenzauk.core.reflect.Setter;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;

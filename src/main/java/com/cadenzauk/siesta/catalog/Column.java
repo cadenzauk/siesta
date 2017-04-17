@@ -23,7 +23,7 @@
 package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 
 import java.util.Optional;
 import java.util.function.Function;

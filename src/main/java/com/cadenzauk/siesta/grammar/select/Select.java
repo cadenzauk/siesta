@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
@@ -29,7 +30,7 @@ import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.Ordering;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
@@ -105,6 +106,13 @@ public class Select<RT> implements TypedExpression<RT> {
 
     Optional<RT> optional(SqlExecutor sqlExecutor) {
         return OptionalUtil.ofOnly(list(sqlExecutor));
+    }
+
+    Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable autoCloseable) {
+        Object[] args = args(scope).toArray();
+        String sql = sql();
+        LOG.debug(sql);
+        return autoCloseable.add(sqlExecutor.stream(sql, args, rowMapper()));
     }
 
     public RT single(SqlExecutor sqlExecutor) {

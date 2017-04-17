@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.sql.RowMapper;
+
 public interface DynamicRowMapper<R> extends RowMapper<R> {
     void add(String label);
 }

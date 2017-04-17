@@ -20,10 +20,33 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.core.sql;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 
-public interface RowMapper<T> {
-    T mapRow(ResultSet rs);
+public class ResultSetSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
+    private final ResultSet resultSet;
+    private final RowMapper<T> rowMapper;
+
+    public ResultSetSpliterator(ResultSet resultSet, RowMapper<T> rowMapper) {
+        super(Long.MAX_VALUE, 0);
+        this.resultSet = resultSet;
+        this.rowMapper = rowMapper;
+    }
+
+    @Override
+    public boolean tryAdvance(Consumer<? super T> action) {
+        try {
+            if (!resultSet.next()) {
+                return false;
+            }
+            action.accept(rowMapper.mapRow(resultSet));
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
 }

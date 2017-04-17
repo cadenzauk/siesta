@@ -22,11 +22,12 @@
 
 package com.cadenzauk.siesta.example;
 
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IntegrationTest;
-import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
+import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import org.junit.Test;
 
 import java.time.ZoneOffset;
@@ -44,7 +45,7 @@ public class SiestaExample extends IntegrationTest {
     public void insertOneRowAndReadItBack() {
         Database database = Database.newBuilder()
             .defaultSchema("TEST")
-            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .build();
 
         Widget sprocket = new Widget(1001L, "Sprocket", 4L, Optional.empty());
@@ -68,7 +69,7 @@ public class SiestaExample extends IntegrationTest {
     public void insertSomeGizmosAndReadThemBack() {
         Database database = Database.newBuilder()
             .defaultSchema("TEST")
-            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .build();
         ZonedDateTime start = ZonedDateTime.now(ZoneOffset.UTC);
         database.insert(
@@ -117,7 +118,7 @@ public class SiestaExample extends IntegrationTest {
     public void selectIntoObject() {
         Database database = Database.newBuilder()
             .defaultSchema("TEST")
-            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .build();
         database.insert(
             new Manufacturer(2006L, "Spacely Space Sprockets, Inc"),
@@ -155,6 +156,13 @@ public class SiestaExample extends IntegrationTest {
             .orderBy(Manufacturer::manufacturerId)
             .list();
 
+        try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
+            database.from(Manufacturer.class)
+                .select(Manufacturer::name)
+                .where(Manufacturer::manufacturerId).isEqualTo(1L)
+                .stream(autoCloseable)
+                .forEach(System.out::println);
+        }
         assertThat(partCountsBySupplier, hasSize(3));
         assertThat(partCountsBySupplier.get(0).item1(), is("Spacely Space Sprockets, Inc"));
         assertThat(partCountsBySupplier.get(1).item1(), is("Cogswell's Cogs"));

@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.DynamicTest;

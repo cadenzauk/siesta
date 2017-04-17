@@ -197,7 +197,7 @@ List<ManufacturerSummary> manufacturerSummaries = database.from(Manufacturer.cla
     .list();
 ```
 
-Of course, you could also add a HAVING clause as follows.
+You could also add a HAVING clause as follows.
 
 ```java
 List<ManufacturerSummary> nonSuppliers = database.from(Manufacturer.class, "m")
@@ -210,6 +210,53 @@ List<ManufacturerSummary> nonSuppliers = database.from(Manufacturer.class, "m")
     .having(countDistinct(Widget::widgetId)).isEqualTo(0)
     .orderBy(Manufacturer::manufacturerId)
     .list();
+
+```
+
+### Working With Streams
+
+Instead of `list()` or `optional()`, or `single()`, you can use `stream()` to get the results of your query as a `Stream`.  The stream needs to
+be closed when you're finished with it so it can close the JDBC resources used to execute the query.  To make this convenient and 
+foolproof, the stream method takes a [`CompositeAutoCloseable`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/core/lang/CompositeAutoCloseable.java) 
+object to which the stream is added.  Closing the `CompositeAutoCloseable` closes the stream, which of course can easily be done with Java's
+"try with resources":
+
+```java
+// Not a good example - see below
+try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
+    database.from(Manufacturer.class)
+        .stream(autoCloseable)
+        .forEach(m -> System.out.println(m.name()));
+}
+```
+
+Note that Spring's `JdbcTemplate` doesn't handle scrollable result sets and large query results very well, so the `JdbcTemplateSqlExecutor`
+isn't a good choice for streams - the implementation of `stream()` is just `list().stream()`.
+ 
+On the other hand, SIESTA's raw [`JdbcSqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/siesta/jdbc/JdbcSqlExecutor.java)
+does implement `stream()` based on a spliterator that scrolls through the result set so by using this you can write code that
+handles very large query.
+
+Of course you should do as much work to filter and project in the database rather than shipping all the unneeded results to the client
+and then filtering the stream.
+
+```java
+// Don't do this!
+try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
+    database.from(Manufacturer.class)
+        .stream(autoCloseable)
+        .filter(m -> m.manufacturerId() == 1L)
+        .forEach(m -> System.out.println(m.name()));
+}
+
+// Do this
+try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
+    database.from(Manufacturer.class)
+        .select(Manufacturer::name)
+        .where(Manufacturer::manufacturerId).isEqualTo(1L)
+        .stream(autoCloseable)
+        .forEach(System.out::println);
+}
 
 ```
 

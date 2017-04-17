@@ -22,12 +22,13 @@
 
 package com.cadenzauk.siesta.spring;
 
-import com.cadenzauk.siesta.RowMapper;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class JdbcTemplateSqlExecutor implements SqlExecutor {
     private final JdbcTemplate jdbcTemplate;
@@ -39,6 +40,11 @@ public class JdbcTemplateSqlExecutor implements SqlExecutor {
     @Override
     public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
         return jdbcTemplate.query(sql, args, (rs, rowNum) -> rowMapper.mapRow(rs));
+    }
+
+    @Override
+    public <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper) {
+        return query(sql, args, rowMapper).stream();
     }
 
     @Override
