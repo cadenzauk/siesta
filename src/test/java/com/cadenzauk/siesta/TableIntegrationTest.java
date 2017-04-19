@@ -310,6 +310,28 @@ public class TableIntegrationTest extends IntegrationTest {
         assertThat(result.get(1).item2(), nullValue());
     }
 
+    @Test
+    public void delete() {
+        Database database = testDatabase(dataSource);
+        long manufacturer1 = newId();
+        long manufacturer2 = newId();
+        ManufacturerRow manufacturerRow1 = ManufacturerRow.newBuilder()
+            .manufacturerId(manufacturer1)
+            .name(Optional.of("tbc 1"))
+            .build();
+        ManufacturerRow manufacturerRow2 = ManufacturerRow.newBuilder()
+            .manufacturerId(manufacturer2)
+            .name(Optional.of("tbc 2"))
+            .build();
+        database.insert(manufacturerRow1, manufacturerRow2);
+        assertThat(database.from(ManufacturerRow.class).select(count()).where(ManufacturerRow::name).isLike("tbc %").single(), is(2));
+
+        int rowsDeleted = database.delete(ManufacturerRow.class).where(ManufacturerRow::name).isEqualTo("tbc 1").execute();
+
+        assertThat(database.from(ManufacturerRow.class).select(count()).where(ManufacturerRow::name).isLike("tbc %").single(), is(1));
+        assertThat(rowsDeleted, is(1));
+    }
+
     private static long newId() {
         return ids.incrementAndGet();
     }

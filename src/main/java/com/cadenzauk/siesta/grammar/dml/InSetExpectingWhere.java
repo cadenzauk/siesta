@@ -20,31 +20,25 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.siesta.grammar.dml;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
-public abstract class Clause<U> {
-    protected final Update<U> statement;
+public class InSetExpectingWhere<U> extends ExpectingWhere {
+    private final Update<U> statement;
 
-    protected Clause(Update<U> statement) {
+    public InSetExpectingWhere(Update<U> statement) {
+        super(statement);
         this.statement = statement;
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
+    public <T> SetExpressionBuilder<T,InSetExpectingWhere<U>> set(Function1<U,T> lhs) {
+        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::addSet);
     }
 
-    public int execute() {
-        return statement.execute(database().getDefaultSqlExecutor());
-    }
-
-    public String sql() {
-        return statement.sql();
-    }
-
-    private Database database() {
-        return statement.database();
+    public <T> SetExpressionBuilder<T,InSetExpectingWhere<U>> set(FunctionOptional1<U,T> lhs) {
+        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::addSet);
     }
 }

@@ -29,10 +29,12 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.grammar.dml.Delete;
+import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.Select;
-import com.cadenzauk.siesta.grammar.update.InSetExpectingWhere;
-import com.cadenzauk.siesta.grammar.update.Update;
+import com.cadenzauk.siesta.grammar.dml.InSetExpectingWhere;
+import com.cadenzauk.siesta.grammar.dml.Update;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
 import javax.persistence.AttributeConverter;
@@ -190,6 +192,18 @@ public class Database {
 
     public <U> InSetExpectingWhere<U> update(Class<U> rowClass, String alias) {
         return Update.update(this, table(rowClass).as(alias));
+    }
+
+    public <D> ExpectingWhere delete(Alias<D> alias) {
+        return Delete.delete(this, alias);
+    }
+
+    public <D> ExpectingWhere delete(Class<D> rowClass) {
+        return Delete.delete(this, table(rowClass));
+    }
+
+    public <D> ExpectingWhere delete(Class<D> rowClass, String alias) {
+        return Delete.delete(this, table(rowClass).as(alias));
     }
 
     public static Builder newBuilder() {

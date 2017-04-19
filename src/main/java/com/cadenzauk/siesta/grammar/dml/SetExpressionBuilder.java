@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.Assignment;

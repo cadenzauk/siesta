@@ -20,9 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

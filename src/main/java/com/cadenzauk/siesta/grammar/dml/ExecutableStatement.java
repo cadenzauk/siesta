@@ -20,34 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.update;
+package com.cadenzauk.siesta.grammar.dml;
 
-import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.grammar.expression.Assignment;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
-
-public class Update<U> {
-    private final static Logger LOG = LoggerFactory.getLogger(Update.class);
+public abstract class ExecutableStatement {
+    private final static Logger LOG = LoggerFactory.getLogger(ExecutableStatement.class);
     private final Scope scope;
-    private final Alias<U> alias;
-    private final List<Assignment> sets = new ArrayList<>();
     private BooleanExpression whereClause;
 
-    private Update(Database database, Alias<U> alias) {
-        this.alias = alias;
-        scope = new Scope(database, alias);
+    protected ExecutableStatement(Scope scope) {
+        this.scope = scope;
+    }
+
+    int execute(SqlExecutor sqlExecutor) {
+        Object[] args = args(scope).toArray();
+        String sql = sql(scope);
+        LOG.debug(sql);
+        return sqlExecutor.update(sql, args);
     }
 
     Database database() {
@@ -55,39 +52,20 @@ public class Update<U> {
     }
 
     String sql() {
-        return String.format("update %s as %s set %s%s",
-            alias.table().qualifiedName(),
-            alias.aliasName(),
-            sets.stream().map(e -> e.sql(scope)).collect(joining(", ")),
-            whereClauseSql());
+        return sql(scope);
     }
 
-    int execute(SqlExecutor sqlExecutor) {
-        Object[] args = args(scope).toArray();
-        String sql = sql();
-        LOG.debug(sql);
-        return sqlExecutor.update(sql, args);
-    }
-
-    InSetExpectingWhere<U> addSet(Assignment expression) {
-        sets.add(expression);
-        return new InSetExpectingWhere<>(this);
-    }
-
-    private String whereClauseSql() {
+    protected String whereClauseSql(Scope scope) {
         return whereClause == null ? "" : " where " + whereClause.sql(scope);
     }
 
-    private Stream<Object> args(Scope scope) {
-        return Stream.concat(
-            sets.stream().flatMap(a -> a.args(scope)),
-            whereClause == null ? Stream.empty() : whereClause.args(scope)
-        );
+    protected Stream<Object> whereClauseArgs(Scope scope) {
+        return whereClause == null ? Stream.empty() : whereClause.args(scope);
     }
 
-    InWhereExpectingAnd<U> setWhereClause(BooleanExpression e) {
+    InWhereExpectingAnd setWhereClause(BooleanExpression e) {
         whereClause = e;
-        return new InWhereExpectingAnd<>(this);
+        return new InWhereExpectingAnd(this);
     }
 
     void andWhere(BooleanExpression newClause) {
@@ -98,14 +76,7 @@ public class Update<U> {
         whereClause = whereClause.appendOr(newClause);
     }
 
-    private InSetExpectingWhere<U> setClause() {
-        return new InSetExpectingWhere<>(this);
-    }
+    protected abstract String sql(Scope scope);
 
-    public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
-        return update(database, table.as(table.tableName()));
-    }
-    public static <U> InSetExpectingWhere<U> update(Database database, Alias<U> alias) {
-        return new Update<>(database, alias).setClause();
-    }
+    protected abstract Stream<Object> args(Scope scope);
 }

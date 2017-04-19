@@ -181,6 +181,5 @@ public class SiestaExample extends IntegrationTest {
 
         assertThat(nonSuppliers, hasSize(1));
         assertThat(nonSuppliers.get(0).name(), is("Orbit City Gears"));
-
     }
 }
