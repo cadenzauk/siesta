@@ -29,8 +29,10 @@ import com.cadenzauk.siesta.grammar.select.ExpectingEndOfStatement;
 import com.cadenzauk.siesta.grammar.select.ExpectingHaving;
 import com.cadenzauk.siesta.test.model.TestDatabase;
 import com.cadenzauk.siesta.test.model.WidgetRow;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -61,8 +63,12 @@ class SelectHavingTest extends MockitoTest {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    @TestFactory
-    Stream<DynamicTest> having() {
+    private static Arguments havingTest(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,ExpectingEndOfStatement<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
+        return ObjectArrayArguments.create(having, expectedSql, expectedArgs);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForHaving() {
         return Stream.of(
             havingTest((w, sel) -> sel.having(column(count()).isGreaterThan(countDistinct(WidgetRow::name))),
                 "having count(*) > count(distinct w.NAME)",
@@ -141,23 +147,23 @@ class SelectHavingTest extends MockitoTest {
         );
     }
 
-    private <T> DynamicTest havingTest(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,ExpectingEndOfStatement<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
-        return DynamicTest.dynamicTest(expectedSql, () -> {
-            MockitoAnnotations.initMocks(this);
-            Database database = TestDatabase.testDatabase();
-            Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
-            having.apply(w, database
-                .from(w)
-                .select(WidgetRow::manufacturerId).comma(WidgetRow::description).comma(max(WidgetRow::name))
-                .groupBy(WidgetRow::manufacturerId).comma(WidgetRow::description))
-                .list(sqlExecutor);
+    @ParameterizedTest
+    @MethodSource(names = "parametersForHaving")
+    void having(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,ExpectingEndOfStatement<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
+        MockitoAnnotations.initMocks(this);
+        Database database = TestDatabase.testDatabase();
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
+        having.apply(w, database
+            .from(w)
+            .select(WidgetRow::manufacturerId).comma(WidgetRow::description).comma(max(WidgetRow::name))
+            .groupBy(WidgetRow::manufacturerId).comma(WidgetRow::description))
+            .list(sqlExecutor);
 
-            verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-            assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, w.DESCRIPTION as w_DESCRIPTION, max(w.NAME) as max_w_NAME " +
-                "from TEST.WIDGET as w " +
-                "group by w.MANUFACTURER_ID, w.DESCRIPTION " +
-                expectedSql));
-            assertThat(args.getValue(), is(expectedArgs));
-        });
+        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, w.DESCRIPTION as w_DESCRIPTION, max(w.NAME) as max_w_NAME " +
+            "from TEST.WIDGET as w " +
+            "group by w.MANUFACTURER_ID, w.DESCRIPTION " +
+            expectedSql));
+        assertThat(args.getValue(), is(expectedArgs));
     }
 }

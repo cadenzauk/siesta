@@ -22,52 +22,57 @@
 
 package com.cadenzauk.core.lang;
 
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
 class StringUtilTest {
-    @TestFactory
-    Stream<DynamicTest> uppercaseFirst() {
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForUppercaseFirst() {
         return Stream.of(
-            uppercaseFirst(null, ""),
-            uppercaseFirst("", ""),
-            uppercaseFirst("a", "A"),
-            uppercaseFirst("B", "B"),
-            uppercaseFirst("abc", "Abc"),
-            uppercaseFirst(" def", " def")
+            create(null, ""),
+            create("", ""),
+            create("a", "A"),
+            create("B", "B"),
+            create("abc", "Abc"),
+            create(" def", " def")
         );
     }
 
-    private DynamicTest uppercaseFirst(String input, String expected) {
-        return DynamicTest.dynamicTest(input + "->" + expected, () -> assertThat(StringUtil.uppercaseFirst(input), is(expected)));
+    @ParameterizedTest
+    @MethodSource(names = "parametersForUppercaseFirst")
+    void uppercaseFirst(String input, String expected) {
+        assertThat(StringUtil.uppercaseFirst(input), is(expected));
     }
 
-    @TestFactory
-    Stream<DynamicTest> camelToUpper() {
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForCamelToUpper() {
         return Stream.of(
-            camelToUpper(null, ""),
-            camelToUpper("", ""),
-            camelToUpper("a", "A"),
-            camelToUpper("B", "B"),
-            camelToUpper("abc", "ABC"),
-            camelToUpper(" def", " DEF"),
-            camelToUpper("aBC", "A_BC"),
-            camelToUpper("camelCase", "CAMEL_CASE"),
-            camelToUpper("camelCaseWithTLA", "CAMEL_CASE_WITH_TLA"),
-            camelToUpper("camelCaseWithTLAInMiddle", "CAMEL_CASE_WITH_TLA_IN_MIDDLE"),
-            camelToUpper("tlaAtStart", "TLA_AT_START"),
-            camelToUpper("NotCamelCase", "NOT_CAMEL_CASE"),
-            camelToUpper("TLANotCamelCase", "TLA_NOT_CAMEL_CASE")
+            create(null, ""),
+            create("", ""),
+            create("a", "A"),
+            create("B", "B"),
+            create("abc", "ABC"),
+            create(" def", " DEF"),
+            create("aBC", "A_BC"),
+            create("camelCase", "CAMEL_CASE"),
+            create("camelCaseWithTLA", "CAMEL_CASE_WITH_TLA"),
+            create("camelCaseWithTLAInMiddle", "CAMEL_CASE_WITH_TLA_IN_MIDDLE"),
+            create("tlaAtStart", "TLA_AT_START"),
+            create("NotCamelCase", "NOT_CAMEL_CASE"),
+            create("TLANotCamelCase", "TLA_NOT_CAMEL_CASE")
         );
     }
 
-    private DynamicTest camelToUpper(String input, String expectedResult) {
-        return DynamicTest.dynamicTest(input + "->" + expectedResult, () -> assertThat(StringUtil.camelToUpper(input), is(expectedResult)));
+    @ParameterizedTest
+    @MethodSource(names = "parametersForCamelToUpper")
+    void camelToUpper(String input, String expectedResult) {
+        assertThat(StringUtil.camelToUpper(input), is(expectedResult));
     }
-
 }

@@ -23,8 +23,10 @@
 package com.cadenzauk.core.tuple;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ObjectArrayArguments;
 
 import java.util.List;
 import java.util.function.Function;
@@ -33,11 +35,14 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class TupleTest {
-    @TestFactory
-    Stream<DynamicTest> testToString() {
+    private static Arguments toStringTestCase(Tuple sut, String expected) {
+        return ObjectArrayArguments.create(sut, expected);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> toStringArgs() {
         return Stream.of(
             // Tuple2
             toStringTestCase(Tuple.of("", 100), "(, 100)"),
@@ -76,16 +81,21 @@ class TupleTest {
         );
     }
 
-    private static DynamicTest toStringTestCase(Tuple sut, String expected) {
-        return dynamicTest(expected, () -> {
-            String result = sut.toString();
+    @ParameterizedTest
+    @MethodSource(names = "toStringArgs")
+    void toStringIsCorrect(Tuple sut, String expected) {
+        String result = sut.toString();
 
-            assertThat(result, is(expected));
-        });
+        assertThat(result, is(expected));
     }
 
-    @TestFactory
-    Stream<DynamicTest> testEquals() {
+
+    private static Arguments equalsTestCase(Tuple sut, Tuple rhs, boolean areEqual) {
+        return ObjectArrayArguments.create(sut, rhs, areEqual);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForEquals() {
         return Stream.of(
             // Tuple2
             equalsTestCase(Tuple.of("", 100), Tuple.of("", 100), true),
@@ -176,18 +186,22 @@ class TupleTest {
     }
 
     @SuppressWarnings("EqualsWithItself")
-    private static DynamicTest equalsTestCase(Tuple sut, Tuple rhs, boolean areEqual) {
-        return dynamicTest(sut.toString() + (areEqual ? " == " : " != ") + rhs, () -> {
-            boolean result1 = sut.equals(sut);
-            boolean result2 = sut.equals(rhs);
+    @ParameterizedTest
+    @MethodSource(names = "parametersForEquals")
+    void equalsIsCorrect(Tuple sut, Tuple rhs, boolean areEqual) {
+        boolean result1 = sut.equals(sut);
+        boolean result2 = sut.equals(rhs);
 
-            assertThat(result1, is(true));
-            assertThat(result2, is(areEqual));
-        });
+        assertThat(result1, is(true));
+        assertThat(result2, is(areEqual));
     }
 
-    @TestFactory
-    Stream<DynamicTest> testHashCode() {
+    private static Arguments hashCodeTestCase(Tuple sut, Tuple equal, Tuple notEqual) {
+        return ObjectArrayArguments.create(sut, equal, notEqual);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> hashCodeArgs() {
         return Stream.of(
             // Tuple2
             hashCodeTestCase(Tuple.of(1, 2), Tuple.of(1, 2), Tuple.of(1, 0)),
@@ -252,15 +266,19 @@ class TupleTest {
         );
     }
 
-    private static DynamicTest hashCodeTestCase(Tuple sut, Tuple equal, Tuple notEqual) {
-        return dynamicTest(sut.toString(), () -> {
-            assertThat(sut.hashCode(), is(equal.hashCode()));
-            assertThat(sut.hashCode(), not(notEqual.hashCode()));
-        });
+    @ParameterizedTest
+    @MethodSource(names = "hashCodeArgs")
+    void hashCodeIsCorrect(Tuple sut, Tuple equal, Tuple notEqual) {
+        assertThat(sut.hashCode(), is(equal.hashCode()));
+        assertThat(sut.hashCode(), not(notEqual.hashCode()));
     }
 
-    @TestFactory
-    Stream<DynamicTest> item() {
+    private static <T extends Tuple> Arguments itemTestCase(T sut, Function<T,Integer> getter, int expected) {
+        return ObjectArrayArguments.create(sut, getter, expected);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> itemArgs() {
         return Stream.of(
             itemTestCase(Tuple.of(1, 2), Tuple2::item1, 1),
             itemTestCase(Tuple.of(1, 2), Tuple2::item2, 2),
@@ -308,13 +326,20 @@ class TupleTest {
             itemTestCase(Tuple.of(1, 2, 3, 4, 5, 6, 7, 8, 9), Tuple9::item9, 9));
     }
 
-    private static <T extends Tuple> DynamicTest itemTestCase(T sut, Function<T,Integer> getter, int expected) {
+    @ParameterizedTest
+    @MethodSource(names = "itemArgs")
+    <T extends Tuple> void item(T sut, Function<T,Integer> getter, int expected) {
         Integer actual = getter.apply(sut);
-        return dynamicTest(sut + " -> " + expected, () -> assertThat(actual, is(expected)));
+
+        assertThat(actual, is(expected));
     }
 
-    @TestFactory
-    Stream<DynamicTest> map() {
+    private static <T extends Tuple> Arguments mapTestCase(T sut, Function<T,List<Integer>> mapper, List<Integer> expected) {
+        return ObjectArrayArguments.create(sut, mapper, expected);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> mapArgs() {
         return Stream.of(
             mapTestCase(Tuple.of(1, 2), t -> t.map(ImmutableList::of), ImmutableList.of(1, 2)),
             mapTestCase(Tuple.of(1, 2, 3), t -> t.map(ImmutableList::of), ImmutableList.of(1, 2, 3)),
@@ -327,10 +352,11 @@ class TupleTest {
         );
     }
 
-    private static <T extends Tuple> DynamicTest mapTestCase(T sut, Function<T,List<Integer>> mapper, List<Integer> expected) {
-        return dynamicTest(sut.toString(), () -> {
-            List<Integer> actual = mapper.apply(sut);
-            assertThat(actual, is(expected));
-        });
+    @ParameterizedTest
+    @MethodSource(names = "mapArgs")
+    <T extends Tuple> void map(T sut, Function<T,List<Integer>> mapper, List<Integer> expected) {
+        List<Integer> actual = mapper.apply(sut);
+
+        assertThat(actual, is(expected));
     }
 }

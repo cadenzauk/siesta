@@ -24,12 +24,10 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import com.cadenzauk.core.tuple.Tuple;
-import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.core.tuple.Tuple3;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -42,6 +40,7 @@ import java.util.stream.Stream;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
 class TypeUtilTest {
     @Test
@@ -52,25 +51,22 @@ class TypeUtilTest {
             .withCause(RuntimeInstantiationException.class);
     }
 
-    private Stream<Tuple2<Class<?>,Class<?>>> parametersForBoxedType() {
+    static Stream<Arguments> parametersForBoxedType() {
         return Stream.of(
-            Tuple.of(Long.TYPE, Long.class),
-            Tuple.of(Integer.TYPE, Integer.class),
-            Tuple.of(Short.TYPE, Short.class),
-            Tuple.of(Byte.TYPE, Byte.class),
-            Tuple.of(Double.TYPE, Double.class),
-            Tuple.of(Float.TYPE, Float.class),
-            Tuple.of(Character.TYPE, Character.class),
-            Tuple.of(Boolean.TYPE, Boolean.class)
+            create(Long.TYPE, Long.class),
+            create(Integer.TYPE, Integer.class),
+            create(Short.TYPE, Short.class),
+            create(Byte.TYPE, Byte.class),
+            create(Double.TYPE, Double.class),
+            create(Float.TYPE, Float.class),
+            create(Character.TYPE, Character.class),
+            create(Boolean.TYPE, Boolean.class)
         );
     }
 
-    @TestFactory
-    Stream<DynamicTest> boxedType() {
-        return parametersForBoxedType().map(p -> DynamicTest.dynamicTest(p.toString(), () -> boxedType(p.item1(), p.item2())));
-    }
-
-    private void boxedType(Class<?> unboxed, Class<?> expected) {
+    @ParameterizedTest
+    @MethodSource(names = "parametersForBoxedType")
+    void boxedType(Class<?> unboxed, Class<?> expected) {
         Class<?> result = TypeUtil.boxedType(unboxed);
 
         assertThat(result, equalTo(expected));
@@ -83,21 +79,18 @@ class TypeUtilTest {
     @SuppressWarnings("unused")
     private List<Integer> integerList;
 
-    private Stream<Tuple3<Type,Integer,Class<?>>> parametersForActualTypeArgument() {
+    static Stream<Arguments> parametersForActualTypeArgument() {
         return Stream.of(
-            Tuple.of(ClassUtil.getDeclaredField(getClass(), "optionalString").getGenericType(), 0, String.class),
-            Tuple.of(ClassUtil.getDeclaredField(getClass(), "integerList").getGenericType(), 0, Integer.class),
-            Tuple.of(ClassUtil.getDeclaredField(getClass(), "longCharacterMap").getGenericType(), 0, Long.class),
-            Tuple.of(ClassUtil.getDeclaredField(getClass(), "longCharacterMap").getGenericType(), 1, Character.class)
+            create(ClassUtil.getDeclaredField(TypeUtilTest.class, "optionalString").getGenericType(), 0, String.class),
+            create(ClassUtil.getDeclaredField(TypeUtilTest.class, "integerList").getGenericType(), 0, Integer.class),
+            create(ClassUtil.getDeclaredField(TypeUtilTest.class, "longCharacterMap").getGenericType(), 0, Long.class),
+            create(ClassUtil.getDeclaredField(TypeUtilTest.class, "longCharacterMap").getGenericType(), 1, Character.class)
         );
     }
 
-    @TestFactory
-    Stream<DynamicTest> actualTypeArgument() {
-        return parametersForActualTypeArgument().map(p -> DynamicTest.dynamicTest(p.toString(), () -> actualTypeArgument(p.item1(), p.item2(), p.item3())));
-    }
-
-    private void actualTypeArgument(Type input, int index, Class<?> expected) {
+    @ParameterizedTest
+    @MethodSource(names = "parametersForActualTypeArgument")
+    void actualTypeArgument(Type input, int index, Class<?> expected) {
         Class<?> result = TypeUtil.actualTypeArgument((ParameterizedType) input, index);
 
         assertThat(result, equalTo(expected));

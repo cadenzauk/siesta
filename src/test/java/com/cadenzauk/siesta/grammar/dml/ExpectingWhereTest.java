@@ -27,8 +27,10 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.test.model.WidgetRow;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -55,8 +57,12 @@ class ExpectingWhereTest extends MockitoTest {
     @Captor
     private ArgumentCaptor<Object[]> args;
 
-    @TestFactory
-    Stream<DynamicTest> where() {
+    private static Arguments whereTestCase(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
+        return ObjectArrayArguments.create(whereClause, expectedSql, expectedArgs);
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForWhere() {
         return Stream.of(
             whereTestCase(
                 (a, s) -> s.where(upper(WidgetRow::name)).isEqualTo("BOB"),
@@ -149,19 +155,19 @@ class ExpectingWhereTest extends MockitoTest {
         );
     }
 
-    private DynamicTest whereTestCase(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
-        return DynamicTest.dynamicTest(expectedSql, () -> {
-            MockitoAnnotations.initMocks(this);
-            Database database = Database.newBuilder()
-                .defaultSchema("TEST")
-                .build();
-            Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
+    @ParameterizedTest
+    @MethodSource(names = "parametersForWhere")
+    void where(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
+        MockitoAnnotations.initMocks(this);
+        Database database = Database.newBuilder()
+            .defaultSchema("TEST")
+            .build();
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
 
-            whereClause.apply(w, database.delete(w)).execute(sqlExecutor);
+        whereClause.apply(w, database.delete(w)).execute(sqlExecutor);
 
-            verify(sqlExecutor).update(sql.capture(), args.capture());
-            assertThat(sql.getValue(), is("delete from TEST.WIDGET as w where " + expectedSql));
-            assertThat(args.getValue(), is(expectedArgs));
-        });
+        verify(sqlExecutor).update(sql.capture(), args.capture());
+        assertThat(sql.getValue(), is("delete from TEST.WIDGET as w where " + expectedSql));
+        assertThat(args.getValue(), is(expectedArgs));
     }
 }
