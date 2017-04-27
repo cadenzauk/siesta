@@ -24,19 +24,23 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-public class UnaryFunction<T> implements TypedExpression<T> {
+public class UnaryFunction<T, R> implements TypedExpression<R> {
     private final String name;
     private final TypedExpression<T> arg;
+    private final BiFunction<Scope,String,RowMapper<R>> rowMapperFactory;
 
-    private UnaryFunction(String name, TypedExpression<T> arg) {
+    private UnaryFunction(String name, TypedExpression<T> arg, BiFunction<Scope,String,RowMapper<R>> rowMapperFactory) {
         this.name = name;
         this.arg = arg;
+        this.rowMapperFactory = rowMapperFactory;
     }
 
     @Override
@@ -50,8 +54,8 @@ public class UnaryFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return arg.rowMapper(scope, label);
+    public RowMapper<R> rowMapper(Scope scope, String label) {
+        return rowMapperFactory.apply(scope, label);
     }
 
     @Override
@@ -64,31 +68,60 @@ public class UnaryFunction<T> implements TypedExpression<T> {
         return Precedence.UNARY;
     }
 
-    public static <T> UnaryFunction<T> of(TypedExpression<T> arg, String name) {
-        return new UnaryFunction<>(name, arg);
+    public static <T> UnaryFunction<T,T> of(TypedExpression<T> arg, String name) {
+        return new UnaryFunction<>(name, arg, arg::rowMapper);
     }
 
-    public static <T,R> UnaryFunction<T> of(Function1<R,T> arg, String name) {
-        return new UnaryFunction<>(name, UnresolvedColumn.of(arg));
+    public static <T, R> UnaryFunction<T,T> of(Function1<R,T> arg, String name) {
+        return of(UnresolvedColumn.of(arg), name);
     }
 
-    public static <T,R> UnaryFunction<T> of(FunctionOptional1<R,T> arg, String name) {
-        return new UnaryFunction<>(name, UnresolvedColumn.of(arg));
+    public static <T, R> UnaryFunction<T,T> of(FunctionOptional1<R,T> arg, String name) {
+        return of(UnresolvedColumn.of(arg), name);
     }
 
-    public static <T,R> UnaryFunction<T> of(String alias, Function1<R,T> arg, String name) {
-        return new UnaryFunction<>(name, UnresolvedColumn.of(alias, arg));
+    public static <T, R> UnaryFunction<T,T> of(String alias, Function1<R,T> arg, String name) {
+        return of(UnresolvedColumn.of(alias, arg), name);
     }
 
-    public static <T,R> UnaryFunction<T> of(String alias, FunctionOptional1<R,T> arg, String name) {
-        return new UnaryFunction<>(name, UnresolvedColumn.of(alias, arg));
+    public static <T, R> UnaryFunction<T,T> of(String alias, FunctionOptional1<R,T> arg, String name) {
+        return of(UnresolvedColumn.of(alias, arg), name);
     }
 
-    public static <T,R> UnaryFunction<T> of(Alias<R> alias, Function1<R,T> arg, String name) {
-        return new UnaryFunction<>(name, ResolvedColumn.of(alias, arg));
+    public static <T, R> UnaryFunction<T,T> of(Alias<R> alias, Function1<R,T> arg, String name) {
+        return of(ResolvedColumn.of(alias, arg), name);
     }
 
-    public static <T,R> TypedExpression<T> of(Alias<R> alias, FunctionOptional1<R,T> arg, String name) {
-        return new UnaryFunction<>(name, ResolvedColumn.of(alias, arg));
+    public static <T, R> UnaryFunction<T,T> of(Alias<R> alias, FunctionOptional1<R,T> arg, String name) {
+        return of(ResolvedColumn.of(alias, arg), name);
     }
+
+    public static <T, S> UnaryFunction<T,S> of(TypedExpression<T> arg, String name, Class<S> resultClass) {
+        return new UnaryFunction<>(name, arg, Scope.makeMapper(resultClass));
+    }
+
+    public static <T, R, S> UnaryFunction<T,S> of(Function1<R,T> arg, String name, Class<S> resultClass) {
+        return of(UnresolvedColumn.of(arg), name, resultClass);
+    }
+
+    public static <T, R, S> UnaryFunction<T,S> of(FunctionOptional1<R,T> arg, String name, Class<S> resultClass) {
+        return of(UnresolvedColumn.of(arg), name, resultClass);
+    }
+
+    public static <T, R, S> UnaryFunction<T,S> of(String alias, Function1<R,T> arg, String name, Class<S> resultClass) {
+        return of(UnresolvedColumn.of(alias, arg), name, resultClass);
+    }
+
+    public static <T, R, S> UnaryFunction<T,S> of(String alias, FunctionOptional1<R,T> arg, String name, Class<S> resultClass) {
+        return of(UnresolvedColumn.of(alias, arg), name, resultClass);
+    }
+
+    public static <T, R, S> UnaryFunction<T,S> of(Alias<R> alias, Function1<R,T> arg, String name, Class<S> resultClass) {
+        return of(ResolvedColumn.of(alias, arg), name, resultClass);
+    }
+
+    public static <T, R, S> UnaryFunction<T,S> of(Alias<R> alias, FunctionOptional1<R,T> arg, String name, Class<S> resultClass) {
+        return of(ResolvedColumn.of(alias, arg), name, resultClass);
+    }
+
 }

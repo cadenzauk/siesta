@@ -110,6 +110,11 @@ public class Database {
             .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + value));
     }
 
+    public <T> DataType<T> getDataTypeOf(Class<T> valueClass) {
+        return dataTypeRegistry.dataTypeOf(valueClass)
+            .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + valueClass));
+    }
+
     public <T, R> Optional<DataType<T>> dataTypeOf(MethodInfo<R,T> getterInfo) {
         return dataTypeRegistry.dataTypeOf(getterInfo.effectiveType());
     }

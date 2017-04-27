@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.test.model.ManufacturerRow;
 import com.cadenzauk.siesta.test.model.WidgetRow;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
-import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
+import static com.cadenzauk.siesta.grammar.expression.StringFunctions.substr;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.test.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -242,5 +245,33 @@ public class SelectExpressionTest {
         assertThat(sql, is("select coalesce(w.NAME, w.DESCRIPTION, ?) as name " +
             "from TEST.WIDGET as w " +
             "where w.MANUFACTURER_ID = ?"));
+    }
+
+    @Test
+    void substrFunc() {
+        Database database = testDatabase();
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
+        String sql = database.from(w)
+            .select(substr(w.column(WidgetRow::name), 4), "name")
+            .where(WidgetRow::manufacturerId).isEqualTo(2L)
+            .sql();
+
+        assertThat(sql, is("select substr(w.NAME, ?) as name " +
+            "from TEST.WIDGET as w " +
+            "where w.MANUFACTURER_ID = ?"));
+    }
+
+    @Test
+    void concat() {
+        Database database = testDatabase();
+        Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
+        String sql = database.from(w)
+            .select(w.column(WidgetRow::name).concat(WidgetRow::description).concat(WidgetRow::manufacturerId), "name")
+            .where(w.column(WidgetRow::name).concat(WidgetRow::description).isEqualTo(value("Bob").concat(w.column(WidgetRow::description))))
+            .sql();
+
+        assertThat(sql, is("select w.NAME || w.DESCRIPTION || w.MANUFACTURER_ID as name " +
+            "from TEST.WIDGET as w " +
+            "where w.NAME || w.DESCRIPTION = ? || w.DESCRIPTION"));
     }
 }

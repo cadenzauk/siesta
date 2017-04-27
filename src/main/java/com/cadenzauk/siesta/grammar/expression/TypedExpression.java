@@ -22,11 +22,50 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
+
+import java.util.function.Function;
+
+import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.of;
 
 public interface TypedExpression<T> extends Expression {
     String label(Scope scope);
 
     RowMapper<T> rowMapper(Scope scope, String label);
+
+    static <T> ExpressionBuilder<T,BooleanExpression> column(TypedExpression<T> lhs) {
+        return of(lhs, Function.identity());
+    }
+
+    static <T, R> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> lhs) {
+        return of(UnresolvedColumn.of(lhs), Function.identity());
+    }
+
+    static <T, R> ExpressionBuilder<T,BooleanExpression> column(FunctionOptional1<R,T> lhs) {
+        return of(UnresolvedColumn.of(lhs), Function.identity());
+    }
+
+    static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, Function1<R,T> lhs) {
+        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, FunctionOptional1<R,T> lhs) {
+        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, Function1<R,T> lhs) {
+        return of(ResolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return of(ResolvedColumn.of(alias, lhs), Function.identity());
+    }
+
+    static <T> ExpressionBuilder<T,BooleanExpression> value(T value) {
+        return of(ValueExpression.of(value), Function.identity());
+    }
 }

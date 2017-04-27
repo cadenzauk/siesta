@@ -35,7 +35,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.cadenzauk.siesta.Aggregates.countDistinct;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;

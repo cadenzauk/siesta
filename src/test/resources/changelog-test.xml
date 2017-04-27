@@ -61,6 +61,19 @@
             <column name="CHECKED" type="DATE"/>
             <column name="INSERTION_TS" type="TIMESTAMP"/>
         </createTable>
+
+        <createTable tableName="SALESPERSON" schemaName="TEST">
+            <column name="SALESPERSON_ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="FIRST_NAME" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SURNAME" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MIDDLE_NAMES" type="VARCHAR(100)"/>
+        </createTable>
     </changeSet>
 </databaseChangeLog>
 

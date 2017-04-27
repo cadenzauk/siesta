@@ -31,8 +31,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import static com.cadenzauk.siesta.Aggregates.count;
-import static com.cadenzauk.siesta.Aggregates.countDistinct;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;

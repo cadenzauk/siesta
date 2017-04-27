@@ -41,10 +41,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.siesta.Aggregates.count;
-import static com.cadenzauk.siesta.Aggregates.countDistinct;
-import static com.cadenzauk.siesta.Aggregates.max;
-import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;

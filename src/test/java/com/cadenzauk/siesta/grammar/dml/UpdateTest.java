@@ -33,7 +33,7 @@ import org.mockito.Mock;
 
 import java.util.Optional;
 
-import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

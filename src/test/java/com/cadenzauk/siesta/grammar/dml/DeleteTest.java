@@ -31,7 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.column;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

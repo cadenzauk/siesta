@@ -28,6 +28,8 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import org.apache.commons.lang3.StringUtils;
@@ -79,12 +81,12 @@ public class Alias<R> {
         return String.format("%s_%s", aliasName, columnName);
     }
 
-    public <T> TypedExpression<T> col(Function1<R,T> getter) {
-        return ResolvedColumn.of(this, getter);
+    public <T> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> getter) {
+        return TypedExpression.column(this, getter);
     }
 
-    public <T> TypedExpression<T> col(FunctionOptional1<R,T> getter) {
-        return ResolvedColumn.of(this, getter);
+    public <T> ExpressionBuilder<T,BooleanExpression> column(FunctionOptional1<R,T> getter) {
+        return TypedExpression.column(this, getter);
     }
 
     public Table<R> table() {

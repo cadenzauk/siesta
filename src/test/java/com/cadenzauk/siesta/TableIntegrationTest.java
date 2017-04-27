@@ -26,6 +26,7 @@ import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import com.cadenzauk.siesta.test.model.ManufacturerRow;
+import com.cadenzauk.siesta.test.model.SalespersonRow;
 import com.cadenzauk.siesta.test.model.WidgetRow;
 import com.cadenzauk.siesta.test.model.WidgetViewRow;
 import org.junit.Test;
@@ -34,11 +35,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.cadenzauk.siesta.Aggregates.count;
-import static com.cadenzauk.siesta.Aggregates.countDistinct;
-import static com.cadenzauk.siesta.Aggregates.max;
-import static com.cadenzauk.siesta.Aggregates.min;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.min;
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
+import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.test.model.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
@@ -330,6 +333,24 @@ public class TableIntegrationTest extends IntegrationTest {
 
         assertThat(database.from(ManufacturerRow.class).select(count()).where(ManufacturerRow::name).isLike("tbc %").single(), is(1));
         assertThat(rowsDeleted, is(1));
+    }
+
+    @Test
+    public void concatTest() {
+        Database database = testDatabase(dataSource);
+        SalespersonRow george = SalespersonRow.newBuilder()
+            .salespersonId(newId())
+            .firstName("George")
+            .surname("Jetson")
+            .build();
+        database.insert(george);
+
+        Alias<SalespersonRow> s = database.table(SalespersonRow.class).as("s");
+        String name = database.from(s)
+            .select(upper(s.column(SalespersonRow::firstName).concat(" ").concat(SalespersonRow::surname)))
+            .where(SalespersonRow::salespersonId).isEqualTo(george.salespersonId())
+            .single();
+        assertThat(name, is("GEORGE JETSON"));
     }
 
     private static long newId() {

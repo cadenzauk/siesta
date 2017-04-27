@@ -24,9 +24,11 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.condition.InCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.IsNullCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.LikeCondition;
@@ -34,8 +36,9 @@ import com.cadenzauk.siesta.grammar.expression.condition.OperatorExpressionCondi
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-public class ExpressionBuilder<T, N> {
+public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     private final TypedExpression<T> lhs;
     private final Function<BooleanExpression,N> onComplete;
     private Optional<Double> selectivity = Optional.empty();
@@ -43,6 +46,31 @@ public class ExpressionBuilder<T, N> {
     private ExpressionBuilder(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
+    }
+
+    @Override
+    public String sql(Scope scope) {
+        return lhs.sql(scope);
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return lhs.args(scope);
+    }
+
+    @Override
+    public Precedence precedence() {
+        return lhs.precedence();
+    }
+
+    @Override
+    public String label(Scope scope) {
+        return lhs.label(scope);
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return lhs.rowMapper(scope, label);
     }
 
     //---
@@ -353,6 +381,41 @@ public class ExpressionBuilder<T, N> {
     }
 
     //---
+
+    public <U> ExpressionBuilder<String,N> concat(U arg) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, ValueExpression.of(arg)), onComplete);
+    }
+
+    public <U> ExpressionBuilder<String,N> concat(TypedExpression<U> arg) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, arg), onComplete);
+    }
+
+    public <R, U> ExpressionBuilder<String,N> concat(Function1<R,U> getter) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(getter)), onComplete);
+    }
+
+    public <R, U> ExpressionBuilder<String,N> concat(FunctionOptional1<R,U> getter) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(getter)), onComplete);
+    }
+
+    public <R, U> ExpressionBuilder<String,N> concat(String alias, Function1<R,U> getter) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(alias, getter)), onComplete);
+    }
+
+    public <R, U> ExpressionBuilder<String,N> concat(String alias, FunctionOptional1<R,U> getter) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(alias, getter)), onComplete);
+    }
+
+    public <R, U> ExpressionBuilder<String,N> concat(Alias<R> alias, Function1<R,U> getter) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, ResolvedColumn.of(alias, getter)), onComplete);
+    }
+
+    public <R, U> ExpressionBuilder<String,N> concat(Alias<R> alias, FunctionOptional1<R,U> getter) {
+        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, ResolvedColumn.of(alias, getter)), onComplete);
+    }
+
+    //---
+
     public ExpressionBuilder<T,N> selectivity(double v) {
         selectivity = Optional.of(v);
         return this;
@@ -364,33 +427,5 @@ public class ExpressionBuilder<T, N> {
 
     public static <T, N> ExpressionBuilder<T,N> of(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         return new ExpressionBuilder<>(lhs, onComplete);
-    }
-
-    public static <T> ExpressionBuilder<T,BooleanExpression> column(TypedExpression<T> lhs) {
-        return ExpressionBuilder.of(lhs, Function.identity());
-    }
-
-    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> lhs) {
-        return of(UnresolvedColumn.of(lhs), Function.identity());
-    }
-
-    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(FunctionOptional1<R,T> lhs) {
-        return of(UnresolvedColumn.of(lhs), Function.identity());
-    }
-
-    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, Function1<R,T> lhs) {
-        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
-    }
-
-    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, FunctionOptional1<R,T> lhs) {
-        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
-    }
-
-    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, Function1<R,T> lhs) {
-        return of(ResolvedColumn.of(alias, lhs), Function.identity());
-    }
-
-    public static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return of(ResolvedColumn.of(alias, lhs), Function.identity());
     }
 }

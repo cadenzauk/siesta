@@ -47,8 +47,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
-import static com.cadenzauk.siesta.Aggregates.max;
-import static com.cadenzauk.siesta.Aggregates.min;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.min;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;

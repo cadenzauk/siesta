@@ -32,7 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import static com.cadenzauk.siesta.Aggregates.max;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;

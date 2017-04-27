@@ -30,7 +30,7 @@ import javax.persistence.Column;
 import javax.persistence.Table;
 import java.util.Optional;
 
-import static com.cadenzauk.siesta.Aggregates.max;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 

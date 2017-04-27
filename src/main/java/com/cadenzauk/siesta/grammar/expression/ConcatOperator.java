@@ -22,15 +22,42 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-public enum Precedence {
-    PARENTHESES,
-    SELECT,
-    OR,
-    AND,
-    NOT,
-    BETWEEN,
-    COMPARISON,
-    CONCAT,
-    UNARY,
-    COLUMN
+import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Scope;
+
+import java.util.stream.Stream;
+
+public class ConcatOperator<T, U>  implements TypedExpression<String> {
+    private final TypedExpression<T> lhs;
+    private final TypedExpression<U> rhs;
+
+    public ConcatOperator(TypedExpression<T> lhs, TypedExpression<U> rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
+
+    @Override
+    public String sql(Scope scope) {
+        return String.format("%s || %s", sql(lhs, scope), sql(rhs, scope));
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return Stream.concat(lhs.args(scope), rhs.args(scope));
+    }
+
+    @Override
+    public Precedence precedence() {
+        return Precedence.CONCAT;
+    }
+
+    @Override
+    public String label(Scope scope) {
+        return lhs.label(scope);
+    }
+
+    @Override
+    public RowMapper<String> rowMapper(Scope scope, String label) {
+        return Scope.makeMapper(String.class).apply(scope, label);
+    }
 }

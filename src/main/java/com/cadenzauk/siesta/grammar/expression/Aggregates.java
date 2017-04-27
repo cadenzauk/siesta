@@ -20,16 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.siesta.grammar.expression.CountDistinctFunction;
-import com.cadenzauk.siesta.grammar.expression.CountFunction;
-import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import com.cadenzauk.siesta.grammar.expression.UnaryFunction;
-import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.Alias;
 
 public class Aggregates {
     public static <T> TypedExpression<T> max(TypedExpression<T> arg) {

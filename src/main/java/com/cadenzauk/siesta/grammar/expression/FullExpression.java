@@ -37,7 +37,7 @@ public class FullExpression<T> extends BooleanExpression {
 
     @Override
     public String sql(Scope scope) {
-        return lhs.sql(scope) + " " + rhs.sql(scope);
+        return sql(lhs, scope) + " " + rhs.sql(scope);
     }
 
     @Override

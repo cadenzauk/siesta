@@ -101,9 +101,10 @@ class AliasTest extends MockitoTest {
         when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
         when(widgetDescription.name()).thenReturn("D");
 
-        TypedExpression<Long> col = sut.col(WidgetRow::widgetId);
+        TypedExpression<Long> col = sut.column(WidgetRow::widgetId);
 
-        assertThat(col, instanceOf(ResolvedColumn.class));
+        assertThat(col.sql(scope), is("fred.D"));
+        assertThat(col.args(scope).count(), is(0L));
         assertThat(col.label(scope), is("fred_D"));
     }
 
@@ -114,9 +115,10 @@ class AliasTest extends MockitoTest {
         when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
         when(widgetRowId.name()).thenReturn("ROW_ID");
 
-        TypedExpression<String> col = sut.col(WidgetRow::description);
+        TypedExpression<String> col = sut.column(WidgetRow::description);
 
-        assertThat(col, instanceOf(ResolvedColumn.class));
+        assertThat(col.sql(scope), is("fred.ROW_ID"));
+        assertThat(col.args(scope).count(), is(0L));
         assertThat(col.label(scope), is("fred_ROW_ID"));
     }
 

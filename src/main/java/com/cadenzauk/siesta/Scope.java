@@ -22,10 +22,12 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.sql.RowMapper;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static java.util.stream.Collectors.toList;
 
@@ -75,5 +77,12 @@ public class Scope {
 
     public Scope plus(Scope inner) {
         return new Scope(this, inner.aliases);
+    }
+
+    public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {
+        return (scope, label) -> {
+            final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
+            return rs -> dataType.get(rs, label).orElse(null);
+        };
     }
 }
