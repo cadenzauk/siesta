@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.test.model;
 
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Table(name = "SALESPERSON", schema = "TEST")
@@ -31,12 +32,16 @@ public class SalespersonRow {
     private final String firstName;
     private final Optional<String> middleNames;
     private final String surname;
+    private final int numberOfSales;
+    private final Optional<BigDecimal> commission;
 
     private SalespersonRow(Builder builder) {
         salespersonId = builder.salespersonId;
         firstName = builder.firstName;
         middleNames = builder.middleNames;
         surname = builder.surname;
+        numberOfSales = builder.numberOfSales;
+        commission = builder.commission;
     }
 
     public long salespersonId() {
@@ -55,6 +60,14 @@ public class SalespersonRow {
         return surname;
     }
 
+    public int numberOfSales() {
+        return numberOfSales;
+    }
+
+    public Optional<BigDecimal> commission() {
+        return commission;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -64,6 +77,8 @@ public class SalespersonRow {
         private String firstName;
         private Optional<String> middleNames = Optional.empty();
         private String surname;
+        private int numberOfSales;
+        private Optional<BigDecimal> commission = Optional.empty();
 
         private Builder() {
         }
@@ -85,6 +100,16 @@ public class SalespersonRow {
 
         public Builder surname(String val) {
             surname = val;
+            return this;
+        }
+
+        public Builder numberOfSales(int val) {
+            numberOfSales = val;
+            return this;
+        }
+
+        public Builder commission(Optional<BigDecimal> val) {
+            commission = val;
             return this;
         }
 

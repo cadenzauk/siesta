@@ -70,11 +70,11 @@ class JdbcSqlExecutorTest extends MockitoTest {
     void wireUpMocks() throws SQLException {
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-        when(preparedStatement.executeQuery()).thenReturn(resultSet);
     }
 
     @Test
     void query() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenReturn("Barney").thenThrow(new AssertionError("Unexpected call to row mapper"));
         SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
@@ -97,6 +97,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void stream() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenReturn("Barney").thenThrow(new AssertionError("Unexpected call to row mapper"));
         SqlExecutor sut = JdbcSqlExecutor.of(dataSource, 100);
@@ -122,6 +123,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void streamWhenMapperThrows() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenThrow(new IllegalArgumentException("Exception while mapping"));
         SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
@@ -150,6 +152,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void streamWhenNextThrows() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenThrow(new SQLException("Connection lost"));
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred");
         SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
@@ -179,8 +182,8 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void streamWhenExecuteThrows() throws SQLException {
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(preparedStatement.executeQuery()).thenThrow(new SQLException("No permission"));
-        when(rowMapper.mapRow(resultSet)).thenReturn("Fred");
         SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = 'fred'";
 

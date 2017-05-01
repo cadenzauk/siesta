@@ -28,6 +28,7 @@ import com.cadenzauk.core.util.UtilityClass;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class FieldUtil extends UtilityClass {
@@ -47,6 +48,14 @@ public final class FieldUtil extends UtilityClass {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Object get(String fieldName, Object target) {
+        Objects.requireNonNull(fieldName);
+        Objects.requireNonNull(target);
+        return ClassUtil.findField(target.getClass(), fieldName)
+            .map(f -> get(f, target))
+            .orElseThrow(() -> new IllegalArgumentException("No such field as " + fieldName + " in " + target.getClass()));
     }
 
     private static Optional<ParameterizedType> genericType(Field field) {

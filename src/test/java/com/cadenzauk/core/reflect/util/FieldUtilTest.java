@@ -30,20 +30,20 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 
 class FieldUtilTest {
-    @Test
-    void cannotInstantiate() {
-        calling(() -> Factory.forClass(FieldUtil.class).get())
-            .shouldThrow(RuntimeException.class)
-            .withCause(InvocationTargetException.class)
-            .withCause(RuntimeInstantiationException.class);
+   @Test
+    void isUtility() {
+       assertThat(FieldUtil.class, isUtilityClass());
     }
 
     @Test
@@ -70,6 +70,46 @@ class FieldUtilTest {
     }
 
     @Test
+    void getFromObjectSuccess() {
+       ClassWithStringField target = new ClassWithStringField();
+        String value = UUID.randomUUID().toString();
+        target.setStringField(value);
+
+        Object result = FieldUtil.get("stringField", target);
+
+        assertThat(result, equalTo(value));
+    }
+
+    @Test
+    void getFromObjectError() {
+       ClassWithStringField target = new ClassWithStringField();
+
+        calling(() -> FieldUtil.get("rubbish", target))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage(is("No such field as rubbish in class com.cadenzauk.core.reflect.util.FieldUtilTest$ClassWithStringField"));
+    }
+
+    @Test
+    void genericTypeArgumentSuccess() {
+        Optional<Class<?>> result = FieldUtil.genericTypeArgument(ClassUtil.getDeclaredField(ClassWithStringField.class, "optionalStringField"), 0);
+
+        assertThat(result, is(Optional.of(String.class)));
+    }
+
+    @Test
+    void genericTypeArgumentNotGeneric() {
+        Optional<Class<?>> result = FieldUtil.genericTypeArgument(ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField"), 0);
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void genericTypeArgumentInvalidIndex() {
+        calling(() -> FieldUtil.genericTypeArgument(ClassUtil.getDeclaredField(ClassWithStringField.class, "optionalStringField"), 1))
+            .shouldThrow(ArrayIndexOutOfBoundsException.class);
+    }
+
+    @Test
     void hasAnnotationPresent() {
         Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
 
@@ -87,9 +127,29 @@ class FieldUtilTest {
         assertThat(result, is(false));
     }
 
+    @Test
+    void annotationPresent() {
+        Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
+
+        Optional<XmlElement> result = FieldUtil.annotation(XmlElement.class, field);
+
+        assertThat(result.isPresent(), is(true));
+    }
+
+    @Test
+    void annotationNotPresent() {
+        Field field = ClassUtil.getDeclaredField(ClassWithStringField.class, "stringField");
+
+        Optional<XmlAttribute> result = FieldUtil.annotation(XmlAttribute.class, field);
+
+        assertThat(result, is(Optional.empty()));
+    }
+
     private static class ClassWithStringField {
         @XmlElement
         private String stringField;
+
+        private Optional<String> optionalStringField;
 
         public String getStringField() {
             return stringField;

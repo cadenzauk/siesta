@@ -22,12 +22,25 @@
 
 package com.cadenzauk.core;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
-public class MockitoTest {
+public abstract class MockitoTest {
+    MockitoSession mockitoSession;
     @BeforeEach
     public void initMocks() {
-        MockitoAnnotations.initMocks(this);
+        mockitoSession = Mockito.mockitoSession()
+            .initMocks(this)
+            .strictness(Strictness.STRICT_STUBS)
+            .startMocking();
+    }
+
+    @AfterEach
+    public void finishMocking() {
+        mockitoSession.finishMocking();
     }
 }

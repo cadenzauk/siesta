@@ -73,6 +73,8 @@
                 <constraints nullable="false"/>
             </column>
             <column name="MIDDLE_NAMES" type="VARCHAR(100)"/>
+            <column name="NUMBER_OF_SALES" type="INTEGER"/>
+            <column name="COMMISSION" type="DECIMAL"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

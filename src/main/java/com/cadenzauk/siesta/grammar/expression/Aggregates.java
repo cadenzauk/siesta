@@ -24,9 +24,14 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.siesta.Alias;
 
-public class Aggregates {
+public final class Aggregates extends UtilityClass {
+    public static <T> TypedExpression<T> max(T arg) {
+        return UnaryFunction.of(TypedExpression.value(arg), "max");
+    }
+
     public static <T> TypedExpression<T> max(TypedExpression<T> arg) {
         return UnaryFunction.of(arg, "max");
     }
@@ -53,6 +58,10 @@ public class Aggregates {
 
     public static <T, R> TypedExpression<T> max(Alias<R> alias, FunctionOptional1<R,T> arg) {
         return UnaryFunction.of(alias, arg, "max");
+    }
+
+    public static <T> TypedExpression<T> min(T arg) {
+        return UnaryFunction.of(TypedExpression.value(arg), "min");
     }
 
     public static <T> TypedExpression<T> min(TypedExpression<T> arg) {
@@ -83,32 +92,68 @@ public class Aggregates {
         return UnaryFunction.of(alias, arg, "min");
     }
 
-    public static <T> TypedExpression<T> sum(TypedExpression<T> arg) {
+    public static <T> TypedExpression<T> sum(T arg) {
+        return UnaryFunction.of(TypedExpression.value(arg), "sum");
+    }
+
+    public static <T extends Number> TypedExpression<T> sum(TypedExpression<T> arg) {
         return UnaryFunction.of(arg, "sum");
     }
 
-    public static <T, R> TypedExpression<T> sum(Function1<R,T> arg) {
+    public static <T extends Number, R> TypedExpression<T> sum(Function1<R,T> arg) {
         return UnaryFunction.of(arg, "sum");
     }
 
-    public static <T, R> TypedExpression<T> sum(FunctionOptional1<R,T> arg) {
+    public static <T extends Number, R> TypedExpression<T> sum(FunctionOptional1<R,T> arg) {
         return UnaryFunction.of(arg, "sum");
     }
 
-    public static <T, R> TypedExpression<T> sum(String alias, Function1<R,T> arg) {
+    public static <T extends Number, R> TypedExpression<T> sum(String alias, Function1<R,T> arg) {
         return UnaryFunction.of(alias, arg, "sum");
     }
 
-    public static <T, R> TypedExpression<T> sum(String alias, FunctionOptional1<R,T> arg) {
+    public static <T extends Number, R> TypedExpression<T> sum(String alias, FunctionOptional1<R,T> arg) {
         return UnaryFunction.of(alias, arg, "sum");
     }
 
-    public static <T, R> TypedExpression<T> sum(Alias<R> alias, Function1<R,T> arg) {
+    public static <T extends Number, R> TypedExpression<T> sum(Alias<R> alias, Function1<R,T> arg) {
         return UnaryFunction.of(alias, arg, "sum");
     }
 
-    public static <T, R> TypedExpression<T> sum(Alias<R> alias, FunctionOptional1<R,T> arg) {
+    public static <T extends Number, R> TypedExpression<T> sum(Alias<R> alias, FunctionOptional1<R,T> arg) {
         return UnaryFunction.of(alias, arg, "sum");
+    }
+
+    public static <T> TypedExpression<T> avg(T arg) {
+        return UnaryFunction.of(TypedExpression.value(arg), "avg");
+    }
+
+    public static <T extends Number> TypedExpression<T> avg(TypedExpression<T> arg) {
+        return UnaryFunction.of(arg, "avg");
+    }
+
+    public static <T extends Number, R> TypedExpression<T> avg(Function1<R,T> arg) {
+        return UnaryFunction.of(arg, "avg");
+    }
+
+    public static <T extends Number, R> TypedExpression<T> avg(FunctionOptional1<R,T> arg) {
+        return UnaryFunction.of(arg, "avg");
+    }
+
+    public static <T extends Number, R> TypedExpression<T> avg(String alias, Function1<R,T> arg) {
+        return UnaryFunction.of(alias, arg, "avg");
+    }
+
+    public static <T extends Number, R> TypedExpression<T> avg(String alias, FunctionOptional1<R,T> arg) {
+        return UnaryFunction.of(alias, arg, "avg");
+    }
+
+    public static <T extends Number, R> TypedExpression<T> avg(Alias<R> alias, Function1<R,T> arg) {
+        return UnaryFunction.of(alias, arg, "avg");
+    }
+
+    public static <T extends Number, R> TypedExpression<T> avg(Alias<R> alias, FunctionOptional1<R,T> arg) {
+        return UnaryFunction.of(alias, arg, "avg");
     }
 
     public static TypedExpression<Integer> count() {

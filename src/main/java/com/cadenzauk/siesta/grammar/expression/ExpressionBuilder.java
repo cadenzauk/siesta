@@ -348,35 +348,35 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "", onComplete);
     }
 
-    public BetweenBuilder<T,N> notBetween(T value) {
+    public BetweenBuilder<T,N> isNotBetween(T value) {
         return new BetweenBuilder<>(lhs, ValueExpression.of(value), "not ", onComplete);
     }
 
-    public BetweenBuilder<T,N> notBetween(TypedExpression<T> expression) {
+    public BetweenBuilder<T,N> isNotBetween(TypedExpression<T> expression) {
         return new BetweenBuilder<>(lhs, expression, "not ", onComplete);
     }
 
-    public <R> BetweenBuilder<T,N> notBetween(Function1<R,T> getter) {
+    public <R> BetweenBuilder<T,N> isNotBetween(Function1<R,T> getter) {
         return new BetweenBuilder<>(lhs, UnresolvedColumn.of(getter), "not ", onComplete);
     }
 
-    public <R> BetweenBuilder<T,N> notBetween(FunctionOptional1<R,T> getter) {
+    public <R> BetweenBuilder<T,N> isNotBetween(FunctionOptional1<R,T> getter) {
         return new BetweenBuilder<>(lhs, UnresolvedColumn.of(getter), "not ", onComplete);
     }
 
-    public <R> BetweenBuilder<T,N> notBetween(String alias, Function1<R,T> getter) {
+    public <R> BetweenBuilder<T,N> isNotBetween(String alias, Function1<R,T> getter) {
         return new BetweenBuilder<>(lhs, UnresolvedColumn.of(alias, getter), "not ", onComplete);
     }
 
-    public <R> BetweenBuilder<T,N> notBetween(String alias, FunctionOptional1<R,T> getter) {
+    public <R> BetweenBuilder<T,N> isNotBetween(String alias, FunctionOptional1<R,T> getter) {
         return new BetweenBuilder<>(lhs, UnresolvedColumn.of(alias, getter), "not ", onComplete);
     }
 
-    public <R> BetweenBuilder<T,N> notBetween(Alias<R> alias, Function1<R,T> getter) {
+    public <R> BetweenBuilder<T,N> isNotBetween(Alias<R> alias, Function1<R,T> getter) {
         return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "not ", onComplete);
     }
 
-    public <R> BetweenBuilder<T,N> notBetween(Alias<R> alias, FunctionOptional1<R,T> getter) {
+    public <R> BetweenBuilder<T,N> isNotBetween(Alias<R> alias, FunctionOptional1<R,T> getter) {
         return new BetweenBuilder<>(lhs, ResolvedColumn.of(alias, getter), "not ", onComplete);
     }
 

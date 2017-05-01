@@ -22,30 +22,18 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.test.model.SalespersonRow;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.length;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.substr;
@@ -59,34 +47,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class StringFunctionsTest extends MockitoTest {
-    @Mock
-    private Scope scope;
-
+class StringFunctionsTest extends FunctionTest {
     @Mock
     private TypedExpression<String> expression1;
 
     @Mock
     private TypedExpression<Integer> expression2;
 
-    @Mock
-    private SqlExecutor sqlExecutor;
-
-    @Captor
-    private ArgumentCaptor<String> sql;
-
-    @Captor
-    private ArgumentCaptor<Object[]> args;
-
-    @Captor
-    private ArgumentCaptor<RowMapper<?>> rowMapper;
-
     @Test
-    void cannotInstantiate() {
-        calling(() -> Factory.forClass(StringFunctions.class).get())
-            .shouldThrow(RuntimeException.class)
-            .withCause(InvocationTargetException.class)
-            .withCause(RuntimeInstantiationException.class);
+    void isUtility() {
+        assertThat(StringFunctions.class, isUtilityClass());
     }
 
     @Test
@@ -103,12 +73,8 @@ class StringFunctionsTest extends MockitoTest {
         verifyNoMoreInteractions(expression1, expression2);
     }
 
-    private static Arguments testCase(Function<Alias<SalespersonRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
-        return ObjectArrayArguments.create(sutSupplier, expectedSql, expectedArgs);
-    }
-
     @SuppressWarnings("unused")
-    private static Stream<Arguments> parametersFunctionTest() {
+    private static Stream<Arguments> parametersForFunctionTest() {
         return Stream.of(
             testCase(s -> upper("ABC"), "upper(?)", toArray("ABC")),
             testCase(s -> upper(lower("ABC")), "upper(lower(?))", toArray("ABC")),
@@ -159,19 +125,4 @@ class StringFunctionsTest extends MockitoTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource(names = "parametersFunctionTest")
-    void functionTest(Function<Alias<SalespersonRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
-        MockitoAnnotations.initMocks(this);
-        Database database = testDatabase();
-        Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
-
-        database.from(alias)
-            .select(sutSupplier.apply(alias), "foo")
-            .list(sqlExecutor);
-
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select " + expectedSql + " as foo from TEST.SALESPERSON as s"));
-        assertThat(args.getValue(), is(expectedArgs));
-    }
 }
