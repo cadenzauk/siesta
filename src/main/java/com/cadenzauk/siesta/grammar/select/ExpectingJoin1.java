@@ -29,7 +29,7 @@ import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
 
 public class ExpectingJoin1<RT> extends ExpectingSelect<RT> {
-    public ExpectingJoin1(Select<RT> select) {
+    ExpectingJoin1(Select<RT> select) {
         super(select);
     }
 
