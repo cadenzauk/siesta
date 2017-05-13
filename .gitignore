@@ -1,7 +1,7 @@
-/.gradle/
 /.idea/
-/build/
-/out/
+.gradle/
+build/
+out/
 
 .DS_Store
 *~
