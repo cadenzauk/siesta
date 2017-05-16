@@ -22,16 +22,6 @@
 
 package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.siesta.Dialect;
+public class H2Dialect extends AnsiDialect {
 
-public class Db2Dialect extends AnsiDialect {
-    @Override
-    public String selectivity(double s) {
-        return String.format(" selectivity %f", s);
-    }
-
-    @Override
-    public String dual() {
-        return "SYSIBM.SYSDUMMY1";
-    }
 }

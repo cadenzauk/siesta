@@ -62,7 +62,7 @@ public class SqlFunction<T> implements TypedExpression<T> {
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Arrays.stream(args).flatMap(a  -> a.args(scope));
+        return Arrays.stream(args).flatMap(a -> a.args(scope));
     }
 
     @Override
@@ -70,11 +70,15 @@ public class SqlFunction<T> implements TypedExpression<T> {
         return Precedence.UNARY;
     }
 
+    public static <T, U, S> SqlFunction<S> of(String name, Class<S> resultClass) {
+        return new SqlFunction<>(name, Scope.makeMapper(resultClass));
+    }
+
     public static <T, U, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2, String name, Class<S> resultClass) {
         return new SqlFunction<>(name, Scope.makeMapper(resultClass), arg1, arg2);
     }
 
-    public static <T, U, V, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2 , TypedExpression<V> arg3, String name, Class<S> resultClass) {
+    public static <T, U, V, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2, TypedExpression<V> arg3, String name, Class<S> resultClass) {
         return new SqlFunction<>(name, Scope.makeMapper(resultClass), arg1, arg2, arg3);
     }
 }

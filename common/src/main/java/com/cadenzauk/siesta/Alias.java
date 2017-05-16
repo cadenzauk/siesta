@@ -70,6 +70,9 @@ public class Alias<R> {
     }
 
     String inWhereClause() {
+        if (table.rowClass() == Dual.class) {
+            return table.database().dialect().dual();
+        }
         return String.format("%s as %s", table.qualifiedName(), aliasName);
     }
 

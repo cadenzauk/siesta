@@ -25,17 +25,23 @@ package com.cadenzauk.siesta.example;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Dual;
 import com.cadenzauk.siesta.IntegrationTest;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
+import com.cadenzauk.siesta.test.model.SalespersonRow;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -181,5 +187,21 @@ public class SiestaExample extends IntegrationTest {
 
         assertThat(nonSuppliers, hasSize(1));
         assertThat(nonSuppliers.get(0).name(), is("Orbit City Gears"));
+    }
+
+    @Test
+    public void currentDateTest() {
+        Database database = Database.newBuilder()
+            .defaultSchema("TEST")
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
+            .build();
+
+        database.insert();
+
+        Tuple2<LocalDate,ZonedDateTime> today = database.from(Dual.class)
+            .select(currentDate()).comma(currentTimestamp())
+            .single();
+
+        System.out.println(today);
     }
 }

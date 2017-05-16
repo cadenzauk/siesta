@@ -20,18 +20,19 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.Dialect;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
-public class Db2Dialect extends AnsiDialect {
-    @Override
-    public String selectivity(double s) {
-        return String.format(" selectivity %f", s);
+public class DateFunctions {
+    //--
+    public static TypedExpression<LocalDate> currentDate() {
+        return SqlFunction.of("current_date", LocalDate.class);
     }
 
-    @Override
-    public String dual() {
-        return "SYSIBM.SYSDUMMY1";
+    //--
+    public static TypedExpression<ZonedDateTime> currentTimestamp() {
+        return SqlFunction.of("current_timestamp", ZonedDateTime.class);
     }
 }

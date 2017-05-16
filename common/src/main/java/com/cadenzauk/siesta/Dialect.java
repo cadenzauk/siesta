@@ -24,4 +24,6 @@ package com.cadenzauk.siesta;
 
 public interface Dialect {
     String selectivity(double s);
+
+    String dual();
 }

@@ -29,4 +29,9 @@ public class AnsiDialect implements Dialect {
     public String selectivity(double s) {
         return "";
     }
+
+    @Override
+    public String dual() {
+        return "DUAL";
+    }
 }

@@ -20,18 +20,7 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.Dialect;
-
-public class Db2Dialect extends AnsiDialect {
-    @Override
-    public String selectivity(double s) {
-        return String.format(" selectivity %f", s);
-    }
-
-    @Override
-    public String dual() {
-        return "SYSIBM.SYSDUMMY1";
-    }
+public class Dual {
 }
