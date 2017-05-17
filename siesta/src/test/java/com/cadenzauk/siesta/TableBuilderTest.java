@@ -20,6 +20,40 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.siesta;
 
-include ":siesta", ":siesta-oracle"
+import com.cadenzauk.siesta.catalog.Table;
+import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+class TableBuilderTest {
+    @SuppressWarnings("unused")
+    public static class TestRow {
+        private long id;
+        private Optional<String> name;
+
+        public TestRow() {
+        }
+
+        public long id() {
+            return id;
+        }
+    }
+
+    @Test
+    void buildReflectively() {
+        Database database = Database.newBuilder()
+            .defaultSchema("SCHEMA")
+            .table(TestRow.class, t -> t.tableName("TEST"))
+            .build();
+        Table<TestRow> testRowTable = database.table(TestRow.class);
+
+        String sql = database.from(testRowTable.as("t")).sql();
+
+        assertThat(sql, is("select t.ID as t_ID, t.NAME as t_NAME from SCHEMA.TEST t"));
+    }
+}

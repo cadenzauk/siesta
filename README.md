@@ -13,7 +13,7 @@ Let's look at a few examples to see how it works.
 First we'll create a table for using [Liquibase](http://www.liquibase.org/).
 
 ```xml
-<createTable tableName="WIDGET" schemaName="TEST">
+<createTable tableName="WIDGET" schemaName="SIESTA">
     <column name="WIDGET_ID" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>
     </column>

@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2017 Cadenza United Kingdom Limited
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-M3'
+    }
+}
+
+group 'com.cadenzauk'
+version '1.0.0-SNAPSHOT'
+
+project.ext {
+    springVersion = '4.3.6.RELEASE'
+    junitPlatformVersion = '1.0.0-M4'
+    junitJupiterVersion = '5.0.0-M4'
+}
+
+repositories {
+    maven {
+        url "https://www.oracle.com/content/secure/maven/content"
+        credentials {
+            username project.hasProperty("oracleUsername") ? ossrhUsername : ""
+            password project.hasProperty("oraclePassword") ? ossrhPassword : ""
+        }
+    }
+}
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+sourceSets {
+    testutil {
+        compileClasspath += sourceSets.main.runtimeClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+    test {
+        compileClasspath += sourceSets.testutil.runtimeClasspath
+        runtimeClasspath += sourceSets.testutil.runtimeClasspath
+    }
+}
+
+junitPlatform {
+    platformVersion junitPlatformVersion
+    filters {
+        engines {
+            include 'junit-jupiter', 'junit-vintage'
+        }
+    }
+}
+
+dependencies {
+    compile project(":siesta")
+    compile group: 'com.oracle.jdbc', name: 'ojdbc8', version: '12.2.0.1'
+    testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+
+    testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '4.12.0-M4'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from tasks.javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: project.hasProperty("ossrhUsername") ? ossrhUsername : "", password: project.hasProperty("ossrhPassword") ? ossrhPassword : "")
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: project.hasProperty("ossrhUsername") ? ossrhUsername : "", password: project.hasProperty("ossrhPassword") ? ossrhPassword : "")
+            }
+
+            pom.project {
+                name 'Cadenza UK SIESTA'
+                packaging 'jar'
+                artifactId 'siesta-oracle'
+                description 'SIESTA Is an Easy SQL Typesafe API'
+                url 'https://github.com/cadenzauk/siesta'
+
+                scm {
+                    url 'scm:git@github.com:cadenzauk/siesta.git'
+                    connection 'scm:git@github.com:cadenzauk/siesta.git'
+                    developerConnection 'scm:git@github.com:cadenzauk/siesta.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The MIT License'
+                        url 'https://raw.githubusercontent.com/cadenzauk/siesta/master/LICENCE'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mdrodg'
+                        name 'Mark Rodgers'
+                    }
+                }
+            }
+        }
+    }
+}

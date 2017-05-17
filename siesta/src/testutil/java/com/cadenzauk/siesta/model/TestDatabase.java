@@ -20,6 +20,31 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.siesta.model;
 
-include ":siesta", ":siesta-oracle"
+import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
+
+import javax.sql.DataSource;
+
+public class TestDatabase {
+    public static Database testDatabase(DataSource dataSource, Dialect dialect) {
+        return testDatabaseBuilder(dialect)
+            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
+            .build();
+    }
+
+    public static Database testDatabase(Dialect dialect) {
+        return testDatabaseBuilder(dialect).build();
+    }
+
+    private static Database.Builder testDatabaseBuilder(Dialect dialect) {
+        return Database.newBuilder().defaultSchema("SIESTA")
+            .dialect(dialect)
+            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
+            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
+            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
+            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
+    }
+}
