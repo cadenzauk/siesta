@@ -23,16 +23,13 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.MockitoTest;
-import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ArrayUtils.toArray;

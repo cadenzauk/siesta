@@ -26,7 +26,6 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.function.BiFunction;

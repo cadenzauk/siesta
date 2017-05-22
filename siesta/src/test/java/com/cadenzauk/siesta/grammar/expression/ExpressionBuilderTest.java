@@ -260,6 +260,7 @@ class ExpressionBuilderTest extends MockitoTest {
         ExpressionBuilder<String,InWhereExpectingAnd<SalespersonRow>> select = database.from(SalespersonRow.class)
             .where(SalespersonRow::firstName);
 
+        //noinspection Convert2MethodRef
         calling(() -> select.isIn())
             .shouldThrow(IllegalArgumentException.class);
     }
@@ -270,6 +271,7 @@ class ExpressionBuilderTest extends MockitoTest {
         ExpressionBuilder<String,InWhereExpectingAnd<SalespersonRow>> select = database.from(SalespersonRow.class)
             .where(SalespersonRow::firstName);
 
+        //noinspection Convert2MethodRef
         calling(() -> select.isNotIn())
             .shouldThrow(IllegalArgumentException.class);
     }

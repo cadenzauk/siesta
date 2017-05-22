@@ -28,13 +28,13 @@ import com.cadenzauk.core.reflect.Factory;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Dual;
 import com.cadenzauk.siesta.DynamicRowMapper;
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;
@@ -120,7 +120,7 @@ public class Table<R> {
     }
 
     public void insert(SqlExecutor sqlExecutor, R[] rows) {
-        if (1 == 2) {
+        if (database().dialect().supportsMultiInsert()) {
             impl.insert(sqlExecutor, rows);
         } else {
             Arrays.stream(rows).forEach(r -> impl.insert(sqlExecutor, r));
@@ -149,13 +149,14 @@ public class Table<R> {
         private final Function<B,R> buildRow;
         private final List<TableColumn<Object,R,B>> columns;
 
-        public Impl(Supplier<B> newBuilder, Function<B,R> buildRow, List<TableColumn<Object,R,B>> columns) {
+        Impl(Supplier<B> newBuilder, Function<B,R> buildRow, List<TableColumn<Object,R,B>> columns) {
             this.newBuilder = newBuilder;
             this.buildRow = buildRow;
             this.columns = ImmutableList.copyOf(columns);
         }
 
-        public void insert(SqlExecutor sqlExecutor, R... rows) {
+        @SafeVarargs
+        final void insert(SqlExecutor sqlExecutor, R... rows) {
             if (rows.length == 0) {
                 return;
             }

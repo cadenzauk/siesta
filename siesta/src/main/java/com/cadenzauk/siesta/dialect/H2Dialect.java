@@ -23,5 +23,8 @@
 package com.cadenzauk.siesta.dialect;
 
 public class H2Dialect extends AnsiDialect {
-
+    @Override
+    public boolean supportsMultiInsert() {
+        return true;
+    }
 }

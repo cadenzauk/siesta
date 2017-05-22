@@ -24,14 +24,17 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
+import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,6 +44,8 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.min;
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.hasSize;
@@ -48,7 +53,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-public class TableIntegrationTest extends IntegrationTest {
+public abstract class TableIntegrationTest extends IntegrationTest {
     private static final AtomicLong ids = new AtomicLong();
 
     @Resource
@@ -354,6 +359,36 @@ public class TableIntegrationTest extends IntegrationTest {
             .where(SalespersonRow::salespersonId).isEqualTo(george.salespersonId())
             .single();
         assertThat(name, is("GEORGE JETSON"));
+    }
+
+    @Test
+    public void currentTimestampTest() {
+        Database database = testDatabase(dataSource, dialect);
+
+        ZonedDateTime before = ZonedDateTime.now(ZoneId.of("UTC"));
+        ZonedDateTime now = database.from(Dual.class)
+            .select(currentTimestamp())
+            .single();
+        ZonedDateTime after = ZonedDateTime.now(ZoneId.of("UTC"));
+
+        System.out.printf("%s <= %s <= %s%n", before, now, after);
+        assertThat(before.isAfter(now), is(false));
+        assertThat(now.isAfter(after), is(false));
+    }
+
+    @Test
+    public void currentDateTest() {
+        Database database = testDatabase(dataSource, dialect);
+
+        LocalDate before = LocalDate.now();
+        LocalDate now = database.from(Dual.class)
+            .select(currentDate())
+            .single();
+        LocalDate after = LocalDate.now();
+
+        System.out.printf("%s <= %s <= %s%n", before, now, after);
+        assertThat(before.isAfter(now), is(false));
+        assertThat(now.isAfter(after), is(false));
     }
 
     private static long newId() {

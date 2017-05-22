@@ -22,6 +22,8 @@
 
 package com.cadenzauk.core.lang;
 
+import com.cadenzauk.core.function.ThrowingConsumer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +46,11 @@ public class CompositeAutoCloseable implements UncheckedAutoCloseable {
         if (copy != null) {
             closeAll(copy);
         }
+    }
+
+    public <T, E extends Exception> T add(T closeable, ThrowingConsumer<T, E> closer) {
+        add(() -> closer.accept(closeable));
+        return closeable;
     }
 
     public <T extends AutoCloseable> T add(T closeable) {

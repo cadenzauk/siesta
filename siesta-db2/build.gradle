@@ -19,22 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+version '1.0.0-SNAPSHOT'
 
-package com.cadenzauk.siesta.grammar.expression;
+repositories {
+    mavenLocal()
+}
 
-import com.cadenzauk.siesta.Dialect;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-
-public class DateFunctions {
-    //--
-    public static TypedExpression<LocalDate> currentDate() {
-        return DialectFunction.of("current_date", Dialect::today, LocalDate.class);
-    }
-
-    //--
-    public static TypedExpression<ZonedDateTime> currentTimestamp() {
-        return DialectFunction.of("current_timestamp", Dialect::currentTimestamp, ZonedDateTime.class);
-    }
+dependencies {
+    compile project(":siesta")
+    compile group: 'com.ibm.db2', name: 'db2jcc4', version: '11.1.0'
+    compile group: 'com.ibm.db2', name: 'sqlj4', version: '11.1.0'
+    testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
 }

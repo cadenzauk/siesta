@@ -26,8 +26,11 @@ import com.cadenzauk.core.util.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.TimeZone;
 
 import static com.cadenzauk.core.time.LocalDateUtil.START_OF_GREGORIAN_CALENDAR;
 
@@ -37,7 +40,8 @@ public class TimestampUtil extends UtilityClass {
         if (zonedDateTime.toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
             throw new IllegalArgumentException("Cannot convert date/times before the start of the Gregorian calendar to timestamps.");
         }
-        return Timestamp.valueOf(zonedDateTime.toLocalDateTime());
+        ZonedDateTime localDateTime = ZonedDateTime.ofInstant(zonedDateTime.toInstant(), ZoneId.systemDefault());
+        return Timestamp.valueOf(localDateTime.toLocalDateTime());
     }
 
     @NotNull
@@ -45,6 +49,7 @@ public class TimestampUtil extends UtilityClass {
         if (ZonedDateTime.ofInstant(timestamp.toInstant(), zoneId).toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
             throw new IllegalArgumentException("Cannot convert timestamps before the start of the Gregorian calendar to date/time.");
         }
-        return ZonedDateTime.of(timestamp.toLocalDateTime(), zoneId);
+        ZonedDateTime localDateTime = ZonedDateTime.of(timestamp.toLocalDateTime(), ZoneId.systemDefault());
+        return ZonedDateTime.ofInstant(localDateTime.toInstant(), zoneId);
     }
 }

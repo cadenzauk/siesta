@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.dialect.H2Dialect;
 import liquibase.integration.spring.SpringLiquibase;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Bean;
@@ -63,7 +63,7 @@ public abstract class IntegrationTest {
 
         @Bean
         public Dialect dialect() {
-            return new AnsiDialect();
+            return new H2Dialect();
         }
     }
 

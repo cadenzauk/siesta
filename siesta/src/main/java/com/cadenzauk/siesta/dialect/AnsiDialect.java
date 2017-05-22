@@ -34,4 +34,19 @@ public class AnsiDialect implements Dialect {
     public String dual() {
         return "DUAL";
     }
+
+    @Override
+    public String currentTimestamp() {
+        return "current_timestamp";
+    }
+
+    @Override
+    public String today() {
+        return "current_date";
+    }
+
+    @Override
+    public boolean supportsMultiInsert() {
+        return false;
+    }
 }

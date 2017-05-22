@@ -22,14 +22,11 @@
 
 package com.cadenzauk.core.reflect.util;
 
-import com.cadenzauk.core.lang.RuntimeInstantiationException;
-import com.cadenzauk.core.reflect.Factory;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,7 +35,6 @@ import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
 
 class FieldUtilTest {
    @Test

@@ -22,8 +22,6 @@
 
 package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.siesta.Dialect;
-
 public class Db2Dialect extends AnsiDialect {
     @Override
     public String selectivity(double s) {
@@ -33,5 +31,10 @@ public class Db2Dialect extends AnsiDialect {
     @Override
     public String dual() {
         return "SYSIBM.SYSDUMMY1";
+    }
+
+    @Override
+    public boolean supportsMultiInsert() {
+        return true;
     }
 }

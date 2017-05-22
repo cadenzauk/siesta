@@ -26,4 +26,10 @@ public interface Dialect {
     String selectivity(double s);
 
     String dual();
+
+    String currentTimestamp();
+
+    String today();
+
+    boolean supportsMultiInsert();
 }

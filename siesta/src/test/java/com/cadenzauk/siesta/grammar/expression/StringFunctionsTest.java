@@ -29,14 +29,12 @@ import org.mockito.Mock;
 
 import java.util.stream.Stream;
 
-import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.length;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.substr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

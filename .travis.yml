@@ -8,7 +8,7 @@ jdk:
 script:
   - sudo apt-get update && sudo apt-get install oracle-java8-installer
   - java -version
-  - ./gradlew clean test
+  - ./gradlew clean :siesta:junitPlatformTest
 
 install: true
 
