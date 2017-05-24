@@ -19,19 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+version '1.0.0-SNAPSHOT'
 
-package com.cadenzauk.siesta;
-
-public interface Dialect {
-    String selectivity(double s);
-
-    boolean requiresFromDual();
-
-    String dual();
-
-    String currentTimestamp();
-
-    String today();
-
-    boolean supportsMultiInsert();
+dependencies {
+    compile project(":siesta")
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.1.1'
+    testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
 }

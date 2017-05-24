@@ -79,6 +79,10 @@ public class Scope {
         return new Scope(this, inner.aliases);
     }
 
+    public Dialect dialect() {
+        return database().dialect();
+    }
+
     public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {
         return (scope, label) -> {
             final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);

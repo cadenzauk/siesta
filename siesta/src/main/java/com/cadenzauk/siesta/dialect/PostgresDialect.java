@@ -20,18 +20,16 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.dialect;
 
-public interface Dialect {
-    String selectivity(double s);
+public class PostgresDialect extends AnsiDialect {
+    @Override
+    public boolean supportsMultiInsert() {
+        return true;
+    }
 
-    boolean requiresFromDual();
-
-    String dual();
-
-    String currentTimestamp();
-
-    String today();
-
-    boolean supportsMultiInsert();
+    @Override
+    public boolean requiresFromDual() {
+        return false;
+    }
 }

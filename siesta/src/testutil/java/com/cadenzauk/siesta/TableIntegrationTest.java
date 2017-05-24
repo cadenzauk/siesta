@@ -32,9 +32,10 @@ import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -365,11 +366,12 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     public void currentTimestampTest() {
         Database database = testDatabase(dataSource, dialect);
 
-        ZonedDateTime before = ZonedDateTime.now(ZoneId.of("UTC"));
+        ZonedDateTime before = ZonedDateTime.now(Clock.systemUTC());
         ZonedDateTime now = database.from(Dual.class)
             .select(currentTimestamp())
-            .single();
-        ZonedDateTime after = ZonedDateTime.now(ZoneId.of("UTC"));
+            .single()
+            .truncatedTo(ChronoUnit.MILLIS);
+        ZonedDateTime after = ZonedDateTime.now(Clock.systemUTC());
 
         System.out.printf("%s <= %s <= %s%n", before, now, after);
         assertThat(before.isAfter(now), is(false));

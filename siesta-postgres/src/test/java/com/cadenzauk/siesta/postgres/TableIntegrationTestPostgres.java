@@ -20,18 +20,34 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.postgres;import com.cadenzauk.core.sql.PooledDataSource;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.dialect.OracleDialect;
+import com.cadenzauk.siesta.dialect.PostgresDialect;
+import org.postgresql.ds.PGConnectionPoolDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
-public interface Dialect {
-    String selectivity(double s);
+import javax.sql.DataSource;
+import java.sql.SQLException;
 
-    boolean requiresFromDual();
+@ContextConfiguration
+public class TableIntegrationTestPostgres extends TableIntegrationTest {
+    @Configuration
+    public static class Config {
+        @Bean
+        public DataSource dataSource() throws SQLException {
+            PGConnectionPoolDataSource pool = new PGConnectionPoolDataSource();
+            pool.setUser("siesta");
+            pool.setDatabaseName("postgres");
+            return new PooledDataSource(pool);
+        }
 
-    String dual();
-
-    String currentTimestamp();
-
-    String today();
-
-    boolean supportsMultiInsert();
+        @Bean
+        public Dialect dialect() {
+            return new PostgresDialect();
+        }
+    }
 }

@@ -66,8 +66,8 @@ public class UpdateTest extends MockitoTest {
 
         verify(sqlExecutor).update(sql.capture(), args.capture());
         assertThat(sql.getValue(), is("update SIESTA.WIDGET w " +
-            "set w.NAME = ?, " +
-            "w.DESCRIPTION = ? " +
+            "set NAME = ?, " +
+            "DESCRIPTION = ? " +
             "where w.WIDGET_ID = ? " +
             "and (" +
             "w.DESCRIPTION between ? and w.NAME " +

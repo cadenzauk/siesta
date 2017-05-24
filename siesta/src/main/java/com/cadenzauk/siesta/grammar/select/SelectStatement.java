@@ -209,7 +209,7 @@ class SelectStatement<RT> {
     }
 
     private String sqlImpl(Scope actualScope) {
-        return String.format("select %s from %s%s%s%s%s",
+        return String.format("select %s %s%s%s%s%s",
             projection().sql(actualScope),
             from.sql(actualScope),
             whereClauseSql(actualScope),

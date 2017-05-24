@@ -28,16 +28,16 @@ import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
 import java.util.stream.Stream;
 
 public class Assignment {
-    private final Expression lhs;
+    private final UnresolvedColumn<?,?> lhs;
     private final AssignmentValue rhs;
 
-    public Assignment(Expression lhs, AssignmentValue rhs) {
+    public Assignment(UnresolvedColumn<?,?> lhs, AssignmentValue rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
     public String sql(Scope scope) {
-        return lhs.sql(scope) + rhs.sql(scope);
+        return lhs.columnName(scope) + rhs.sql(scope);
     }
 
     public Stream<Object> args(Scope scope) {

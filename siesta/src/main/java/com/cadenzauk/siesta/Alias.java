@@ -68,8 +68,12 @@ public class Alias<R> {
             .toHashCode();
     }
 
+    public boolean isDual() {
+        return table.rowClass() == Dual.class;
+    }
+
     String inWhereClause() {
-        if (table.rowClass() == Dual.class) {
+        if (isDual()) {
             return table.database().dialect().dual();
         }
         return String.format("%s %s", table.qualifiedName(), aliasName);

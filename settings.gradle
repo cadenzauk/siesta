@@ -22,4 +22,4 @@
 
 rootProject.name = 'cadenzauk'
 
-include ":siesta", ":siesta-db2", ":siesta-oracle"
+include ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres"

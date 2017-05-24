@@ -31,6 +31,11 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public boolean requiresFromDual() {
+        return true;
+    }
+
+    @Override
     public String dual() {
         return "DUAL";
     }

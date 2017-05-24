@@ -49,8 +49,12 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
+        return resolve(scope).inSelectClauseSql(columnName(scope));
+    }
+
+    public String columnName(Scope scope) {
         Column<T,R> column = scope.database().column(getterMethod);
-        return resolve(scope).inSelectClauseSql(column.name());
+        return column.name();
     }
 
     @Override
@@ -89,7 +93,7 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
         return new UnresolvedColumn<>(method);
     }
 
-    public static <T, R> TypedExpression<T> of(FunctionOptional1<R,T> getter) {
+    public static <T, R> UnresolvedColumn<T,R> of(FunctionOptional1<R,T> getter) {
         MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(method);
     }

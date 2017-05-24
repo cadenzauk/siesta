@@ -22,8 +22,8 @@
 
 package com.cadenzauk.siesta.grammar.dml;
 
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
 import com.cadenzauk.siesta.grammar.expression.assignment.SetToNull;
 import com.cadenzauk.siesta.grammar.expression.assignment.SetToValue;
@@ -32,10 +32,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class SetExpressionBuilder<T, N> {
-    private final TypedExpression<T> lhs;
+    private final UnresolvedColumn<T,?> lhs;
     private final Function<Assignment,N> onComplete;
 
-    private SetExpressionBuilder(TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
+    private SetExpressionBuilder(UnresolvedColumn<T,?> lhs, Function<Assignment,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
     }
@@ -58,7 +58,7 @@ public class SetExpressionBuilder<T, N> {
         return onComplete.apply(new Assignment(lhs, rhs));
     }
 
-    public static <T, N> SetExpressionBuilder<T,N> of(TypedExpression<T> lhs, Function<Assignment,N> onComplete) {
+    public static <T, R, N> SetExpressionBuilder<T,N> of(UnresolvedColumn<T,R> lhs, Function<Assignment,N> onComplete) {
         return new SetExpressionBuilder<>(lhs, onComplete);
     }
 }
