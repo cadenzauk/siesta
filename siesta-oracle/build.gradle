@@ -25,8 +25,8 @@ repositories {
     maven {
         url "https://www.oracle.com/content/secure/maven/content"
         credentials {
-            username project.hasProperty("oracleUsername") ? ossrhUsername : ""
-            password project.hasProperty("oraclePassword") ? ossrhPassword : ""
+            username project.hasProperty("oracleUsername") ? oracleUsername : ""
+            password project.hasProperty("oraclePassword") ? oraclePassword : ""
         }
     }
 }
