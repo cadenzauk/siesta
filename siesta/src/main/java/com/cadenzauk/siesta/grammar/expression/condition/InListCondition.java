@@ -32,11 +32,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class InCondition<T> implements Condition<T> {
+public class InListCondition<T> implements Condition<T> {
     private final String operator;
     private final T[] values;
 
-    public InCondition(String operator, T[] values) {
+    public InListCondition(String operator, T[] values) {
         this.operator = operator;
         this.values = values;
     }

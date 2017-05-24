@@ -33,8 +33,8 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
 public class InHavingExpectingAnd<RT> extends ExpectingOrderBy<RT> {
-    public InHavingExpectingAnd(Select<RT> select) {
-        super(select);
+    public InHavingExpectingAnd(SelectStatement<RT> statement) {
+        super(statement);
     }
 
     public InHavingExpectingAnd<RT> and(BooleanExpression expression) {

@@ -23,71 +23,72 @@
 package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
-import com.cadenzauk.core.util.OptionalUtil;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.From;
-import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.Ordering;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
-import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import com.google.common.collect.Iterables;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+public abstract class Select<RT> implements TypedExpression<RT> {
+    protected final SelectStatement<RT> statement;
 
-public class Select<RT> implements TypedExpression<RT> {
-    private static final Logger LOG = LoggerFactory.getLogger(Select.class);
+    Select(SelectStatement<RT> statement) {
+        this.statement = statement;
+    }
 
-    protected final Scope scope;
-    private final From from;
-    private final RowMapper<RT> rowMapper;
-    private final Projection projection;
-    private BooleanExpression whereClause;
-    private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
-    private BooleanExpression havingClause;
-    private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
+    public List<RT> list() {
+        return list(defaultSqlExecutor());
+    }
 
-    Select(Scope scope, From from, RowMapper<RT> rowMapper, Projection projection) {
-        this.scope = scope;
-        this.from = from;
-        this.rowMapper = rowMapper;
-        this.projection = projection;
+    public List<RT> list(SqlExecutor sqlExecutor) {
+        return statement.list(sqlExecutor);
+    }
+
+    public Optional<RT> optional() {
+        return statement.optional(defaultSqlExecutor());
+    }
+
+    public Optional<RT> optional(SqlExecutor sqlExecutor) {
+        return statement.optional(sqlExecutor);
+    }
+
+    public Stream<RT> stream(CompositeAutoCloseable compositeAutoCloseable) {
+        return statement.stream(defaultSqlExecutor(), compositeAutoCloseable);
+    }
+
+    public Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable compositeAutoCloseable) {
+        return statement.stream(sqlExecutor, compositeAutoCloseable);
+    }
+
+    public RT single() {
+        return single(defaultSqlExecutor());
+    }
+
+    private RT single(SqlExecutor sqlExecutor) {
+        return statement.single(sqlExecutor);
+    }
+
+    public String sql() {
+        return statement.sql();
     }
 
     @Override
-    public String sql(Scope outerScope) {
-        return "(" + sqlImpl(outerScope.plus(scope)) + ")";
+    public String sql(Scope scope) {
+        return statement.sql(scope);
     }
 
     @Override
     public String label(Scope scope) {
-        return null;
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.of(
-            projection.args(scope),
-            from.args(scope),
-            whereClauseArgs(),
-            groupByClauseArgs(),
-            havingClauseArgs()
-        ).flatMap(Function.identity());
+        return statement.label();
     }
 
     @Override
@@ -97,146 +98,28 @@ public class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public RowMapper<RT> rowMapper(Scope scope, String label) {
-        return rowMapper();
+        return statement.rowMapper();
     }
 
-    Projection projection() {
-        return projection;
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return statement.args(scope);
     }
 
-    Optional<RT> optional(SqlExecutor sqlExecutor) {
-        return OptionalUtil.ofOnly(list(sqlExecutor));
+    protected Scope scope() {
+        return statement.scope();
     }
 
-    Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable autoCloseable) {
-        Object[] args = args(scope).toArray();
-        String sql = sql();
-        LOG.debug(sql);
-        return autoCloseable.add(sqlExecutor.stream(sql, args, rowMapper()));
+    protected Database database() {
+        return statement.scope.database();
     }
 
-    public RT single(SqlExecutor sqlExecutor) {
-        return Iterables.getOnlyElement(list(sqlExecutor));
-    }
-
-    From from() {
-        return from;
-    }
-
-    Scope scope() {
-        return scope;
-    }
-
-    List<RT> list(SqlExecutor sqlExecutor) {
-        Object[] args = args(scope).toArray();
-        String sql = sql();
-        LOG.debug(sql);
-        return sqlExecutor.query(sql, args, rowMapper());
-    }
-
-    String sql() {
-        return sqlImpl(scope);
-    }
-
-    RowMapper<RT> rowMapper() {
-        return rowMapper;
-    }
-
-    <T> void addGroupBy(TypedExpression<T> expression) {
-        groupByClauses.add(expression);
-    }
-
-    <T> void addOrderBy(TypedExpression<T> expression, Order order) {
-        orderByClauses.add(new Ordering<>(expression, order));
-    }
-
-    InWhereExpectingAnd<RT> setWhereClause(BooleanExpression e) {
-        whereClause = e;
-        return new InWhereExpectingAnd<>(this);
-    }
-
-    void andWhere(BooleanExpression e) {
-        whereClause = whereClause.appendAnd(e);
-    }
-
-    void orWhere(BooleanExpression e) {
-        whereClause = whereClause.appendOr(e);
-    }
-
-    InHavingExpectingAnd<RT> setHavingClause(BooleanExpression e) {
-        havingClause = e;
-        return new InHavingExpectingAnd<>(this);
-    }
-
-    void andHaving(BooleanExpression e) {
-        havingClause = havingClause.appendAnd(e);
-    }
-
-    void orHaving(BooleanExpression e) {
-        havingClause = havingClause.appendOr(e);
-    }
-
-    @NotNull
-    private Stream<Object> whereClauseArgs() {
-        return whereClause == null
-            ? Stream.empty()
-            : whereClause.args(scope);
-    }
-
-    @NotNull
-    private String whereClauseSql(Scope scope) {
-        return whereClause == null
-            ? ""
-            : " where " + whereClause.sql(scope);
-    }
-
-    @NotNull
-    private Stream<Object> groupByClauseArgs() {
-        return groupByClauses
-            .stream()
-            .flatMap(g -> g.args(scope));
-    }
-
-    @NotNull
-    private String groupByClauseSql(Scope scope) {
-        return groupByClauses.isEmpty()
-            ? ""
-            : " group by " + groupByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
-    }
-
-    @NotNull
-    private Stream<Object> havingClauseArgs() {
-        return havingClause == null
-            ? Stream.empty()
-            : havingClause.args(scope);
-    }
-
-    @NotNull
-    private String havingClauseSql(Scope scope) {
-        return havingClause == null
-            ? ""
-            : " having " + havingClause.sql(scope);
-    }
-
-    @NotNull
-    private String orderByClauseSql(Scope scope) {
-        return orderByClauses.isEmpty()
-            ? ""
-            : " order by " + orderByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
-    }
-
-    private String sqlImpl(Scope actualScope) {
-        return String.format("select %s from %s%s%s%s%s",
-            projection().sql(actualScope),
-            from.sql(actualScope),
-            whereClauseSql(actualScope),
-            groupByClauseSql(actualScope),
-            havingClauseSql(actualScope),
-            orderByClauseSql(actualScope));
+    private SqlExecutor defaultSqlExecutor() {
+        return database().getDefaultSqlExecutor();
     }
 
     public static <R> ExpectingJoin1<R> from(Database database, Alias<R> alias) {
-        Select<R> select = new Select<>(new Scope(database, alias), From.from(alias), alias.rowMapper(), Projection.of(alias));
+        SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), From.from(alias), alias.rowMapper(), Projection.of(alias));
         return new ExpectingJoin1<>(select);
     }
 

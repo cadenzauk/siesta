@@ -37,8 +37,8 @@ import com.cadenzauk.siesta.projection.DynamicProjection;
 import java.util.Optional;
 
 public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
-    protected ExpectingSelect(Select<RT> select) {
-        super(select);
+    protected ExpectingSelect(SelectStatement<RT> statement) {
+        super(statement);
     }
 
     public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression) {
@@ -93,7 +93,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     public <R> InSelectIntoExpectingWith<R> select(Alias<R> alias) {
         DynamicRowMapper<R> rowMapper = alias.dynamicRowMapper();
         DynamicProjection projection = new DynamicProjection();
-        Select<R> select = new Select<>(scope().plus(alias),
+        SelectStatement<R> select = new SelectStatement<>(scope().plus(alias),
             statement.from(),
             rowMapper,
             projection);
@@ -101,7 +101,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     }
 
     private <T> InProjectionExpectingComma1<T> select(TypedExpression<T> column, Optional<String> label) {
-        Select<T> select = new Select<>(scope(),
+        SelectStatement<T> select = new SelectStatement<>(scope(),
             statement.from(),
             column.rowMapper(scope(), label.orElseGet(() -> column.label(scope()))),
             Projection.of(column, label));

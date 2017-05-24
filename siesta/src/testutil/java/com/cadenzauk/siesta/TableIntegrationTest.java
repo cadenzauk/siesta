@@ -391,6 +391,46 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         assertThat(now.isAfter(after), is(false));
     }
 
+    @Test
+    public void selectIn() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow fred = SalespersonRow.newBuilder()
+            .salespersonId(newId())
+            .firstName("Fred")
+            .surname("Smith")
+            .build();
+        SalespersonRow bruce = SalespersonRow.newBuilder()
+            .salespersonId(newId())
+            .firstName("Bruce")
+            .surname("Smith")
+            .build();
+        database.insert(fred, bruce);
+
+        List<SalespersonRow> smiths1 = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isIn(
+                database.from(SalespersonRow.class, "s")
+                    .select(SalespersonRow::salespersonId)
+                    .where(SalespersonRow::surname).isEqualTo("Smith")
+            )
+            .orderBy(SalespersonRow::firstName)
+            .list();
+        List<SalespersonRow> smiths2 = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isNotIn(
+                database.from(SalespersonRow.class, "s")
+                    .select(SalespersonRow::salespersonId)
+                    .where(SalespersonRow::surname).isNotEqualTo("Smith")
+            )
+            .orderBy(SalespersonRow::firstName, Order.DESC)
+            .list();
+
+        assertThat(smiths1, hasSize(2));
+        assertThat(smiths1.get(0).firstName(), is("Bruce"));
+        assertThat(smiths1.get(1).firstName(), is("Fred"));
+        assertThat(smiths2, hasSize(2));
+        assertThat(smiths2.get(0).firstName(), is("Fred"));
+        assertThat(smiths2.get(1).firstName(), is("Bruce"));
+    }
+
     private static long newId() {
         return ids.incrementAndGet();
     }

@@ -33,7 +33,7 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
 public class ExpectingHaving<RT> extends ExpectingOrderBy<RT> {
-    protected ExpectingHaving(Select<RT> statement) {
+    protected ExpectingHaving(SelectStatement<RT> statement) {
         super(statement);
     }
 

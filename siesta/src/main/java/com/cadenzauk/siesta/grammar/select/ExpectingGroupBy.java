@@ -28,8 +28,8 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 public abstract class ExpectingGroupBy<RT> extends ExpectingOrderBy<RT> {
-    protected ExpectingGroupBy(Select<RT> select) {
-        super(select);
+    ExpectingGroupBy(SelectStatement<RT> statement) {
+        super(statement);
     }
 
     public <T> InGroupByExpectingComma<RT> groupBy(TypedExpression<T> expression) {

@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.RowMappers;
 
 public class ExpectingJoin8<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8> extends InJoinExpectingAnd<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8>> {
 
-    public ExpectingJoin8(Select<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8>> select) {
+    public ExpectingJoin8(SelectStatement<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8>> select) {
         super(select);
     }
 
@@ -68,7 +68,7 @@ public class ExpectingJoin8<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8> extends InJo
     }
 
     private <R> InJoinExpectingOn<ExpectingJoin9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R>,Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R>> join(JoinType joinType, Alias<R> alias) {
-        Select<Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R>> select = new Select<>(
+        SelectStatement<Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R>> select = new SelectStatement<>(
             scope().plus(alias),
             statement.from().join(joinType, alias),
             RowMappers.add9th(statement.rowMapper(), alias.rowMapper()),

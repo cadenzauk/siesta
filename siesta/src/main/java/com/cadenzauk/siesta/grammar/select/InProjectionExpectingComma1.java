@@ -36,8 +36,8 @@ import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import java.util.Optional;
 
 public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
-    public InProjectionExpectingComma1(Select<T1> select) {
-        super(select);
+    public InProjectionExpectingComma1(SelectStatement<T1> statement) {
+        super(statement);
     }
 
     public <T> InProjectionExpectingComma2<T1,T> comma(TypedExpression<T> expression) {
@@ -97,7 +97,7 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
     }
 
     private <T> InProjectionExpectingComma2<T1,T> comma(TypedExpression<T> col, Optional<String> label) {
-        Select<Tuple2<T1,T>> select = new Select<>(scope(),
+        SelectStatement<Tuple2<T1,T>> select = new SelectStatement<>(scope(),
             statement.from(),
             RowMappers.of(
                 statement.rowMapper(),

@@ -30,8 +30,8 @@ import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
-public class InOrderByExpectingThen<RT> extends ExpectingEndOfStatement<RT> {
-    public InOrderByExpectingThen(Select<RT> select) {
+public class InOrderByExpectingThen<RT> extends Select<RT> {
+    public InOrderByExpectingThen(SelectStatement<RT> select) {
         super(select);
     }
 

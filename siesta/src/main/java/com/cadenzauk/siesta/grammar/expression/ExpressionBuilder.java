@@ -29,10 +29,12 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.expression.condition.InCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.InListCondition;
+import com.cadenzauk.siesta.grammar.expression.condition.InSelectCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.IsNullCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.LikeCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.OperatorExpressionCondition;
+import com.cadenzauk.siesta.grammar.select.Select;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -282,11 +284,23 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return isOpIn("not in", values);
     }
 
+    public N isIn(Select<T> select) {
+        return isOpIn("in", select);
+    }
+
+    public N isNotIn(Select<T> select) {
+        return isOpIn("not in", select);
+    }
+
     private N isOpIn(String operator, T[] values) {
         if (values.length == 0) {
             throw new IllegalArgumentException("At least one value is required for an IN expression.");
         }
-        return complete(new InCondition<>(operator, values));
+        return complete(new InListCondition<>(operator, values));
+    }
+
+    private N isOpIn(String operator, Select<T> select) {
+        return complete(new InSelectCondition<>(operator, select));
     }
 
     //--- IS [NOT] NULL

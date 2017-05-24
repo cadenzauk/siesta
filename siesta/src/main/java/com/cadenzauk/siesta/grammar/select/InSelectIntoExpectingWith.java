@@ -35,8 +35,8 @@ public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
     private final DynamicRowMapper<RT> rowMapper;
     private final DynamicProjection projection;
 
-    public InSelectIntoExpectingWith(Select<RT> select, DynamicRowMapper<RT> rowMapper, DynamicProjection projection) {
-        super(select);
+    public InSelectIntoExpectingWith(SelectStatement<RT> statement, DynamicRowMapper<RT> rowMapper, DynamicProjection projection) {
+        super(statement);
         this.rowMapper = rowMapper;
         this.projection = projection;
     }

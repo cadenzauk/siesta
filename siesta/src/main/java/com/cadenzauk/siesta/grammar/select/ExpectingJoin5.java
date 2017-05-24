@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.RowMappers;
 
 public class ExpectingJoin5<RT1, RT2, RT3, RT4, RT5> extends InJoinExpectingAnd<ExpectingJoin5<RT1,RT2,RT3,RT4,RT5>,Tuple5<RT1,RT2,RT3,RT4,RT5>> {
 
-    public ExpectingJoin5(Select<Tuple5<RT1,RT2,RT3,RT4,RT5>> select) {
+    public ExpectingJoin5(SelectStatement<Tuple5<RT1,RT2,RT3,RT4,RT5>> select) {
         super(select);
     }
 
@@ -68,7 +68,7 @@ public class ExpectingJoin5<RT1, RT2, RT3, RT4, RT5> extends InJoinExpectingAnd<
     }
 
     private <R> InJoinExpectingOn<ExpectingJoin6<RT1,RT2,RT3,RT4,RT5,R>,Tuple6<RT1,RT2,RT3,RT4,RT5,R>> join(JoinType joinType, Alias<R> alias) {
-        Select<Tuple6<RT1,RT2,RT3,RT4,RT5,R>> select = new Select<>(
+        SelectStatement<Tuple6<RT1,RT2,RT3,RT4,RT5,R>> select = new SelectStatement<>(
             scope().plus(alias),
             statement.from().join(joinType, alias),
             RowMappers.add6th(statement.rowMapper(), alias.rowMapper()),

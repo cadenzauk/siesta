@@ -57,35 +57,35 @@ class InProjectionExpectingCommaTest {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private static Arguments testCase1(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase1(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return ObjectArrayArguments.create(method, expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase2(BiFunction<InProjectionExpectingComma2<?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase2(BiFunction<InProjectionExpectingComma2<?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase1((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase3(BiFunction<InProjectionExpectingComma3<?,?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase3(BiFunction<InProjectionExpectingComma3<?,?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase2((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase4(BiFunction<InProjectionExpectingComma4<?,?,?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase4(BiFunction<InProjectionExpectingComma4<?,?,?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase3((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase5(BiFunction<InProjectionExpectingComma5<?,?,?,?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase5(BiFunction<InProjectionExpectingComma5<?,?,?,?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase4((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase6(BiFunction<InProjectionExpectingComma6<?,?,?,?,?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase6(BiFunction<InProjectionExpectingComma6<?,?,?,?,?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase5((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase7(BiFunction<InProjectionExpectingComma7<?,?,?,?,?,?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase7(BiFunction<InProjectionExpectingComma7<?,?,?,?,?,?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase6((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    private static Arguments testCase8(BiFunction<InProjectionExpectingComma8<?,?,?,?,?,?,?,?>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object... expectedArgs) {
+    private static Arguments testCase8(BiFunction<InProjectionExpectingComma8<?,?,?,?,?,?,?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
         return testCase7((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
@@ -216,7 +216,7 @@ class InProjectionExpectingCommaTest {
 
     @ParameterizedTest
     @MethodSource(names = "argsForComma")
-    void testComma(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,ExpectingEndOfStatement<?>> method, String expectedSql, Object[] expectedArgs) {
+    void testComma(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");

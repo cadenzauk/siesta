@@ -38,8 +38,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 public class InProjectionExpectingComma5<T1, T2, T3, T4, T5> extends ExpectingWhere<Tuple5<T1,T2,T3,T4,T5>> {
-    public InProjectionExpectingComma5(Select<Tuple5<T1,T2,T3,T4,T5>> select) {
-        super(select);
+    public InProjectionExpectingComma5(SelectStatement<Tuple5<T1,T2,T3,T4,T5>> statement) {
+        super(statement);
     }
 
     public <T> InProjectionExpectingComma6<T1,T2,T3,T4,T5,T> comma(TypedExpression<T> expression) {
@@ -100,7 +100,7 @@ public class InProjectionExpectingComma5<T1, T2, T3, T4, T5> extends ExpectingWh
 
     @NotNull
     private <T> InProjectionExpectingComma6<T1,T2,T3,T4,T5,T> comma(TypedExpression<T> col, Optional<String> label) {
-        Select<Tuple6<T1,T2,T3,T4,T5,T>> select = new Select<>(
+        SelectStatement<Tuple6<T1,T2,T3,T4,T5,T>> select = new SelectStatement<>(
             scope(),
             statement.from(),
             RowMappers.add6th(

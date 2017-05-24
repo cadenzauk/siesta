@@ -24,7 +24,6 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.reflect.util.FieldUtil;
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -54,9 +53,6 @@ class AndExpressionTest extends MockitoTest {
 
     @Mock
     private BooleanExpression appended;
-
-    @Mock
-    private RowMapper<String> rowMapper;
 
     @Test
     void sql() {
@@ -100,6 +96,7 @@ class AndExpressionTest extends MockitoTest {
         verifyNoMoreInteractions(lhs, rhs, scope);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void appendOr() {
         AndExpression sut = new AndExpression(lhs, rhs);

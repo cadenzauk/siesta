@@ -31,10 +31,10 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.dml.Delete;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
-import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
-import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.dml.InSetExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.Update;
+import com.cadenzauk.siesta.grammar.select.Select;
+import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
 import javax.persistence.AttributeConverter;

@@ -26,7 +26,7 @@ import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
-import com.cadenzauk.siesta.grammar.select.ExpectingEndOfStatement;
+import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.select.ExpectingHaving;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
@@ -64,7 +64,7 @@ class SelectHavingTest extends MockitoTest {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private static Arguments havingTest(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,ExpectingEndOfStatement<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
+    private static Arguments havingTest(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,Select<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
         return ObjectArrayArguments.create(having, expectedSql, expectedArgs);
     }
 
@@ -150,7 +150,7 @@ class SelectHavingTest extends MockitoTest {
 
     @ParameterizedTest
     @MethodSource(names = "parametersForHaving")
-    void having(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,ExpectingEndOfStatement<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
+    void having(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,Select<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = TestDatabase.testDatabase(new AnsiDialect());
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");

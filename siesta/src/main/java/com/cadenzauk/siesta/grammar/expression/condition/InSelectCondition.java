@@ -20,25 +20,30 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.dml;
+package com.cadenzauk.siesta.grammar.expression.condition;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.select.Select;
 
-public class InSetExpectingWhere<U> extends ExpectingWhere {
-    private final Update<U> statement;
+import java.util.stream.Stream;
 
-    InSetExpectingWhere(Update<U> statement) {
-        super(statement);
-        this.statement = statement;
+public class InSelectCondition<T> implements Condition<T> {
+    private final String operator;
+    private final Select<T> innerSelect;
+
+    public InSelectCondition(String operator, Select<T> innerSelect) {
+        this.operator = operator;
+        this.innerSelect = innerSelect;
     }
 
-    public <T> SetExpressionBuilder<T,InSetExpectingWhere<U>> set(Function1<U,T> lhs) {
-        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::addSet);
+    @Override
+    public String sql(Scope scope) {
+        return operator + " " + innerSelect.sql(scope);
     }
 
-    public <T> SetExpressionBuilder<T,InSetExpectingWhere<U>> set(FunctionOptional1<U,T> lhs) {
-        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::addSet);
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return innerSelect.args(scope);
     }
 }

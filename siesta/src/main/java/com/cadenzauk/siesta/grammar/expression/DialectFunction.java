@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 public class DialectFunction<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator;
-    private BiFunction<Dialect,TypedExpression<?>[],String> sqlFunction;
+    private final BiFunction<Dialect,TypedExpression<?>[],String> sqlFunction;
     private final TypedExpression<?>[] args;
     private final BiFunction<Scope,String,RowMapper<T>> rowMapperFactory;
 

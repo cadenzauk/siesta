@@ -32,8 +32,8 @@ import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 
 public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT> extends ExpectingSelect<RT> {
-    protected InJoinExpectingAnd(Select<RT> select) {
-        super(select);
+    protected InJoinExpectingAnd(SelectStatement<RT> statement) {
+        super(statement);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(Function1<R,T> lhs) {
