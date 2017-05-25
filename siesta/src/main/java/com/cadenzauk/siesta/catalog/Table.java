@@ -33,7 +33,6 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Dual;
 import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
@@ -109,9 +108,6 @@ public class Table<R> {
     }
 
     public String qualifiedName() {
-        if (rowClass == Dual.class) {
-            return "DUAL";
-        }
         return schema + "." + tableName();
     }
 

@@ -33,11 +33,14 @@ import com.cadenzauk.siesta.grammar.dml.Delete;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InSetExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.Update;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
 import javax.persistence.AttributeConverter;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +81,10 @@ public class Database {
     @SuppressWarnings("unchecked")
     public <R> Table<R> table(Class<R> rowClass) {
         return table(rowClass, Function.identity());
+    }
+
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what) {
+        return from(Dual.class).select(what);
     }
 
     @SuppressWarnings("unchecked")

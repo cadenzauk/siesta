@@ -22,5 +22,5 @@
 
 package com.cadenzauk.siesta;
 
-public class Dual {
+class Dual {
 }

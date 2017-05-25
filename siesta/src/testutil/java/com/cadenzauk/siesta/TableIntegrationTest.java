@@ -367,7 +367,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
 
         ZonedDateTime before = ZonedDateTime.now(Clock.systemUTC());
-        ZonedDateTime now = database.from(Dual.class)
+        ZonedDateTime now = database
             .select(currentTimestamp())
             .single()
             .truncatedTo(ChronoUnit.MILLIS);
@@ -383,7 +383,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
 
         LocalDate before = LocalDate.now();
-        LocalDate now = database.from(Dual.class)
+        LocalDate now = database
             .select(currentDate())
             .single();
         LocalDate after = LocalDate.now();

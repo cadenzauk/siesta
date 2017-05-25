@@ -26,7 +26,6 @@ import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Dual;
 import com.cadenzauk.siesta.IntegrationTest;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import org.junit.Test;
@@ -196,7 +195,7 @@ public class SiestaExample extends IntegrationTest {
 
         database.insert();
 
-        Tuple2<LocalDate,ZonedDateTime> today = database.from(Dual.class)
+        Tuple2<LocalDate,ZonedDateTime> today = database
             .select(currentDate()).comma(currentTimestamp())
             .single();
 
