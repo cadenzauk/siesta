@@ -31,17 +31,18 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Alias<R> {
     private final Table<R> table;
-    private final String aliasName;
+    private final Optional<String> aliasName;
 
-    public Alias(Table<R> table, String aliasName) {
+    private Alias(Table<R> table, Optional<String> aliasName) {
         this.table = table;
         this.aliasName = aliasName;
     }
@@ -68,7 +69,7 @@ public class Alias<R> {
             .toHashCode();
     }
 
-    public boolean isDual() {
+    boolean isDual() {
         return table.rowClass() == Dual.class;
     }
 
@@ -76,15 +77,21 @@ public class Alias<R> {
         if (isDual()) {
             return table.database().dialect().dual();
         }
-        return String.format("%s %s", table.qualifiedName(), aliasName);
+        return aliasName
+            .map(a -> String.format("%s %s", table.qualifiedName(), a))
+            .orElseGet(table::qualifiedName);
     }
 
     public String inSelectClauseSql(String columnName) {
-        return String.format("%s.%s", aliasName, columnName);
+        return String.format("%s.%s", aliasName.orElseGet(table::qualifiedName), columnName);
     }
 
     public String inSelectClauseLabel(String columnName) {
-        return String.format("%s_%s", aliasName, columnName);
+        return String.format("%s_%s", columnLabelPrefix(), columnName);
+    }
+
+    private String columnLabelPrefix() {
+        return aliasName.orElseGet(table::tableName);
     }
 
     public <T> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> getter) {
@@ -99,7 +106,7 @@ public class Alias<R> {
         return table;
     }
 
-    public String aliasName() {
+    public Optional<String> aliasName() {
         return aliasName;
     }
 
@@ -108,20 +115,20 @@ public class Alias<R> {
     }
 
     public RowMapper<R> rowMapper() {
-        return table.rowMapper(aliasName + "_");
+        return table.rowMapper(columnLabelPrefix() + "_");
     }
 
     public DynamicRowMapper<R> dynamicRowMapper() {
-        return table.dynamicRowMapper(aliasName + "_");
+        return table.dynamicRowMapper(columnLabelPrefix() + "_");
     }
 
     @SuppressWarnings("unchecked")
     <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {
-        if (StringUtils.equals(requiredAlias, aliasName)) {
+        if (Objects.equals(Optional.of(requiredAlias), aliasName)) {
             if (requiredRowClass.isAssignableFrom(table.rowClass())) {
                 return Stream.of((Alias<R2>) this);
             }
-            throw new IllegalArgumentException("Alias " + aliasName + " is an alias for " + table().rowClass() + " and not " + requiredRowClass);
+            throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + table().rowClass() + " and not " + requiredRowClass);
         }
         return Stream.empty();
     }
@@ -132,5 +139,13 @@ public class Alias<R> {
             return Stream.of((Alias<R2>) this);
         }
         return Stream.empty();
+    }
+
+    public static <U> Alias<U> of(Table<U> table) {
+        return new Alias<>(table, Optional.empty());
+    }
+
+    public static <U> Alias<U> of(Table<U> table, String aliasName) {
+        return new Alias<>(table, Optional.of(aliasName));
     }
 }

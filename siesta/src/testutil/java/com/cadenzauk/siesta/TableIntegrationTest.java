@@ -35,7 +35,6 @@ import javax.annotation.Resource;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -120,7 +119,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         JdbcTemplateSqlExecutor sqlExecutor = JdbcTemplateSqlExecutor.of(dataSource);
         database.insert(sqlExecutor, aWidget);
 
-        int updated = database.update(WidgetRow.class, "w")
+        int updated = database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Sprocket")
             .set(WidgetRow::description).toNull()
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
@@ -356,22 +355,21 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
         Alias<SalespersonRow> s = database.table(SalespersonRow.class).as("s");
         String name = database.from(s)
-            .select(upper(s.column(SalespersonRow::firstName).concat(" ").concat(SalespersonRow::surname)))
+            .select(upper(s.column(SalespersonRow::firstName).concat(" ").concat(SalespersonRow::surname).concat(1)))
             .where(SalespersonRow::salespersonId).isEqualTo(george.salespersonId())
             .single();
-        assertThat(name, is("GEORGE JETSON"));
+        assertThat(name, is("GEORGE JETSON1"));
     }
 
     @Test
     public void currentTimestampTest() {
         Database database = testDatabase(dataSource, dialect);
 
-        ZonedDateTime before = ZonedDateTime.now(Clock.systemUTC());
+        ZonedDateTime before = ZonedDateTime.now(Clock.systemUTC()).minusSeconds(10);
         ZonedDateTime now = database
             .select(currentTimestamp())
-            .single()
-            .truncatedTo(ChronoUnit.MILLIS);
-        ZonedDateTime after = ZonedDateTime.now(Clock.systemUTC());
+            .single();
+        ZonedDateTime after = ZonedDateTime.now(Clock.systemUTC()).plusSeconds(10);
 
         System.out.printf("%s <= %s <= %s%n", before, now, after);
         assertThat(before.isAfter(now), is(false));

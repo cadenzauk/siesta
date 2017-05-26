@@ -44,9 +44,9 @@ public class Update<U> extends ExecutableStatement {
     }
 
     protected String sql(Scope scope) {
-        return String.format("update %s %s set %s%s",
+        return String.format("update %s%s set %s%s",
             alias.table().qualifiedName(),
-            alias.aliasName(),
+            alias.aliasName().map(a -> " " + a).orElse(""),
             sets.stream().map(e -> e.sql(scope)).collect(joining(", ")),
             whereClauseSql(scope));
     }
@@ -68,7 +68,7 @@ public class Update<U> extends ExecutableStatement {
     }
 
     public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
-        return update(database, table.as(table.tableName()));
+        return update(database, Alias.of(table));
     }
     public static <U> InSetExpectingWhere<U> update(Database database, Alias<U> alias) {
         return new Update<>(database, alias).setClause();

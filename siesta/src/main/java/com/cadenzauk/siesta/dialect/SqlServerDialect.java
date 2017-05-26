@@ -20,6 +20,30 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.siesta.dialect;
 
-include ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver"
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
+
+public class SqlServerDialect extends AnsiDialect {
+    @Override
+    public String today() {
+        return "getdate()";
+    }
+
+    @Override
+    public boolean supportsMultiInsert() {
+        return true;
+    }
+
+    @Override
+    public boolean requiresFromDual() {
+        return false;
+    }
+
+    @Override
+    public String concat(Stream<String> sql) {
+        return "concat(" + sql.collect(joining(", ")) + ")";
+    }
+}

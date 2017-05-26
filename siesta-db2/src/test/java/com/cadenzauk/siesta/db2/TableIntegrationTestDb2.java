@@ -42,6 +42,7 @@ public class TableIntegrationTestDb2 extends TableIntegrationTest {
         public DataSource dataSource() throws SQLException {
             DB2ConnectionPoolDataSource pool = new DB2ConnectionPoolDataSource();
             pool.setDatabaseName("SIESTA");
+            pool.setDriverType(2);
             return new PooledDataSource(pool);
         }
 

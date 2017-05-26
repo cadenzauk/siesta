@@ -25,25 +25,26 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ConcatOperator<T, U>  implements TypedExpression<String> {
-    private final TypedExpression<T> lhs;
-    private final TypedExpression<U> rhs;
+    private final List<TypedExpression<?>> operands = new ArrayList<>();
 
     public ConcatOperator(TypedExpression<T> lhs, TypedExpression<U> rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
+        operands.add(lhs);
+        operands.add(rhs);
     }
 
     @Override
     public String sql(Scope scope) {
-        return String.format("%s || %s", sql(lhs, scope), sql(rhs, scope));
+        return scope.dialect().concat(operands.stream().map(op -> sql(op, scope)));
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Stream.concat(lhs.args(scope), rhs.args(scope));
+        return operands.stream().flatMap(op -> op.args(scope));
     }
 
     @Override
@@ -53,7 +54,7 @@ public class ConcatOperator<T, U>  implements TypedExpression<String> {
 
     @Override
     public String label(Scope scope) {
-        return lhs.label(scope);
+        return operands.get(0).label(scope);
     }
 
     @Override

@@ -24,6 +24,10 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Dialect;
 
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
+
 public class AnsiDialect implements Dialect {
     @Override
     public String selectivity(double s) {
@@ -53,5 +57,10 @@ public class AnsiDialect implements Dialect {
     @Override
     public boolean supportsMultiInsert() {
         return false;
+    }
+
+    @Override
+    public String concat(Stream<String> sql) {
+        return sql.collect(joining(" || "));
     }
 }

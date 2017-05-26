@@ -60,11 +60,11 @@ class DeleteTest extends MockitoTest {
             .execute(sqlExecutor);
 
         verify(sqlExecutor).update(sql.capture(), args.capture());
-        assertThat(sql.getValue(), is("delete from SIESTA.WIDGET WIDGET " +
-            "where WIDGET.WIDGET_ID = ? " +
+        assertThat(sql.getValue(), is("delete from SIESTA.WIDGET " +
+            "where SIESTA.WIDGET.WIDGET_ID = ? " +
             "and (" +
-            "WIDGET.DESCRIPTION between ? and WIDGET.NAME " +
-            "or WIDGET.DESCRIPTION is null" +
+            "SIESTA.WIDGET.DESCRIPTION between ? and SIESTA.WIDGET.NAME " +
+            "or SIESTA.WIDGET.DESCRIPTION is null" +
             ")"));
         assertThat(args.getValue(), is(toArray(2L, "C")));
     }

@@ -20,10 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.postgres;import com.cadenzauk.core.sql.PooledDataSource;
+package com.cadenzauk.siesta.postgres;
+
+import com.cadenzauk.core.sql.PooledDataSource;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.TableIntegrationTest;
-import com.cadenzauk.siesta.dialect.OracleDialect;
 import com.cadenzauk.siesta.dialect.PostgresDialect;
 import org.postgresql.ds.PGConnectionPoolDataSource;
 import org.springframework.context.annotation.Bean;

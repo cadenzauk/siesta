@@ -19,7 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+version '1.0.0-SNAPSHOT'
 
-rootProject.name = 'cadenzauk'
-
-include ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver"
+dependencies {
+    compile project(":siesta")
+    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.1.0.jre8'
+    testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+}

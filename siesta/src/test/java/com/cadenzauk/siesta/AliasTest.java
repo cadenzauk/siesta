@@ -67,7 +67,7 @@ class AliasTest extends MockitoTest {
     @Test
     void inWhereClause()  {
         when(widgetTable.qualifiedName()).thenReturn("SCHEMA.WIDGET");
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "bob");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "bob");
 
         String result = sut.inWhereClause();
 
@@ -76,7 +76,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void inSelectClauseSql()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
 
         String result = sut.inSelectClauseSql("WIDGET_ID");
 
@@ -85,7 +85,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void inSelectClauseLabel()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
 
         String result = sut.inSelectClauseLabel("WIDGET_ID");
 
@@ -94,7 +94,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void col()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
         when(widgetDescription.name()).thenReturn("D");
@@ -108,7 +108,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void colOptional()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "fred");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
         when(widgetRowId.name()).thenReturn("ROW_ID");
@@ -122,7 +122,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void columnDelegatesToTable()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "joe");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "joe");
         when(widgetTable.column(methodInfo)).thenReturn(widgetRowId);
 
         Column<Long,WidgetRow> result = sut.column(methodInfo);
@@ -134,7 +134,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void rowMapperDelegatesToTable()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "barney");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "barney");
         when(widgetTable.rowMapper("barney_")).thenReturn(rowMapper);
 
         RowMapper<WidgetRow> result = sut.rowMapper();
@@ -148,7 +148,7 @@ class AliasTest extends MockitoTest {
     @Test
     void asRightClassWithRightNameReturnsAlias()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "wilma").collect(toList());
 
@@ -159,7 +159,7 @@ class AliasTest extends MockitoTest {
     @Test
     void asDifferentClassWithWrongNameThrowsException()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         calling(() -> sut.as(ManufacturerRow.class, "wilma"))
             .shouldThrow(IllegalArgumentException.class)
@@ -170,7 +170,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void asRightClassWithDifferentNameReturnsEmpty()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "pebbles");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "pebbles");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "dino").collect(toList());
 
@@ -179,7 +179,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void asDifferentClassWithDifferentNameReturnsEmpty()  {
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "dino");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class, "burt").collect(toList());
 
@@ -189,7 +189,7 @@ class AliasTest extends MockitoTest {
     @Test
     void asWithWrongClassReturnsEmpty()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "dino");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class).collect(toList());
 
@@ -200,7 +200,7 @@ class AliasTest extends MockitoTest {
     @Test
     void asWithSameClassReturnsAlias()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class).collect(toList());
 
@@ -211,7 +211,7 @@ class AliasTest extends MockitoTest {
     @Test
     void asWithSuperClassReturnsAlias()  {
         when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
-        Alias<WidgetRow> sut = new Alias<>(widgetTable, "wilma");
+        Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         List<Alias<Object>> result = sut.as(Object.class).collect(toList());
 

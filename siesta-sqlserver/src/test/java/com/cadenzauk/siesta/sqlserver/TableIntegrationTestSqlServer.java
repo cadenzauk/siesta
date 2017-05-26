@@ -20,32 +20,36 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.model;
+package com.cadenzauk.siesta.sqlserver;
 
-import com.cadenzauk.siesta.Database;
+import com.cadenzauk.core.sql.PooledDataSource;
 import com.cadenzauk.siesta.Dialect;
-import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
+import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.dialect.SqlServerDialect;
+import com.microsoft.sqlserver.jdbc.SQLServerConnectionPoolDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 
-public class TestDatabase {
-    public static Database testDatabase(DataSource dataSource, Dialect dialect) {
-        return testDatabaseBuilder(dialect)
-            .defaultSqlExecutor(JdbcTemplateSqlExecutor.of(dataSource))
-            .build();
-    }
+@ContextConfiguration
+public class TableIntegrationTestSqlServer extends TableIntegrationTest {
+    @Configuration
+    public static class Config {
+        @Bean
+        public DataSource dataSource() throws SQLException {
+            SQLServerConnectionPoolDataSource pool = new SQLServerConnectionPoolDataSource();
+            pool.setServerName("localhost\\SQLEXPRESS");
+            pool.setDatabaseName("SIESTA");
+            pool.setIntegratedSecurity(true);
+            return new PooledDataSource(pool);
+        }
 
-    public static Database testDatabase(Dialect dialect) {
-        return testDatabaseBuilder(dialect).build();
-    }
-
-    private static Database.Builder testDatabaseBuilder(Dialect dialect) {
-        return Database.newBuilder()
-            .defaultSchema("SIESTA")
-            .dialect(dialect)
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
+        @Bean
+        public Dialect dialect() {
+            return new SqlServerDialect();
+        }
     }
 }

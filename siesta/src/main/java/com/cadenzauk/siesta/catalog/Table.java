@@ -112,7 +112,7 @@ public class Table<R> {
     }
 
     public Alias<R> as(String alias) {
-        return new Alias<>(this, alias);
+        return Alias.of(this, alias);
     }
 
     public void insert(SqlExecutor sqlExecutor, R[] rows) {

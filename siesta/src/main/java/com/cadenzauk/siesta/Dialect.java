@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta;
 
+import java.util.stream.Stream;
+
 public interface Dialect {
     String selectivity(double s);
 
@@ -34,4 +36,6 @@ public interface Dialect {
     String today();
 
     boolean supportsMultiInsert();
+
+    String concat(Stream<String> sql);
 }

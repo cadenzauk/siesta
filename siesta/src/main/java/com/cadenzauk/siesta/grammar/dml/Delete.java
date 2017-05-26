@@ -39,9 +39,9 @@ public class Delete<D> extends ExecutableStatement {
 
     @Override
     protected String sql(Scope scope) {
-        return String.format("delete from %s %s%s",
+        return String.format("delete from %s%s%s",
             alias.table().qualifiedName(),
-            alias.aliasName(),
+            alias.aliasName().map(a -> " " + a).orElse(""),
             whereClauseSql(scope));
     }
 
@@ -55,7 +55,7 @@ public class Delete<D> extends ExecutableStatement {
     }
 
     public static <U> ExpectingWhere delete(Database database, Table<U> table) {
-        return delete(database, table.as(table.tableName()));
+        return delete(database, Alias.of(table));
     }
 
     public static <U> ExpectingWhere delete(Database database, Alias<U> alias) {
