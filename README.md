@@ -74,13 +74,13 @@ Widget sprocket = new Widget(1L, "Sprocket", 4L, Optional.empty());
 database.insert(sqlExecutor, sprocket);
 ```
 
-[`Database`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/siesta/SqlExecutor.java) is the heart 
+[`Database`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/siesta/Database.java) is the heart 
 of SIESTA.  It holds information about how to map our objects to the database, what dialect of SQL we're
-using etc.  [`SqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/siesta/SqlExecutor.java)
+using etc.  [`SqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/siesta/SqlExecutor.java)
 is an interface that SIESTA uses to actually execute the SQL or DML.  Here we're using an implementation based on Spring's 
 `JdbcTemplate`.
 
-The example works because the default [`NamingStrategy`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/siesta/NamingStrategy.java)
+The example works because the default [`NamingStrategy`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/siesta/NamingStrategy.java)
 converts Java field names to database column names and Java classes to tables by splitting camel case words with underscores and 
 converting to uppercase, so `widgetId` becomes `WIDGET_ID` as in our table.  You can implement a different naming strategy if you like, or you can use JPA 
 annotations to explicitly name the columns and Tables.
@@ -217,7 +217,7 @@ List<ManufacturerSummary> nonSuppliers = database.from(Manufacturer.class, "m")
 
 Instead of `list()` or `optional()`, or `single()`, you can use `stream()` to get the results of your query as a `Stream`.  The stream needs to
 be closed when you're finished with it so it can close the JDBC resources used to execute the query.  To make this convenient and 
-foolproof, the stream method takes a [`CompositeAutoCloseable`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/core/lang/CompositeAutoCloseable.java) 
+foolproof, the stream method takes a [`CompositeAutoCloseable`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/core/lang/CompositeAutoCloseable.java) 
 object to which the stream is added.  Closing the `CompositeAutoCloseable` closes the stream, which of course can easily be done with Java's
 "try with resources":
 
@@ -233,7 +233,7 @@ try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
 Note that Spring's `JdbcTemplate` doesn't handle scrollable result sets and large query results very well, so the `JdbcTemplateSqlExecutor`
 isn't a good choice for streams - the implementation of `stream()` is just `list().stream()`.
  
-On the other hand, SIESTA's raw [`JdbcSqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/src/main/java/com/cadenzauk/siesta/jdbc/JdbcSqlExecutor.java)
+On the other hand, SIESTA's raw [`JdbcSqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/siesta/jdbc/JdbcSqlExecutor.java)
 does implement `stream()` based on a spliterator that scrolls through the result set so by using this you can write code that
 handles very large query.
 
@@ -263,4 +263,4 @@ try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
 ## Example Code
 
 Complete working tests for the examples shown here can be found in 
-[SiestaExample.java](https://github.com/cadenzauk/siesta/blob/master/src/test/java/com/cadenzauk/siesta/example/SiestaExample.java) 
+[SiestaExample.java](https://github.com/cadenzauk/siesta/blob/master/siesta/src/test/java/com/cadenzauk/siesta/example/SiestaExample.java) 
