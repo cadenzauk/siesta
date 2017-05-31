@@ -397,35 +397,35 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     //---
 
     public <U> ExpressionBuilder<String,N> concat(U arg) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, ValueExpression.of(arg)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, ValueExpression.of(arg)), onComplete);
     }
 
     public <U> ExpressionBuilder<String,N> concat(TypedExpression<U> arg) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, arg), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, arg), onComplete);
     }
 
     public <R, U> ExpressionBuilder<String,N> concat(Function1<R,U> getter) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(getter)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, UnresolvedColumn.of(getter)), onComplete);
     }
 
     public <R, U> ExpressionBuilder<String,N> concat(FunctionOptional1<R,U> getter) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(getter)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, UnresolvedColumn.of(getter)), onComplete);
     }
 
     public <R, U> ExpressionBuilder<String,N> concat(String alias, Function1<R,U> getter) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(alias, getter)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, UnresolvedColumn.of(alias, getter)), onComplete);
     }
 
     public <R, U> ExpressionBuilder<String,N> concat(String alias, FunctionOptional1<R,U> getter) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, UnresolvedColumn.of(alias, getter)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, UnresolvedColumn.of(alias, getter)), onComplete);
     }
 
     public <R, U> ExpressionBuilder<String,N> concat(Alias<R> alias, Function1<R,U> getter) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, ResolvedColumn.of(alias, getter)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, ResolvedColumn.of(alias, getter)), onComplete);
     }
 
     public <R, U> ExpressionBuilder<String,N> concat(Alias<R> alias, FunctionOptional1<R,U> getter) {
-        return new ExpressionBuilder<>(new ConcatOperator<>(lhs, ResolvedColumn.of(alias, getter)), onComplete);
+        return new ExpressionBuilder<>(ConcatOperator.of(lhs, ResolvedColumn.of(alias, getter)), onComplete);
     }
 
     //---

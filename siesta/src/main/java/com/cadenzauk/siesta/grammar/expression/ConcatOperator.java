@@ -23,16 +23,17 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ConcatOperator<T, U>  implements TypedExpression<String> {
+public class ConcatOperator  implements TypedExpression<String> {
     private final List<TypedExpression<?>> operands = new ArrayList<>();
 
-    public ConcatOperator(TypedExpression<T> lhs, TypedExpression<U> rhs) {
+    private ConcatOperator(TypedExpression<?> lhs, TypedExpression<?> rhs) {
         operands.add(lhs);
         operands.add(rhs);
     }
@@ -60,5 +61,16 @@ public class ConcatOperator<T, U>  implements TypedExpression<String> {
     @Override
     public RowMapper<String> rowMapper(Scope scope, String label) {
         return Scope.makeMapper(String.class).apply(scope, label);
+    }
+
+    private ConcatOperator append(TypedExpression<?> expression) {
+        operands.add(expression);
+        return this;
+    }
+
+    public static <T,U> ConcatOperator of(TypedExpression<T> lhs, TypedExpression<U> rhs) {
+        return OptionalUtil.as(ConcatOperator.class, lhs)
+            .map(concat -> concat.append(rhs))
+            .orElseGet(() -> new ConcatOperator(lhs, rhs));
     }
 }
