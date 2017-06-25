@@ -48,6 +48,6 @@ public class LikeCondition<T> implements Condition<T> {
     @Override
     public Stream<Object> args(Scope scope) {
         DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return Stream.of(dataType.toDatabase(value));
+        return Stream.of(dataType.toDatabase(scope.database(), value));
     }
 }

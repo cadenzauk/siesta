@@ -53,6 +53,6 @@ public class InListCondition<T> implements Condition<T> {
         DataType<T> dataType = scope.database().getDataTypeOf(values[0]);
         return Arrays.stream(values)
             .map(Optional::of)
-            .map(dataType::toDatabase);
+            .map(val -> dataType.toDatabase(scope.database(), val));
     }
 }

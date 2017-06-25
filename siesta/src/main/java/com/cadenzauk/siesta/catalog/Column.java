@@ -22,8 +22,9 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.Database;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,7 +35,7 @@ public interface Column<T, R> {
 
     DataType<T> dataType();
 
-    RowMapper<T> rowMapper(String label);
+    RowMapper<T> rowMapper(Database database, String label);
 
     Class<R> rowClass();
 

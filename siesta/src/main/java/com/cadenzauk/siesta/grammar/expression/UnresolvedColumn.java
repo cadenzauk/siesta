@@ -77,7 +77,7 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         Column<T,R> column = scope.database().column(getterMethod);
-        return column.rowMapper(label);
+        return column.rowMapper(scope.database(), label);
     }
 
     @SuppressWarnings("unchecked")

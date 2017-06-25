@@ -20,30 +20,17 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.assignment;
+package com.cadenzauk.core.testutil;
 
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.core.lang.UncheckedAutoCloseable;
+import com.cadenzauk.core.util.UtilityClass;
 
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.TimeZone;
 
-public class SetToValue<T> implements AssignmentValue {
-    private final T value;
-
-    public SetToValue(T value) {
-        Objects.requireNonNull(value);
-        this.value = value;
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return " = ?";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return Stream.of(dataType.toDatabase(scope.database(), value));
+public abstract class TemporalTestUtil extends UtilityClass {
+    public static UncheckedAutoCloseable withTimeZone(String timeZone) {
+        TimeZone prevDefault = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+        return () -> TimeZone.setDefault(prevDefault );
     }
 }

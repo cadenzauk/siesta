@@ -22,6 +22,10 @@
 
 package com.cadenzauk.siesta;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
 public interface Dialect {
@@ -38,4 +42,20 @@ public interface Dialect {
     boolean supportsMultiInsert();
 
     String concat(Stream<String> sql);
+
+    String binaryLiteral(byte[] bytes);
+
+    String byteLiteral(byte val);
+
+    String dateLiteral(LocalDate date);
+
+    String floatLiteral(float val);
+
+    String smallIntLiteral(short val);
+
+    String timestampLiteral(LocalDateTime date, ZoneId databaseTimeZone);
+
+    String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone);
+
+    String stringLiteral(String val);
 }

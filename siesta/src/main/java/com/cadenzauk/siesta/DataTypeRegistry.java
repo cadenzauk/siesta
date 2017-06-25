@@ -42,6 +42,7 @@ public class DataTypeRegistry {
         register(DataType.FLOAT);
         register(DataType.INTEGER);
         register(DataType.LOCAL_DATE);
+        register(DataType.LOCAL_DATE_TIME);
         register(DataType.LONG);
         register(DataType.SHORT);
         register(DataType.STRING);
@@ -52,8 +53,8 @@ public class DataTypeRegistry {
         entries.put(dataType.javaClass(), dataType);
     }
 
-    public <T> void register(AttributeConverter<T,?> converter) {
-        DataType<T> dataType = DataType.fromConverter(converter);
+    public <T, D, C extends AttributeConverter<T,D>> void register(C converter, LiteralFormatter<T> literalFormatter) {
+        DataType<T> dataType = DataType.fromConverter(converter, literalFormatter);
         entries.put(dataType.javaClass(), dataType);
     }
 

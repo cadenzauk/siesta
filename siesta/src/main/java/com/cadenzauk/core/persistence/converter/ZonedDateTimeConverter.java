@@ -31,20 +31,28 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 public class ZonedDateTimeConverter implements AttributeConverter<ZonedDateTime,Timestamp>{
+    private final ZoneId dbZoneId;
     private final ZoneId zoneId;
 
     public ZonedDateTimeConverter() {
+        dbZoneId = ZoneId.systemDefault();
         zoneId = ZoneId.of("UTC");
     }
 
     public ZonedDateTimeConverter(ZoneId zoneId) {
+        dbZoneId = ZoneId.systemDefault();
+        this.zoneId = zoneId;
+    }
+
+    public ZonedDateTimeConverter(ZoneId dbZoneId, ZoneId zoneId) {
+        this.dbZoneId = dbZoneId;
         this.zoneId = zoneId;
     }
 
     @Override
     public Timestamp convertToDatabaseColumn(ZonedDateTime attribute) {
         return Optional.ofNullable(attribute)
-            .map(TimestampUtil::valueOf)
+            .map(zonedDateTime -> TimestampUtil.valueOf(dbZoneId, zonedDateTime))
             .orElse(null);
     }
 
@@ -52,7 +60,7 @@ public class ZonedDateTimeConverter implements AttributeConverter<ZonedDateTime,
     @Override
     public ZonedDateTime convertToEntityAttribute(Timestamp dbData) {
         return Optional.ofNullable(dbData)
-            .map(ts -> TimestampUtil.toZonedDateTime(ts, zoneId))
+            .map(ts -> TimestampUtil.toZonedDateTime(ts, dbZoneId, zoneId))
             .orElse(null);
     }
 }

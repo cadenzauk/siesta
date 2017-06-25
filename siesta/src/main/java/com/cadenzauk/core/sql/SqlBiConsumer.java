@@ -20,16 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.persistence.converter;
+package com.cadenzauk.core.sql;
 
-import com.cadenzauk.core.lang.UncheckedAutoCloseable;
+import java.sql.SQLException;
 
-import java.util.TimeZone;
-
-public abstract class TemporalConverterTest {
-    protected static UncheckedAutoCloseable withTimeZone(String timeZone) {
-        TimeZone prevDefault = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
-        return () -> TimeZone.setDefault(prevDefault );
-    }
+@FunctionalInterface
+public interface SqlBiConsumer<T, V> {
+    void accept(T jdbcObject, V arg) throws SQLException;
 }

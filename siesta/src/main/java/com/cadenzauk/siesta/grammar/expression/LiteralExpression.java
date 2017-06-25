@@ -20,30 +20,52 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.assignment;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
 
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class SetToValue<T> implements AssignmentValue {
-    private final T value;
+public class LiteralExpression<T> implements TypedExpression<T> {
+    private final LabelGenerator labelGenerator = new LabelGenerator("literal_");
+    private T value;
 
-    public SetToValue(T value) {
-        Objects.requireNonNull(value);
+    public LiteralExpression(T value) {
         this.value = value;
     }
 
     @Override
     public String sql(Scope scope) {
-        return " = ?";
+        Database database = scope.database();
+        return database.getDataTypeOf(value).literal(database, value);
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return Stream.of(dataType.toDatabase(scope.database(), value));
+        return Stream.empty();
+    }
+
+    @Override
+    public Precedence precedence() {
+        return Precedence.UNARY;
+    }
+
+    @Override
+    public String label(Scope scope) {
+        return labelGenerator.label();
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return rs -> scope.database().getDataTypeOf(value).get(rs, label, scope.database()).orElse(null);
+    }
+
+    public static <T> LiteralExpression<T> of(T value) {
+        Objects.requireNonNull(value);
+        return new LiteralExpression<>(value);
     }
 }

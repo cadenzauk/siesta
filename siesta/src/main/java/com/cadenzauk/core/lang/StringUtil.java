@@ -46,4 +46,26 @@ public final class StringUtil extends UtilityClass {
             .map(String::toUpperCase)
             .collect(joining("_"));
     }
+
+    public static String hex(byte... bytes) {
+        if (bytes == null) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            builder.append(String.format("%02x", b));
+        }
+        return builder.toString();
+    }
+
+    public static String octal(byte... bytes) {
+        if (bytes == null) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder(bytes.length * 3);
+        for (byte b : bytes) {
+            builder.append(String.format("%03o", b));
+        }
+        return builder.toString();
+    }
 }

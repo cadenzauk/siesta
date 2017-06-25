@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import static com.cadenzauk.core.lang.StringUtil.octal;
+
 public class PostgresDialect extends AnsiDialect {
     @Override
     public boolean supportsMultiInsert() {
@@ -32,4 +34,20 @@ public class PostgresDialect extends AnsiDialect {
     public boolean requiresFromDual() {
         return false;
     }
+
+    @Override
+    public String binaryLiteral(byte[] bytes) {
+        StringBuilder builder = new StringBuilder("E'");
+        for (byte b : bytes) {
+            builder.append("\\\\");
+            builder.append(octal(b));
+        }
+        builder.append("'::bytea");
+        return builder.toString();
+    }
+
+//    @Override
+//    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
+//        return String.format("TIMESTAMP WITH TIME ZONE '%s'", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS VV")));
+//    }
 }

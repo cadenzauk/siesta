@@ -20,30 +20,12 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.assignment;
+package com.cadenzauk.core.sql;
 
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Scope;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import java.util.Objects;
-import java.util.stream.Stream;
-
-public class SetToValue<T> implements AssignmentValue {
-    private final T value;
-
-    public SetToValue(T value) {
-        Objects.requireNonNull(value);
-        this.value = value;
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return " = ?";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return Stream.of(dataType.toDatabase(scope.database(), value));
-    }
+@FunctionalInterface
+public interface ResultSetGet<T> {
+    T get(ResultSet rs, String label) throws SQLException;
 }

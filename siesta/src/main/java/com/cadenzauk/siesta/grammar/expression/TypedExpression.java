@@ -30,42 +30,44 @@ import com.cadenzauk.siesta.Scope;
 
 import java.util.function.Function;
 
-import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.of;
-
 public interface TypedExpression<T> extends Expression {
     String label(Scope scope);
 
     RowMapper<T> rowMapper(Scope scope, String label);
 
     static <T> ExpressionBuilder<T,BooleanExpression> column(TypedExpression<T> lhs) {
-        return of(lhs, Function.identity());
+        return ExpressionBuilder.of(lhs, Function.identity());
     }
 
     static <T, R> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> lhs) {
-        return of(UnresolvedColumn.of(lhs), Function.identity());
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), Function.identity());
     }
 
     static <T, R> ExpressionBuilder<T,BooleanExpression> column(FunctionOptional1<R,T> lhs) {
-        return of(UnresolvedColumn.of(lhs), Function.identity());
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), Function.identity());
     }
 
     static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, Function1<R,T> lhs) {
-        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), Function.identity());
     }
 
     static <T, R> ExpressionBuilder<T,BooleanExpression> column(String alias, FunctionOptional1<R,T> lhs) {
-        return of(UnresolvedColumn.of(alias, lhs), Function.identity());
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), Function.identity());
     }
 
     static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, Function1<R,T> lhs) {
-        return of(ResolvedColumn.of(alias, lhs), Function.identity());
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Function.identity());
     }
 
     static <T, R> ExpressionBuilder<T,BooleanExpression> column(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return of(ResolvedColumn.of(alias, lhs), Function.identity());
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), Function.identity());
     }
 
     static <T> ExpressionBuilder<T,BooleanExpression> value(T value) {
-        return of(ValueExpression.of(value), Function.identity());
+        return ExpressionBuilder.of(ValueExpression.of(value), Function.identity());
+    }
+
+    static <T> ExpressionBuilder<T,BooleanExpression> literal(T value) {
+        return ExpressionBuilder.of(LiteralExpression.of(value), Function.identity());
     }
 }

@@ -22,12 +22,12 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.FieldInfo;
 import com.cadenzauk.core.reflect.Setter;
+import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.core.sql.RowMapper;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -69,8 +69,8 @@ public class TableColumn<T, R, B> implements Column<T,R> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(String label) {
-        return rs -> dataType.get(rs, label).orElse(null);
+    public RowMapper<T> rowMapper(Database database, String label) {
+        return rs -> dataType.get(rs, label, database).orElse(null);
     }
 
     @Override
@@ -90,8 +90,8 @@ public class TableColumn<T, R, B> implements Column<T,R> {
         return primaryKey;
     }
 
-    public ResultSetValue<B> extract(ResultSet rs, String label) {
-        Optional<T> value = dataType.get(rs, label);
+    public ResultSetValue<B> extract(Database db, ResultSet rs, String label) {
+        Optional<T> value = dataType.get(rs, label, db);
         return new ResultSetValue<B>() {
             @Override
             public boolean isPresent() {

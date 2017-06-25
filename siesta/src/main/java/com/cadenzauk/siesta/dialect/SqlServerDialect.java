@@ -22,8 +22,14 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.core.lang.StringUtil.hex;
 import static java.util.stream.Collectors.joining;
 
 public class SqlServerDialect extends AnsiDialect {
@@ -46,4 +52,34 @@ public class SqlServerDialect extends AnsiDialect {
     public String concat(Stream<String> sql) {
         return "concat(" + sql.collect(joining(", ")) + ")";
     }
+
+    @Override
+    public String dateLiteral(LocalDate date) {
+        return String.format("cast('%s' as date)", date.format(DateTimeFormatter.ISO_DATE));
+    }
+
+    @Override
+    public String timestampLiteral(LocalDateTime localDateTime, ZoneId databaseTimeZone) {
+//        ZonedDateTime local = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+//        ZonedDateTime db = local.withZoneSameInstant(databaseTimeZone);
+//        return String.format("cast('%s' as datetime2(6))", db.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+        return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+    }
+
+    @Override
+    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
+        ZonedDateTime localDateTime = date.withZoneSameInstant(databaseTimeZone);
+        return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+    }
+
+    @Override
+    public String binaryLiteral(byte[] bytes) {
+        return String.format("0x%s", hex(bytes));
+    }
+
+    @Override
+    public String byteLiteral(byte val) {
+        return String.format("cast(%d as tinyint)", val & 0xff);
+    }
+
 }

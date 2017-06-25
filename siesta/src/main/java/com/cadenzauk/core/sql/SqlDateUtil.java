@@ -23,7 +23,6 @@
 package com.cadenzauk.core.sql;
 
 import com.cadenzauk.core.util.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -31,16 +30,20 @@ import java.time.LocalDate;
 import static com.cadenzauk.core.time.LocalDateUtil.START_OF_GREGORIAN_CALENDAR;
 
 public class SqlDateUtil extends UtilityClass {
-    @NotNull
-    public static Date valueOf(@NotNull LocalDate localDate) {
+    public static Date valueOf(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
         if (localDate.isBefore(START_OF_GREGORIAN_CALENDAR)) {
             throw new IllegalArgumentException("Cannot convert local dates before the start of the Gregorian calendar to SQL dates.");
         }
         return Date.valueOf(localDate);
     }
 
-    @NotNull
-    public static LocalDate toLocalDate(@NotNull Date date) {
+    public static LocalDate toLocalDate(Date date) {
+        if (date == null) {
+            return null;
+        }
         if (date.toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
             throw new IllegalArgumentException("Cannot convert SQL dates before the start of the Gregorian calendar to local dates.");
         }

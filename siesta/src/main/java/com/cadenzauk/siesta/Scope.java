@@ -86,7 +86,7 @@ public class Scope {
     public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {
         return (scope, label) -> {
             final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
-            return rs -> dataType.get(rs, label).orElse(null);
+            return rs -> dataType.get(rs, label, scope.database()).orElse(null);
         };
     }
 }

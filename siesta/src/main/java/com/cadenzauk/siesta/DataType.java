@@ -23,10 +23,10 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.util.TypeUtil;
+import com.cadenzauk.core.sql.SqlDateUtil;
+import com.cadenzauk.core.sql.TimestampUtil;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
-import com.cadenzauk.core.persistence.converter.LocalDateConverter;
-import com.cadenzauk.core.persistence.converter.ZonedDateTimeConverter;
 import com.google.common.collect.ImmutableMap;
 
 import javax.persistence.AttributeConverter;
@@ -38,61 +38,108 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.TimeZone;
+import java.util.function.BiFunction;
 
 public class DataType<T> {
-    public static final DataType<BigDecimal> BIG_DECIMAL = new DataType<>(BigDecimal.class, ResultSet::getBigDecimal, defaultConverter());
-    public static final DataType<Byte> BYTE = new DataType<>(Byte.class, ResultSet::getByte, defaultConverter());
-    public static final DataType<byte[]> BYTE_ARRAY = new DataType<>(byte[].class, ResultSet::getBytes, defaultConverter());
-    public static final DataType<Double> DOUBLE = new DataType<>(Double.class, ResultSet::getDouble, defaultConverter());
-    public static final DataType<Float> FLOAT = new DataType<>(Float.class, ResultSet::getFloat, defaultConverter());
-    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class, ResultSet::getInt, defaultConverter());
-    public static final DataType<Long> LONG = new DataType<>(Long.class, ResultSet::getLong, defaultConverter());
-    public static final DataType<Short> SHORT = new DataType<>(Short.class, ResultSet::getShort, defaultConverter());
-    public static final DataType<String> STRING = new DataType<>(String.class, ResultSet::getString, defaultConverter());
-    public static final DataType<LocalDate> LOCAL_DATE = DataType.fromConverter(new LocalDateConverter());
-    public static final DataType<ZonedDateTime> ZONED_DATE_TIME = DataType.fromConverter(new ZonedDateTimeConverter());
+    public static final DataType<BigDecimal> BIG_DECIMAL = new DataType<>(BigDecimal.class,
+        (rs, col, db) -> rs.getBigDecimal(col),
+        defaultConverter(),
+        defaultLiteralFormatter());
+    public static final DataType<Byte> BYTE = new DataType<>(Byte.class,
+        (rs, col, db) -> rs.getByte(col),
+        defaultConverter(),
+        Dialect::byteLiteral);
+    public static final DataType<byte[]> BYTE_ARRAY = new DataType<>(byte[].class,
+        (rs, col, db) -> rs.getBytes(col),
+        defaultConverter(),
+        Dialect::binaryLiteral);
+    public static final DataType<Double> DOUBLE = new DataType<>(Double.class,
+        (rs, col, db) -> rs.getDouble(col),
+        defaultConverter(),
+        defaultLiteralFormatter());
+    public static final DataType<Float> FLOAT = new DataType<>(Float.class,
+        (rs, col, db) -> rs.getFloat(col),
+        defaultConverter(),
+        Dialect::floatLiteral);
+    public static final DataType<Integer> INTEGER = new DataType<>(Integer.class,
+        (rs, col, db) -> rs.getInt(col),
+        defaultConverter(),
+        defaultLiteralFormatter());
+    public static final DataType<LocalDate> LOCAL_DATE = new DataType<>(LocalDate.class,
+        DataType::getLocalDate,
+        DataType::localDateToDb,
+        Database::dateLiteral);
+    public static final DataType<LocalDateTime> LOCAL_DATE_TIME = new DataType<>(LocalDateTime.class,
+        DataType::getLocalDateTime,
+        DataType::localDateTimeToDb,
+        Database::timestampLiteral);
+    public static final DataType<Long> LONG = new DataType<>(Long.class,
+        (rs, col, db) -> rs.getLong(col),
+        defaultConverter(),
+        defaultLiteralFormatter());
+    public static final DataType<Short> SHORT = new DataType<>(Short.class,
+        (rs, col, db) -> rs.getShort(col),
+        defaultConverter(),
+        Dialect::smallIntLiteral);
+    public static final DataType<String> STRING = new DataType<>(String.class,
+        (rs, col, db) -> rs.getString(col),
+        defaultConverter(),
+        Dialect::stringLiteral);
+    public static final DataType<ZonedDateTime> ZONED_DATE_TIME = new DataType<>(ZonedDateTime.class,
+        DataType::getZonedDateTime,
+        DataType::zonedDateTimeToDb,
+        Database::timestampWithTimeZoneLiteral);
 
     private final Class<T> javaClass;
     private final ResultSetExtractor<T> resultSetExtractor;
-    private final Function<Optional<T>,Object> converter;
+    private final BiFunction<Database,Optional<T>,Object> converter;
+    private final LiteralFormatter<T> literalFormatter;
 
-    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, Function<Optional<T>,Object> converter) {
+    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, BiFunction<Database,Optional<T>, Object> converter, BiFunction<Dialect,T,String> literalFormatter) {
+        this(javaClass, resultSetExtractor, converter, (Database db, T val) -> literalFormatter.apply(db.dialect(), val));
+    }
+
+    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, BiFunction<Database,Optional<T>,Object> converter, LiteralFormatter<T> literalFormatter) {
         this.javaClass = TypeUtil.boxedType(javaClass);
         this.resultSetExtractor = resultSetExtractor;
         this.converter = converter;
+        this.literalFormatter = literalFormatter;
     }
 
     public Class<T> javaClass() {
         return javaClass;
     }
 
-    public Object toDatabase(Optional<T> v) {
-        return converter.apply(v);
+    public Object toDatabase(Database database, Optional<T> v) {
+        return converter.apply(database, v);
     }
 
-    public Object toDatabase(T v) {
-        return converter.apply(Optional.ofNullable(v));
+    public Object toDatabase(Database database, T v) {
+        return converter.apply(database, Optional.ofNullable(v));
     }
 
-    public Optional<T> get(ResultSet rs, String colName) {
+    public Optional<T> get(ResultSet rs, String colName, Database database) {
         try {
-            T value = resultSetExtractor.get(rs, colName);
+            T value = resultSetExtractor.get(rs, colName, database);
             return rs.wasNull() ? Optional.empty() : Optional.of(value);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static <T> Function<Optional<T>,Object> defaultConverter() {
-        return v -> v.orElse(null);
+    public String literal(Database database, T value) {
+        return literalFormatter.format(database, value);
     }
 
-    public static <T,D,C extends AttributeConverter<T,D>> DataType<T> fromConverter(C converter) {
+    public static <T, D, C extends AttributeConverter<T,D>> DataType<T> fromConverter(C converter, LiteralFormatter<T> literalFormatter) {
         ParameterizedType any = Arrays.stream(converter.getClass().getGenericInterfaces())
             .map(t -> OptionalUtil.as(ParameterizedType.class, t))
             .flatMap(StreamUtil::of)
@@ -106,27 +153,67 @@ public class DataType<T> {
         ResultSetExtractor<D> resultSetExtractor = ResultSetExtractor.forType(databaseClass);
 
         return new DataType<>(entityAttributeClass,
-            (rs,n) -> converter.convertToEntityAttribute(resultSetExtractor.get(rs, n)),
-            v -> v.map(converter::convertToDatabaseColumn).orElse(null));
+            (rs, n, db) -> converter.convertToEntityAttribute(resultSetExtractor.get(rs, n, db)),
+            (db, v) -> v.map(converter::convertToDatabaseColumn).orElse(null),
+            literalFormatter);
+    }
+
+    private static Timestamp getTimestamp(ResultSet resultSet, String columnLabel, Database db) throws SQLException {
+        return resultSet.getTimestamp(columnLabel, new GregorianCalendar(TimeZone.getTimeZone(db.databaseTimeZone())));
+    }
+
+    private static Object localDateToDb(Database db, Optional<LocalDate> value) {
+        return value.map(SqlDateUtil::valueOf).orElse(null);
+    }
+
+    private static Object localDateTimeToDb(Database db, Optional<LocalDateTime> value) {
+        return value.map(v -> TimestampUtil.valueOf(db.databaseTimeZone(), ZonedDateTime.of(v, ZoneId.systemDefault()))).orElse(null);
+    }
+
+    private static Object zonedDateTimeToDb(Database db, Optional<ZonedDateTime> value) {
+        return value.map(v -> TimestampUtil.valueOf(db.databaseTimeZone(), v)).orElse(null);
+    }
+
+    private static LocalDate getLocalDate(ResultSet rs, String col, Database db) throws SQLException {
+        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
+        return SqlDateUtil.toLocalDate(date);
+    }
+
+    private static LocalDateTime getLocalDateTime(ResultSet rs, String col, Database db) throws SQLException {
+        Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
+        return TimestampUtil.toLocalDateTime(timestamp);
+    }
+
+    private static ZonedDateTime getZonedDateTime(ResultSet rs, String col, Database db) throws SQLException {
+        Timestamp timestamp = getTimestamp(rs, col, db);
+        return TimestampUtil.toZonedDateTime(timestamp, db.databaseTimeZone(), ZoneId.of("UTC"));
+    }
+
+    private static <T> BiFunction<Database,Optional<T>,Object> defaultConverter() {
+        return (db, v) -> v.orElse(null);
+    }
+
+    private static <T> LiteralFormatter<T> defaultLiteralFormatter() {
+        return (d, v) -> v.toString();
     }
 
     @FunctionalInterface
-    private interface ResultSetExtractor<T> {
-        T get(ResultSet rs, String col) throws SQLException;
+    interface ResultSetExtractor<T> {
+        T get(ResultSet rs, String col, Database database) throws SQLException;
 
-        Map<Class<?>, ResultSetExtractor<?>> extractors = ImmutableMap.<Class<?>, ResultSetExtractor<?>>builder()
-            .put(BigDecimal.class, ResultSet::getBigDecimal)
-            .put(Byte.class, ResultSet::getByte)
-            .put(byte[].class, ResultSet::getBytes)
-            .put(Date.class, ResultSet::getDate)
-            .put(Double.class, ResultSet::getDouble)
-            .put(Float.class, ResultSet::getFloat)
-            .put(Integer.class, ResultSet::getInt)
-            .put(Long.class, ResultSet::getLong)
-            .put(Short.class, ResultSet::getShort)
-            .put(String.class, ResultSet::getString)
-            .put(Time.class, ResultSet::getTime)
-            .put(Timestamp.class, ResultSet::getTimestamp)
+        Map<Class<?>,ResultSetExtractor<?>> extractors = ImmutableMap.<Class<?>,ResultSetExtractor<?>>builder()
+            .put(BigDecimal.class, (resultSet, columnLabel, db) -> resultSet.getBigDecimal(columnLabel))
+            .put(Byte.class, (resultSet, columnLabel, db) -> resultSet.getByte(columnLabel))
+            .put(byte[].class, (resultSet, columnLabel, db) -> resultSet.getBytes(columnLabel))
+            .put(Date.class, (resultSet, columnLabel, db) -> resultSet.getDate(columnLabel))
+            .put(Double.class, (resultSet, columnLabel, db) -> resultSet.getDouble(columnLabel))
+            .put(Float.class, (resultSet, columnLabel, db) -> resultSet.getFloat(columnLabel))
+            .put(Integer.class, (resultSet, columnLabel, db) -> resultSet.getInt(columnLabel))
+            .put(Long.class, (resultSet, columnLabel, db) -> resultSet.getLong(columnLabel))
+            .put(Short.class, (resultSet, columnLabel, db) -> resultSet.getShort(columnLabel))
+            .put(String.class, (resultSet, columnLabel, db) -> resultSet.getString(columnLabel))
+            .put(Time.class, (resultSet, columnLabel, db) -> resultSet.getTime(columnLabel))
+            .put(Timestamp.class, DataType::getTimestamp)
             .build();
 
         @SuppressWarnings("unchecked")

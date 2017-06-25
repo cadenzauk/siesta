@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import static com.cadenzauk.core.lang.StringUtil.hex;
+
 public class Db2Dialect extends AnsiDialect {
     @Override
     public String selectivity(double s) {
@@ -36,5 +38,15 @@ public class Db2Dialect extends AnsiDialect {
     @Override
     public boolean supportsMultiInsert() {
         return true;
+    }
+
+    @Override
+    public String binaryLiteral(byte[] bytes) {
+        return String.format("HEXTORAW('%s')", hex(bytes));
+    }
+
+    @Override
+    public String byteLiteral(byte val) {
+        return String.format("cast(%d as smallint)", val);
     }
 }

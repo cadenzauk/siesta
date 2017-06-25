@@ -171,7 +171,7 @@ public class Table<R> {
                     .stream()
                     .map(c -> c.getter()
                         .apply(r)
-                        .map(v -> c.dataType().toDatabase(v))
+                        .map(v -> c.dataType().toDatabase(database, v))
                         .orElse(null)))
                 .toArray();
 
@@ -185,7 +185,7 @@ public class Table<R> {
         public RowMapper<R> rowMapper(Optional<String> prefix) {
             return rs -> {
                 List<ResultSetValue<B>> values = columns.stream()
-                    .map(c -> c.extract(rs, prefix.orElse(tableName + "_") + c.name()))
+                    .map(c -> c.extract(database, rs, prefix.orElse(tableName + "_") + c.name()))
                     .collect(toList());
                 return values.stream().noneMatch(ResultSetValue::isPresent)
                     ? null
@@ -213,7 +213,7 @@ public class Table<R> {
                 public R mapRow(ResultSet rs) {
                     List<ResultSetValue<B>> values = columns.stream()
                         .filter(c -> labels.contains(c.label(labelPrefix)))
-                        .map(c -> c.extract(rs, prefix.orElse(tableName + "_") + c.name()))
+                        .map(c -> c.extract(database, rs, prefix.orElse(tableName + "_") + c.name()))
                         .collect(toList());
                     return values.stream().noneMatch(ResultSetValue::isPresent)
                         ? null

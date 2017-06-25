@@ -26,6 +26,7 @@ import com.cadenzauk.core.util.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -33,20 +34,28 @@ import static com.cadenzauk.core.time.LocalDateUtil.START_OF_GREGORIAN_CALENDAR;
 
 public class TimestampUtil extends UtilityClass {
     @NotNull
-    public static Timestamp valueOf(@NotNull ZonedDateTime zonedDateTime) {
+    public static Timestamp valueOf(ZoneId dbZoneId, @NotNull ZonedDateTime zonedDateTime) {
         if (zonedDateTime.toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
             throw new IllegalArgumentException("Cannot convert date/times before the start of the Gregorian calendar to timestamps.");
         }
-        ZonedDateTime localDateTime = ZonedDateTime.ofInstant(zonedDateTime.toInstant(), ZoneId.systemDefault());
+        ZonedDateTime localDateTime = zonedDateTime.withZoneSameInstant(dbZoneId);
         return Timestamp.valueOf(localDateTime.toLocalDateTime());
     }
 
     @NotNull
-    public static ZonedDateTime toZonedDateTime(@NotNull Timestamp timestamp, @NotNull ZoneId zoneId) {
+    public static ZonedDateTime toZonedDateTime(@NotNull Timestamp timestamp, ZoneId dbZoneId, @NotNull ZoneId zoneId) {
         if (ZonedDateTime.ofInstant(timestamp.toInstant(), zoneId).toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
             throw new IllegalArgumentException("Cannot convert timestamps before the start of the Gregorian calendar to date/time.");
         }
-        ZonedDateTime localDateTime = ZonedDateTime.of(timestamp.toLocalDateTime(), ZoneId.systemDefault());
+        ZonedDateTime localDateTime = ZonedDateTime.ofInstant(timestamp.toInstant(), dbZoneId);
         return ZonedDateTime.ofInstant(localDateTime.toInstant(), zoneId);
+    }
+
+    @NotNull
+    public static LocalDateTime toLocalDateTime(@NotNull Timestamp timestamp) {
+        if (LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault()).toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
+            throw new IllegalArgumentException("Cannot convert timestamps before the start of the Gregorian calendar to date/time.");
+        }
+        return timestamp.toLocalDateTime();
     }
 }

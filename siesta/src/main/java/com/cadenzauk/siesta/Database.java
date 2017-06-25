@@ -40,6 +40,10 @@ import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
 import javax.persistence.AttributeConverter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +59,16 @@ public class Database {
     private final NamingStrategy namingStrategy;
     private final Dialect dialect;
     private final Optional<SqlExecutor> defaultSqlExecutor;
+    private final ZoneId databaseTimeZone;
 
     private Database(Builder builder) {
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
         dialect = builder.dialect;
         defaultSqlExecutor = builder.defaultSqlExecutor;
+        databaseTimeZone = builder.databaseTimeZone;
         builder.tables.forEach(t -> t.accept(this));
-        builder.converters.forEach(dataTypeRegistry::register);
+        builder.converters.forEach(c -> c.register(this));
     }
 
     public String defaultSchema() {
@@ -77,6 +83,18 @@ public class Database {
         return dialect;
     }
 
+    public String dateLiteral(LocalDate val) {
+        return dialect().dateLiteral(val);
+    }
+
+    public String timestampLiteral(LocalDateTime val) {
+        return dialect().timestampLiteral(val, databaseTimeZone);
+    }
+
+    public String timestampWithTimeZoneLiteral(ZonedDateTime val) {
+        return dialect().timestampWithTimeZoneLiteral(val, databaseTimeZone);
+    }
+
     @SuppressWarnings("unchecked")
     public <R> Table<R> table(Class<R> rowClass) {
         return table(rowClass, Function.identity());
@@ -84,6 +102,10 @@ public class Database {
 
     public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what) {
         return from(Dual.class).select(what);
+    }
+
+    public ZoneId databaseTimeZone() {
+        return databaseTimeZone;
     }
 
     @SuppressWarnings("unchecked")
@@ -221,13 +243,28 @@ public class Database {
         return new Builder();
     }
 
+    private static class DataTypeParams<T> {
+        private final AttributeConverter<T,?> converter;
+        private final LiteralFormatter<T> literalFormatter;
+
+        private DataTypeParams(AttributeConverter<T,?> converter, LiteralFormatter<T> literalFormatter) {
+            this.converter = converter;
+            this.literalFormatter = literalFormatter;
+        }
+
+        private void register(Database database) {
+            database.dataTypeRegistry.register(converter, literalFormatter);
+        }
+    }
+
     public static final class Builder {
         private String defaultSchema;
         private NamingStrategy namingStrategy = new UppercaseUnderscores();
         private Dialect dialect = new AnsiDialect();
         private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
+        private ZoneId databaseTimeZone = ZoneId.systemDefault();
         private final List<Consumer<Database>> tables = new ArrayList<>();
-        private final List<AttributeConverter<?,?>> converters = new ArrayList<>();
+        private final List<DataTypeParams<?>> converters = new ArrayList<>();
 
         private Builder() {
         }
@@ -252,13 +289,18 @@ public class Database {
             return this;
         }
 
+        public Builder databaseTimeZone(ZoneId val) {
+            databaseTimeZone = val;
+            return this;
+        }
+
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
             tables.add(database -> database.table(rowClass, init));
             return this;
         }
 
-        public <T> Builder dataType(AttributeConverter<T,?> attributeConverter) {
-            converters.add(attributeConverter);
+        public <T> Builder dataType(AttributeConverter<T,?> attributeConverter, LiteralFormatter<T> literalFormatter) {
+            converters.add(new DataTypeParams<>(attributeConverter, literalFormatter));
             return this;
         }
 

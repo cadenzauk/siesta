@@ -25,8 +25,8 @@ package com.cadenzauk.siesta.jdbc;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.ConnectionUtil;
 import com.cadenzauk.core.sql.DataSourceUtil;
-import com.cadenzauk.core.sql.ResultSetSpliterator;
 import com.cadenzauk.core.sql.PreparedStatementUtil;
+import com.cadenzauk.core.sql.ResultSetSpliterator;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 

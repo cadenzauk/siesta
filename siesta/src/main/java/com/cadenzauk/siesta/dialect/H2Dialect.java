@@ -27,4 +27,15 @@ public class H2Dialect extends AnsiDialect {
     public boolean supportsMultiInsert() {
         return true;
     }
+
+    @Override
+    public String byteLiteral(byte val) {
+        return String.format("cast(%d as tinyint)", val);
+    }
+
+//    @Override
+//    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
+//        ZonedDateTime localDateTime = date.withZoneSameInstant(ZoneId.of("UTC"));
+//        return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+//    }
 }

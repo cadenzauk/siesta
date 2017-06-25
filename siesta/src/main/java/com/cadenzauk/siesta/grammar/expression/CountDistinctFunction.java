@@ -57,6 +57,6 @@ public class CountDistinctFunction<T> implements TypedExpression<Integer> {
 
     @Override
     public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> DataType.INTEGER.get(rs, label).orElse(null);
+        return rs -> DataType.INTEGER.get(rs, label, scope.database()).orElse(null);
     }
 }

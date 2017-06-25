@@ -75,4 +75,45 @@ class StringUtilTest {
     void camelToUpper(String input, String expectedResult) {
         assertThat(StringUtil.camelToUpper(input), is(expectedResult));
     }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForHex() {
+        return Stream.of(
+            create(null, ""),
+            create(new byte[0], ""),
+            create(new byte[] { -128 }, "80"),
+            create(new byte[] { -1 }, "ff"),
+            create(new byte[] { 0 }, "00"),
+            create(new byte[] { 15 }, "0f"),
+            create(new byte[] { 127 }, "7f"),
+            create(new byte[] { 0, 127, 10 }, "007f0a"),
+            create(new byte[] { (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef }, "deadbeef")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource(names = "parametersForHex")
+    void hex(byte[] input, String expectedResult) {
+        assertThat(StringUtil.hex(input), is(expectedResult));
+    }
+
+    @SuppressWarnings("unused")
+    static Stream<Arguments> parametersForOctal() {
+        return Stream.of(
+            create(null, ""),
+            create(new byte[0], ""),
+            create(new byte[] { -128 }, "200"),
+            create(new byte[] { -1 }, "377"),
+            create(new byte[] { 0 }, "000"),
+            create(new byte[] { 15 }, "017"),
+            create(new byte[] { 127 }, "177"),
+            create(new byte[] { 0, 127, 10 }, "000177012")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource(names = "parametersForOctal")
+    void octal(byte[] input, String expectedResult) {
+        assertThat(StringUtil.octal(input), is(expectedResult));
+    }
 }

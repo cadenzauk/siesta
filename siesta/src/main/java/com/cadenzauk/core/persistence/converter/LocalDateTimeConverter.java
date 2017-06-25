@@ -20,30 +20,29 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.assignment;
+package com.cadenzauk.core.persistence.converter;
 
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Scope;
+import javax.persistence.AttributeConverter;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-import java.util.Objects;
-import java.util.stream.Stream;
-
-public class SetToValue<T> implements AssignmentValue {
-    private final T value;
-
-    public SetToValue(T value) {
-        Objects.requireNonNull(value);
-        this.value = value;
+public class LocalDateTimeConverter implements AttributeConverter<LocalDateTime,Timestamp> {
+    public LocalDateTimeConverter() {
+    }
+    
+    @Override
+    public Timestamp convertToDatabaseColumn(LocalDateTime attribute) {
+        return Optional.ofNullable(attribute)
+            .map(Timestamp::valueOf)
+            .orElse(null);
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public String sql(Scope scope) {
-        return " = ?";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return Stream.of(dataType.toDatabase(scope.database(), value));
+    public LocalDateTime convertToEntityAttribute(Timestamp dbData) {
+        return Optional.ofNullable(dbData)
+            .map(Timestamp::toLocalDateTime)
+            .orElse(null);
     }
 }

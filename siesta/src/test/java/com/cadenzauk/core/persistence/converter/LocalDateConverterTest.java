@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static java.time.Month.DECEMBER;
 import static java.time.Month.FEBRUARY;
 import static java.time.Month.JANUARY;
@@ -45,7 +46,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
-class LocalDateConverterTest extends TemporalConverterTest {
+class LocalDateConverterTest {
+    @SuppressWarnings("unused")
     static Stream<Arguments> parameters() {
         return Stream.of(
             create("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),

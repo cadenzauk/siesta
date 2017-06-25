@@ -22,8 +22,10 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.WidgetRow;
@@ -32,13 +34,17 @@ import com.cadenzauk.siesta.spring.JdbcTemplateSqlExecutor;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
@@ -46,7 +52,10 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.min;
 import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
+import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.when;
+import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
@@ -429,6 +438,102 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         assertThat(smiths2, hasSize(2));
         assertThat(smiths2.get(0).firstName(), is("Fred"));
         assertThat(smiths2.get(1).firstName(), is("Bruce"));
+    }
+
+    @Test
+    public void caseExpression() {
+        Database database = testDatabase(dataSource, dialect);
+        long manufacturerId = newId();
+        WidgetRow doohicky = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .name("Doohicky")
+            .manufacturerId(manufacturerId)
+            .build();
+        WidgetRow doohickie = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .name("Doohickie")
+            .manufacturerId(manufacturerId)
+            .build();
+        WidgetRow doodad = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .name("Doodad")
+            .manufacturerId(manufacturerId)
+            .build();
+        WidgetRow doofer = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .name("Doofer")
+            .manufacturerId(manufacturerId)
+            .build();
+        database.insert(doohicky, doohickie, doodad, doofer);
+
+        List<String> result = database.from(WidgetRow.class)
+            .select(
+                when(WidgetRow::name).isLike("Doohick%").then(lower(WidgetRow::name))
+                    .when(WidgetRow::name).isEqualTo(value("Doodad")).then(upper(WidgetRow::name))
+                    .orElse(WidgetRow::name))
+            .where(WidgetRow::manufacturerId).isEqualTo(manufacturerId)
+            .orderBy(WidgetRow::widgetId)
+            .list();
+
+        assertThat(result.get(0), is("doohicky"));
+        assertThat(result.get(1), is("doohickie"));
+        assertThat(result.get(2), is("DOODAD"));
+        assertThat(result.get(3), is("Doofer"));
+    }
+
+    @Test
+    public void literal() {
+        runLiteral(new BigDecimal("5001.12"));
+        runLiteral((byte) 0xff);
+        runLiteral(new byte[]{(byte) 0xff, 0x1, 0x7f});
+        runLiteral(3.1415);
+        runLiteral(2.71f);
+        runLiteral(LocalDate.of(2014, 9, 12));
+        runLiteral("UTC", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000));
+        runLiteral("Europe/Paris", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000));
+        runLiteral("Pacific/Chatham", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000));
+        runLiteral(LocalDateTime.of(2017, 1, 2, 3, 4, 5, 6000000));
+        runLiteral(9223372036854775807L);
+        runLiteral((short) 32767);
+        runLiteral("Abc'def\"g hi");
+        runLiteral("UTC", ZonedDateTime.of(2001, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC")));
+        runLiteral("Europe/Berlin", ZonedDateTime.of(2002, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC")));
+        runLiteral("UTC", ZonedDateTime.of(2003, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage")));
+        runLiteral("America/New_York", ZonedDateTime.of(2004, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage")));
+        runLiteral("America/Anchorage", ZonedDateTime.of(2005, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage")));
+    }
+
+    private void runLiteral(String timeZone, ZonedDateTime value) {
+        Database database = testDatabase(dataSource, dialect);
+        try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
+            ZonedDateTime expected = value.withZoneSameInstant(ZoneId.of("UTC"));
+
+            ZonedDateTime result = database.select(TypedExpression.literal(value)).single();
+
+            assertThat(result, is(expected));
+        }
+    }
+
+    private <T> void runLiteral(String timeZone, T value) {
+        Database database = testDatabase(dataSource, dialect);
+        try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
+
+            T result = database.select(TypedExpression.literal(value)).single();
+
+            assertThat(result, is(value));
+        }
+    }
+
+    private <T> void runLiteral(T value) {
+        runLiteral(value, value);
+    }
+
+    private <T> void runLiteral(T value, T expected) {
+        Database database = testDatabase(dataSource, dialect);
+
+        T result = database.select(TypedExpression.literal(value)).single();
+
+        assertThat(result, is(expected));
     }
 
     private static long newId() {

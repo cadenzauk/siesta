@@ -24,8 +24,14 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Dialect;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.core.lang.StringUtil.hex;
 import static java.util.stream.Collectors.joining;
 
 public class AnsiDialect implements Dialect {
@@ -62,5 +68,49 @@ public class AnsiDialect implements Dialect {
     @Override
     public String concat(Stream<String> sql) {
         return sql.collect(joining(" || "));
+    }
+
+    @Override
+    public String binaryLiteral(byte[] bytes) {
+        return String.format("X'%s'", hex(bytes));
+    }
+
+    @Override
+    public String byteLiteral(byte val) {
+        return String.format("cast(%d as smallint)", val);
+    }
+
+    @Override
+    public String dateLiteral(LocalDate date) {
+        return String.format("DATE '%s'", date.format(DateTimeFormatter.ISO_DATE));
+    }
+
+    @Override
+    public String floatLiteral(float val) {
+        return String.format("cast(%s as real)", val);
+    }
+
+    @Override
+    public String smallIntLiteral(short val) {
+        return String.format("cast(%d as smallint)", val);
+    }
+
+    @Override
+    public String timestampLiteral(LocalDateTime date, ZoneId databaseTimeZone) {
+//        ZonedDateTime local = ZonedDateTime.of(date, ZoneId.systemDefault());
+//        ZonedDateTime db = local.withZoneSameInstant(databaseTimeZone);
+//        return String.format("TIMESTAMP '%s'", db.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+        return String.format("TIMESTAMP '%s'", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+    }
+
+    @Override
+    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
+        ZonedDateTime localDateTime = date.withZoneSameInstant(databaseTimeZone);
+        return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+    }
+
+    @Override
+    public String stringLiteral(String val) {
+        return "'" + val.replaceAll("'", "''") + "'";
     }
 }
