@@ -237,7 +237,9 @@ class DataTypeTest extends MockitoTest {
     void getLocalDateTime(String timeZone) throws SQLException {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
-            when(rs.getTimestamp(eq("someColumn"), any())).thenReturn(Timestamp.valueOf(expected));
+            Timestamp returnVal = Timestamp.from(ZonedDateTime.of(expected, ZoneId.of(timeZone)).toInstant());
+            when(rs.getTimestamp(eq("someColumn"), any())).thenReturn(returnVal);
+            when(db.databaseTimeZone()).thenReturn(ZoneId.of(timeZone));
 
             Optional<LocalDateTime> result = DataType.LOCAL_DATE_TIME.get(rs, "someColumn", db);
 

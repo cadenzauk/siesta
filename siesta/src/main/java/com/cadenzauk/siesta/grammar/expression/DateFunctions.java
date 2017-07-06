@@ -25,12 +25,18 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.siesta.Dialect;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class DateFunctions {
     //--
     public static TypedExpression<LocalDate> currentDate() {
         return DialectFunction.of("current_date", Dialect::today, LocalDate.class);
+    }
+
+    //--
+    public static TypedExpression<LocalDateTime> currentTimestampLocal() {
+        return DialectFunction.of("current_timestamp_local", Dialect::currentTimestamp, LocalDateTime.class);
     }
 
     //--

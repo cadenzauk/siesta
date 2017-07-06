@@ -45,7 +45,7 @@ public abstract class RandomValues extends UtilityClass {
     }
 
     public static LocalDate randomLocalDate() {
-        int year = RANDOM.nextInt(1590, 3000);
+        int year = RANDOM.nextInt(1970, 3000);
         int month = RANDOM.nextInt(1, 13);
         int day = RANDOM.nextInt(1, new GregorianCalendar(year, month - 1, 1).getActualMaximum(Calendar.DAY_OF_MONTH) + 1);
         return LocalDate.of(year, month, day);
@@ -55,8 +55,7 @@ public abstract class RandomValues extends UtilityClass {
         int hour = RANDOM.nextInt(0, 24);
         int minute = RANDOM.nextInt(0, 60);
         int second = RANDOM.nextInt(0, 60);
-        int milli = RANDOM.nextInt(0, 1000);
-        return LocalTime.of(hour, minute, second, milli * 1_000_000);
+        return LocalTime.of(hour, minute, second);
     }
 
     public static LocalDateTime randomLocalDateTime() {

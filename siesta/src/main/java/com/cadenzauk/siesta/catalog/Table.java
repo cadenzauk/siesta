@@ -151,6 +151,7 @@ public class Table<R> {
             this.columns = ImmutableList.copyOf(columns);
         }
 
+        @SuppressWarnings("unchecked")
         @SafeVarargs
         final void insert(SqlExecutor sqlExecutor, R... rows) {
             if (rows.length == 0) {

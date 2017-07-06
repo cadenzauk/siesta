@@ -52,10 +52,7 @@ public class TimestampUtil extends UtilityClass {
     }
 
     @NotNull
-    public static LocalDateTime toLocalDateTime(@NotNull Timestamp timestamp) {
-        if (LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault()).toLocalDate().isBefore(START_OF_GREGORIAN_CALENDAR)) {
-            throw new IllegalArgumentException("Cannot convert timestamps before the start of the Gregorian calendar to date/time.");
-        }
-        return timestamp.toLocalDateTime();
+    public static LocalDateTime toLocalDateTime(@NotNull Timestamp timestamp, ZoneId dbZoneId) {
+        return toZonedDateTime(timestamp, dbZoneId, ZoneId.systemDefault()).toLocalDateTime();
     }
 }

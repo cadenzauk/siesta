@@ -44,6 +44,7 @@ import static java.util.stream.Collectors.toList;
 public class JdbcSqlExecutor implements SqlExecutor {
     private final DataSource dataSource;
     private final int fetchSize;
+    private final JdbcDataTypeRegistry registry = new JdbcDataTypeRegistry();
 
     private JdbcSqlExecutor(DataSource dataSource, int fetchSize) {
         this.dataSource = dataSource;
@@ -84,7 +85,7 @@ public class JdbcSqlExecutor implements SqlExecutor {
     private PreparedStatement prepare(String sql, Object[] args, CompositeAutoCloseable closeable) {
         Connection connection = closeable.add(DataSourceUtil.connection(dataSource));
         PreparedStatement preparedStatement = closeable.add(ConnectionUtil.prepare(connection, sql));
-        IntStream.range(0, args.length).forEach(i -> PreparedStatementUtil.setObject(preparedStatement, i + 1, args[i]));
+        IntStream.range(0, args.length).forEach(i -> registry.setParameter(preparedStatement, i + 1, args[i]));
         return preparedStatement;
     }
 

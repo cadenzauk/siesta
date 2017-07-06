@@ -162,16 +162,18 @@ public class DataType<T> {
         return resultSet.getTimestamp(columnLabel, new GregorianCalendar(TimeZone.getTimeZone(db.databaseTimeZone())));
     }
 
-    private static Object localDateToDb(Database db, Optional<LocalDate> value) {
+    private static Date localDateToDb(Database db, Optional<LocalDate> value) {
         return value.map(SqlDateUtil::valueOf).orElse(null);
     }
 
-    private static Object localDateTimeToDb(Database db, Optional<LocalDateTime> value) {
-        return value.map(v -> TimestampUtil.valueOf(db.databaseTimeZone(), ZonedDateTime.of(v, ZoneId.systemDefault()))).orElse(null);
+    private static Timestamp localDateTimeToDb(Database db, Optional<LocalDateTime> value) {
+        return zonedDateTimeToDb(db, value.map(v -> ZonedDateTime.of(v, ZoneId.systemDefault())));
     }
 
-    private static Object zonedDateTimeToDb(Database db, Optional<ZonedDateTime> value) {
-        return value.map(v -> TimestampUtil.valueOf(db.databaseTimeZone(), v)).orElse(null);
+    private static Timestamp zonedDateTimeToDb(Database db, Optional<ZonedDateTime> value) {
+        return value
+            .map(v -> TimestampUtil.valueOf(db.databaseTimeZone(), v))
+            .orElse(null);
     }
 
     private static LocalDate getLocalDate(ResultSet rs, String col, Database db) throws SQLException {
@@ -180,8 +182,8 @@ public class DataType<T> {
     }
 
     private static LocalDateTime getLocalDateTime(ResultSet rs, String col, Database db) throws SQLException {
-        Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
-        return TimestampUtil.toLocalDateTime(timestamp);
+        Timestamp timestamp = getTimestamp(rs, col, db);
+        return TimestampUtil.toLocalDateTime(timestamp, db.databaseTimeZone());
     }
 
     private static ZonedDateTime getZonedDateTime(ResultSet rs, String col, Database db) throws SQLException {

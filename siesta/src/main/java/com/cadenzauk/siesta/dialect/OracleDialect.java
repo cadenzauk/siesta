@@ -33,15 +33,6 @@ public class OracleDialect extends AnsiDialect {
         return String.format("to_date('%s', 'yyyy-mm-dd')", date.format(DateTimeFormatter.ISO_DATE));
     }
 
-//    @Override
-//    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
-//        return String.format("TIMESTAMP '%s %s'",
-//            date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")),
-//            date.getOffset().getTotalSeconds() == 0
-//                ? "+00:00"
-//                : date.format(DateTimeFormatter.ofPattern("XXX")));
-//    }
-//
     @Override
     public String binaryLiteral(byte[] bytes) {
         return String.format("HEXTORAW('%s')", hex(bytes));

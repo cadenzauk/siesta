@@ -22,30 +22,39 @@
 
 package com.cadenzauk.siesta.model;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Dialect;
-import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
-import javax.sql.DataSource;
+@Table(name = "TIME_TEST", schema = "SIESTA")
+public class TimeTestRow {
+    private final String guid;
+    private final Optional<LocalDateTime> localDateTime;
+    private final Optional<ZonedDateTime> utcDateTime;
 
-public class TestDatabase {
-    public static Database testDatabase(DataSource dataSource, Dialect dialect) {
-        return testDatabaseBuilder(dialect)
-            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
-            .build();
+    public TimeTestRow(LocalDateTime localDateTime) {
+        this.guid = UUID.randomUUID().toString();
+        this.localDateTime = Optional.of(localDateTime);
+        this.utcDateTime = Optional.empty();
     }
 
-    public static Database testDatabase(Dialect dialect) {
-        return testDatabaseBuilder(dialect).build();
+    public TimeTestRow(ZonedDateTime utcDateTime) {
+        this.guid = UUID.randomUUID().toString();
+        this.localDateTime = Optional.empty();
+        this.utcDateTime = Optional.of(utcDateTime);
     }
 
-    private static Database.Builder testDatabaseBuilder(Dialect dialect) {
-        return Database.newBuilder()
-            .defaultSchema("SIESTA")
-            .dialect(dialect)
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
+    public String guid() {
+        return guid;
+    }
+
+    public Optional<LocalDateTime> localDateTime() {
+        return localDateTime;
+    }
+
+    public Optional<ZonedDateTime> utcDateTime() {
+        return utcDateTime;
     }
 }

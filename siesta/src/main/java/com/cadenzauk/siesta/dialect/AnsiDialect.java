@@ -97,9 +97,6 @@ public class AnsiDialect implements Dialect {
 
     @Override
     public String timestampLiteral(LocalDateTime date, ZoneId databaseTimeZone) {
-//        ZonedDateTime local = ZonedDateTime.of(date, ZoneId.systemDefault());
-//        ZonedDateTime db = local.withZoneSameInstant(databaseTimeZone);
-//        return String.format("TIMESTAMP '%s'", db.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
         return String.format("TIMESTAMP '%s'", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
     }
 

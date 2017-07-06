@@ -45,9 +45,4 @@ public class PostgresDialect extends AnsiDialect {
         builder.append("'::bytea");
         return builder.toString();
     }
-
-//    @Override
-//    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
-//        return String.format("TIMESTAMP WITH TIME ZONE '%s'", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS VV")));
-//    }
 }

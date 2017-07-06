@@ -193,8 +193,6 @@ public class SiestaExample extends IntegrationTest {
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .build();
 
-        database.insert();
-
         Tuple2<LocalDate,ZonedDateTime> today = database
             .select(currentDate()).comma(currentTimestamp())
             .single();
