@@ -401,11 +401,11 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     public void currentTimestampLocalTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
-            LocalDateTime before = LocalDateTime.now().minusSeconds(10);
+            LocalDateTime before = LocalDateTime.now(database.databaseTimeZone()).minusSeconds(10);
             LocalDateTime now = database
                 .select(currentTimestampLocal())
                 .single();
-            LocalDateTime after = LocalDateTime.now().plusSeconds(10);
+            LocalDateTime after = LocalDateTime.now(database.databaseTimeZone()).plusSeconds(10);
 
             System.out.printf("%s <= %s <= %s%n", before, now, after);
             assertThat(before.isAfter(now), is(false));
@@ -575,9 +575,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     public void localDateTimeLiteral(String timeZone, LocalDateTime value) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
-            LocalDateTime expected = ZonedDateTime.of(value, database.databaseTimeZone())
-                .withZoneSameInstant(ZoneId.systemDefault())
-                .toLocalDateTime();
+            LocalDateTime expected = value;
 
             LocalDateTime result = database.select(TypedExpression.literal(value)).single();
 
@@ -600,7 +598,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
                 .where(TimeTestRow::guid).isEqualTo(input.guid())
                 .single();
 
-            assertThat(result.truncatedTo(ChronoUnit.MILLIS), is(expected.truncatedTo(ChronoUnit.MILLIS)));
+            assertThat(result, is(expected));
         }
     }
 

@@ -34,6 +34,11 @@ public class OracleDialect extends AnsiDialect {
     }
 
     @Override
+    public String currentTimestamp() {
+        return "localtimestamp";
+    }
+
+    @Override
     public String binaryLiteral(byte[] bytes) {
         return String.format("HEXTORAW('%s')", hex(bytes));
     }

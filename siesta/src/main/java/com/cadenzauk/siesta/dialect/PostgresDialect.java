@@ -36,6 +36,11 @@ public class PostgresDialect extends AnsiDialect {
     }
 
     @Override
+    public String currentTimestamp() {
+        return "localtimestamp";
+    }
+
+    @Override
     public String binaryLiteral(byte[] bytes) {
         StringBuilder builder = new StringBuilder("E'");
         for (byte b : bytes) {

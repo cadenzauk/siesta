@@ -167,7 +167,7 @@ public class DataType<T> {
     }
 
     private static Timestamp localDateTimeToDb(Database db, Optional<LocalDateTime> value) {
-        return zonedDateTimeToDb(db, value.map(v -> ZonedDateTime.of(v, ZoneId.systemDefault())));
+        return value.map(Timestamp::valueOf).orElse(null);
     }
 
     private static Timestamp zonedDateTimeToDb(Database db, Optional<ZonedDateTime> value) {
@@ -182,8 +182,8 @@ public class DataType<T> {
     }
 
     private static LocalDateTime getLocalDateTime(ResultSet rs, String col, Database db) throws SQLException {
-        Timestamp timestamp = getTimestamp(rs, col, db);
-        return TimestampUtil.toLocalDateTime(timestamp, db.databaseTimeZone());
+        Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
+        return timestamp.toLocalDateTime();
     }
 
     private static ZonedDateTime getZonedDateTime(ResultSet rs, String col, Database db) throws SQLException {

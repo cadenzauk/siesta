@@ -50,9 +50,4 @@ public class TimestampUtil extends UtilityClass {
         ZonedDateTime localDateTime = ZonedDateTime.ofInstant(timestamp.toInstant(), dbZoneId);
         return ZonedDateTime.ofInstant(localDateTime.toInstant(), zoneId);
     }
-
-    @NotNull
-    public static LocalDateTime toLocalDateTime(@NotNull Timestamp timestamp, ZoneId dbZoneId) {
-        return toZonedDateTime(timestamp, dbZoneId, ZoneId.systemDefault()).toLocalDateTime();
-    }
 }

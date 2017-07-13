@@ -152,17 +152,11 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZonePairs")
-    void toDatabaseLocalDateTime(String dbTimeZone, String jvmTimeZone) {
-        ZoneId dbZone = ZoneId.of(dbTimeZone);
-        ZoneId jvmZone = ZoneId.of(jvmTimeZone);
-        LocalDateTime input = RandomValues.randomLocalDateTime();
-
+    @MethodSource(names = "timeZones")
+    void toDatabaseLocalDateTime(String jvmTimeZone) {
         try (UncheckedAutoCloseable ignored = withTimeZone(jvmTimeZone)) {
-            ZonedDateTime jvmTime = ZonedDateTime.of(input, jvmZone);
-            ZonedDateTime dbTime = jvmTime.withZoneSameInstant(dbZone);
-            Timestamp expected = Timestamp.valueOf(dbTime.toLocalDateTime());
-            when(db.databaseTimeZone()).thenReturn(dbZone);
+            LocalDateTime input = RandomValues.randomLocalDateTime();
+            Timestamp expected = Timestamp.valueOf(input);
 
             Object result = DataType.LOCAL_DATE_TIME.toDatabase(db, input);
 
@@ -237,9 +231,7 @@ class DataTypeTest extends MockitoTest {
     void getLocalDateTime(String timeZone) throws SQLException {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
-            Timestamp returnVal = Timestamp.from(ZonedDateTime.of(expected, ZoneId.of(timeZone)).toInstant());
-            when(rs.getTimestamp(eq("someColumn"), any())).thenReturn(returnVal);
-            when(db.databaseTimeZone()).thenReturn(ZoneId.of(timeZone));
+            when(rs.getTimestamp(eq("someColumn"), any())).thenReturn(Timestamp.valueOf(expected));
 
             Optional<LocalDateTime> result = DataType.LOCAL_DATE_TIME.get(rs, "someColumn", db);
 
