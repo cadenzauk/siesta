@@ -39,7 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-public class UpdateTest extends MockitoTest {
+class UpdateTest extends MockitoTest {
     @Mock
     private SqlExecutor sqlExecutor;
 

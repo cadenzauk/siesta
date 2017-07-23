@@ -78,12 +78,22 @@
             <column name="COMMISSION" type="DECIMAL"/>
         </createTable>
 
-        <createTable tableName="TIME_TEST" schemaName="SIESTA">
+        <createTable tableName="TEST_TABLE" schemaName="SIESTA">
             <column name="GUID" type="CHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="LOCAL_DATE_TIME" type="TIMESTAMP"/>
-            <column name="UTC_DATE_TIME" type="TIMESTAMP"/>
+            <column name="STRING_REQ" type="VARCHAR(40)"/>
+            <column name="STRING_OPT" type="VARCHAR(40)"/>
+            <column name="INTEGER_REQ" type="INTEGER"/>
+            <column name="INTEGER_OPT" type="INTEGER"/>
+            <column name="DECIMAL_REQ" type="DECIMAL"/>
+            <column name="DECIMAL_OPT" type="DECIMAL"/>
+            <column name="LOCAL_DATE_REQ" type="DATE"/>
+            <column name="LOCAL_DATE_OPT" type="DATE"/>
+            <column name="LOCAL_DATE_TIME_REQ" type="TIMESTAMP"/>
+            <column name="LOCAL_DATE_TIME_OPT" type="TIMESTAMP"/>
+            <column name="UTC_DATE_TIME_REQ" type="TIMESTAMP"/>
+            <column name="UTC_DATE_TIME_OPT" type="TIMESTAMP"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

@@ -25,7 +25,6 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 
-import javax.persistence.AttributeConverter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,11 +49,6 @@ public class DataTypeRegistry {
     }
 
     private <T> void register(DataType<T> dataType) {
-        entries.put(dataType.javaClass(), dataType);
-    }
-
-    public <T, D, C extends AttributeConverter<T,D>> void register(C converter, LiteralFormatter<T> literalFormatter) {
-        DataType<T> dataType = DataType.fromConverter(converter, literalFormatter);
         entries.put(dataType.javaClass(), dataType);
     }
 

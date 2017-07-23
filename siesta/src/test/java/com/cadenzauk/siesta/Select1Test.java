@@ -61,7 +61,7 @@ class Select1Test extends MockitoTest {
         return ObjectArrayArguments.create(f, expected);
     }
 
-    static Stream<Arguments> parametersForJoin() {
+    private static Stream<Arguments> parametersForJoin() {
         return Stream.of(
             testCaseForJoin((c, s) -> s.join(c).on(Parent::id).isEqualTo(Child::parentId), "join SIESTA.CHILD c on p.ID = c.PARENT_ID"),
             testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "join SIESTA.CHILD c on p.ID = c.PARENT_ID"),

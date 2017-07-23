@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.model.SalespersonRow;
+import com.cadenzauk.siesta.model.TestRow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.Mock;
@@ -73,50 +73,50 @@ class StringFunctionsTest extends FunctionTest {
         return Stream.of(
             testCase(s -> upper("ABC"), "upper(?)", toArray("ABC")),
             testCase(s -> upper(lower("ABC")), "upper(lower(?))", toArray("ABC")),
-            testCase(s -> upper(SalespersonRow::surname), "upper(s.SURNAME)", toArray()),
-            testCase(s -> upper(SalespersonRow::middleNames), "upper(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> upper("s", SalespersonRow::surname), "upper(s.SURNAME)", toArray()),
-            testCase(s -> upper("s", SalespersonRow::middleNames), "upper(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> upper(s, SalespersonRow::surname), "upper(s.SURNAME)", toArray()),
-            testCase(s -> upper(s, SalespersonRow::middleNames), "upper(s.MIDDLE_NAMES)", toArray()),
+            testCase(s -> upper(TestRow::stringReq), "upper(s.STRING_REQ)", toArray()),
+            testCase(s -> upper(TestRow::stringOpt), "upper(s.STRING_OPT)", toArray()),
+            testCase(s -> upper("s", TestRow::stringReq), "upper(s.STRING_REQ)", toArray()),
+            testCase(s -> upper("s", TestRow::stringOpt), "upper(s.STRING_OPT)", toArray()),
+            testCase(s -> upper(s, TestRow::stringReq), "upper(s.STRING_REQ)", toArray()),
+            testCase(s -> upper(s, TestRow::stringOpt), "upper(s.STRING_OPT)", toArray()),
 
             testCase(s -> lower("ABC"), "lower(?)", toArray("ABC")),
             testCase(s -> lower(upper("ABC")), "lower(upper(?))", toArray("ABC")),
-            testCase(s -> lower(SalespersonRow::surname), "lower(s.SURNAME)", toArray()),
-            testCase(s -> lower(SalespersonRow::middleNames), "lower(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> lower("s", SalespersonRow::surname), "lower(s.SURNAME)", toArray()),
-            testCase(s -> lower("s", SalespersonRow::middleNames), "lower(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> lower(s, SalespersonRow::surname), "lower(s.SURNAME)", toArray()),
-            testCase(s -> lower(s, SalespersonRow::middleNames), "lower(s.MIDDLE_NAMES)", toArray()),
+            testCase(s -> lower(TestRow::stringReq), "lower(s.STRING_REQ)", toArray()),
+            testCase(s -> lower(TestRow::stringOpt), "lower(s.STRING_OPT)", toArray()),
+            testCase(s -> lower("s", TestRow::stringReq), "lower(s.STRING_REQ)", toArray()),
+            testCase(s -> lower("s", TestRow::stringOpt), "lower(s.STRING_OPT)", toArray()),
+            testCase(s -> lower(s, TestRow::stringReq), "lower(s.STRING_REQ)", toArray()),
+            testCase(s -> lower(s, TestRow::stringOpt), "lower(s.STRING_OPT)", toArray()),
 
             testCase(s -> length("ABC"), "length(?)", toArray("ABC")),
             testCase(s -> length(lower("ABC")), "length(lower(?))", toArray("ABC")),
-            testCase(s -> length(SalespersonRow::surname), "length(s.SURNAME)", toArray()),
-            testCase(s -> length(SalespersonRow::middleNames), "length(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> length("s", SalespersonRow::surname), "length(s.SURNAME)", toArray()),
-            testCase(s -> length("s", SalespersonRow::middleNames), "length(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> length(s, SalespersonRow::surname), "length(s.SURNAME)", toArray()),
-            testCase(s -> length(s, SalespersonRow::middleNames), "length(s.MIDDLE_NAMES)", toArray()),
+            testCase(s -> length(TestRow::stringReq), "length(s.STRING_REQ)", toArray()),
+            testCase(s -> length(TestRow::stringOpt), "length(s.STRING_OPT)", toArray()),
+            testCase(s -> length("s", TestRow::stringReq), "length(s.STRING_REQ)", toArray()),
+            testCase(s -> length("s", TestRow::stringOpt), "length(s.STRING_OPT)", toArray()),
+            testCase(s -> length(s, TestRow::stringReq), "length(s.STRING_REQ)", toArray()),
+            testCase(s -> length(s, TestRow::stringOpt), "length(s.STRING_OPT)", toArray()),
 
             testCase(s -> substr("ABC", 1), "substr(?, ?)", toArray("ABC", 1)),
-            testCase(s -> substr(upper(SalespersonRow::surname), 2), "substr(upper(s.SURNAME), ?)", toArray(2)),
-            testCase(s -> substr(SalespersonRow::surname, 3), "substr(s.SURNAME, ?)", toArray(3)),
-            testCase(s -> substr(SalespersonRow::middleNames, 4), "substr(s.MIDDLE_NAMES, ?)", toArray(4)),
-            testCase(s -> substr("s", SalespersonRow::surname, 3), "substr(s.SURNAME, ?)", toArray(3)),
-            testCase(s -> substr("s", SalespersonRow::middleNames, 4), "substr(s.MIDDLE_NAMES, ?)", toArray(4)),
-            testCase(s -> substr(s, SalespersonRow::surname, 3), "substr(s.SURNAME, ?)", toArray(3)),
-            testCase(s -> substr(s, SalespersonRow::middleNames, 4), "substr(s.MIDDLE_NAMES, ?)", toArray(4)),
-            testCase(s -> substr(s.column(SalespersonRow::middleNames), value(5)), "substr(s.MIDDLE_NAMES, ?)", toArray(5)),
+            testCase(s -> substr(upper(TestRow::stringReq), 2), "substr(upper(s.STRING_REQ), ?)", toArray(2)),
+            testCase(s -> substr(TestRow::stringReq, 3), "substr(s.STRING_REQ, ?)", toArray(3)),
+            testCase(s -> substr(TestRow::stringOpt, 4), "substr(s.STRING_OPT, ?)", toArray(4)),
+            testCase(s -> substr("s", TestRow::stringReq, 3), "substr(s.STRING_REQ, ?)", toArray(3)),
+            testCase(s -> substr("s", TestRow::stringOpt, 4), "substr(s.STRING_OPT, ?)", toArray(4)),
+            testCase(s -> substr(s, TestRow::stringReq, 3), "substr(s.STRING_REQ, ?)", toArray(3)),
+            testCase(s -> substr(s, TestRow::stringOpt, 4), "substr(s.STRING_OPT, ?)", toArray(4)),
+            testCase(s -> substr(s.column(TestRow::stringOpt), value(5)), "substr(s.STRING_OPT, ?)", toArray(5)),
             testCase(s -> substr("ABCD", 1, 2), "substr(?, ?, ?)", toArray("ABCD", 1, 2)),
 
-            testCase(s -> substr(upper(SalespersonRow::surname), 2, 1), "substr(upper(s.SURNAME), ?, ?)", toArray(2, 1)),
-            testCase(s -> substr(SalespersonRow::surname, 3, 2), "substr(s.SURNAME, ?, ?)", toArray(3, 2)),
-            testCase(s -> substr(SalespersonRow::middleNames, 4, 2), "substr(s.MIDDLE_NAMES, ?, ?)", toArray(4, 2)),
-            testCase(s -> substr("s", SalespersonRow::surname, 3, 2), "substr(s.SURNAME, ?, ?)", toArray(3, 2)),
-            testCase(s -> substr("s", SalespersonRow::middleNames, 4, 2), "substr(s.MIDDLE_NAMES, ?, ?)", toArray(4, 2)),
-            testCase(s -> substr(s, SalespersonRow::surname, 3, 2), "substr(s.SURNAME, ?, ?)", toArray(3, 2)),
-            testCase(s -> substr(s, SalespersonRow::middleNames, 4, 2), "substr(s.MIDDLE_NAMES, ?, ?)", toArray(4, 2)),
-            testCase(s -> substr(s.column(SalespersonRow::middleNames), value(5), value(3)), "substr(s.MIDDLE_NAMES, ?, ?)", toArray(5, 3))
+            testCase(s -> substr(upper(TestRow::stringReq), 2, 1), "substr(upper(s.STRING_REQ), ?, ?)", toArray(2, 1)),
+            testCase(s -> substr(TestRow::stringReq, 3, 2), "substr(s.STRING_REQ, ?, ?)", toArray(3, 2)),
+            testCase(s -> substr(TestRow::stringOpt, 4, 2), "substr(s.STRING_OPT, ?, ?)", toArray(4, 2)),
+            testCase(s -> substr("s", TestRow::stringReq, 3, 2), "substr(s.STRING_REQ, ?, ?)", toArray(3, 2)),
+            testCase(s -> substr("s", TestRow::stringOpt, 4, 2), "substr(s.STRING_OPT, ?, ?)", toArray(4, 2)),
+            testCase(s -> substr(s, TestRow::stringReq, 3, 2), "substr(s.STRING_REQ, ?, ?)", toArray(3, 2)),
+            testCase(s -> substr(s, TestRow::stringOpt, 4, 2), "substr(s.STRING_OPT, ?, ?)", toArray(4, 2)),
+            testCase(s -> substr(s.column(TestRow::stringOpt), value(5), value(3)), "substr(s.STRING_OPT, ?, ?)", toArray(5, 3))
         );
     }
 

@@ -51,7 +51,7 @@ class TypeUtilTest {
             .withCause(RuntimeInstantiationException.class);
     }
 
-    static Stream<Arguments> parametersForBoxedType() {
+    private static Stream<Arguments> parametersForBoxedType() {
         return Stream.of(
             create(Long.TYPE, Long.class),
             create(Integer.TYPE, Integer.class),
@@ -79,7 +79,7 @@ class TypeUtilTest {
     @SuppressWarnings("unused")
     private List<Integer> integerList;
 
-    static Stream<Arguments> parametersForActualTypeArgument() {
+    private static Stream<Arguments> parametersForActualTypeArgument() {
         return Stream.of(
             create(ClassUtil.getDeclaredField(TypeUtilTest.class, "optionalString").getGenericType(), 0, String.class),
             create(ClassUtil.getDeclaredField(TypeUtilTest.class, "integerList").getGenericType(), 0, Integer.class),

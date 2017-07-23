@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 
 public class LiteralExpression<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator = new LabelGenerator("literal_");
-    private T value;
+    private final T value;
 
-    public LiteralExpression(T value) {
+    private LiteralExpression(T value) {
         this.value = value;
     }
 

@@ -151,7 +151,7 @@ public class CaseExpression<T> implements TypedExpression<T> {
     }
 
     public static class InFirstWhenExpectingThen {
-        private BooleanExpression booleanExpression;
+        private final BooleanExpression booleanExpression;
 
         public InFirstWhenExpectingThen(BooleanExpression booleanExpression) {
             this.booleanExpression = booleanExpression;
@@ -191,7 +191,7 @@ public class CaseExpression<T> implements TypedExpression<T> {
     }
 
     public class InSubsequentWhenExpectingThen {
-        private BooleanExpression booleanExpression;
+        private final BooleanExpression booleanExpression;
 
         public InSubsequentWhenExpectingThen(BooleanExpression booleanExpression) {
             this.booleanExpression = booleanExpression;

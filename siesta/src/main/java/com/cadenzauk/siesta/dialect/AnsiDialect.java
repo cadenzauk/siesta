@@ -56,6 +56,36 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public String year(String arg) {
+        return String.format("year(%s)", arg);
+    }
+
+    @Override
+    public String month(String arg) {
+        return String.format("month(%s)", arg);
+    }
+
+    @Override
+    public String day(String arg) {
+        return String.format("day(%s)", arg);
+    }
+
+    @Override
+    public String hour(String arg) {
+        return String.format("hour(%s)", arg);
+    }
+
+    @Override
+    public String minute(String arg) {
+        return String.format("minute(%s)", arg);
+    }
+
+    @Override
+    public String second(String arg) {
+        return String.format("second(%s)", arg);
+    }
+
+    @Override
     public String today() {
         return "current_date";
     }
@@ -109,5 +139,20 @@ public class AnsiDialect implements Dialect {
     @Override
     public String stringLiteral(String val) {
         return "'" + val.replaceAll("'", "''") + "'";
+    }
+
+    @Override
+    public String dateParameter(LocalDate val) {
+        return "cast(? as date)";
+    }
+
+    @Override
+    public String timestampParameter(LocalDateTime val) {
+        return "cast(? as timestamp)";
+    }
+
+    @Override
+    public String timestampWithTimeZoneParameter(ZonedDateTime val) {
+        return "cast(? as timestamp)";
     }
 }

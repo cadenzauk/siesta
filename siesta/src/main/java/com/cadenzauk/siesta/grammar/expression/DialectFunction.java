@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.Function2;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
@@ -29,16 +31,15 @@ import com.cadenzauk.siesta.grammar.LabelGenerator;
 
 import java.util.Arrays;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class DialectFunction<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator;
-    private final BiFunction<Dialect,TypedExpression<?>[],String> sqlFunction;
+    private final BiFunction<Dialect,String[],String> sqlFunction;
     private final TypedExpression<?>[] args;
     private final BiFunction<Scope,String,RowMapper<T>> rowMapperFactory;
 
-    private DialectFunction(String name, BiFunction<Dialect,TypedExpression<?>[],String> sqlFunction, BiFunction<Scope, String, RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
+    private DialectFunction(String name, BiFunction<Dialect,String[],String> sqlFunction, BiFunction<Scope, String, RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
         labelGenerator = new LabelGenerator(name + "_");
         this.sqlFunction = sqlFunction;
         this.args = args;
@@ -47,7 +48,7 @@ public class DialectFunction<T> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return sqlFunction.apply(scope.database().dialect(), args);
+        return sqlFunction.apply(scope.database().dialect(), Arrays.stream(args).map(a -> a.sql(scope)).toArray(String[]::new));
     }
 
     @Override
@@ -70,7 +71,11 @@ public class DialectFunction<T> implements TypedExpression<T> {
         return Precedence.UNARY;
     }
 
-    public static <T> DialectFunction<T> of(String name, Function<Dialect,String> sqlFunction, Class<T> resultClass) {
+    public static <T> DialectFunction<T> of(String name, Function1<Dialect,String> sqlFunction, Class<T> resultClass) {
         return new DialectFunction<>(name, (d, a) -> sqlFunction.apply(d), Scope.makeMapper(resultClass));
+    }
+
+    public static <T> DialectFunction<T> of(String name, Function2<Dialect,String,String> sqlFunction, TypedExpression<?> arg, Class<T> resultClass) {
+        return new DialectFunction<>(name, (d, a) -> sqlFunction.apply(d, a[0]), Scope.makeMapper(resultClass), arg);
     }
 }

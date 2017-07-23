@@ -41,7 +41,7 @@ public class ValueExpression<T> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return "?";
+        return scope.database().getDataTypeOf(value).sqlType(scope.dialect(), value);
     }
 
     @Override

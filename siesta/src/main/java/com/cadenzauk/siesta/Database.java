@@ -39,7 +39,6 @@ import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 
-import javax.persistence.AttributeConverter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -68,7 +67,6 @@ public class Database {
         defaultSqlExecutor = builder.defaultSqlExecutor;
         databaseTimeZone = builder.databaseTimeZone;
         builder.tables.forEach(t -> t.accept(this));
-        builder.converters.forEach(c -> c.register(this));
     }
 
     public String defaultSchema() {
@@ -243,20 +241,6 @@ public class Database {
         return new Builder();
     }
 
-    private static class DataTypeParams<T> {
-        private final AttributeConverter<T,?> converter;
-        private final LiteralFormatter<T> literalFormatter;
-
-        private DataTypeParams(AttributeConverter<T,?> converter, LiteralFormatter<T> literalFormatter) {
-            this.converter = converter;
-            this.literalFormatter = literalFormatter;
-        }
-
-        private void register(Database database) {
-            database.dataTypeRegistry.register(converter, literalFormatter);
-        }
-    }
-
     public static final class Builder {
         private String defaultSchema;
         private NamingStrategy namingStrategy = new UppercaseUnderscores();
@@ -264,7 +248,6 @@ public class Database {
         private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
         private ZoneId databaseTimeZone = ZoneId.systemDefault();
         private final List<Consumer<Database>> tables = new ArrayList<>();
-        private final List<DataTypeParams<?>> converters = new ArrayList<>();
 
         private Builder() {
         }
@@ -296,11 +279,6 @@ public class Database {
 
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
             tables.add(database -> database.table(rowClass, init));
-            return this;
-        }
-
-        public <T> Builder dataType(AttributeConverter<T,?> attributeConverter, LiteralFormatter<T> literalFormatter) {
-            converters.add(new DataTypeParams<>(attributeConverter, literalFormatter));
             return this;
         }
 

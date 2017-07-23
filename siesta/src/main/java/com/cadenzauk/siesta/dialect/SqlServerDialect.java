@@ -49,6 +49,21 @@ public class SqlServerDialect extends AnsiDialect {
     }
 
     @Override
+    public String hour(String arg) {
+        return String.format("datepart(hour, %s)", arg);
+    }
+
+    @Override
+    public String minute(String arg) {
+        return String.format("datepart(minute, %s)", arg);
+    }
+
+    @Override
+    public String second(String arg) {
+        return String.format("datepart(second, %s)", arg);
+    }
+
+    @Override
     public String concat(Stream<String> sql) {
         return "concat(" + sql.collect(joining(", ")) + ")";
     }
@@ -60,9 +75,6 @@ public class SqlServerDialect extends AnsiDialect {
 
     @Override
     public String timestampLiteral(LocalDateTime localDateTime, ZoneId databaseTimeZone) {
-//        ZonedDateTime local = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
-//        ZonedDateTime db = local.withZoneSameInstant(databaseTimeZone);
-//        return String.format("cast('%s' as datetime2(6))", db.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
         return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
     }
 
@@ -70,6 +82,16 @@ public class SqlServerDialect extends AnsiDialect {
     public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
         ZonedDateTime localDateTime = date.withZoneSameInstant(databaseTimeZone);
         return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+    }
+
+    @Override
+    public String timestampParameter(LocalDateTime val) {
+        return "cast(? as datetime2)";
+    }
+
+    @Override
+    public String timestampWithTimeZoneParameter(ZonedDateTime val) {
+        return "cast(? as datetime2)";
     }
 
     @Override

@@ -23,7 +23,9 @@
 package com.cadenzauk.core;
 
 import com.cadenzauk.core.util.UtilityClass;
+import org.apache.commons.lang3.RandomStringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,6 +44,10 @@ public abstract class RandomValues extends UtilityClass {
 
     public static byte randomByte() {
         return (byte) RANDOM.nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE + 1);
+    }
+
+    public static BigDecimal randomBigDecimal(int scale, int precision) {
+        return new BigDecimal(RandomStringUtils.randomNumeric(1, scale) + "." + RandomStringUtils.randomNumeric(precision));
     }
 
     public static LocalDate randomLocalDate() {

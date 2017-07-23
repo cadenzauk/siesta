@@ -33,8 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
 class StringUtilTest {
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForUppercaseFirst() {
+    private static Stream<Arguments> parametersForUppercaseFirst() {
         return Stream.of(
             create(null, ""),
             create("", ""),
@@ -51,8 +50,7 @@ class StringUtilTest {
         assertThat(StringUtil.uppercaseFirst(input), is(expected));
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForCamelToUpper() {
+    private static Stream<Arguments> parametersForCamelToUpper() {
         return Stream.of(
             create(null, ""),
             create("", ""),
@@ -76,8 +74,7 @@ class StringUtilTest {
         assertThat(StringUtil.camelToUpper(input), is(expectedResult));
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForHex() {
+    private static Stream<Arguments> parametersForHex() {
         return Stream.of(
             create(null, ""),
             create(new byte[0], ""),
@@ -97,8 +94,7 @@ class StringUtilTest {
         assertThat(StringUtil.hex(input), is(expectedResult));
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForOctal() {
+    private static Stream<Arguments> parametersForOctal() {
         return Stream.of(
             create(null, ""),
             create(new byte[0], ""),

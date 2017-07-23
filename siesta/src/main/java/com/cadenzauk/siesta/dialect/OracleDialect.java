@@ -39,7 +39,37 @@ public class OracleDialect extends AnsiDialect {
     }
 
     @Override
+    public String year(String arg) {
+        return String.format("extract(year from %s)", arg);
+    }
+
+    @Override
+    public String month(String arg) {
+        return String.format("extract(month from %s)", arg);
+    }
+
+    @Override
+    public String day(String arg) {
+        return String.format("extract(day from %s)", arg);
+    }
+
+    @Override
+    public String hour(String arg) {
+        return String.format("extract(hour from %s)", arg);
+    }
+
+    @Override
+    public String minute(String arg) {
+        return String.format("extract(minute from %s)", arg);
+    }
+
+    @Override
+    public String second(String arg) {
+        return String.format("extract(second from %s)", arg);
+    }
+
+    @Override
     public String binaryLiteral(byte[] bytes) {
-        return String.format("HEXTORAW('%s')", hex(bytes));
+        return String.format("hextoraw('%s')", hex(bytes));
     }
 }

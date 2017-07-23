@@ -37,7 +37,7 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class SelectExpressionTest {
+class SelectExpressionTest {
     @Test
     void isNull() {
         Database database = testDatabase(new AnsiDialect());
@@ -180,7 +180,7 @@ public class SelectExpressionTest {
 
         assertThat(sql, is("select m.MANUFACTURER_ID as m_MANUFACTURER_ID, m.NAME as m_NAME, m.CHECKED as m_CHECKED " +
             "from SIESTA.MANUFACTURER m " +
-            "where (m.CHECKED < ? or m.CHECKED > ? or m.NAME = ?) " +
+            "where (m.CHECKED < cast(? as date) or m.CHECKED > cast(? as date) or m.NAME = ?) " +
             "and (m.NAME = ? or m.CHECKED is null)"));
     }
 
@@ -199,7 +199,7 @@ public class SelectExpressionTest {
 
         assertThat(sql, is("select m.MANUFACTURER_ID as m_MANUFACTURER_ID, m.NAME as m_NAME, m.CHECKED as m_CHECKED " +
             "from SIESTA.MANUFACTURER m " +
-            "where m.CHECKED < ? and m.NAME = ? and (m.NAME = ? or m.CHECKED is null) and m.CHECKED > ?"));
+            "where m.CHECKED < cast(? as date) and m.NAME = ? and (m.NAME = ? or m.CHECKED is null) and m.CHECKED > cast(? as date)"));
     }
 
     @Test

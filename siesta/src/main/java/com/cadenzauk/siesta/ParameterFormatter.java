@@ -20,41 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.model;
+package com.cadenzauk.siesta;
 
-import javax.persistence.Table;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-@Table(name = "TIME_TEST", schema = "SIESTA")
-public class TimeTestRow {
-    private final String guid;
-    private final Optional<LocalDateTime> localDateTime;
-    private final Optional<ZonedDateTime> utcDateTime;
-
-    public TimeTestRow(LocalDateTime localDateTime) {
-        this.guid = UUID.randomUUID().toString();
-        this.localDateTime = Optional.of(localDateTime);
-        this.utcDateTime = Optional.empty();
-    }
-
-    public TimeTestRow(ZonedDateTime utcDateTime) {
-        this.guid = UUID.randomUUID().toString();
-        this.localDateTime = Optional.empty();
-        this.utcDateTime = Optional.of(utcDateTime);
-    }
-
-    public String guid() {
-        return guid;
-    }
-
-    public Optional<LocalDateTime> localDateTime() {
-        return localDateTime;
-    }
-
-    public Optional<ZonedDateTime> utcDateTime() {
-        return utcDateTime;
-    }
+@FunctionalInterface
+interface ParameterFormatter<T> {
+    String format(Dialect dialect, T value);
 }

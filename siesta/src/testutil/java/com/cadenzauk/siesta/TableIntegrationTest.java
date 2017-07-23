@@ -22,15 +22,20 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.core.tuple.Tuple6;
+import com.cadenzauk.core.tuple.Tuple7;
+import com.cadenzauk.siesta.grammar.expression.LiteralExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
-import com.cadenzauk.siesta.model.TimeTestRow;
+import com.cadenzauk.siesta.model.TestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
 import junitparams.JUnitParamsRunner;
@@ -44,7 +49,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -60,11 +64,18 @@ import static com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestampLocal;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.day;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hour;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minute;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.when;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
+import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -75,7 +86,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     private static final AtomicLong ids = new AtomicLong();
 
     @Resource
-    protected Dialect dialect;
+    private Dialect dialect;
 
     @Test
     public void selectFromDatabaseOneTable() {
@@ -380,7 +391,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
+    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
     public void currentDateTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
@@ -397,7 +408,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
+    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
     public void currentTimestampLocalTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
@@ -414,7 +425,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
+    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
     public void currentTimestampTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
@@ -589,13 +600,13 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
-            TimeTestRow input = new TimeTestRow(expected);
+            TestRow input = new TestRow(expected);
 
             database.insert(input);
             LocalDateTime result = database
-                .from(TimeTestRow.class)
-                .select(TimeTestRow::localDateTime)
-                .where(TimeTestRow::guid).isEqualTo(input.guid())
+                .from(TestRow.class)
+                .select(TestRow::localDateTimeOpt)
+                .where(TestRow::guid).isEqualTo(input.guid())
                 .single();
 
             assertThat(result, is(expected));
@@ -603,22 +614,88 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
+    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
     public void canRoundTripZonedDateTimes(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             ZonedDateTime expected = randomZonedDateTime(ZoneId.of("UTC"));
-            TimeTestRow input = new TimeTestRow(expected);
+            TestRow input = new TestRow(expected);
 
             database.insert(input);
             ZonedDateTime result = database
-                .from(TimeTestRow.class)
-                .select(TimeTestRow::utcDateTime)
-                .where(TimeTestRow::guid).isEqualTo(input.guid())
+                .from(TestRow.class)
+                .select(TestRow::utcDateTimeOpt)
+                .where(TestRow::guid).isEqualTo(input.guid())
                 .single();
 
             assertThat(result, is(expected));
         }
+    }
+
+    @Test
+    public void localDatePartFuncs() {
+        LocalDate date = RandomValues.randomLocalDate();
+        Database database = testDatabase(dataSource, dialect);
+
+        Tuple3<Integer,Integer,Integer> result = database
+            .select(year(LiteralExpression.of(date)))
+            .comma(month(ValueExpression.of(date)))
+            .comma(day(LiteralExpression.of(date)))
+            .single();
+
+        assertThat(result.item1(), is(date.getYear()));
+        assertThat(result.item2(), is(date.getMonthValue()));
+        assertThat(result.item3(), is(date.getDayOfMonth()));
+    }
+
+    @Test
+    public void localDateTimePartFuncs() {
+        LocalDateTime dateTime = RandomValues.randomLocalDateTime();
+        Database database = testDatabase(dataSource, dialect);
+
+        Tuple6<Integer,Integer,Integer,Integer,Integer,Integer> result = database
+            .select(year(LiteralExpression.of(dateTime)))
+            .comma(month(ValueExpression.of(dateTime)))
+            .comma(day(LiteralExpression.of(dateTime)))
+            .comma(hour(ValueExpression.of(dateTime)))
+            .comma(minute(LiteralExpression.of(dateTime)))
+            .comma(second(ValueExpression.of(dateTime)))
+            .single();
+
+        assertThat(result.item1(), is(dateTime.getYear()));
+        assertThat(result.item2(), is(dateTime.getMonthValue()));
+        assertThat(result.item3(), is(dateTime.getDayOfMonth()));
+        assertThat(result.item4(), is(dateTime.getHour()));
+        assertThat(result.item5(), is(dateTime.getMinute()));
+        assertThat(result.item6(), is(dateTime.getSecond()));
+    }
+
+    @Test
+    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
+    public void zonedDateTimePartFuncs(String timeZone) {
+        Database database = testDatabaseBuilder(dialect)
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
+            .databaseTimeZone(ZoneId.of(timeZone))
+            .build();
+        ZonedDateTime dateTime = RandomValues.randomZonedDateTime(database.databaseTimeZone());
+
+        Tuple7<Integer,Integer,Integer,Integer,Integer,Integer,Integer> result = database
+            .select(year(LiteralExpression.of(dateTime)))
+            .comma(month(ValueExpression.of(dateTime)))
+            .comma(day(LiteralExpression.of(dateTime)))
+            .comma(hour(ValueExpression.of(dateTime)))
+            .comma(hour(LiteralExpression.of(dateTime)))
+            .comma(minute(LiteralExpression.of(dateTime)))
+            .comma(second(ValueExpression.of(dateTime)))
+            .single();
+
+        assertThat(result.item1(), is(dateTime.getYear()));
+        assertThat(result.item2(), is(dateTime.getMonthValue()));
+        assertThat(result.item3(), is(dateTime.getDayOfMonth()));
+        assertThat(result.item4(), is(dateTime.getHour()));
+        assertThat(result.item5(), is(dateTime.getHour()));
+        assertThat(result.item6(), is(dateTime.getMinute()));
+        assertThat(result.item7(), is(dateTime.getSecond()));
     }
 
     private static long newId() {

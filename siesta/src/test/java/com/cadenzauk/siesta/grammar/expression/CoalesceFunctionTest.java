@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class CoalesceFunctionTest extends MockitoTest {
+class CoalesceFunctionTest extends MockitoTest {
     @Mock
     private Scope scope;
 

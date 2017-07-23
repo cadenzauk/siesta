@@ -29,7 +29,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
-import com.cadenzauk.siesta.model.SalespersonRow;
+import com.cadenzauk.siesta.model.TestRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,7 +46,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-public abstract class FunctionTest extends MockitoTest {
+abstract class FunctionTest extends MockitoTest {
     @Mock
     protected Scope scope;
     @Mock
@@ -60,21 +60,21 @@ public abstract class FunctionTest extends MockitoTest {
 
     @ParameterizedTest
     @MethodSource(names = "parametersForFunctionTest")
-    void functionTest(Function<Alias<SalespersonRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
+    void functionTest(Function<Alias<TestRow>, TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
-        Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
+        Alias<TestRow> alias = database.table(TestRow.class).as("s");
 
         database.from(alias)
             .select(sutSupplier.apply(alias), "foo")
             .list(sqlExecutor);
 
         verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select " + expectedSql + " as foo from SIESTA.SALESPERSON s"));
+        assertThat(sql.getValue(), is("select " + expectedSql + " as foo from SIESTA.TEST_TABLE s"));
         assertThat(args.getValue(), is(expectedArgs));
     }
 
-    protected static Arguments testCase(Function<Alias<SalespersonRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
+    protected static Arguments testCase(Function<Alias<TestRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
         return ObjectArrayArguments.create(sutSupplier, expectedSql, expectedArgs);
     }
 }

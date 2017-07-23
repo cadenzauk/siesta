@@ -39,7 +39,7 @@ public class TestDatabase {
         return testDatabaseBuilder(dialect).build();
     }
 
-    private static Database.Builder testDatabaseBuilder(Dialect dialect) {
+    public static Database.Builder testDatabaseBuilder(Dialect dialect) {
         return Database.newBuilder()
             .defaultSchema("SIESTA")
             .dialect(dialect)

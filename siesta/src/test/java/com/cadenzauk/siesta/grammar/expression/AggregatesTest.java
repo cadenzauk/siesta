@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.model.SalespersonRow;
+import com.cadenzauk.siesta.model.TestRow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -46,53 +46,53 @@ class AggregatesTest extends FunctionTest {
     }
 
     @SuppressWarnings("unused")
-    private static Stream<Arguments> parametersForFunctionTest() {
+    static Stream<Arguments> parametersForFunctionTest() {
         return Stream.of(
             testCase(s -> max("ABC"), "max(?)", toArray("ABC")),
             testCase(s -> max(lower("ABC")), "max(lower(?))", toArray("ABC")),
-            testCase(s -> max(SalespersonRow::surname), "max(s.SURNAME)", toArray()),
-            testCase(s -> max(SalespersonRow::middleNames), "max(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> max("s", SalespersonRow::surname), "max(s.SURNAME)", toArray()),
-            testCase(s -> max("s", SalespersonRow::middleNames), "max(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> max(s, SalespersonRow::surname), "max(s.SURNAME)", toArray()),
-            testCase(s -> max(s, SalespersonRow::middleNames), "max(s.MIDDLE_NAMES)", toArray()),
+            testCase(s -> max(TestRow::stringReq), "max(s.STRING_REQ)", toArray()),
+            testCase(s -> max(TestRow::stringOpt), "max(s.STRING_OPT)", toArray()),
+            testCase(s -> max("s", TestRow::stringReq), "max(s.STRING_REQ)", toArray()),
+            testCase(s -> max("s", TestRow::stringOpt), "max(s.STRING_OPT)", toArray()),
+            testCase(s -> max(s, TestRow::stringReq), "max(s.STRING_REQ)", toArray()),
+            testCase(s -> max(s, TestRow::stringOpt), "max(s.STRING_OPT)", toArray()),
 
             testCase(s -> min("ABC"), "min(?)", toArray("ABC")),
             testCase(s -> min(lower("ABC")), "min(lower(?))", toArray("ABC")),
-            testCase(s -> min(SalespersonRow::surname), "min(s.SURNAME)", toArray()),
-            testCase(s -> min(SalespersonRow::middleNames), "min(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> min("s", SalespersonRow::surname), "min(s.SURNAME)", toArray()),
-            testCase(s -> min("s", SalespersonRow::middleNames), "min(s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> min(s, SalespersonRow::surname), "min(s.SURNAME)", toArray()),
-            testCase(s -> min(s, SalespersonRow::middleNames), "min(s.MIDDLE_NAMES)", toArray()),
+            testCase(s -> min(TestRow::stringReq), "min(s.STRING_REQ)", toArray()),
+            testCase(s -> min(TestRow::stringOpt), "min(s.STRING_OPT)", toArray()),
+            testCase(s -> min("s", TestRow::stringReq), "min(s.STRING_REQ)", toArray()),
+            testCase(s -> min("s", TestRow::stringOpt), "min(s.STRING_OPT)", toArray()),
+            testCase(s -> min(s, TestRow::stringReq), "min(s.STRING_REQ)", toArray()),
+            testCase(s -> min(s, TestRow::stringOpt), "min(s.STRING_OPT)", toArray()),
 
             testCase(s -> sum(1), "sum(?)", toArray(1)),
             testCase(s -> sum(TypedExpression.value(1.2)), "sum(?)", toArray(1.2)),
-            testCase(s -> sum(SalespersonRow::numberOfSales), "sum(s.NUMBER_OF_SALES)", toArray()),
-            testCase(s -> sum(SalespersonRow::commission), "sum(s.COMMISSION)", toArray()),
-            testCase(s -> sum("s", SalespersonRow::numberOfSales), "sum(s.NUMBER_OF_SALES)", toArray()),
-            testCase(s -> sum("s", SalespersonRow::commission), "sum(s.COMMISSION)", toArray()),
-            testCase(s -> sum(s, SalespersonRow::numberOfSales), "sum(s.NUMBER_OF_SALES)", toArray()),
-            testCase(s -> sum(s, SalespersonRow::commission), "sum(s.COMMISSION)", toArray()),
+            testCase(s -> sum(TestRow::integerReq), "sum(s.INTEGER_REQ)", toArray()),
+            testCase(s -> sum(TestRow::decimalOpt), "sum(s.DECIMAL_OPT)", toArray()),
+            testCase(s -> sum("s", TestRow::integerReq), "sum(s.INTEGER_REQ)", toArray()),
+            testCase(s -> sum("s", TestRow::decimalOpt), "sum(s.DECIMAL_OPT)", toArray()),
+            testCase(s -> sum(s, TestRow::integerReq), "sum(s.INTEGER_REQ)", toArray()),
+            testCase(s -> sum(s, TestRow::decimalOpt), "sum(s.DECIMAL_OPT)", toArray()),
 
             testCase(s -> avg(1), "avg(?)", toArray(1)),
             testCase(s -> avg(TypedExpression.value(1.2)), "avg(?)", toArray(1.2)),
-            testCase(s -> avg(SalespersonRow::numberOfSales), "avg(s.NUMBER_OF_SALES)", toArray()),
-            testCase(s -> avg(SalespersonRow::commission), "avg(s.COMMISSION)", toArray()),
-            testCase(s -> avg("s", SalespersonRow::numberOfSales), "avg(s.NUMBER_OF_SALES)", toArray()),
-            testCase(s -> avg("s", SalespersonRow::commission), "avg(s.COMMISSION)", toArray()),
-            testCase(s -> avg(s, SalespersonRow::numberOfSales), "avg(s.NUMBER_OF_SALES)", toArray()),
-            testCase(s -> avg(s, SalespersonRow::commission), "avg(s.COMMISSION)", toArray()),
+            testCase(s -> avg(TestRow::integerReq), "avg(s.INTEGER_REQ)", toArray()),
+            testCase(s -> avg(TestRow::decimalOpt), "avg(s.DECIMAL_OPT)", toArray()),
+            testCase(s -> avg("s", TestRow::integerReq), "avg(s.INTEGER_REQ)", toArray()),
+            testCase(s -> avg("s", TestRow::decimalOpt), "avg(s.DECIMAL_OPT)", toArray()),
+            testCase(s -> avg(s, TestRow::integerReq), "avg(s.INTEGER_REQ)", toArray()),
+            testCase(s -> avg(s, TestRow::decimalOpt), "avg(s.DECIMAL_OPT)", toArray()),
 
             testCase(s -> count(), "count(*)", toArray()),
 
             testCase(s -> countDistinct(lower("ABC")), "count(distinct lower(?))", toArray("ABC")),
-            testCase(s -> countDistinct(SalespersonRow::surname), "count(distinct s.SURNAME)", toArray()),
-            testCase(s -> countDistinct(SalespersonRow::middleNames), "count(distinct s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> countDistinct("s", SalespersonRow::surname), "count(distinct s.SURNAME)", toArray()),
-            testCase(s -> countDistinct("s", SalespersonRow::middleNames), "count(distinct s.MIDDLE_NAMES)", toArray()),
-            testCase(s -> countDistinct(s, SalespersonRow::surname), "count(distinct s.SURNAME)", toArray()),
-            testCase(s -> countDistinct(s, SalespersonRow::middleNames), "count(distinct s.MIDDLE_NAMES)", toArray())
+            testCase(s -> countDistinct(TestRow::stringReq), "count(distinct s.STRING_REQ)", toArray()),
+            testCase(s -> countDistinct(TestRow::stringOpt), "count(distinct s.STRING_OPT)", toArray()),
+            testCase(s -> countDistinct("s", TestRow::stringReq), "count(distinct s.STRING_REQ)", toArray()),
+            testCase(s -> countDistinct("s", TestRow::stringOpt), "count(distinct s.STRING_OPT)", toArray()),
+            testCase(s -> countDistinct(s, TestRow::stringReq), "count(distinct s.STRING_REQ)", toArray()),
+            testCase(s -> countDistinct(s, TestRow::stringOpt), "count(distinct s.STRING_OPT)", toArray())
         );
     }
 }

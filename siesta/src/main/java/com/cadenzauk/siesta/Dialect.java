@@ -37,6 +37,18 @@ public interface Dialect {
 
     String currentTimestamp();
 
+    String year(String arg);
+
+    String month(String arg);
+
+    String day(String arg);
+
+    String hour(String arg);
+
+    String minute(String arg);
+
+    String second(String arg);
+
     String today();
 
     boolean supportsMultiInsert();
@@ -58,4 +70,10 @@ public interface Dialect {
     String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone);
 
     String stringLiteral(String val);
+
+    String dateParameter(LocalDate val);
+
+    String timestampParameter(LocalDateTime val);
+
+    String timestampWithTimeZoneParameter(ZonedDateTime val);
 }

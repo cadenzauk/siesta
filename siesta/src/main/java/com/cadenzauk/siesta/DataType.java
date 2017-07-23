@@ -25,12 +25,8 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.sql.SqlDateUtil;
 import com.cadenzauk.core.sql.TimestampUtil;
-import com.cadenzauk.core.stream.StreamUtil;
-import com.cadenzauk.core.util.OptionalUtil;
 import com.google.common.collect.ImmutableMap;
 
-import javax.persistence.AttributeConverter;
-import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -41,7 +37,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Optional;
@@ -52,66 +47,80 @@ public class DataType<T> {
     public static final DataType<BigDecimal> BIG_DECIMAL = new DataType<>(BigDecimal.class,
         (rs, col, db) -> rs.getBigDecimal(col),
         defaultConverter(),
-        defaultLiteralFormatter());
+        defaultLiteralFormatter(),
+        defaultParameterFormatter());
     public static final DataType<Byte> BYTE = new DataType<>(Byte.class,
         (rs, col, db) -> rs.getByte(col),
         defaultConverter(),
-        Dialect::byteLiteral);
+        Dialect::byteLiteral,
+        defaultParameterFormatter());
     public static final DataType<byte[]> BYTE_ARRAY = new DataType<>(byte[].class,
         (rs, col, db) -> rs.getBytes(col),
         defaultConverter(),
-        Dialect::binaryLiteral);
+        Dialect::binaryLiteral,
+        defaultParameterFormatter());
     public static final DataType<Double> DOUBLE = new DataType<>(Double.class,
         (rs, col, db) -> rs.getDouble(col),
         defaultConverter(),
-        defaultLiteralFormatter());
+        defaultLiteralFormatter(),
+        defaultParameterFormatter());
     public static final DataType<Float> FLOAT = new DataType<>(Float.class,
         (rs, col, db) -> rs.getFloat(col),
         defaultConverter(),
-        Dialect::floatLiteral);
+        Dialect::floatLiteral,
+        defaultParameterFormatter());
     public static final DataType<Integer> INTEGER = new DataType<>(Integer.class,
         (rs, col, db) -> rs.getInt(col),
         defaultConverter(),
-        defaultLiteralFormatter());
+        defaultLiteralFormatter(),
+        defaultParameterFormatter());
     public static final DataType<LocalDate> LOCAL_DATE = new DataType<>(LocalDate.class,
         DataType::getLocalDate,
         DataType::localDateToDb,
-        Database::dateLiteral);
+        Database::dateLiteral,
+        Dialect::dateParameter);
     public static final DataType<LocalDateTime> LOCAL_DATE_TIME = new DataType<>(LocalDateTime.class,
         DataType::getLocalDateTime,
         DataType::localDateTimeToDb,
-        Database::timestampLiteral);
+        Database::timestampLiteral,
+        Dialect::timestampParameter);
     public static final DataType<Long> LONG = new DataType<>(Long.class,
         (rs, col, db) -> rs.getLong(col),
         defaultConverter(),
-        defaultLiteralFormatter());
+        defaultLiteralFormatter(),
+        defaultParameterFormatter());
     public static final DataType<Short> SHORT = new DataType<>(Short.class,
         (rs, col, db) -> rs.getShort(col),
         defaultConverter(),
-        Dialect::smallIntLiteral);
+        Dialect::smallIntLiteral,
+        defaultParameterFormatter());
     public static final DataType<String> STRING = new DataType<>(String.class,
         (rs, col, db) -> rs.getString(col),
         defaultConverter(),
-        Dialect::stringLiteral);
+        Dialect::stringLiteral,
+        defaultParameterFormatter());
     public static final DataType<ZonedDateTime> ZONED_DATE_TIME = new DataType<>(ZonedDateTime.class,
         DataType::getZonedDateTime,
         DataType::zonedDateTimeToDb,
-        Database::timestampWithTimeZoneLiteral);
+        Database::timestampWithTimeZoneLiteral,
+        Dialect::timestampWithTimeZoneParameter);
 
     private final Class<T> javaClass;
     private final ResultSetExtractor<T> resultSetExtractor;
     private final BiFunction<Database,Optional<T>,Object> converter;
     private final LiteralFormatter<T> literalFormatter;
+    private final ParameterFormatter<T> parameterFormatter;
 
-    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, BiFunction<Database,Optional<T>, Object> converter, BiFunction<Dialect,T,String> literalFormatter) {
-        this(javaClass, resultSetExtractor, converter, (Database db, T val) -> literalFormatter.apply(db.dialect(), val));
+    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, BiFunction<Database,Optional<T>, Object> converter, BiFunction<Dialect,T,String> literalFormatter, ParameterFormatter<T> parameterFormatter) {
+        this(javaClass, resultSetExtractor, converter, (Database db, T val) -> literalFormatter.apply(db.dialect(), val), parameterFormatter);
     }
 
-    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, BiFunction<Database,Optional<T>,Object> converter, LiteralFormatter<T> literalFormatter) {
+    private DataType(Class<T> javaClass, ResultSetExtractor<T> resultSetExtractor, BiFunction<Database,Optional<T>,Object> converter, LiteralFormatter<T> literalFormatter, ParameterFormatter<T> parameterFormatter) {
         this.javaClass = TypeUtil.boxedType(javaClass);
         this.resultSetExtractor = resultSetExtractor;
         this.converter = converter;
         this.literalFormatter = literalFormatter;
+        this.parameterFormatter = parameterFormatter;
     }
 
     public Class<T> javaClass() {
@@ -139,23 +148,8 @@ public class DataType<T> {
         return literalFormatter.format(database, value);
     }
 
-    public static <T, D, C extends AttributeConverter<T,D>> DataType<T> fromConverter(C converter, LiteralFormatter<T> literalFormatter) {
-        ParameterizedType any = Arrays.stream(converter.getClass().getGenericInterfaces())
-            .map(t -> OptionalUtil.as(ParameterizedType.class, t))
-            .flatMap(StreamUtil::of)
-            .filter(x -> x.getRawType() == AttributeConverter.class)
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("Unexpected error - couldn't find AttributeConverter interface."));
-
-        @SuppressWarnings("unchecked") Class<T> entityAttributeClass = (Class<T>) any.getActualTypeArguments()[0];
-        @SuppressWarnings("unchecked") Class<D> databaseClass = (Class<D>) any.getActualTypeArguments()[1];
-
-        ResultSetExtractor<D> resultSetExtractor = ResultSetExtractor.forType(databaseClass);
-
-        return new DataType<>(entityAttributeClass,
-            (rs, n, db) -> converter.convertToEntityAttribute(resultSetExtractor.get(rs, n, db)),
-            (db, v) -> v.map(converter::convertToDatabaseColumn).orElse(null),
-            literalFormatter);
+    public String sqlType(Dialect dialect, T value) {
+        return parameterFormatter.format(dialect, value);
     }
 
     private static Timestamp getTimestamp(ResultSet resultSet, String columnLabel, Database db) throws SQLException {
@@ -199,6 +193,10 @@ public class DataType<T> {
         return (d, v) -> v.toString();
     }
 
+    private static <T> ParameterFormatter<T> defaultParameterFormatter() {
+        return (d, v) -> "?";
+    }
+
     @FunctionalInterface
     interface ResultSetExtractor<T> {
         T get(ResultSet rs, String col, Database database) throws SQLException;
@@ -217,11 +215,5 @@ public class DataType<T> {
             .put(Time.class, (resultSet, columnLabel, db) -> resultSet.getTime(columnLabel))
             .put(Timestamp.class, DataType::getTimestamp)
             .build();
-
-        @SuppressWarnings("unchecked")
-        static <D> ResultSetExtractor<D> forType(Class<D> databaseClass) {
-            return Optional.ofNullable((ResultSetExtractor<D>) extractors.get(databaseClass))
-                .orElseThrow(() -> new IllegalArgumentException(""));
-        }
     }
 }
