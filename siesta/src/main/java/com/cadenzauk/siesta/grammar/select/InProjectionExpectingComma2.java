@@ -98,6 +98,26 @@ public class InProjectionExpectingComma2<T1, T2> extends ExpectingWhere<Tuple2<T
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T> InProjectionExpectingComma3<T1,T2,T> comma(Class<T> rowClass) {
+        Alias<T> alias = scope().findAlias(rowClass);
+        return comma(alias);
+    }
+
+    public <T> InProjectionExpectingComma3<T1,T2,T> comma(Class<T> rowClass, String aliasName) {
+        Alias<T> alias = scope().findAlias(rowClass, aliasName);
+        return comma(alias);
+    }
+
+    public <T> InProjectionExpectingComma3<T1,T2,T> comma(Alias<T> alias) {
+        SelectStatement<Tuple3<T1,T2,T>> select = new SelectStatement<>(scope(),
+            statement.from(),
+            RowMappers.add3rd(
+                statement.rowMapper(),
+                alias.rowMapper()),
+            Projection.of(statement.projection(), Projection.of(alias)));
+        return new InProjectionExpectingComma3<>(select);
+    }
+
     @NotNull
     private <T> InProjectionExpectingComma3<T1,T2,T> comma(TypedExpression<T> col, Optional<String> label) {
         SelectStatement<Tuple3<T1,T2,T>> select = new SelectStatement<>(

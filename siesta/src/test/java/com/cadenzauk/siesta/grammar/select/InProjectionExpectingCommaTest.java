@@ -89,7 +89,6 @@ class InProjectionExpectingCommaTest {
         return testCase7((x, a) -> method.apply(x.comma(SalespersonRow::salespersonId, "id"), a), "s.SALESPERSON_ID as id, " + expectedSql, expectedArgs);
     }
 
-    @SuppressWarnings("unused")
     private static Stream<Arguments> argsForComma() {
         return Stream.of(
             testCase1((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
@@ -106,6 +105,9 @@ class InProjectionExpectingCommaTest {
             testCase1((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase1((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase1((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase1((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase1((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase1(InProjectionExpectingComma1::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase2((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase2((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -121,6 +123,9 @@ class InProjectionExpectingCommaTest {
             testCase2((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase2((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase2((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase2((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase2((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase2(InProjectionExpectingComma2::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase3((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase3((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -136,6 +141,9 @@ class InProjectionExpectingCommaTest {
             testCase3((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase3((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase3((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase3((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase3((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase3(InProjectionExpectingComma3::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase4((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase4((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -151,6 +159,9 @@ class InProjectionExpectingCommaTest {
             testCase4((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase4((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase4((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase4((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase4((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase4(InProjectionExpectingComma4::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase5((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase5((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -166,6 +177,9 @@ class InProjectionExpectingCommaTest {
             testCase5((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase5((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase5((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase5((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase5((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase5(InProjectionExpectingComma5::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase6((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase6((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -181,6 +195,9 @@ class InProjectionExpectingCommaTest {
             testCase6((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase6((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase6((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase6((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase6((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase6(InProjectionExpectingComma6::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase7((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase7((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -196,6 +213,9 @@ class InProjectionExpectingCommaTest {
             testCase7((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase7((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
             testCase7((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase7((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase7((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase7(InProjectionExpectingComma7::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             testCase8((x, a) -> x.comma(ValueExpression.of("ABC")), "\\? as value_\\d+", "ABC"),
             testCase8((x, a) -> x.comma(ValueExpression.of("ABC"), "abc"), "\\? as abc", "ABC"),
@@ -210,7 +230,10 @@ class InProjectionExpectingCommaTest {
             testCase8((x, a) -> x.comma(a, SalespersonRow::middleNames), "s\\.MIDDLE_NAMES as s_MIDDLE_NAMES"),
             testCase8((x, a) -> x.comma(a, SalespersonRow::middleNames, "middle"), "s.MIDDLE_NAMES as middle"),
             testCase8((x, a) -> x.comma(a, SalespersonRow::surname), "s\\.SURNAME as s_SURNAME"),
-            testCase8((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname")
+            testCase8((x, a) -> x.comma(a, SalespersonRow::surname, "surname"), "s.SURNAME as surname"),
+            testCase8((x, a) -> x.comma(SalespersonRow.class), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase8((x, a) -> x.comma(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            testCase8(InProjectionExpectingComma8::comma, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION")
         );
     }
 

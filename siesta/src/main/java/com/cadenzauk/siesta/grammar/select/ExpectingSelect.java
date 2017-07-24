@@ -81,16 +81,34 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return select(ResolvedColumn.of(alias, methodReference), label);
     }
 
-    public <R> InSelectIntoExpectingWith<R> select(Class<R> rowClass) {
+    public <R> InProjectionExpectingComma1<R> select(Class<R> rowClass) {
+        Alias<R> alias = scope().findAlias(rowClass);
+        return select(alias);
+    }
+
+    public <R> InProjectionExpectingComma1<R> select(Class<R> rowClass, String aliasName) {
+        Alias<R> alias = scope().findAlias(rowClass, aliasName);
+        return select(alias);
+    }
+
+    public <R> InProjectionExpectingComma1<R> select(Alias<R> alias) {
+        SelectStatement<R> select = new SelectStatement<>(scope(),
+            statement.from(),
+            alias.rowMapper(),
+            Projection.of(alias));
+        return new InProjectionExpectingComma1<>(select);
+    }
+
+    public <R> InSelectIntoExpectingWith<R> selectInto(Class<R> rowClass) {
         Table<R> table = database().table(rowClass);
-        return select(table.as(table.tableName()));
+        return selectInto(table.as(table.tableName()));
     }
 
-    public <R> InSelectIntoExpectingWith<R> select(Class<R> rowClass, String alias) {
-        return select(database().table(rowClass).as(alias));
+    public <R> InSelectIntoExpectingWith<R> selectInto(Class<R> rowClass, String alias) {
+        return selectInto(database().table(rowClass).as(alias));
     }
 
-    public <R> InSelectIntoExpectingWith<R> select(Alias<R> alias) {
+    public <R> InSelectIntoExpectingWith<R> selectInto(Alias<R> alias) {
         DynamicRowMapper<R> rowMapper = alias.dynamicRowMapper();
         DynamicProjection projection = new DynamicProjection();
         SelectStatement<R> select = new SelectStatement<>(scope().plus(alias),

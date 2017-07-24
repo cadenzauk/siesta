@@ -98,6 +98,26 @@ public class InProjectionExpectingComma8<T1, T2, T3, T4, T5, T6, T7, T8> extends
         return comma(ResolvedColumn.of(alias, methodReference), Optional.of(label));
     }
 
+    public <T> ExpectingWhere<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T>> comma(Class<T> rowClass) {
+        Alias<T> alias = scope().findAlias(rowClass);
+        return comma(alias);
+    }
+
+    public <T> ExpectingWhere<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T>> comma(Class<T> rowClass, String aliasName) {
+        Alias<T> alias = scope().findAlias(rowClass, aliasName);
+        return comma(alias);
+    }
+
+    public <T> ExpectingWhere<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T>> comma(Alias<T> alias) {
+        SelectStatement<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T>> select = new SelectStatement<>(scope(),
+            statement.from(),
+            RowMappers.add9th(
+                statement.rowMapper(),
+                alias.rowMapper()),
+            Projection.of(statement.projection(), Projection.of(alias)));
+        return new ExpectingWhere<>(select);
+    }
+
     @NotNull
     private <T> ExpectingWhere<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T>> comma(TypedExpression<T> col, Optional<String> label) {
         SelectStatement<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T>> select = new SelectStatement<>(

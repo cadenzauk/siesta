@@ -188,7 +188,7 @@ Now you can map your results into this class as part of the query.
 ```java
 List<ManufacturerSummary> manufacturerSummaries = database.from(Manufacturer.class, "m")
     .leftJoin(Widget.class, "w").on(Widget::manufacturerId).isEqualTo(Manufacturer::manufacturerId)
-    .select(ManufacturerSummary.class)
+    .selectInto(ManufacturerSummary.class)
     .with(Manufacturer::name).as(ManufacturerSummary::name)
     .with(countDistinct(Widget::widgetId)).as(ManufacturerSummary::numberOfPartsSupplied)
     .where(Manufacturer::manufacturerId).isIn(2006L, 2007L, 2008L)
@@ -202,7 +202,7 @@ You could also add a HAVING clause as follows.
 ```java
 List<ManufacturerSummary> nonSuppliers = database.from(Manufacturer.class, "m")
     .leftJoin(Widget.class, "w").on(Widget::manufacturerId).isEqualTo(Manufacturer::manufacturerId)
-    .select(ManufacturerSummary.class)
+    .selectInto(ManufacturerSummary.class)
     .with(Manufacturer::name).as(ManufacturerSummary::name)
     .with(countDistinct(Widget::widgetId)).as(ManufacturerSummary::numberOfPartsSupplied)
     .where(Manufacturer::manufacturerId).isIn(2006L, 2007L, 2008L)

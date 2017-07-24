@@ -163,6 +163,55 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void selectRow() {
+        Database database = testDatabase(dataSource, dialect);
+        long manufacturerId = newId();
+        ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
+            .manufacturerId(manufacturerId)
+            .name(Optional.of("Acclaimed Widgets"))
+            .build();
+        WidgetRow aWidget1 = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .manufacturerId(manufacturerId)
+            .name("Acclaimed 1")
+            .build();
+        WidgetRow aWidget2 = WidgetRow.newBuilder()
+            .widgetId(newId())
+            .manufacturerId(manufacturerId)
+            .name("Acclaimed 2")
+            .build();
+        database.insert(aManufacturer);
+        database.insert(aWidget1, aWidget2);
+
+        List<WidgetRow> acclaimedWidgets1 = database
+            .from(ManufacturerRow.class, "m")
+            .join(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
+            .select(WidgetRow.class)
+            .where(ManufacturerRow::name).isEqualTo("Acclaimed Widgets")
+            .orderBy(WidgetRow::name, Order.DESC)
+            .list();
+
+        List<Tuple2<String,WidgetRow>> acclaimedWidgets2 = database
+            .from(ManufacturerRow.class, "m")
+            .join(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
+            .select(WidgetRow::name, "name")
+            .comma(WidgetRow.class)
+            .where(ManufacturerRow::name).isEqualTo("Acclaimed Widgets")
+            .orderBy(WidgetRow::name, Order.ASC)
+            .list();
+
+        assertThat(acclaimedWidgets1, hasSize(2));
+        assertThat(acclaimedWidgets1.get(0).name(), is("Acclaimed 2"));
+        assertThat(acclaimedWidgets1.get(1).name(), is("Acclaimed 1"));
+
+        assertThat(acclaimedWidgets2, hasSize(2));
+        assertThat(acclaimedWidgets2.get(0).item1(), is("Acclaimed 1"));
+        assertThat(acclaimedWidgets2.get(1).item1(), is("Acclaimed 2"));
+        assertThat(acclaimedWidgets2.get(0).item2().name(), is("Acclaimed 1"));
+        assertThat(acclaimedWidgets2.get(1).item2().name(), is("Acclaimed 2"));
+    }
+
+    @Test
     public void selectIntoView() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturerId = newId();
@@ -182,7 +231,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         Optional<WidgetViewRow> gizmo = database
             .from(WidgetRow.class, "w")
             .leftJoin(ManufacturerRow.class, "m").on(ManufacturerRow::manufacturerId).isEqualTo(WidgetRow::manufacturerId)
-            .select(WidgetViewRow.class, "v")
+            .selectInto(WidgetViewRow.class, "v")
             .with(WidgetRow::widgetId).as(WidgetViewRow::widgetId)
             .with(WidgetRow::name).as(WidgetViewRow::widgetName)
             .with(WidgetRow::description).as(WidgetViewRow::description)

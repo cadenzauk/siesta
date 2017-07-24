@@ -89,7 +89,7 @@ class SelectProjectionTest extends MockitoTest {
         database
             .from(WidgetRow.class, "w")
             .join(ManufacturerRow.class, "m").on(ManufacturerRow::manufacturerId).isEqualTo(WidgetRow::manufacturerId)
-            .select(v)
+            .selectInto(v)
             .with(WidgetRow::widgetId).as(WidgetViewRow::widgetId)
             .with(WidgetRow::name).as(WidgetViewRow::widgetName)
             .with(WidgetRow::description).as(WidgetViewRow::description)
