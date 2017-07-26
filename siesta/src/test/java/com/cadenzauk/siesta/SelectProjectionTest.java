@@ -84,12 +84,11 @@ class SelectProjectionTest extends MockitoTest {
     @Test
     void projectIntoObject() {
         Database database = TestDatabase.testDatabase(new AnsiDialect());
-        Alias<WidgetViewRow> v = database.table(WidgetViewRow.class).as("v");
 
         database
             .from(WidgetRow.class, "w")
             .join(ManufacturerRow.class, "m").on(ManufacturerRow::manufacturerId).isEqualTo(WidgetRow::manufacturerId)
-            .selectInto(v)
+            .selectInto(WidgetViewRow.class, "v")
             .with(WidgetRow::widgetId).as(WidgetViewRow::widgetId)
             .with(WidgetRow::name).as(WidgetViewRow::widgetName)
             .with(WidgetRow::description).as(WidgetViewRow::description)

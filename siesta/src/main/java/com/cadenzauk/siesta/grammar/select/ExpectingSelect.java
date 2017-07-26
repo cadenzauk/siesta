@@ -57,6 +57,14 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return select(UnresolvedColumn.of(methodReference));
     }
 
+    public <T, R> InProjectionExpectingComma1<T> select(String alias, Function1<R,T> methodReference) {
+        return select(UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(String alias, FunctionOptional1<R,T> methodReference) {
+        return select(UnresolvedColumn.of(alias, methodReference));
+    }
+
     public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference) {
         return select(ResolvedColumn.of(alias, methodReference));
     }
@@ -71,6 +79,14 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     public <T, R> InProjectionExpectingComma1<T> select(FunctionOptional1<R,T> methodReference, String label) {
         return select(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(String alias, Function1<R,T> methodReference, String label) {
+        return select(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(String alias, FunctionOptional1<R,T> methodReference, String label) {
+        return select(UnresolvedColumn.of(alias, methodReference), label);
     }
 
     public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference, String label) {
