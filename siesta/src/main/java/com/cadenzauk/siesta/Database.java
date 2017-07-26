@@ -102,6 +102,10 @@ public class Database {
         return from(Dual.class).select(what);
     }
 
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what, String label) {
+        return from(Dual.class).select(what, label);
+    }
+
     public ZoneId databaseTimeZone() {
         return databaseTimeZone;
     }

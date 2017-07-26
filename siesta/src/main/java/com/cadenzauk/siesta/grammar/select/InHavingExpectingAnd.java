@@ -32,7 +32,7 @@ import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
-public class InHavingExpectingAnd<RT> extends ExpectingOrderBy<RT> {
+public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
     public InHavingExpectingAnd(SelectStatement<RT> statement) {
         super(statement);
     }

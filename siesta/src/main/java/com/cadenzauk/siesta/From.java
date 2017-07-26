@@ -45,7 +45,7 @@ public abstract class From {
         @Override
         public String sql(Scope scope) {
             return scope.dialect().requiresFromDual() || !alias.isDual()
-                ? "from " + alias.inWhereClause()
+                ? " from " + alias.inWhereClause()
                 : "";
         }
 

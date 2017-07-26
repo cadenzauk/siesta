@@ -32,6 +32,11 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
     protected ExpectingOrderBy(SelectStatement<RT> statement) {
         super(statement);
     }
+
+    public <T> InOrderByExpectingThen<RT> orderBy(int columnNo) {
+        return new InOrderByExpectingThen<>(statement).then(columnNo);
+    }
+
     public <T> InOrderByExpectingThen<RT> orderBy(TypedExpression<T> expression) {
         return new InOrderByExpectingThen<>(statement).then(expression);
     }

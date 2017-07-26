@@ -20,20 +20,20 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-
-public class Ordering<T, R> {
-    private final TypedExpression<T> expression;
-    private final Order order;
-
-    public Ordering(TypedExpression<T> expression, Order order) {
-        this.expression = expression;
-        this.order = order;
+public class ExpectingUnion<RT> extends ExpectingOrderBy<RT> {
+    ExpectingUnion(SelectStatement<RT> statement) {
+        super(statement);
     }
 
-    public String sql(Scope scope) {
-        return expression.sql(scope) + " " + order.sql();
+    public ExpectingUnion<RT> union(ExpectingUnion<RT> next) {
+        statement.addUnion(next.statement, UnionType.UNION);
+        return this;
+    }
+
+    public ExpectingUnion<RT> unionAll(ExpectingUnion<RT> next) {
+        statement.addUnion(next.statement, UnionType.UNION_ALL);
+        return this;
     }
 }

@@ -24,10 +24,11 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.Ordering;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
@@ -56,13 +57,18 @@ class SelectStatement<RT> {
     private BooleanExpression whereClause;
     private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
     private BooleanExpression havingClause;
-    private final List<Ordering<?,?>> orderByClauses = new ArrayList<>();
+    private final List<Tuple2<UnionType,SelectStatement<RT>>> unions = new ArrayList<>();
+    private final List<OrderingClause> orderByClauses = new ArrayList<>();
 
     SelectStatement(Scope scope, From from, RowMapper<RT> rowMapper, Projection projection) {
         this.scope = scope;
         this.from = from;
         this.rowMapper = rowMapper;
         this.projection = projection;
+    }
+
+    void addUnion(SelectStatement<RT> next, UnionType unionType) {
+        unions.add(Tuple.of(unionType, next));
     }
 
     String sql(Scope outerScope) {
@@ -79,7 +85,8 @@ class SelectStatement<RT> {
             from.args(scope),
             whereClauseArgs(),
             groupByClauseArgs(),
-            havingClauseArgs()
+            havingClauseArgs(),
+            unionsArgs()
         ).flatMap(Function.identity());
     }
 
@@ -131,6 +138,10 @@ class SelectStatement<RT> {
 
     <T> void addOrderBy(TypedExpression<T> expression, Order order) {
         orderByClauses.add(new Ordering<>(expression, order));
+    }
+
+    <T> void addOrderBy(int columnNumber, Order order) {
+        orderByClauses.add(new OrderByColumnNumber(columnNumber, order));
     }
 
     InWhereExpectingAnd<RT> setWhereClause(BooleanExpression e) {
@@ -195,10 +206,22 @@ class SelectStatement<RT> {
     }
 
     @NotNull
+    private Stream<Object> unionsArgs() {
+        return unions.stream().flatMap(u -> u.item2().args(scope));
+    }
+
+    @NotNull
     private String havingClauseSql(Scope scope) {
         return havingClause == null
             ? ""
             : " having " + havingClause.sql(scope);
+    }
+
+    @NotNull
+    private String unionsSql(Scope scope) {
+        return unions.isEmpty()
+            ? ""
+            : " " + unions.stream().map(t -> t.map((u, s) -> u.format(s.sqlImpl(scope)))).collect(joining(" "));
     }
 
     @NotNull
@@ -209,12 +232,13 @@ class SelectStatement<RT> {
     }
 
     private String sqlImpl(Scope actualScope) {
-        return String.format("select %s %s%s%s%s%s",
+        return String.format("select %s%s%s%s%s%s%s",
             projection().sql(actualScope),
             from.sql(actualScope),
             whereClauseSql(actualScope),
             groupByClauseSql(actualScope),
             havingClauseSql(actualScope),
+            unionsSql(actualScope),
             orderByClauseSql(actualScope));
     }
 }

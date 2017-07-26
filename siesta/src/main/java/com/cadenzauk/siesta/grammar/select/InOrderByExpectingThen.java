@@ -35,6 +35,11 @@ public class InOrderByExpectingThen<RT> extends Select<RT> {
         super(select);
     }
 
+    public <T> InOrderByExpectingThen<RT> then(int columnNo) {
+        statement.addOrderBy(columnNo, Order.ASC);
+        return this;
+    }
+
     public <T> InOrderByExpectingThen<RT> then(TypedExpression<T> column) {
         statement.addOrderBy(column, Order.ASC);
         return this;

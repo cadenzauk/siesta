@@ -27,7 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-public abstract class ExpectingGroupBy<RT> extends ExpectingOrderBy<RT> {
+public abstract class ExpectingGroupBy<RT> extends ExpectingUnion<RT> {
     ExpectingGroupBy(SelectStatement<RT> statement) {
         super(statement);
     }

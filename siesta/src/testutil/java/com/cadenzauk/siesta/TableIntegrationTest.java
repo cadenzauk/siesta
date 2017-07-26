@@ -747,6 +747,26 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         assertThat(result.item7(), is(dateTime.getSecond()));
     }
 
+    @Test
+    public void unionTest() {
+        Database database = testDatabase(dataSource, dialect);
+
+        List<Integer> result = database.select(TypedExpression.literal(3))
+            .union(database.select(TypedExpression.literal(1)))
+            .union(database.select(TypedExpression.literal(1))
+                .where(TypedExpression.literal(4)).isEqualTo(TypedExpression.literal(5)))
+            .union(database.select(TypedExpression.literal(2)))
+            .unionAll(database.select(TypedExpression.literal(2)))
+            .orderBy(1)
+            .list();
+
+        assertThat(result, hasSize(4));
+        assertThat(result.get(0), is(1));
+        assertThat(result.get(1), is(2));
+        assertThat(result.get(2), is(2));
+        assertThat(result.get(3), is(3));
+    }
+
     private static long newId() {
         return ids.incrementAndGet();
     }
