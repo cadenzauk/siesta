@@ -33,9 +33,8 @@ public class H2Dialect extends AnsiDialect {
         return String.format("cast(%d as tinyint)", val);
     }
 
-//    @Override
-//    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
-//        ZonedDateTime localDateTime = date.withZoneSameInstant(ZoneId.of("UTC"));
-//        return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
-//    }
+    @Override
+    public String fetchFirst(String sql, long n) {
+        return String.format("%s limit %d", sql, n);
+    }
 }

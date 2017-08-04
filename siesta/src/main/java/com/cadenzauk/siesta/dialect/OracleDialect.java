@@ -72,4 +72,10 @@ public class OracleDialect extends AnsiDialect {
     public String binaryLiteral(byte[] bytes) {
         return String.format("hextoraw('%s')", hex(bytes));
     }
+
+    @Override
+    public String fetchFirst(String sql, long n) {
+        return String.format("select * from (%s) where rownum <= %d", sql, n);
+    }
+
 }

@@ -155,4 +155,9 @@ public class AnsiDialect implements Dialect {
     public String timestampWithTimeZoneParameter(ZonedDateTime val) {
         return "cast(? as timestamp)";
     }
+
+    @Override
+    public String fetchFirst(String sql, long n) {
+        return String.format("select * from (select *, row_number() over() as x_row_number from (%s)) where x_row_number <= %d", sql, n);
+    }
 }

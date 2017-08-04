@@ -49,4 +49,9 @@ public class Db2Dialect extends AnsiDialect {
     public String byteLiteral(byte val) {
         return String.format("cast(%d as smallint)", val);
     }
+
+    @Override
+    public String fetchFirst(String sql, long n) {
+        return String.format("%s fetch first %d rows only", sql, n);
+    }
 }

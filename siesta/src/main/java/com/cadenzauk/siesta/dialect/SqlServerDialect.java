@@ -27,12 +27,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
 import static java.util.stream.Collectors.joining;
 
 public class SqlServerDialect extends AnsiDialect {
+    private static final Pattern SELECT_PATTERN = Pattern.compile("(select (distinct )?)");
+
     @Override
     public String today() {
         return "getdate()";
@@ -104,4 +107,8 @@ public class SqlServerDialect extends AnsiDialect {
         return String.format("cast(%d as tinyint)", val & 0xff);
     }
 
+    @Override
+    public String fetchFirst(String sql, long n) {
+        return SELECT_PATTERN.matcher(sql).replaceFirst("$1top " + n + " ");
+    }
 }

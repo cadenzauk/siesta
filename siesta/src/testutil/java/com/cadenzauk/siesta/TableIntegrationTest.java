@@ -40,6 +40,7 @@ import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,6 +53,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
@@ -765,6 +767,36 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         assertThat(result.get(1), is(2));
         assertThat(result.get(2), is(2));
         assertThat(result.get(3), is(3));
+    }
+
+    @Test
+    public void fetchFirst() {
+        Database database = testDatabase(dataSource, dialect);
+        long lowerBound = ids.get();
+        SalespersonRow[] salesPeople = IntStream.range(0, 10)
+            .mapToObj(i -> aRandomSalesperson())
+            .toArray(SalespersonRow[]::new);
+        database.insert(salesPeople);
+        long upperBound = ids.get();
+
+        List<SalespersonRow> fullList = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isBetween(lowerBound + 1).and(upperBound)
+            .list();
+        List<SalespersonRow> reducedList = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isBetween(lowerBound + 1).and(upperBound)
+            .fetchFirst(5)
+            .list();
+
+        assertThat(fullList, hasSize(10));
+        assertThat(reducedList, hasSize(5));
+    }
+
+    private SalespersonRow aRandomSalesperson() {
+        return SalespersonRow.newBuilder()
+            .salespersonId(newId())
+            .firstName(RandomStringUtils.randomAlphabetic(3, 12))
+            .surname(RandomStringUtils.randomAlphabetic(5, 15))
+            .build();
     }
 
     private static long newId() {

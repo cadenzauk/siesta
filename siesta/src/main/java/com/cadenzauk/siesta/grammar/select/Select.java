@@ -73,6 +73,11 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return single(defaultSqlExecutor());
     }
 
+    public Select<RT> fetchFirst(long i) {
+        statement.fetchFirst(i);
+        return this;
+    }
+
     private RT single(SqlExecutor sqlExecutor) {
         return statement.single(sqlExecutor);
     }

@@ -76,4 +76,6 @@ public interface Dialect {
     String timestampParameter(LocalDateTime val);
 
     String timestampWithTimeZoneParameter(ZonedDateTime val);
+
+    String fetchFirst(String sql, long n);
 }

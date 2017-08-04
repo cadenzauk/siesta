@@ -59,6 +59,7 @@ class SelectStatement<RT> {
     private BooleanExpression havingClause;
     private final List<Tuple2<UnionType,SelectStatement<RT>>> unions = new ArrayList<>();
     private final List<OrderingClause> orderByClauses = new ArrayList<>();
+    private Optional<Long> fetchFirst = Optional.empty();
 
     SelectStatement(Scope scope, From from, RowMapper<RT> rowMapper, Projection projection) {
         this.scope = scope;
@@ -92,6 +93,10 @@ class SelectStatement<RT> {
 
     Projection projection() {
         return projection;
+    }
+
+    void fetchFirst(long i) {
+        fetchFirst = Optional.of(i);
     }
 
     Optional<RT> optional(SqlExecutor sqlExecutor) {
@@ -232,7 +237,7 @@ class SelectStatement<RT> {
     }
 
     private String sqlImpl(Scope actualScope) {
-        return String.format("select %s%s%s%s%s%s%s",
+        String sql = String.format("select %s%s%s%s%s%s%s",
             projection().sql(actualScope),
             from.sql(actualScope),
             whereClauseSql(actualScope),
@@ -240,5 +245,6 @@ class SelectStatement<RT> {
             havingClauseSql(actualScope),
             unionsSql(actualScope),
             orderByClauseSql(actualScope));
+        return fetchFirst.map(n -> scope.dialect().fetchFirst(sql, n)).orElse(sql);
     }
 }

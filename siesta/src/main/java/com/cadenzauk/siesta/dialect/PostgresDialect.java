@@ -80,4 +80,9 @@ public class PostgresDialect extends AnsiDialect {
         builder.append("'::bytea");
         return builder.toString();
     }
+
+    @Override
+    public String fetchFirst(String sql, long n) {
+        return String.format("%s offset 0 rows fetch next %d rows only", sql, n);
+    }
 }
