@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.reflect.TypeToken;
 
 import java.util.function.Function;
 
@@ -34,6 +35,8 @@ public interface TypedExpression<T> extends Expression {
     String label(Scope scope);
 
     RowMapper<T> rowMapper(Scope scope, String label);
+
+    TypeToken<T> type();
 
     static <T> ExpressionBuilder<T,BooleanExpression> column(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, Function.identity());

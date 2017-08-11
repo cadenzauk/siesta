@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.WidgetRow;
+import com.google.common.reflect.TypeToken;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -67,6 +68,7 @@ class AliasTest extends MockitoTest {
     @Test
     void inWhereClause()  {
         when(widgetTable.qualifiedName()).thenReturn("SCHEMA.WIDGET");
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = Alias.of(widgetTable, "bob");
 
         String result = sut.inWhereClause();
@@ -147,7 +149,7 @@ class AliasTest extends MockitoTest {
     @SuppressWarnings("unchecked")
     @Test
     void asRightClassWithRightNameReturnsAlias()  {
-        when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "wilma").collect(toList());
@@ -158,13 +160,13 @@ class AliasTest extends MockitoTest {
     @SuppressWarnings("unchecked")
     @Test
     void asDifferentClassWithWrongNameThrowsException()  {
-        when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         calling(() -> sut.as(ManufacturerRow.class, "wilma"))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Alias wilma is an alias for " +
-                "class com.cadenzauk.siesta.model.WidgetRow and not " +
+                "com.cadenzauk.siesta.model.WidgetRow and not " +
                 "class com.cadenzauk.siesta.model.ManufacturerRow"));
     }
 
@@ -188,7 +190,7 @@ class AliasTest extends MockitoTest {
 
     @Test
     void asWithWrongClassReturnsEmpty()  {
-        when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = Alias.of(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class).collect(toList());
@@ -199,7 +201,7 @@ class AliasTest extends MockitoTest {
     @SuppressWarnings("unchecked")
     @Test
     void asWithSameClassReturnsAlias()  {
-        when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class).collect(toList());
@@ -210,7 +212,7 @@ class AliasTest extends MockitoTest {
     @SuppressWarnings("unchecked")
     @Test
     void asWithSuperClassReturnsAlias()  {
-        when(widgetTable.rowClass()).thenReturn(WidgetRow.class);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = Alias.of(widgetTable, "wilma");
 
         List<Alias<Object>> result = sut.as(Object.class).collect(toList());

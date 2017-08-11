@@ -52,4 +52,14 @@ public class AliasColumns<R> implements Projection {
     public Stream<Object> args(Scope scope) {
         return Stream.empty();
     }
+
+    @Override
+    public String labelList(Scope scope) {
+        return alias
+            .table()
+            .columns()
+            .map(Column::name)
+            .map(alias::inSelectClauseLabel)
+            .collect(joining(", "));
+    }
 }

@@ -29,17 +29,20 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
+import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
 
 public class ResolvedColumn<T,R> implements TypedExpression<T> {
     private final Alias<R> alias;
     private final Column<T,R> column;
+    private final TypeToken<T> type;
 
     @SuppressWarnings("unchecked")
     private ResolvedColumn(Alias<R> alias, MethodInfo<R,T> method) {
         this.alias = alias;
         this.column = alias.column(method);
+        this.type = TypeToken.of(method.effectiveType());
     }
 
     @Override
@@ -65,6 +68,11 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         return rs -> column.dataType().get(rs, label, scope.database()).orElse(null);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return type;
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, Function1<R,T> getterReference) {

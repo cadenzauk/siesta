@@ -33,6 +33,7 @@ import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +79,11 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return this;
     }
 
+    @Override
+    public TypeToken<RT> type() {
+        return statement.rowType();
+    }
+
     private RT single(SqlExecutor sqlExecutor) {
         return statement.single(sqlExecutor);
     }
@@ -108,7 +114,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return statement.args(scope);
+        return statement.args(scope.empty());
     }
 
     protected Scope scope() {
@@ -124,7 +130,21 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public static <R> ExpectingJoin1<R> from(Database database, Alias<R> alias) {
-        SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), From.from(alias), alias.rowMapper(), Projection.of(alias));
+        SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), alias.type(), From.from(alias), alias.rowMapper(), Projection.of(alias));
+        return new ExpectingJoin1<>(select);
+    }
+
+    public static <R> ExpectingJoin1<R> from(Database database, CommonTableExpression<R> cte) {
+        Alias<R> alias = cte.asAlias();
+        SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), alias.type(), From.from(alias), alias.rowMapper(), Projection.of(alias));
+        cte.commonTableExpressions().forEach(select::addCommonTableExpression);
+        return new ExpectingJoin1<>(select);
+    }
+
+    public static <R> ExpectingJoin1<R> from(Database database, CommonTableExpression<R> cte, String aliasName) {
+        Alias<R> alias = cte.as(aliasName);
+        SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), alias.type(), From.from(alias), alias.rowMapper(), Projection.of(alias));
+        cte.commonTableExpressions().forEach(select::addCommonTableExpression);
         return new ExpectingJoin1<>(select);
     }
 

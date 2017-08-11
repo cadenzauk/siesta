@@ -52,6 +52,10 @@ public class Scope {
         return database;
     }
 
+    public Scope empty() {
+        return new Scope(database());
+    }
+
     public <R> Alias<R> findAlias(Class<R> requiredRowClass, String requiredAlias) {
         Optional<Alias<R>> found = aliases.stream().flatMap(a -> a.as(requiredRowClass, requiredAlias)).findFirst();
         return found
@@ -76,11 +80,17 @@ public class Scope {
     }
 
     public Scope plus(Scope inner) {
-        return new Scope(this, inner.aliases);
+        return inner.outer
+            .map(o -> new Scope(this.plus(o), inner.aliases))
+            .orElseGet(() ->new Scope(this, inner.aliases));
     }
 
     public Dialect dialect() {
         return database().dialect();
+    }
+
+    public boolean isOutermost() {
+        return !outer.isPresent();
     }
 
     public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {

@@ -20,32 +20,20 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.reflect;
+package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.reflect.util.ConstructorUtil;
-import com.cadenzauk.core.util.UtilityClass;
-import com.google.common.reflect.TypeToken;
-import org.objenesis.ObjenesisHelper;
+import com.cadenzauk.siesta.Database;
 
-import java.lang.reflect.Constructor;
-import java.util.function.Supplier;
+public class CommonTableExpressionBuilder {
+    private final Database database;
+    private final String name;
 
-public final class Factory extends UtilityClass {
-    public static <T> Supplier<T> forClass(Class<T> aClass) {
-        return ClassUtil.constructor(aClass)
-            .map(Factory::invoke)
-            .orElseGet(() -> () -> ObjenesisHelper.newInstance(aClass));
+    public CommonTableExpressionBuilder(Database database, String name) {
+        this.database = database;
+        this.name = name;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Supplier<T> forType(TypeToken<T> aClass) {
-        return (Supplier<T>) ClassUtil.constructor(aClass.getRawType())
-            .map(Factory::invoke)
-            .orElseGet(() -> () -> ObjenesisHelper.newInstance((Class<T>) aClass.getRawType()));
-    }
-
-    private static <T> Supplier<T> invoke(Constructor<T> ctor) {
-        return () -> ConstructorUtil.newInstance(ctor);
+    public <RT> CommonTableExpression<RT> as(Select<RT> select) {
+        return new CommonTableExpression<>(database.table(select.type()), name, select.statement);
     }
 }

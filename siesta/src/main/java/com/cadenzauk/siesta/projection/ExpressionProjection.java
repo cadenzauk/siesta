@@ -40,11 +40,20 @@ public class ExpressionProjection<T> implements Projection {
 
     @Override
     public String sql(Scope scope) {
-        return String.format("%s as %s", expression.sql(scope), label.orElseGet(() -> expression.label(scope)));
+        return String.format("%s as %s", expression.sql(scope), label(scope));
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
         return expression.args(scope);
+    }
+
+    @Override
+    public String labelList(Scope scope) {
+        return label(scope);
+    }
+
+    private String label(Scope scope) {
+        return label.orElseGet(() -> expression.label(scope));
     }
 }

@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
 
@@ -58,5 +59,10 @@ public class CountDistinctFunction<T> implements TypedExpression<Integer> {
     @Override
     public RowMapper<Integer> rowMapper(Scope scope, String label) {
         return rs -> DataType.INTEGER.get(rs, label, scope.database()).orElse(null);
+    }
+
+    @Override
+    public TypeToken<Integer> type() {
+        return TypeToken.of(Integer.class);
     }
 }

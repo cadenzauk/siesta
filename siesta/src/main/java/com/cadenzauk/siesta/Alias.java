@@ -31,6 +31,7 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -42,7 +43,7 @@ public class Alias<R> {
     private final Table<R> table;
     private final Optional<String> aliasName;
 
-    private Alias(Table<R> table, Optional<String> aliasName) {
+    protected Alias(Table<R> table, Optional<String> aliasName) {
         this.table = table;
         this.aliasName = aliasName;
     }
@@ -69,11 +70,15 @@ public class Alias<R> {
             .toHashCode();
     }
 
-    boolean isDual() {
-        return table.rowClass() == Dual.class;
+    public TypeToken<R> type() {
+        return table.rowType();
     }
 
-    String inWhereClause() {
+    boolean isDual() {
+        return table.rowType().getRawType() == Dual.class;
+    }
+
+    protected String inWhereClause() {
         if (isDual()) {
             return table.database().dialect().dual();
         }
@@ -90,7 +95,7 @@ public class Alias<R> {
         return String.format("%s_%s", columnLabelPrefix(), columnName);
     }
 
-    private String columnLabelPrefix() {
+    protected String columnLabelPrefix() {
         return aliasName.orElseGet(table::tableName);
     }
 
@@ -125,17 +130,17 @@ public class Alias<R> {
     @SuppressWarnings("unchecked")
     <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {
         if (Objects.equals(Optional.of(requiredAlias), aliasName)) {
-            if (requiredRowClass.isAssignableFrom(table.rowClass())) {
+            if (requiredRowClass.isAssignableFrom(table.rowType().getRawType())) {
                 return Stream.of((Alias<R2>) this);
             }
-            throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + table().rowClass() + " and not " + requiredRowClass);
+            throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + table().rowType() + " and not " + requiredRowClass);
         }
         return Stream.empty();
     }
 
     @SuppressWarnings("unchecked")
     <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass) {
-        if (requiredRowClass.isAssignableFrom(table.rowClass())) {
+        if (requiredRowClass.isAssignableFrom(table.rowType().getRawType())) {
             return Stream.of((Alias<R2>) this);
         }
         return Stream.empty();

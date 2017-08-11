@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin7<RT1, RT2, RT3, RT4, RT5, RT6, RT7> extends InJoinExpectingAnd<ExpectingJoin7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>,Tuple7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>> {
 
@@ -70,6 +71,7 @@ public class ExpectingJoin7<RT1, RT2, RT3, RT4, RT5, RT6, RT7> extends InJoinExp
     private <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> join(JoinType joinType, Alias<R> alias) {
         SelectStatement<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> select = new SelectStatement<>(
             scope().plus(alias),
+            new TypeToken<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>>() {},
             statement.from().join(joinType, alias),
             RowMappers.add8th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

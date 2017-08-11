@@ -35,6 +35,7 @@ import com.cadenzauk.siesta.grammar.expression.condition.IsNullCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.LikeCondition;
 import com.cadenzauk.siesta.grammar.expression.condition.OperatorExpressionCondition;
 import com.cadenzauk.siesta.grammar.select.Select;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -73,6 +74,11 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         return lhs.rowMapper(scope, label);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return lhs.type();
     }
 
     //---

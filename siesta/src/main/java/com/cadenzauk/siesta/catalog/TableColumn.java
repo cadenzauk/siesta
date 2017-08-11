@@ -28,6 +28,7 @@ import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
 public class TableColumn<T, R, B> implements Column<T,R> {
     private final String name;
     private final DataType<T> dataType;
-    private final Class<R> rowClass;
+    private final TypeToken<R> rowType;
     private final Function<R,Optional<T>> getter;
     private final BiConsumer<B,Optional<T>> setter;
     private final boolean primaryKey;
@@ -48,7 +49,7 @@ public class TableColumn<T, R, B> implements Column<T,R> {
     private TableColumn(Builder<T,R,B> builder) {
         name = builder.name;
         dataType = builder.dataType;
-        rowClass = builder.rowClass;
+        rowType = builder.rowType;
         getter = builder.getter;
         setter = builder.setter;
         primaryKey = builder.primaryKey;
@@ -73,9 +74,10 @@ public class TableColumn<T, R, B> implements Column<T,R> {
         return rs -> dataType.get(rs, label, database).orElse(null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Class<R> rowClass() {
-        return rowClass;
+        return (Class<R>) rowType.getRawType();
     }
 
     @SuppressWarnings("unchecked")
@@ -109,41 +111,41 @@ public class TableColumn<T, R, B> implements Column<T,R> {
         return prefix + name;
     }
 
-    public static <T, R, B> TableColumn<T,R,B> fromField(Database database, Class<R> rowClass, Class<B> builderClass, Field field) {
-        @SuppressWarnings("unchecked") FieldInfo<R,T> fieldInfo = (FieldInfo<R,T>) FieldInfo.of(rowClass, field);
+    public static <T, R, B> TableColumn<T,R,B> fromField(Database database, TypeToken<R> rowType, TypeToken<B> builderType, Field field) {
+        @SuppressWarnings("unchecked") FieldInfo<R,T> fieldInfo = (FieldInfo<R,T>) FieldInfo.of(rowType.getRawType(), field);
         DataType<T> dataType = database.dataTypeOf(fieldInfo)
             .orElseThrow(() -> new IllegalArgumentException("Unable to determine the data type for " + fieldInfo));
-        Field builderField = ClassUtil.findField(builderClass, fieldInfo.name())
-            .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderClass + " does not have a field " + fieldInfo.name() + "."));
+        Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
+            .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
         return optional(
             database.columnNameFor(fieldInfo),
             dataType,
-            rowClass,
+            fieldInfo.declaringType(),
             fieldInfo.optionalGetter(),
-            Setter.forField(builderClass, fieldInfo.effectiveType(), builderField))
+            Setter.forField(builderType, fieldInfo.effectiveType(), builderField))
             .build();
     }
 
-    static <T, R, B> Builder<T,R,B> mandatory(String name, DataType<T> dataType, Class<R> rowClass, Function<R,T> getter, BiConsumer<B,T> setter) {
-        return new Builder<>(name, dataType, rowClass, row -> Optional.ofNullable(getter.apply(row)), (b, v) -> setter.accept(b, v.orElseThrow(NoSuchElementException::new)));
+    static <T, R, B> Builder<T,R,B> mandatory(String name, DataType<T> dataType, TypeToken<R> rowType, Function<R,T> getter, BiConsumer<B,T> setter) {
+        return new Builder<>(name, dataType, rowType, row -> Optional.ofNullable(getter.apply(row)), (b, v) -> setter.accept(b, v.orElseThrow(NoSuchElementException::new)));
     }
 
-    static <T, R, B> Builder<T,R,B> optional(String name, DataType<T> dataType, Class<R> rowClass, Function<R,Optional<T>> getter, BiConsumer<B,Optional<T>> setter) {
+    static <T, R, B> Builder<T,R,B> optional(String name, DataType<T> dataType, TypeToken<R> rowClass, Function<R,Optional<T>> getter, BiConsumer<B,Optional<T>> setter) {
         return new Builder<>(name, dataType, rowClass, getter, setter);
     }
 
     public static final class Builder<T, R, B> {
         private final String name;
         private final DataType<T> dataType;
-        private final Class<R> rowClass;
+        private final TypeToken<R> rowType;
         private final Function<R,Optional<T>> getter;
         private final BiConsumer<B,Optional<T>> setter;
         private boolean primaryKey;
 
-        private Builder(String name, DataType<T> dataType, Class<R> rowClass, Function<R,Optional<T>> getter, BiConsumer<B,Optional<T>> setter) {
+        private Builder(String name, DataType<T> dataType, TypeToken<R> rowType, Function<R,Optional<T>> getter, BiConsumer<B,Optional<T>> setter) {
             this.name = name;
             this.dataType = dataType;
-            this.rowClass = rowClass;
+            this.rowType = rowType;
             this.getter = getter;
             this.setter = setter;
         }

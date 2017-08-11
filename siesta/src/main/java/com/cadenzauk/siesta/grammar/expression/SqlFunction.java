@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Arrays;
 import java.util.function.BiFunction;
@@ -35,12 +36,14 @@ import static java.util.stream.Collectors.joining;
 public class SqlFunction<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator;
     private final String name;
+    private final TypeToken<T> type;
     private final TypedExpression<?>[] args;
     private final BiFunction<Scope,String,RowMapper<T>> rowMapperFactory;
 
-    private SqlFunction(String name, BiFunction<Scope,String,RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
+    private SqlFunction(String name, TypeToken<T> type, BiFunction<Scope,String,RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
         labelGenerator = new LabelGenerator(name + "_");
         this.name = name;
+        this.type = type;
         this.args = args;
         this.rowMapperFactory = rowMapperFactory;
     }
@@ -61,6 +64,11 @@ public class SqlFunction<T> implements TypedExpression<T> {
     }
 
     @Override
+    public TypeToken<T> type() {
+        return type;
+    }
+
+    @Override
     public Stream<Object> args(Scope scope) {
         return Arrays.stream(args).flatMap(a -> a.args(scope));
     }
@@ -71,14 +79,14 @@ public class SqlFunction<T> implements TypedExpression<T> {
     }
 
     public static <T, U, S> SqlFunction<S> of(String name, Class<S> resultClass) {
-        return new SqlFunction<>(name, Scope.makeMapper(resultClass));
+        return new SqlFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass));
     }
 
     public static <T, U, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2, String name, Class<S> resultClass) {
-        return new SqlFunction<>(name, Scope.makeMapper(resultClass), arg1, arg2);
+        return new SqlFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass), arg1, arg2);
     }
 
     public static <T, U, V, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2, TypedExpression<V> arg3, String name, Class<S> resultClass) {
-        return new SqlFunction<>(name, Scope.makeMapper(resultClass), arg1, arg2, arg3);
+        return new SqlFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass), arg1, arg2, arg3);
     }
 }

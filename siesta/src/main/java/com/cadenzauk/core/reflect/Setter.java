@@ -26,6 +26,7 @@ import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
 import com.cadenzauk.core.util.UtilityClass;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -42,6 +43,11 @@ public final class Setter extends UtilityClass {
     private static final Function<String,String> WITH_X = s -> "with" + uppercaseFirst(s);
     private static final Function<String,String> SET_X = s -> "set" + uppercaseFirst(s);
     private static final Function<String,String> X = Function.identity();
+
+    @SuppressWarnings("unchecked")
+    public static <T, V> BiConsumer<T, Optional<V>> forField(TypeToken<T> targetClass, Class<V> argType, Field field) {
+        return forField((Class<T>) targetClass.getRawType(), argType, field);
+    }
 
     public static <T, V> BiConsumer<T, Optional<V>> forField(Class<T> targetClass, Class<V> argType, Field field) {
         Optional<Method> setterMethod = Stream.of(WITH_X, SET_X, X)

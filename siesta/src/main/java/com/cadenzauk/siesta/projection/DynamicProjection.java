@@ -49,6 +49,13 @@ public class DynamicProjection implements Projection {
         return columns.stream().flatMap(p -> p.item1().args(scope));
     }
 
+    @Override
+    public String labelList(Scope scope) {
+        return columns.stream()
+            .map(p -> p.map((s, t) -> t.label(scope)))
+            .collect(joining(", "));
+    }
+
     public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {
         columns.add(Tuple.of(source, target));
     }

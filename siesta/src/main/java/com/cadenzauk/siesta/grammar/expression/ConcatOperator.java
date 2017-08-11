@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,11 @@ public class ConcatOperator  implements TypedExpression<String> {
     @Override
     public RowMapper<String> rowMapper(Scope scope, String label) {
         return Scope.makeMapper(String.class).apply(scope, label);
+    }
+
+    @Override
+    public TypeToken<String> type() {
+        return TypeToken.of(String.class);
     }
 
     private ConcatOperator append(TypedExpression<?> expression) {

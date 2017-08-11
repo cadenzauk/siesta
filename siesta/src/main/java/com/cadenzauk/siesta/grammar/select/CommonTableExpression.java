@@ -20,39 +20,60 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.projection;
+package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.CteAlias;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.catalog.Column;
+import com.cadenzauk.siesta.catalog.Table;
 
-import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class ProjectionList implements Projection {
-    private final Projection[] p;
+public class CommonTableExpression<RT> {
+    private final Table<RT> table;
+    private final String name;
+    private final SelectStatement<RT> select;
 
-    public ProjectionList(Projection[] p) {
-        this.p = p;
+    CommonTableExpression(Table<RT> table, String name, SelectStatement<RT> select) {
+        this.table = table;
+        this.name = name;
+        this.select = select;
     }
 
-    @Override
     public String sql(Scope scope) {
-        return Arrays.stream(p)
-            .map(x -> x.sql(scope))
-            .collect(joining(", "));
+        Scope actualScope = scope.plus(select.scope());
+        return String.format("%s(%s) as %s",
+            name,
+            table.columns().map(Column::name).collect(joining(", ")),
+            select.sql(actualScope));
     }
 
-    @Override
     public Stream<Object> args(Scope scope) {
-        return Arrays.stream(p).flatMap(x -> x.args(scope));
+        Scope actualScope = scope.plus(select.scope());
+        return select.args(actualScope);
     }
 
-    @Override
-    public String labelList(Scope scope) {
-        return Arrays.stream(p)
-            .map(x -> x.labelList(scope))
-            .collect(joining(", "));
+    public Alias<RT> as(String alias) {
+        return new CteAlias<>(this, Optional.of(alias));
+    }
+
+    public Alias<RT> asAlias() {
+        return new CteAlias<>(this, Optional.empty());
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public Table<RT> table() {
+        return table;
+    }
+
+    public Stream<CommonTableExpression<?>> commonTableExpressions() {
+        return Stream.concat(select.commonTableExpressions(), Stream.of(this));
     }
 }

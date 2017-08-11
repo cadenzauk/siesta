@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -78,6 +79,11 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     public RowMapper<T> rowMapper(Scope scope, String label) {
         Column<T,R> column = scope.database().column(getterMethod);
         return column.rowMapper(scope.database(), label);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return TypeToken.of(getterMethod.effectiveType());
     }
 
     @SuppressWarnings("unchecked")

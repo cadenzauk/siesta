@@ -25,13 +25,15 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
+import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
+import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.expression.LiteralExpression;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
+import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -41,6 +43,7 @@ import com.cadenzauk.siesta.model.WidgetViewRow;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -75,6 +78,7 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.when;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
@@ -591,10 +595,10 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
     @Test
     @Parameters(method = "parametersForLiteral")
-    public <T> void literal(T value) {
+    public <T> void literalTest(T value) {
         Database database = testDatabase(dataSource, dialect);
 
-        T result = database.select(TypedExpression.literal(value)).single();
+        T result = database.select(literal(value)).single();
 
         assertThat(result, is(value));
     }
@@ -617,7 +621,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             ZonedDateTime expected = value.withZoneSameInstant(ZoneId.of("UTC"));
 
-            ZonedDateTime result = database.select(TypedExpression.literal(value)).single();
+            ZonedDateTime result = database.select(literal(value)).single();
 
             assertThat(result, is(expected));
         }
@@ -639,7 +643,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = value;
 
-            LocalDateTime result = database.select(TypedExpression.literal(value)).single();
+            LocalDateTime result = database.select(literal(value)).single();
 
             assertThat(result, is(expected));
         }
@@ -753,12 +757,12 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     public void unionTest() {
         Database database = testDatabase(dataSource, dialect);
 
-        List<Integer> result = database.select(TypedExpression.literal(3))
-            .union(database.select(TypedExpression.literal(1)))
-            .union(database.select(TypedExpression.literal(1))
-                .where(TypedExpression.literal(4)).isEqualTo(TypedExpression.literal(5)))
-            .union(database.select(TypedExpression.literal(2)))
-            .unionAll(database.select(TypedExpression.literal(2)))
+        List<Integer> result = database.select(literal(3))
+            .union(database.select(literal(1)))
+            .union(database.select(literal(1))
+                .where(literal(4)).isEqualTo(literal(5)))
+            .union(database.select(literal(2)))
+            .unionAll(database.select(literal(2)))
             .orderBy(1)
             .list();
 
@@ -772,23 +776,46 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     @Test
     public void fetchFirst() {
         Database database = testDatabase(dataSource, dialect);
-        long lowerBound = ids.get();
-        SalespersonRow[] salesPeople = IntStream.range(0, 10)
-            .mapToObj(i -> aRandomSalesperson())
-            .toArray(SalespersonRow[]::new);
-        database.insert(salesPeople);
-        long upperBound = ids.get();
+        Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
 
         List<SalespersonRow> fullList = database.from(SalespersonRow.class)
-            .where(SalespersonRow::salespersonId).isBetween(lowerBound + 1).and(upperBound)
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
             .list();
         List<SalespersonRow> reducedList = database.from(SalespersonRow.class)
-            .where(SalespersonRow::salespersonId).isBetween(lowerBound + 1).and(upperBound)
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
             .fetchFirst(5)
             .list();
 
         assertThat(fullList, hasSize(10));
         assertThat(reducedList, hasSize(5));
+    }
+
+    @Test
+    public void commonTableExpression() {
+        if (dialect instanceof H2Dialect) {
+            throw new AssumptionViolatedException("H2 is buggy");
+        }
+        Database database = testDatabase(dataSource, dialect);
+        Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
+
+        CommonTableExpression<SalespersonRow> first5 = database.with("first5")
+            .as(
+                database.from(SalespersonRow.class)
+                    .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+                    .orderBy(SalespersonRow::salespersonId)
+                    .fetchFirst(5)
+            );
+        CommonTableExpression<SalespersonRow> last2 = database.with("last2")
+            .as(
+                database.from(first5, "f5")
+                    .orderBy(SalespersonRow::salespersonId, Order.DESC)
+                    .fetchFirst(2)
+            );
+        List<SalespersonRow> lastTwo = database.from(last2, "l2").list();
+
+        assertThat(lastTwo, hasSize(2));
+        assertThat(lastTwo.get(0).salespersonId(), is(inserted.item1() + 4));
+        assertThat(lastTwo.get(1).salespersonId(), is(inserted.item1() + 3));
     }
 
     private SalespersonRow aRandomSalesperson() {
@@ -797,6 +824,16 @@ public abstract class TableIntegrationTest extends IntegrationTest {
             .firstName(RandomStringUtils.randomAlphabetic(3, 12))
             .surname(RandomStringUtils.randomAlphabetic(5, 15))
             .build();
+    }
+
+    private Tuple2<Long,Long> insertSalespeople(Database database, int n) {
+        long lowerBound = ids.get();
+        SalespersonRow[] salesPeople = IntStream.range(0, n)
+            .mapToObj(i -> aRandomSalesperson())
+            .toArray(SalespersonRow[]::new);
+        database.insert(salesPeople);
+        long upperBound = ids.get();
+        return Tuple.of(lowerBound + 1, upperBound);
     }
 
     private static long newId() {

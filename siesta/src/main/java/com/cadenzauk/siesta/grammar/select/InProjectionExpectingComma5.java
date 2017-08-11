@@ -33,6 +33,7 @@ import com.cadenzauk.siesta.RowMappers;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -109,7 +110,9 @@ public class InProjectionExpectingComma5<T1, T2, T3, T4, T5> extends ExpectingWh
     }
 
     public <T> InProjectionExpectingComma6<T1,T2,T3,T4,T5,T> comma(Alias<T> alias) {
-        SelectStatement<Tuple6<T1,T2,T3,T4,T5,T>> select = new SelectStatement<>(scope(),
+        SelectStatement<Tuple6<T1,T2,T3,T4,T5,T>> select = new SelectStatement<>(
+            scope(),
+            new TypeToken<Tuple6<T1,T2,T3,T4,T5,T>>() {},
             statement.from(),
             RowMappers.add6th(
                 statement.rowMapper(),
@@ -122,6 +125,7 @@ public class InProjectionExpectingComma5<T1, T2, T3, T4, T5> extends ExpectingWh
     private <T> InProjectionExpectingComma6<T1,T2,T3,T4,T5,T> comma(TypedExpression<T> col, Optional<String> label) {
         SelectStatement<Tuple6<T1,T2,T3,T4,T5,T>> select = new SelectStatement<>(
             scope(),
+            new TypeToken<Tuple6<T1,T2,T3,T4,T5,T>>() {},
             statement.from(),
             RowMappers.add6th(
                 statement.rowMapper(),

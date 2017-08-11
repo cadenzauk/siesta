@@ -68,6 +68,9 @@ public class JdbcSqlExecutor implements SqlExecutor {
             return StreamSupport
                 .stream(new ResultSetSpliterator<>(resultSet, rowMapper), false)
                 .onClose(closeable::close);
+        } catch (RuntimeException e) {
+            closeable.close();
+            throw e;
         } catch (Exception e) {
             closeable.close();
             throw new RuntimeException(e);

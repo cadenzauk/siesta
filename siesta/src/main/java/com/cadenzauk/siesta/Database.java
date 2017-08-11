@@ -34,10 +34,13 @@ import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InSetExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.Update;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
+import com.cadenzauk.siesta.grammar.select.CommonTableExpressionBuilder;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
+import com.google.common.reflect.TypeToken;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,7 +55,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Database {
-    private final Map<Class<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
+    private final Map<TypeToken<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
     private final DataTypeRegistry dataTypeRegistry = new DataTypeRegistry();
     private final String defaultSchema;
     private final NamingStrategy namingStrategy;
@@ -95,7 +98,11 @@ public class Database {
 
     @SuppressWarnings("unchecked")
     public <R> Table<R> table(Class<R> rowClass) {
-        return table(rowClass, Function.identity());
+        return table(TypeToken.of(rowClass), Function.identity());
+    }
+
+    public <R> Table<R> table(TypeToken<R> rowType) {
+        return table(rowType, Function.identity());
     }
 
     public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what) {
@@ -111,9 +118,9 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    private <R, B> Table<R> table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
-        return (Table<R>) metadataCache.computeIfAbsent(rowClass, k -> {
-            Table.Builder<R,R> builder = new Table.Builder<>(this, rowClass, rowClass, Function.identity());
+    private <R, B> Table<R> table(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+        return (Table<R>) metadataCache.computeIfAbsent(rowType, k -> {
+            Table.Builder<R,R> builder = new Table.Builder<>(this, rowType, rowType, Function.identity());
             return init.apply(builder).build();
         });
     }
@@ -205,12 +212,24 @@ public class Database {
         insert(getDefaultSqlExecutor(), rows);
     }
 
+    public CommonTableExpressionBuilder with(String name) {
+        return new CommonTableExpressionBuilder(this, name);
+    }
+
     public <R> ExpectingJoin1<R> from(Class<R> rowClass) {
         return Select.from(this, table(rowClass));
     }
 
     public <R> ExpectingJoin1<R> from(Alias<R> alias) {
         return Select.from(this, alias);
+    }
+
+    public <R> ExpectingJoin1<R> from(CommonTableExpression<R> cte, String aliasName) {
+        return Select.from(this, cte, aliasName);
+    }
+
+    public <R> ExpectingJoin1<R> from(CommonTableExpression<R> cte) {
+        return Select.from(this, cte);
     }
 
     public <R> ExpectingJoin1<R> from(Class<R> rowClass, String alias) {
@@ -282,7 +301,7 @@ public class Database {
         }
 
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
-            tables.add(database -> database.table(rowClass, init));
+            tables.add(database -> database.table(TypeToken.of(rowClass), init));
             return this;
         }
 

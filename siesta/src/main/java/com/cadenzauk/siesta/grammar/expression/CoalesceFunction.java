@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -67,6 +68,11 @@ public class CoalesceFunction<T> implements TypedExpression<T> {
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         return terms.get(0).rowMapper(scope, label);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return terms.get(0).type();
     }
 
     @NotNull

@@ -27,17 +27,20 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.reflect.TypeToken;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public class UnaryFunction<T, R> implements TypedExpression<R> {
     private final String name;
+    private final TypeToken<R> type;
     private final TypedExpression<T> arg;
     private final BiFunction<Scope,String,RowMapper<R>> rowMapperFactory;
 
-    private UnaryFunction(String name, TypedExpression<T> arg, BiFunction<Scope,String,RowMapper<R>> rowMapperFactory) {
+    private UnaryFunction(String name, TypeToken<R> type, TypedExpression<T> arg, BiFunction<Scope,String,RowMapper<R>> rowMapperFactory) {
         this.name = name;
+        this.type = type;
         this.arg = arg;
         this.rowMapperFactory = rowMapperFactory;
     }
@@ -58,6 +61,11 @@ public class UnaryFunction<T, R> implements TypedExpression<R> {
     }
 
     @Override
+    public TypeToken<R> type() {
+        return type;
+    }
+
+    @Override
     public Stream<Object> args(Scope scope) {
         return arg.args(scope);
     }
@@ -68,7 +76,7 @@ public class UnaryFunction<T, R> implements TypedExpression<R> {
     }
 
     public static <T> UnaryFunction<T,T> of(TypedExpression<T> arg, String name) {
-        return new UnaryFunction<>(name, arg, arg::rowMapper);
+        return new UnaryFunction<>(name, arg.type(), arg, arg::rowMapper);
     }
 
     public static <T, R> UnaryFunction<T,T> of(Function1<R,T> arg, String name) {
@@ -96,7 +104,7 @@ public class UnaryFunction<T, R> implements TypedExpression<R> {
     }
 
     public static <T, S> UnaryFunction<T,S> of(TypedExpression<T> arg, String name, Class<S> resultClass) {
-        return new UnaryFunction<>(name, arg, Scope.makeMapper(resultClass));
+        return new UnaryFunction<>(name, TypeToken.of(resultClass), arg, Scope.makeMapper(resultClass));
     }
 
     public static <T, R, S> UnaryFunction<T,S> of(Function1<R,T> arg, String name, Class<S> resultClass) {

@@ -35,6 +35,7 @@ import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.Iterables;
+import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,8 @@ class SelectStatement<RT> {
     private static final Logger LOG = LoggerFactory.getLogger(SelectStatement.class);
 
     protected final Scope scope;
+    private final List<CommonTableExpression<?>> commonTableExpressions = new ArrayList<>();
+    private final TypeToken<RT> rowType;
     private final From from;
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
@@ -61,11 +64,26 @@ class SelectStatement<RT> {
     private final List<OrderingClause> orderByClauses = new ArrayList<>();
     private Optional<Long> fetchFirst = Optional.empty();
 
-    SelectStatement(Scope scope, From from, RowMapper<RT> rowMapper, Projection projection) {
+    SelectStatement(Scope scope, TypeToken<RT> rowType, From from, RowMapper<RT> rowMapper, Projection projection) {
         this.scope = scope;
+        this.rowType = rowType;
         this.from = from;
         this.rowMapper = rowMapper;
         this.projection = projection;
+    }
+
+    public TypeToken<RT> rowType() {
+        return rowType;
+    }
+
+    public Stream<CommonTableExpression<?>> commonTableExpressions() {
+        return commonTableExpressions.stream();
+    }
+
+    void addCommonTableExpression(CommonTableExpression<?> cte) {
+        if (!commonTableExpressions.contains(cte)) {
+            commonTableExpressions.add(cte);
+        }
     }
 
     void addUnion(SelectStatement<RT> next, UnionType unionType) {
@@ -73,21 +91,23 @@ class SelectStatement<RT> {
     }
 
     String sql(Scope outerScope) {
-        return "(" + sqlImpl(outerScope.plus(scope)) + ")";
+        return "(" + sqlImpl(outerScope) + ")";
     }
 
     String label() {
         return null;
     }
 
-    Stream<Object> args(Scope scope) {
+    Stream<Object> args(Scope outerScope) {
+        Scope innerScope = outerScope.plus(scope);
         return Stream.of(
-            projection.args(scope),
-            from.args(scope),
-            whereClauseArgs(),
-            groupByClauseArgs(),
-            havingClauseArgs(),
-            unionsArgs()
+            cteArgs(outerScope),
+            projection.args(innerScope),
+            from.args(innerScope),
+            whereClauseArgs(innerScope),
+            groupByClauseArgs(innerScope),
+            havingClauseArgs(innerScope),
+            unionsArgs(innerScope)
         ).flatMap(Function.identity());
     }
 
@@ -130,7 +150,7 @@ class SelectStatement<RT> {
     }
 
     String sql() {
-        return sqlImpl(scope);
+        return sqlImpl(scope.empty());
     }
 
     RowMapper<RT> rowMapper() {
@@ -145,7 +165,7 @@ class SelectStatement<RT> {
         orderByClauses.add(new Ordering<>(expression, order));
     }
 
-    <T> void addOrderBy(int columnNumber, Order order) {
+    void addOrderBy(int columnNumber, Order order) {
         orderByClauses.add(new OrderByColumnNumber(columnNumber, order));
     }
 
@@ -167,6 +187,12 @@ class SelectStatement<RT> {
         return new InHavingExpectingAnd<>(this);
     }
 
+    private String commonTableExpressionSql(Scope actualScope) {
+        return commonTableExpressions.isEmpty() || !actualScope.isOutermost()
+            ? ""
+            : "with " + commonTableExpressions().map(cte -> cte.sql(actualScope)).collect(joining(", "));
+    }
+
     void andHaving(BooleanExpression e) {
         havingClause = havingClause.appendAnd(e);
     }
@@ -176,75 +202,84 @@ class SelectStatement<RT> {
     }
 
     @NotNull
-    private Stream<Object> whereClauseArgs() {
+    private Stream<Object> cteArgs(Scope actualScope) {
+        return actualScope.isOutermost()
+            ? commonTableExpressions().flatMap(cte -> cte.args(actualScope))
+            : Stream.empty();
+    }
+
+    @NotNull
+    private Stream<Object> whereClauseArgs(Scope actualScope) {
         return whereClause == null
             ? Stream.empty()
-            : whereClause.args(scope);
+            : whereClause.args(actualScope);
     }
 
     @NotNull
-    private String whereClauseSql(Scope scope) {
+    private String whereClauseSql(Scope actualScope) {
         return whereClause == null
             ? ""
-            : " where " + whereClause.sql(scope);
+            : " where " + whereClause.sql(actualScope);
     }
 
     @NotNull
-    private Stream<Object> groupByClauseArgs() {
+    private Stream<Object> groupByClauseArgs(Scope actualScope) {
         return groupByClauses
             .stream()
-            .flatMap(g -> g.args(scope));
+            .flatMap(g -> g.args(actualScope));
     }
 
     @NotNull
-    private String groupByClauseSql(Scope scope) {
+    private String groupByClauseSql(Scope actualScope) {
         return groupByClauses.isEmpty()
             ? ""
-            : " group by " + groupByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
+            : " group by " + groupByClauses.stream().map(ordering -> ordering.sql(actualScope)).collect(joining(", "));
     }
 
     @NotNull
-    private Stream<Object> havingClauseArgs() {
+    private Stream<Object> havingClauseArgs(Scope actualScope) {
         return havingClause == null
             ? Stream.empty()
-            : havingClause.args(scope);
+            : havingClause.args(actualScope);
     }
 
     @NotNull
-    private Stream<Object> unionsArgs() {
-        return unions.stream().flatMap(u -> u.item2().args(scope));
+    private Stream<Object> unionsArgs(Scope actualScope) {
+        return unions.stream().flatMap(u -> u.item2().args(actualScope));
     }
 
     @NotNull
-    private String havingClauseSql(Scope scope) {
+    private String havingClauseSql(Scope actualScope) {
         return havingClause == null
             ? ""
-            : " having " + havingClause.sql(scope);
+            : " having " + havingClause.sql(actualScope);
     }
 
     @NotNull
-    private String unionsSql(Scope scope) {
+    private String unionsSql(Scope actualScope) {
         return unions.isEmpty()
             ? ""
-            : " " + unions.stream().map(t -> t.map((u, s) -> u.format(s.sqlImpl(scope)))).collect(joining(" "));
+            : " " + unions.stream().map(t -> t.map((u, s) -> u.format(s.sqlImpl(actualScope)))).collect(joining(" "));
     }
 
     @NotNull
-    private String orderByClauseSql(Scope scope) {
+    private String orderByClauseSql(Scope actualScope) {
         return orderByClauses.isEmpty()
             ? ""
-            : " order by " + orderByClauses.stream().map(ordering -> ordering.sql(scope)).collect(joining(", "));
+            : " order by " + orderByClauses.stream().map(ordering -> ordering.sql(actualScope)).collect(joining(", "));
     }
 
-    private String sqlImpl(Scope actualScope) {
-        String sql = String.format("select %s%s%s%s%s%s%s",
-            projection().sql(actualScope),
-            from.sql(actualScope),
-            whereClauseSql(actualScope),
-            groupByClauseSql(actualScope),
-            havingClauseSql(actualScope),
-            unionsSql(actualScope),
-            orderByClauseSql(actualScope));
+    private String sqlImpl(Scope outerScope) {
+        Scope innerScope = outerScope.plus(scope);
+        String sql = String.format("%sselect %s%s%s%s%s%s%s",
+            commonTableExpressionSql(outerScope),
+            projection().sql(innerScope),
+            from.sql(innerScope),
+            whereClauseSql(innerScope),
+            groupByClauseSql(innerScope),
+            havingClauseSql(innerScope),
+            unionsSql(innerScope),
+            orderByClauseSql(innerScope));
         return fetchFirst.map(n -> scope.dialect().fetchFirst(sql, n)).orElse(sql);
     }
 }

@@ -25,6 +25,7 @@ package com.cadenzauk.core.reflect;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.util.MethodUtil;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -34,20 +35,25 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class MethodInfo<C, R> {
-    private final Class<C> declaringClass;
+    private final TypeToken<C> declaringType;
     private final Method method;
     private final Class<?> actualType;
     private final Class<R> effectiveType;
 
-    private MethodInfo(Class<C> declaringClass, Method method, Class<?> actualType, Class<R> effectiveType) {
-        this.declaringClass = declaringClass;
+    private MethodInfo(TypeToken<C> declaringType, Method method, Class<?> actualType, Class<R> effectiveType) {
+        this.declaringType = declaringType;
         this.method = method;
         this.actualType = actualType;
         this.effectiveType = effectiveType;
     }
 
+    public TypeToken<C> declaringType() {
+        return declaringType;
+    }
+
+    @SuppressWarnings("unchecked")
     public Class<C> declaringClass() {
-        return declaringClass;
+        return (Class<C>) declaringType.getRawType();
     }
 
     public Method method() {
@@ -71,13 +77,13 @@ public class MethodInfo<C, R> {
             .filter(m -> m.getReturnType() == fieldInfo.fieldType())
             .filter(m -> Getter.isGetter(m, fieldInfo.field()))
             .findAny()
-            .map(m -> new MethodInfo<>(fieldInfo.declaringClass(), m, fieldInfo.fieldType(), fieldInfo.effectiveType()));
+            .map(m -> new MethodInfo<>(TypeToken.of(fieldInfo.declaringClass()), m, fieldInfo.fieldType(), fieldInfo.effectiveType()));
     }
 
     @SuppressWarnings("unchecked")
     public static <C, F> MethodInfo<C,F> of(Function1<C,F> getter) {
         Method method = MethodUtil.fromReference(getter);
-        return new MethodInfo<>((Class<C>) method.getDeclaringClass(), method, method.getReturnType(), (Class<F>) method.getReturnType());
+        return new MethodInfo<>(TypeToken.of((Class<C>) method.getDeclaringClass()), method, method.getReturnType(), (Class<F>) method.getReturnType());
     }
 
     @SuppressWarnings("unchecked")
@@ -85,6 +91,6 @@ public class MethodInfo<C, R> {
         Method method = MethodUtil.fromReference(getter);
         ParameterizedType genericType = (ParameterizedType) method.getGenericReturnType();
         Type argType = genericType.getActualTypeArguments()[0];
-        return new MethodInfo<>((Class<C>) method.getDeclaringClass(), method, method.getReturnType(), (Class<F>) argType);
+        return new MethodInfo<>(TypeToken.of((Class<C>) method.getDeclaringClass()), method, method.getReturnType(), (Class<F>) argType);
     }
 }

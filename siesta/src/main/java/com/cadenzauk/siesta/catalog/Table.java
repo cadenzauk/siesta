@@ -37,6 +37,7 @@ import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,21 +67,21 @@ import static java.util.stream.Collectors.toList;
 public class Table<R> {
     private static final Logger LOG = LoggerFactory.getLogger(Table.class);
     private final Database database;
-    private final Class<R> rowClass;
+    private final TypeToken<R> rowType;
     private final String schema;
     private final String tableName;
     private final Impl<?> impl;
 
     private <B> Table(Builder<R,B> builder) {
         database = builder.database;
-        rowClass = builder.rowClass;
+        rowType = builder.rowType;
         schema = builder.schema;
         tableName = builder.tableName;
         impl = new Impl<>(builder.newBuilder, builder.buildRow, builder.columns);
     }
 
-    public Class<R> rowClass() {
-        return rowClass;
+    public TypeToken<R> rowType() {
+        return rowType;
     }
 
     public Database database() {
@@ -226,8 +227,8 @@ public class Table<R> {
 
     public static final class Builder<R, B> {
         private final Database database;
-        private final Class<R> rowClass;
-        private final Class<B> builderClass;
+        private final TypeToken<R> rowType;
+        private final TypeToken<B> builderType;
         private final Function<B,R> buildRow;
         private final Set<String> excludedFields = new HashSet<>();
         private final List<TableColumn<Object,R,B>> columns = new ArrayList<>();
@@ -235,13 +236,13 @@ public class Table<R> {
         private String tableName;
         private Supplier<B> newBuilder;
 
-        public Builder(Database database, Class<R> rowClass, Class<B> builderClass, Function<B,R> buildRow) {
+        public Builder(Database database, TypeToken<R> rowType, TypeToken<B> builderType, Function<B,R> buildRow) {
             this.database = database;
-            this.rowClass = rowClass;
-            this.builderClass = builderClass;
+            this.rowType = rowType;
+            this.builderType = builderType;
             this.buildRow = buildRow;
 
-            Optional<javax.persistence.Table> tableAnnotation = ClassUtil.annotation(rowClass, javax.persistence.Table.class);
+            Optional<javax.persistence.Table> tableAnnotation = ClassUtil.annotation(rowType.getRawType(), javax.persistence.Table.class);
             this.schema = tableAnnotation
                 .map(javax.persistence.Table::schema)
                 .flatMap(OptionalUtil::ofBlankable)
@@ -249,14 +250,14 @@ public class Table<R> {
             this.tableName = tableAnnotation
                 .map(javax.persistence.Table::name)
                 .flatMap(OptionalUtil::ofBlankable)
-                .orElseGet(() -> database.namingStrategy().tableName(rowClass.getSimpleName()));
+                .orElseGet(() -> database.namingStrategy().tableName(rowType.getRawType().getSimpleName()));
         }
 
         public Table<R> build() {
             if (newBuilder == null) {
-                this.newBuilder = Factory.forClass(builderClass);
+                this.newBuilder = Factory.forType(builderType);
             }
-            mappedClasses(rowClass)
+            mappedClasses(rowType.getRawType())
                 .flatMap(cls -> Arrays.stream(cls.getDeclaredFields()))
                 .filter(f -> !Modifier.isStatic(f.getModifiers()))
                 .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
@@ -270,7 +271,7 @@ public class Table<R> {
                 // TODO! add collection support
                 return;
             }
-            columns.add(TableColumn.fromField(database, rowClass, builderClass, field));
+            columns.add(TableColumn.fromField(database, rowType, builderType, field));
         }
 
         private Stream<Class<?>> mappedClasses(Class<?> startingWith) {
@@ -294,7 +295,7 @@ public class Table<R> {
 
         public <BB> Builder<R,BB> builder(Function1<BB,R> buildRow) {
             MethodInfo<BB,R> buildMethod = MethodInfo.of(buildRow);
-            return new Builder<>(database, rowClass, buildMethod.declaringClass(), buildRow)
+            return new Builder<>(database, rowType, buildMethod.declaringType(), buildRow)
                 .schema(schema)
                 .tableName(tableName);
         }
@@ -320,7 +321,7 @@ public class Table<R> {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
-            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, database.getDataTypeOf(getterInfo), rowClass, getter, setter);
+            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.mandatory(name, database.getDataTypeOf(getterInfo), rowType, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add((TableColumn<Object,R,B>) columnBuilder.build());
             return this;
@@ -331,7 +332,7 @@ public class Table<R> {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.method().getName();
             excludedFields.add(name);
-            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, database.getDataTypeOf(getterInfo), rowClass, getter, setter);
+            TableColumn.Builder<T,R,B> columnBuilder = TableColumn.optional(name, database.getDataTypeOf(getterInfo), rowType, getter, setter);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add((TableColumn<Object,R,B>) columnBuilder.build());
             return this;

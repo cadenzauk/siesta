@@ -35,6 +35,8 @@ public interface Projection {
 
     Stream<Object> args(Scope scope);
 
+    String labelList(Scope scope);
+
     static <T> Projection of(TypedExpression<T> column) {
         return new ExpressionProjection<>(column, Optional.empty());
     }

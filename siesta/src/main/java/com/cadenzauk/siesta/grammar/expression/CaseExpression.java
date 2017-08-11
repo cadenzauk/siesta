@@ -31,6 +31,7 @@ import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,11 @@ public class CaseExpression<T> implements TypedExpression<T> {
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
         return cases.get(0).item2().rowMapper(scope, label);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return cases.get(0).item2().type();
     }
 
     public TypedExpression<T> orElse(T value) {

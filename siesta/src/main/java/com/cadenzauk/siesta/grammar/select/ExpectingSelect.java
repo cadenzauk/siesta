@@ -109,6 +109,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     public <R> InProjectionExpectingComma1<R> select(Alias<R> alias) {
         SelectStatement<R> select = new SelectStatement<>(scope(),
+            alias.type(),
             statement.from(),
             alias.rowMapper(),
             Projection.of(alias));
@@ -128,6 +129,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         DynamicRowMapper<R> rowMapper = alias.dynamicRowMapper();
         DynamicProjection projection = new DynamicProjection();
         SelectStatement<R> select = new SelectStatement<>(scope().plus(alias),
+            alias.type(),
             statement.from(),
             rowMapper,
             projection);
@@ -136,6 +138,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     private <T> InProjectionExpectingComma1<T> select(TypedExpression<T> column, Optional<String> label) {
         SelectStatement<T> select = new SelectStatement<>(scope(),
+            column.type(),
             statement.from(),
             column.rowMapper(scope(), label.orElseGet(() -> column.label(scope()))),
             Projection.of(column, label));

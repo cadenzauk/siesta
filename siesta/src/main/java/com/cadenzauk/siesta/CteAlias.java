@@ -20,32 +20,35 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.reflect;
+package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.reflect.util.ConstructorUtil;
-import com.cadenzauk.core.util.UtilityClass;
-import com.google.common.reflect.TypeToken;
-import org.objenesis.ObjenesisHelper;
+import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
 
-import java.lang.reflect.Constructor;
-import java.util.function.Supplier;
+import java.util.Optional;
 
-public final class Factory extends UtilityClass {
-    public static <T> Supplier<T> forClass(Class<T> aClass) {
-        return ClassUtil.constructor(aClass)
-            .map(Factory::invoke)
-            .orElseGet(() -> () -> ObjenesisHelper.newInstance(aClass));
+public class CteAlias<RT> extends Alias<RT> {
+    private final CommonTableExpression<RT> commonTableExpression;
+
+    public CteAlias(CommonTableExpression<RT> commonTableExpression, Optional<String> aliasName) {
+        super(commonTableExpression.table(), aliasName);
+        this.commonTableExpression = commonTableExpression;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Supplier<T> forType(TypeToken<T> aClass) {
-        return (Supplier<T>) ClassUtil.constructor(aClass.getRawType())
-            .map(Factory::invoke)
-            .orElseGet(() -> () -> ObjenesisHelper.newInstance((Class<T>) aClass.getRawType()));
+
+    @Override
+    public String inSelectClauseSql(String columnName) {
+        return String.format("%s.%s", aliasName().orElseGet(commonTableExpression::name), columnName);
     }
 
-    private static <T> Supplier<T> invoke(Constructor<T> ctor) {
-        return () -> ConstructorUtil.newInstance(ctor);
+    @Override
+    protected String columnLabelPrefix() {
+        return aliasName().orElseGet(commonTableExpression::name);
+    }
+
+    @Override
+    protected String inWhereClause() {
+        return aliasName()
+            .map(a -> String.format("%s %s", commonTableExpression.name(), a))
+            .orElseGet(commonTableExpression::name);
     }
 }

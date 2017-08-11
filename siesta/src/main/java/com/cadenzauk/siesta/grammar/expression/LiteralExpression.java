@@ -26,6 +26,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -64,6 +65,12 @@ public class LiteralExpression<T> implements TypedExpression<T> {
         return rs -> scope.database().getDataTypeOf(value).get(rs, label, scope.database()).orElse(null);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public TypeToken<T> type() {
+        return TypeToken.of((Class<T>) value.getClass());
+    }
+    
     public static <T> LiteralExpression<T> of(T value) {
         Objects.requireNonNull(value);
         return new LiteralExpression<>(value);

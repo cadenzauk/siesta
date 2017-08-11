@@ -26,6 +26,7 @@ import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -63,6 +64,12 @@ public class ValueExpression<T> implements TypedExpression<T> {
     public RowMapper<T> rowMapper(Scope scope, String label) {
         DataType<T> dataType = scope.database().getDataTypeOf(value);
         return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public TypeToken<T> type() {
+        return TypeToken.of((Class<T>) value.getClass());
     }
 
     public static <T> ValueExpression<T> of(T value) {
