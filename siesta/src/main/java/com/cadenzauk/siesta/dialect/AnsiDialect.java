@@ -23,12 +23,14 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Dialect;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
@@ -43,6 +45,14 @@ public class AnsiDialect implements Dialect {
     @Override
     public boolean requiresFromDual() {
         return true;
+    }
+
+    @Override
+    public String qualifiedTableName(String catalog, String schema, String table) {
+        return Optional.ofNullable(schema)
+            .filter(StringUtils::isNotBlank)
+            .map(s -> String.format("%s.%s", s, table))
+            .orElse(table);
     }
 
     @Override
@@ -144,6 +154,11 @@ public class AnsiDialect implements Dialect {
     @Override
     public String dateParameter(LocalDate val) {
         return "cast(? as date)";
+    }
+
+    @Override
+    public String integerParameter(int val) {
+        return "?";
     }
 
     @Override

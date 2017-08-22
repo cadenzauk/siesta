@@ -33,6 +33,8 @@ public interface Dialect {
 
     boolean requiresFromDual();
 
+    String qualifiedTableName(String catalog, String schema, String table);
+
     String dual();
 
     String currentTimestamp();
@@ -72,6 +74,8 @@ public interface Dialect {
     String stringLiteral(String val);
 
     String dateParameter(LocalDate val);
+
+    String integerParameter(int val);
 
     String timestampParameter(LocalDateTime val);
 

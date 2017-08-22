@@ -19,7 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+version '1.0.0-SNAPSHOT'
 
-rootProject.name = 'cadenzauk'
+repositories {
+    mavenLocal()
+}
 
-include ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird"
+dependencies {
+    compile project(":siesta")
+    compile group: 'org.firebirdsql.jdbc', name: 'jaybird-jdk18', version: '3.0.1'
+	testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+}

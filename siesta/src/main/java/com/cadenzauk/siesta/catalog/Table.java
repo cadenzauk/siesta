@@ -68,6 +68,7 @@ public class Table<R> {
     private static final Logger LOG = LoggerFactory.getLogger(Table.class);
     private final Database database;
     private final TypeToken<R> rowType;
+    private final String catalog;
     private final String schema;
     private final String tableName;
     private final Impl<?> impl;
@@ -75,6 +76,7 @@ public class Table<R> {
     private <B> Table(Builder<R,B> builder) {
         database = builder.database;
         rowType = builder.rowType;
+        catalog = builder.catalog;
         schema = builder.schema;
         tableName = builder.tableName;
         impl = new Impl<>(builder.newBuilder, builder.buildRow, builder.columns);
@@ -109,7 +111,7 @@ public class Table<R> {
     }
 
     public String qualifiedName() {
-        return schema + "." + tableName();
+        return database.dialect().qualifiedTableName(catalog, schema, tableName());
     }
 
     public Alias<R> as(String alias) {
@@ -159,9 +161,8 @@ public class Table<R> {
                 return;
             }
             int nCols = columns.size();
-            String sql = String.format("insert into %s.%s (%s) values %s",
-                schema,
-                tableName,
+            String sql = String.format("insert into %s (%s) values %s",
+                qualifiedName(),
                 columns.stream().map(Column::name).collect(joining(", ")),
                 IntStream.range(0, rows.length)
                     .mapToObj(i -> "(" + IntStream.range(0, nCols).mapToObj(j -> "?").collect(joining(", ")) + ")")
@@ -232,6 +233,7 @@ public class Table<R> {
         private final Function<B,R> buildRow;
         private final Set<String> excludedFields = new HashSet<>();
         private final List<TableColumn<Object,R,B>> columns = new ArrayList<>();
+        private String catalog;
         private String schema;
         private String tableName;
         private Supplier<B> newBuilder;
@@ -243,6 +245,10 @@ public class Table<R> {
             this.buildRow = buildRow;
 
             Optional<javax.persistence.Table> tableAnnotation = ClassUtil.annotation(rowType.getRawType(), javax.persistence.Table.class);
+            this.catalog = tableAnnotation
+                .map(javax.persistence.Table::catalog)
+                .flatMap(OptionalUtil::ofBlankable)
+                .orElse(database.defaultCatalog());
             this.schema = tableAnnotation
                 .map(javax.persistence.Table::schema)
                 .flatMap(OptionalUtil::ofBlankable)
@@ -283,6 +289,11 @@ public class Table<R> {
                 Stream.of(startingWith));
         }
 
+        public Builder<R,B> catalog(String val) {
+            catalog = val;
+            return this;
+        }
+
         public Builder<R,B> schema(String val) {
             schema = val;
             return this;
@@ -296,6 +307,7 @@ public class Table<R> {
         public <BB> Builder<R,BB> builder(Function1<BB,R> buildRow) {
             MethodInfo<BB,R> buildMethod = MethodInfo.of(buildRow);
             return new Builder<>(database, rowType, buildMethod.declaringType(), buildRow)
+                .catalog(catalog)
                 .schema(schema)
                 .tableName(tableName);
         }

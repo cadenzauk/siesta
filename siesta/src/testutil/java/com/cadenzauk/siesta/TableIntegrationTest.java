@@ -439,7 +439,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
         Alias<SalespersonRow> s = database.table(SalespersonRow.class).as("s");
         String name = database.from(s)
-            .select(upper(s.column(SalespersonRow::firstName).concat(" ").concat(SalespersonRow::surname).concat(1)))
+            .select(upper(s.column(SalespersonRow::firstName).concat(literal(" ")).concat(SalespersonRow::surname).concat(1)))
             .where(SalespersonRow::salespersonId).isEqualTo(george.salespersonId())
             .single();
         assertThat(name, is("GEORGE JETSON1"));

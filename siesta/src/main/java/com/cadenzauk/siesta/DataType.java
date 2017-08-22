@@ -73,7 +73,7 @@ public class DataType<T> {
         (rs, col, db) -> rs.getInt(col),
         defaultConverter(),
         defaultLiteralFormatter(),
-        defaultParameterFormatter());
+        Dialect::integerParameter);
     public static final DataType<LocalDate> LOCAL_DATE = new DataType<>(LocalDate.class,
         DataType::getLocalDate,
         DataType::localDateToDb,
@@ -195,6 +195,10 @@ public class DataType<T> {
 
     private static <T> ParameterFormatter<T> defaultParameterFormatter() {
         return (d, v) -> "?";
+    }
+
+    private static <T> ParameterFormatter<T> intParameterFormatter() {
+        return (d, v) -> "cast(? as integer)";
     }
 
     @FunctionalInterface

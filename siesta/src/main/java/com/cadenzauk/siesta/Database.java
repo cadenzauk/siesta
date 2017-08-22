@@ -57,6 +57,7 @@ import java.util.function.Function;
 public class Database {
     private final Map<TypeToken<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
     private final DataTypeRegistry dataTypeRegistry = new DataTypeRegistry();
+    private final String defaultCatalog;
     private final String defaultSchema;
     private final NamingStrategy namingStrategy;
     private final Dialect dialect;
@@ -64,12 +65,17 @@ public class Database {
     private final ZoneId databaseTimeZone;
 
     private Database(Builder builder) {
+        defaultCatalog = builder.defaultCatalog;
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
         dialect = builder.dialect;
         defaultSqlExecutor = builder.defaultSqlExecutor;
         databaseTimeZone = builder.databaseTimeZone;
         builder.tables.forEach(t -> t.accept(this));
+    }
+
+    public String defaultCatalog() {
+        return defaultCatalog;
     }
 
     public String defaultSchema() {
@@ -265,7 +271,8 @@ public class Database {
     }
 
     public static final class Builder {
-        private String defaultSchema;
+        private String defaultCatalog = "";
+        private String defaultSchema = "";
         private NamingStrategy namingStrategy = new UppercaseUnderscores();
         private Dialect dialect = new AnsiDialect();
         private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
@@ -273,6 +280,11 @@ public class Database {
         private final List<Consumer<Database>> tables = new ArrayList<>();
 
         private Builder() {
+        }
+
+        public Builder defaultCatalog(String val) {
+            defaultCatalog = val;
+            return this;
         }
 
         public Builder defaultSchema(String val) {
