@@ -78,4 +78,13 @@ public class OracleDialect extends AnsiDialect {
         return String.format("select * from (%s) where rownum <= %d", sql, n);
     }
 
+    @Override
+    public String bigintType() {
+        return "NUMBER(19)";
+    }
+
+    @Override
+    public String varcharType(int size) {
+        return String.format("varchar2(%d)", size);
+    }
 }

@@ -70,7 +70,12 @@ public class LiteralExpression<T> implements TypedExpression<T> {
     public TypeToken<T> type() {
         return TypeToken.of((Class<T>) value.getClass());
     }
-    
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
+
     public static <T> LiteralExpression<T> of(T value) {
         Objects.requireNonNull(value);
         return new LiteralExpression<>(value);

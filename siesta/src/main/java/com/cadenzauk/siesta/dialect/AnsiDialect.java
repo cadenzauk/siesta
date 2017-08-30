@@ -175,4 +175,61 @@ public class AnsiDialect implements Dialect {
     public String fetchFirst(String sql, long n) {
         return String.format("select * from (select *, row_number() over() as x_row_number from (%s)) where x_row_number <= %d", sql, n);
     }
+
+    @Override
+    public String tinyintType() {
+        return "smallint";
+    }
+
+    @Override
+    public String smallintType() {
+        return "smallint";
+    }
+
+    @Override
+    public String integerType() {
+        return "integer";
+    }
+
+    @Override
+    public String bigintType() {
+        return "bigint";
+    }
+
+    @Override
+    public String decimalType(int size, int prec) {
+        return String.format("decimal(%d,%d)", size, prec);
+    }
+
+    @Override
+    public String doubleType() {
+        return "double precision";
+    }
+
+    @Override
+    public String realType() {
+        return "real";
+    }
+
+    @Override
+    public String dateType() {
+        return "date";
+    }
+
+    @Override
+    public String timestampType(Optional<Integer> prec) {
+        return prec
+            .map(p -> String.format("timestamp(%d)", p))
+            .orElse("timestamp");
+    }
+
+    @Override
+    public String varcharType(int size) {
+        return String.format("varchar(%d)", size);
+    }
+
+    @Override
+    public String charType(int len) {
+        return String.format("char(%d)", len);
+    }
 }

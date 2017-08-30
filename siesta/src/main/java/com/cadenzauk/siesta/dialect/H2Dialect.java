@@ -37,4 +37,9 @@ public class H2Dialect extends AnsiDialect {
     public String fetchFirst(String sql, long n) {
         return String.format("%s limit %d", sql, n);
     }
+
+    @Override
+    public String tinyintType() {
+        return "tinyint";
+    }
 }

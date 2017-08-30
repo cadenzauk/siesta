@@ -44,7 +44,7 @@ public class TableIntegrationTestOracle extends TableIntegrationTest {
             pool.setUser("siesta");
             pool.setPassword("siesta");
             pool.setURL("jdbc:oracle:thin:@127.0.0.1:1521:xe");
-            return new PooledDataSource(pool);
+            return new PooledDataSource(pool, "ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'");
         }
 
         @Bean

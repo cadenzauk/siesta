@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.h2;
+
+import com.cadenzauk.siesta.TableIntegrationTest;
 
 public class TableIntegrationTestH2 extends TableIntegrationTest {
 }

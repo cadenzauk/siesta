@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -110,5 +111,17 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return SELECT_PATTERN.matcher(sql).replaceFirst("$1top " + n + " ");
+    }
+
+    @Override
+    public String tinyintType() {
+        return "tinyint";
+    }
+
+    @Override
+    public String timestampType(Optional<Integer> prec) {
+        return prec
+            .map(p -> String.format("datetime2(%d)", p))
+            .orElse("datetime2");
     }
 }

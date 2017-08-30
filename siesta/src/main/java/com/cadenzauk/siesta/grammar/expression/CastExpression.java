@@ -22,42 +22,27 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ValueExpression<T> implements TypedExpression<T> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("value_");
-    private final T value;
+public class CastExpression<F, T> implements TypedExpression<T> {
+    private final LabelGenerator labelGenerator = new LabelGenerator("cast_");
+    private final TypedExpression<F> from;
+    private final DataType<T> to;
+    private final Function<Dialect,String> toSql;
 
-    private ValueExpression(T value) {
-        Objects.requireNonNull(value);
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return scope.database().getDataTypeOf(value).sqlType(scope.dialect(), value);
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.of(scope.database().getDataTypeOf(value).toDatabase(scope.database(), value));
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.COLUMN;
+    public CastExpression(TypedExpression<F> from, DataType<T> to, Function<Dialect, String> toSql) {
+        this.from = from;
+        this.to = to;
+        this.toSql = toSql;
     }
 
     @Override
@@ -67,17 +52,31 @@ public class ValueExpression<T> implements TypedExpression<T> {
 
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
-        DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+        return rs -> to.get(rs, label, scope.database()).orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public TypeToken<T> type() {
-        return TypeToken.of((Class<T>) value.getClass());
+        return TypeToken.of(to.javaClass());
     }
 
-    public static <T> ValueExpression<T> of(T value) {
-        return new ValueExpression<>(value);
+    @Override
+    public String sql(Scope scope) {
+        return String.format("cast(%s as %s)", from.sql(scope), toSql.apply(scope.dialect()));
+    }
+
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return from.args(scope);
+    }
+
+    @Override
+    public Precedence precedence() {
+        return Precedence.UNARY;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("cast(%s as %s)", from, toSql.apply(new AnsiDialect()));
     }
 }

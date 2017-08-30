@@ -25,6 +25,7 @@ package com.cadenzauk.core.sql;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -33,6 +34,8 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -41,24 +44,44 @@ public class PooledDataSource implements DataSource, AutoCloseable {
     private final ConcurrentHashMap<Tuple2<String,String>,PooledConnection> connectionMap = new ConcurrentHashMap<>();
     private final ConnectionPoolDataSource poolDataSource;
     private final PooledConnection pooledConnection;
+    private final Optional<String> initString;
 
     public PooledDataSource(ConnectionPoolDataSource poolDataSource) throws SQLException {
         this.poolDataSource = poolDataSource;
         pooledConnection = autoCloseable.add(poolDataSource.getPooledConnection(), PooledConnection::close);
+        initString = Optional.empty();
+    }
+
+    public PooledDataSource(ConnectionPoolDataSource poolDataSource, String initial) throws SQLException {
+        this.poolDataSource = poolDataSource;
+        pooledConnection = autoCloseable.add(poolDataSource.getPooledConnection(), PooledConnection::close);
+        initString = Optional.ofNullable(initial).filter(StringUtils::isNotBlank);
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return pooledConnection.getConnection();
+        return init(pooledConnection.getConnection());
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
         try {
-            return connectionMap.computeIfAbsent(Tuple.of(username, password), k -> openConnection(username, password)).getConnection();
+            Connection connection = connectionMap.computeIfAbsent(Tuple.of(username, password), k -> openConnection(username, password)).getConnection();
+            return init(connection);
         } catch (RuntimeSqlException e) {
             throw e.getCause();
         }
+    }
+
+    private Connection init(Connection connection) {
+        initString.ifPresent(s -> {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute(s);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return connection;
     }
 
     @Override

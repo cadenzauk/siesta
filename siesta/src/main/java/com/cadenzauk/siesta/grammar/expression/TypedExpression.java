@@ -73,4 +73,12 @@ public interface TypedExpression<T> extends Expression {
     static <T> ExpressionBuilder<T,BooleanExpression> literal(T value) {
         return ExpressionBuilder.of(LiteralExpression.of(value), Function.identity());
     }
+
+    static <T> CastBuilder<T> cast(T value) {
+        return new CastBuilder<>(ValueExpression.of(value));
+    }
+
+    static <T> CastBuilder<T> cast(TypedExpression<T> value) {
+        return new CastBuilder<>(value);
+    }
 }

@@ -32,6 +32,7 @@ import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.expression.LiteralExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
@@ -78,6 +79,7 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.when;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.cast;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
@@ -439,7 +441,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
         Alias<SalespersonRow> s = database.table(SalespersonRow.class).as("s");
         String name = database.from(s)
-            .select(upper(s.column(SalespersonRow::firstName).concat(literal(" ")).concat(SalespersonRow::surname).concat(1)))
+            .select(upper(s.column(SalespersonRow::firstName).concat(cast(" ").asVarchar(1)).concat(SalespersonRow::surname).concat(cast(1).asInteger())))
             .where(SalespersonRow::salespersonId).isEqualTo(george.salespersonId())
             .single();
         assertThat(name, is("GEORGE JETSON1"));
@@ -816,6 +818,36 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         assertThat(lastTwo, hasSize(2));
         assertThat(lastTwo.get(0).salespersonId(), is(inserted.item1() + 4));
         assertThat(lastTwo.get(1).salespersonId(), is(inserted.item1() + 3));
+    }
+
+    public <T> Object[] castExpressionTestCase(TypedExpression<T> castExpr, T expectedResult) {
+        return new Object[] { castExpr, expectedResult };
+    }
+
+    public Object[][] parametersForCastExpression() {
+        return new Object[][] {
+            castExpressionTestCase(cast(134).asChar(3), "134"),
+            castExpressionTestCase(cast(126).asTinyInteger(), (byte)126),
+            castExpressionTestCase(cast(32767L).asSmallInteger(), (short)32767),
+            castExpressionTestCase(cast(123456L).asInteger(), 123456),
+            castExpressionTestCase(cast("789101112").asBigInteger(), 789101112L),
+            castExpressionTestCase(cast(literal(LocalDateTime.of(2017, 1, 3, 12, 0, 1))).asDate(), LocalDate.of(2017, 1, 3)),
+            castExpressionTestCase(cast(literal(LocalDate.of(2017, 1, 3))).asTimestamp(), LocalDateTime.of(2017, 1, 3, 0, 0, 0)),
+            castExpressionTestCase(cast(literal(LocalDate.of(2017, 1, 3))).asTimestamp(6), LocalDateTime.of(2017, 1, 3, 0, 0, 0)),
+            castExpressionTestCase(cast(LocalDate.of(2017, 1, 3)).asVarchar(20), "2017-01-03"),
+            castExpressionTestCase(cast(literal(1234)).asDoublePrecision(), 1234.0),
+            castExpressionTestCase(cast(literal(1234)).asReal(), 1234.0f),
+        };
+    }
+
+    @Test
+    @Parameters
+    public <T> void castExpression(TypedExpression<T> castExpr, T expectedResult) {
+        Database database = testDatabase(dataSource, dialect);
+
+        T result = database.select(castExpr).single();
+
+        assertThat(result, is(expectedResult));
     }
 
     private SalespersonRow aRandomSalesperson() {

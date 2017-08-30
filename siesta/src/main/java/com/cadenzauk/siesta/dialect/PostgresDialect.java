@@ -85,4 +85,5 @@ public class PostgresDialect extends AnsiDialect {
     public String fetchFirst(String sql, long n) {
         return String.format("%s offset 0 rows fetch next %d rows only", sql, n);
     }
+
 }

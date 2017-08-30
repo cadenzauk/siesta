@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface Dialect {
@@ -82,4 +83,26 @@ public interface Dialect {
     String timestampWithTimeZoneParameter(ZonedDateTime val);
 
     String fetchFirst(String sql, long n);
+
+    String tinyintType();
+
+    String smallintType();
+
+    String integerType();
+
+    String bigintType();
+
+    String decimalType(int size, int prec);
+
+    String doubleType();
+
+    String realType();
+
+    String dateType();
+
+    String timestampType(Optional<Integer> prec);
+
+    String varcharType(int size);
+
+    String charType(int len);
 }

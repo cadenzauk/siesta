@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.Db2Dialect;
+import com.cadenzauk.siesta.dialect.FirebirdDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.dialect.OracleDialect;
 import com.cadenzauk.siesta.dialect.PostgresDialect;
@@ -56,6 +57,7 @@ class DialectTest {
         return Stream.of(
             testCase(new AnsiDialect(), "select * from (select *, row_number() over() as x_row_number from (select * from invoices)) where x_row_number <= 10"),
             testCase(new Db2Dialect(), "select * from invoices fetch first 10 rows only"),
+            testCase(new FirebirdDialect(), "select * from invoices rows 10"),
             testCase(new H2Dialect(), "select * from invoices limit 10"),
             testCase(new OracleDialect(), "select * from (select * from invoices) where rownum <= 10"),
             testCase(new PostgresDialect(), "select * from invoices offset 0 rows fetch next 10 rows only"),
@@ -75,6 +77,7 @@ class DialectTest {
         return Stream.of(
             testCase(new AnsiDialect(), "select INVOICE.ID as INVOICE_ID from AP.INVOICE INVOICE where INVOICE.ID = ?"),
             testCase(new Db2Dialect(), "select INVOICE.ID as INVOICE_ID from AP.INVOICE INVOICE where INVOICE.ID = ? selectivity 0.000100"),
+            testCase(new FirebirdDialect(), "select INVOICE.ID as INVOICE_ID from INVOICE INVOICE where INVOICE.ID = cast(? as integer)"),
             testCase(new H2Dialect(), "select INVOICE.ID as INVOICE_ID from AP.INVOICE INVOICE where INVOICE.ID = ?"),
             testCase(new OracleDialect(), "select INVOICE.ID as INVOICE_ID from AP.INVOICE INVOICE where INVOICE.ID = ?"),
             testCase(new PostgresDialect(), "select INVOICE.ID as INVOICE_ID from AP.INVOICE INVOICE where INVOICE.ID = ?"),

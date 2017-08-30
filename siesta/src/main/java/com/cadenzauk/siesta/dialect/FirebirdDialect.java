@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public class FirebirdDialect extends AnsiDialect {
     @Override
@@ -82,6 +83,16 @@ public class FirebirdDialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return String.format("%s rows %d", sql, n);
+    }
+//
+//    @Override
+//    public String binaryType(int size) {
+//        return String.format("varbinary", size);
+//    }
+
+    @Override
+    public String timestampType(Optional<Integer> prec) {
+        return "timestamp";
     }
 
     @Override
