@@ -20,6 +20,13 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.siesta.grammar.select;
 
-include ":siesta-codegen", ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird"
+import com.cadenzauk.core.tuple.Tuple20;
+
+public class ExpectingJoin20<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, RT11, RT12, RT13, RT14, RT15, RT16, RT17, RT18, RT19, RT20> extends InJoinExpectingAnd<ExpectingJoin20<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,RT18,RT19,RT20>,Tuple20<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,RT18,RT19,RT20>> {
+    public ExpectingJoin20(SelectStatement<Tuple20<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,RT18,RT19,RT20>> statement) {
+        super(statement);
+    }
+
+}

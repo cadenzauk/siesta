@@ -20,6 +20,25 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.siesta;
 
-include ":siesta-codegen", ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird"
+import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.tuple.Tuple;
+<#list 2..n as i>
+import com.cadenzauk.core.tuple.Tuple${i};
+</#list>
+
+public class RowMappers {
+    public static <T1, T2> RowMapper<Tuple2<T1,T2>> of(RowMapper<T1> mapper1, RowMapper<T2> mapper2) {
+        return rs -> Tuple.of(mapper1.mapRow(rs), mapper2.mapRow(rs));
+    }
+   <#list 3..n as i>
+
+    public static <T1<#list 2..i as j>, T${j}</#list>> RowMapper<Tuple${i}<T1<#list 2..i as j>,T${j}</#list>>> add${i}<#if i = 3>rd<#else>th</#if>(RowMapper<Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>>> mapper${i-1}, RowMapper<T${i}> mapper) {
+        return rs -> {
+            Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>> tuple = mapper${i-1}.mapRow(rs);
+            return Tuple.of(tuple.item1()<#list 2..i-1 as j>, tuple.item${j}()</#list>, mapper.mapRow(rs));
+        };
+    }
+    </#list>
+}

@@ -22,13 +22,13 @@
 
 package com.cadenzauk.core.tuple;
 
-import com.cadenzauk.core.function.Function9;
+import com.cadenzauk.core.function.Function12;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.function.Function;
 
-public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
+public class Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> implements Tuple {
     private final T1 item1;
     private final T2 item2;
     private final T3 item3;
@@ -38,8 +38,11 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
     private final T7 item7;
     private final T8 item8;
     private final T9 item9;
+    private final T10 item10;
+    private final T11 item11;
+    private final T12 item12;
 
-    public Tuple9(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8, T9 item9) {
+    public Tuple12(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8, T9 item9, T10 item10, T11 item11, T12 item12) {
         this.item1 = item1;
         this.item2 = item2;
         this.item3 = item3;
@@ -49,6 +52,9 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
         this.item7 = item7;
         this.item8 = item8;
         this.item9 = item9;
+        this.item10 = item10;
+        this.item11 = item11;
+        this.item12 = item12;
     }
 
     @Override
@@ -62,6 +68,9 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             ", " + item7 +
             ", " + item8 +
             ", " + item9 +
+            ", " + item10 +
+            ", " + item11 +
+            ", " + item12 +
             ')';
     }
 
@@ -71,18 +80,21 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        Tuple9<?,?,?,?,?,?,?,?,?> tuple9 = (Tuple9<?,?,?,?,?,?,?,?,?>) o;
+        Tuple12<?,?,?,?,?,?,?,?,?,?,?,?> tuple12 = (Tuple12<?,?,?,?,?,?,?,?,?,?,?,?>) o;
 
         return new EqualsBuilder()
-            .append(item1, tuple9.item1)
-            .append(item2, tuple9.item2)
-            .append(item3, tuple9.item3)
-            .append(item4, tuple9.item4)
-            .append(item5, tuple9.item5)
-            .append(item6, tuple9.item6)
-            .append(item7, tuple9.item7)
-            .append(item8, tuple9.item8)
-            .append(item9, tuple9.item9)
+            .append(item1, tuple12.item1)
+            .append(item2, tuple12.item2)
+            .append(item3, tuple12.item3)
+            .append(item4, tuple12.item4)
+            .append(item5, tuple12.item5)
+            .append(item6, tuple12.item6)
+            .append(item7, tuple12.item7)
+            .append(item8, tuple12.item8)
+            .append(item9, tuple12.item9)
+            .append(item10, tuple12.item10)
+            .append(item11, tuple12.item11)
+            .append(item12, tuple12.item12)
             .isEquals();
     }
 
@@ -98,6 +110,9 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             .append(item7)
             .append(item8)
             .append(item9)
+            .append(item10)
+            .append(item11)
+            .append(item12)
             .toHashCode();
     }
 
@@ -137,11 +152,23 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
         return item9;
     }
 
-    public <T> T map(Function9<T1,T2,T3,T4,T5,T6,T7,T8,T9,T> function) {
-        return function.apply(item1, item2, item3, item4, item5, item6, item7, item8, item9);
+    public T10 item10() {
+        return item10;
     }
 
-    public <T> Tuple9<T,T2,T3,T4,T5,T6,T7,T8,T9> map1(Function<T1,T> function) {
+    public T11 item11() {
+        return item11;
+    }
+
+    public T12 item12() {
+        return item12;
+    }
+
+    public <T> T map(Function12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T> function) {
+        return function.apply(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12);
+    }
+
+    public <T> Tuple12<T,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> map1(Function<T1,T> function) {
         return Tuple.of(
             function.apply(item1),
             item2,
@@ -151,11 +178,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T,T3,T4,T5,T6,T7,T8,T9> map2(Function<T2,T> function) {
+    public <T> Tuple12<T1,T,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12> map2(Function<T2,T> function) {
         return Tuple.of(
             item1,
             function.apply(item2),
@@ -165,11 +195,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T,T4,T5,T6,T7,T8,T9> map3(Function<T3,T> function) {
+    public <T> Tuple12<T1,T2,T,T4,T5,T6,T7,T8,T9,T10,T11,T12> map3(Function<T3,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -179,11 +212,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T3,T,T5,T6,T7,T8,T9> map4(Function<T4,T> function) {
+    public <T> Tuple12<T1,T2,T3,T,T5,T6,T7,T8,T9,T10,T11,T12> map4(Function<T4,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -193,11 +229,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T3,T4,T,T6,T7,T8,T9> map5(Function<T5,T> function) {
+    public <T> Tuple12<T1,T2,T3,T4,T,T6,T7,T8,T9,T10,T11,T12> map5(Function<T5,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -207,11 +246,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T3,T4,T5,T,T7,T8,T9> map6(Function<T6,T> function) {
+    public <T> Tuple12<T1,T2,T3,T4,T5,T,T7,T8,T9,T10,T11,T12> map6(Function<T6,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -221,11 +263,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             function.apply(item6),
             item7,
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T3,T4,T5,T6,T,T8,T9> map7(Function<T7,T> function) {
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T,T8,T9,T10,T11,T12> map7(Function<T7,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -235,11 +280,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             function.apply(item7),
             item8,
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T3,T4,T5,T6,T7,T,T9> map8(Function<T8,T> function) {
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T,T9,T10,T11,T12> map8(Function<T8,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -249,11 +297,14 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             function.apply(item8),
-            item9
+            item9,
+            item10,
+            item11,
+            item12
         );
     }
 
-    public <T> Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T> map9(Function<T9,T> function) {
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T,T10,T11,T12> map9(Function<T9,T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -263,7 +314,61 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> implements Tuple {
             item6,
             item7,
             item8,
-            function.apply(item9)
+            function.apply(item9),
+            item10,
+            item11,
+            item12
+        );
+    }
+
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T,T11,T12> map10(Function<T10,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            item5,
+            item6,
+            item7,
+            item8,
+            item9,
+            function.apply(item10),
+            item11,
+            item12
+        );
+    }
+
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T,T12> map11(Function<T11,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            item5,
+            item6,
+            item7,
+            item8,
+            item9,
+            item10,
+            function.apply(item11),
+            item12
+        );
+    }
+
+    public <T> Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> map12(Function<T12,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            item5,
+            item6,
+            item7,
+            item8,
+            item9,
+            item10,
+            item11,
+            function.apply(item12)
         );
     }
 }

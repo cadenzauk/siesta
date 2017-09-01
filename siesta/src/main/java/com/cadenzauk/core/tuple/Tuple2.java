@@ -26,8 +26,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public class Tuple2<T1,T2> implements Tuple {
+public class Tuple2<T1, T2> implements Tuple {
     private final T1 item1;
     private final T2 item2;
 
@@ -73,5 +74,19 @@ public class Tuple2<T1,T2> implements Tuple {
 
     public <T> T map(BiFunction<T1, T2, T> function) {
         return function.apply(item1, item2);
+    }
+
+    public <T> Tuple2<T,T2> map1(Function<T1,T> function) {
+        return Tuple.of(
+            function.apply(item1),
+            item2
+        );
+    }
+
+    public <T> Tuple2<T1,T> map2(Function<T2,T> function) {
+        return Tuple.of(
+            item1,
+            function.apply(item2)
+        );
     }
 }

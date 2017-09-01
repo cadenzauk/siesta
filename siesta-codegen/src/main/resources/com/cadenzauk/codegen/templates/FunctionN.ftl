@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,11 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.core.function;
 
-include ":siesta-codegen", ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird"
+import java.io.Serializable;
+
+@FunctionalInterface
+public interface Function${n}<<#list 1..n as i>T${i}, </#list>R> extends Serializable {
+    R apply(<#list 1..n-1 as i>T${i} p${i}, </#list>T${n} p${n});
+}

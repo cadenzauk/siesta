@@ -31,49 +31,49 @@ import com.cadenzauk.siesta.RowMappers;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<ExpectingJoin4<RT1,RT2,RT3,RT4>,Tuple4<RT1,RT2,RT3,RT4>> {
-    public ExpectingJoin4(SelectStatement<Tuple4<RT1,RT2,RT3,RT4>> select) {
-        super(select);
+    public ExpectingJoin4(SelectStatement<Tuple4<RT1,RT2,RT3,RT4>> statement) {
+        super(statement);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> join(Alias<R> alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> join(Alias<R5> alias) {
         return join(JoinType.INNER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> join(Class<R> rowClass, String alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> join(Class<R5> rowClass, String alias) {
         return join(JoinType.INNER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> leftJoin(Alias<R> alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> leftJoin(Alias<R5> alias) {
         return join(JoinType.LEFT_OUTER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> leftJoin(Class<R> rowClass, String alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> leftJoin(Class<R5> rowClass, String alias) {
         return join(JoinType.LEFT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> rightJoin(Alias<R> alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> rightJoin(Alias<R5> alias) {
         return join(JoinType.RIGHT_OUTER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> rightJoin(Class<R> rowClass, String alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> rightJoin(Class<R5> rowClass, String alias) {
         return join(JoinType.RIGHT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> fullOuterJoin(Alias<R> alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> fullOuterJoin(Alias<R5> alias) {
         return join(JoinType.FULL_OUTER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> fullOuterJoin(Class<R> rowClass, String alias) {
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> fullOuterJoin(Class<R5> rowClass, String alias) {
         return join(JoinType.FULL_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    private <R> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R>,Tuple5<RT1,RT2,RT3,RT4,R>> join(JoinType joinType, Alias<R> alias) {
-        SelectStatement<Tuple5<RT1,RT2,RT3,RT4,R>> select = new SelectStatement<>(
+    private <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> join(JoinType joinType, Alias<R5> alias) {
+        SelectStatement<Tuple5<RT1,RT2,RT3,RT4,R5>> select5 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple5<RT1,RT2,RT3,RT4,R>>() {},
+            new TypeToken<Tuple5<RT1,RT2,RT3,RT4,R5>>() {},
             statement.from().join(joinType, alias),
             RowMappers.add5th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));
-        return new InJoinExpectingOn<>(select, ExpectingJoin5::new);
+        return new InJoinExpectingOn<>(select5, ExpectingJoin5::new);
     }
 }

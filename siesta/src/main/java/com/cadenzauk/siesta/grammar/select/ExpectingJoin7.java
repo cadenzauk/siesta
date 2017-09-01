@@ -31,50 +31,49 @@ import com.cadenzauk.siesta.RowMappers;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin7<RT1, RT2, RT3, RT4, RT5, RT6, RT7> extends InJoinExpectingAnd<ExpectingJoin7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>,Tuple7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>> {
-
-    public ExpectingJoin7(SelectStatement<Tuple7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>> select) {
-        super(select);
+    public ExpectingJoin7(SelectStatement<Tuple7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>> statement) {
+        super(statement);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> join(Alias<R> alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> join(Alias<R8> alias) {
         return join(JoinType.INNER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> join(Class<R> rowClass, String alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> join(Class<R8> rowClass, String alias) {
         return join(JoinType.INNER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> leftJoin(Alias<R> alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> leftJoin(Alias<R8> alias) {
         return join(JoinType.LEFT_OUTER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> leftJoin(Class<R> rowClass, String alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> leftJoin(Class<R8> rowClass, String alias) {
         return join(JoinType.LEFT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> rightJoin(Alias<R> alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> rightJoin(Alias<R8> alias) {
         return join(JoinType.RIGHT_OUTER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> rightJoin(Class<R> rowClass, String alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> rightJoin(Class<R8> rowClass, String alias) {
         return join(JoinType.RIGHT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> fullOuterJoin(Alias<R> alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> fullOuterJoin(Alias<R8> alias) {
         return join(JoinType.FULL_OUTER, alias);
     }
 
-    public <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> fullOuterJoin(Class<R> rowClass, String alias) {
+    public <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> fullOuterJoin(Class<R8> rowClass, String alias) {
         return join(JoinType.FULL_OUTER, scope().database().table(rowClass).as(alias));
     }
 
-    private <R> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> join(JoinType joinType, Alias<R> alias) {
-        SelectStatement<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>> select = new SelectStatement<>(
+    private <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> join(JoinType joinType, Alias<R8> alias) {
+        SelectStatement<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> select8 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R>>() {},
+            new TypeToken<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>>() {},
             statement.from().join(joinType, alias),
             RowMappers.add8th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));
-        return new InJoinExpectingOn<>(select, ExpectingJoin8::new);
+        return new InJoinExpectingOn<>(select8, ExpectingJoin8::new);
     }
 }

@@ -26,6 +26,8 @@ import com.cadenzauk.core.function.Function7;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.function.Function;
+
 public class Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Tuple {
     private final T1 item1;
     private final T2 item2;
@@ -119,5 +121,89 @@ public class Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Tuple {
 
     public <T> T map(Function7<T1,T2,T3,T4,T5,T6,T7,T> function) {
         return function.apply(item1, item2, item3, item4, item5, item6, item7);
+    }
+
+    public <T> Tuple7<T,T2,T3,T4,T5,T6,T7> map1(Function<T1,T> function) {
+        return Tuple.of(
+            function.apply(item1),
+            item2,
+            item3,
+            item4,
+            item5,
+            item6,
+            item7
+        );
+    }
+
+    public <T> Tuple7<T1,T,T3,T4,T5,T6,T7> map2(Function<T2,T> function) {
+        return Tuple.of(
+            item1,
+            function.apply(item2),
+            item3,
+            item4,
+            item5,
+            item6,
+            item7
+        );
+    }
+
+    public <T> Tuple7<T1,T2,T,T4,T5,T6,T7> map3(Function<T3,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            function.apply(item3),
+            item4,
+            item5,
+            item6,
+            item7
+        );
+    }
+
+    public <T> Tuple7<T1,T2,T3,T,T5,T6,T7> map4(Function<T4,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            function.apply(item4),
+            item5,
+            item6,
+            item7
+        );
+    }
+
+    public <T> Tuple7<T1,T2,T3,T4,T,T6,T7> map5(Function<T5,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            function.apply(item5),
+            item6,
+            item7
+        );
+    }
+
+    public <T> Tuple7<T1,T2,T3,T4,T5,T,T7> map6(Function<T6,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            item5,
+            function.apply(item6),
+            item7
+        );
+    }
+
+    public <T> Tuple7<T1,T2,T3,T4,T5,T6,T> map7(Function<T7,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            item5,
+            item6,
+            function.apply(item7)
+        );
     }
 }

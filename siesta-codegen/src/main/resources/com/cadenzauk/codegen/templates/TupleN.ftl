@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,39 @@
 
 package com.cadenzauk.core.tuple;
 
-import com.cadenzauk.core.function.Function3;
+<#if n &gt; 2>
+import com.cadenzauk.core.function.Function${n};
+</#if>
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+<#if n = 2>
+import java.util.function.BiFunction;
+</#if>
 import java.util.function.Function;
 
-public class Tuple3<T1, T2, T3> implements Tuple {
-    private final T1 item1;
-    private final T2 item2;
-    private final T3 item3;
+public class Tuple${n}<<#list 1..n-1 as i>T${i}, </#list>T${n}> implements Tuple {
+<#list 1..n as i>
+    private final T${i} item${i};
+</#list>
 
-    public Tuple3(T1 item1, T2 item2, T3 item3) {
-        this.item1 = item1;
-        this.item2 = item2;
-        this.item3 = item3;
+    public Tuple${n}(<#list 1..n-1 as i>T${i} item${i}, </#list>T${n} item${n}) {
+<#list 1..n as i>
+        this.item${i} = item${i};
+</#list>
     }
 
     @Override
     public String toString() {
-        return "(" + item1 + ", " + item2 + ", " + item3 + ')';
+<#if n &gt; 3>
+        return "(" + item1 +
+<#list 2..n as i>
+            ", " + item${i} +
+</#list>
+            ')';
+<#else>
+        return "(" + item1 + <#list 2..n as i>", " + item${i} + </#list>')';
+</#if>
     }
 
     @Override
@@ -50,61 +63,41 @@ public class Tuple3<T1, T2, T3> implements Tuple {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        Tuple3<?,?,?> tuple3 = (Tuple3<?,?,?>) o;
+        Tuple${n}<?<#list 2..n as i>,?</#list>> tuple${n} = (Tuple${n}<?<#list 2..n as i>,?</#list>>) o;
 
         return new EqualsBuilder()
-            .append(item1, tuple3.item1)
-            .append(item2, tuple3.item2)
-            .append(item3, tuple3.item3)
+<#list 1..n as i>
+            .append(item${i}, tuple${n}.item${i})
+</#list>
             .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-            .append(item1)
-            .append(item2)
-            .append(item3)
+<#list 1..n as i>
+            .append(item${i})
+</#list>
             .toHashCode();
     }
+<#list 1..n as i>
 
-    public T1 item1() {
-        return item1;
+    public T${i} item${i}() {
+        return item${i};
     }
+</#list>
 
-    public T2 item2() {
-        return item2;
+    public <T> T map(<#if n = 2>BiFunction<T1, T2, T><#else>Function${n}<<#list 1..n as i>T${i},</#list>T></#if> function) {
+        return function.apply(item1<#list 2..n as i>, item${i}</#list>);
     }
+<#list 1..n as i>
 
-    public T3 item3() {
-        return item3;
-    }
-
-    public <T> T map(Function3<T1,T2,T3,T> function) {
-        return function.apply(item1, item2, item3);
-    }
-
-    public <T> Tuple3<T,T2,T3> map1(Function<T1,T> function) {
+    public <T> Tuple${n}<<#list 1..n as j><#if j=i>T<#else>T${j}</#if><#if j<n>,</#if></#list>> map${i}(Function<T${i},T> function) {
         return Tuple.of(
-            function.apply(item1),
-            item2,
-            item3
+    <#list 1..n as j>
+            <#if j=i>function.apply(item${i})<#else>item${j}</#if><#if j<n>,</#if>
+    </#list>
         );
     }
-
-    public <T> Tuple3<T1,T,T3> map2(Function<T2,T> function) {
-        return Tuple.of(
-            item1,
-            function.apply(item2),
-            item3
-        );
-    }
-
-    public <T> Tuple3<T1,T2,T> map3(Function<T3,T> function) {
-        return Tuple.of(
-            item1,
-            item2,
-            function.apply(item3)
-        );
-    }
+</#list>
 }

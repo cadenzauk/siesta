@@ -26,6 +26,8 @@ import com.cadenzauk.core.function.Function6;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.function.Function;
+
 public class Tuple6<T1, T2, T3, T4, T5, T6> implements Tuple {
     private final T1 item1;
     private final T2 item2;
@@ -110,5 +112,71 @@ public class Tuple6<T1, T2, T3, T4, T5, T6> implements Tuple {
 
     public <T> T map(Function6<T1,T2,T3,T4,T5,T6,T> function) {
         return function.apply(item1, item2, item3, item4, item5, item6);
+    }
+
+    public <T> Tuple6<T,T2,T3,T4,T5,T6> map1(Function<T1,T> function) {
+        return Tuple.of(
+            function.apply(item1),
+            item2,
+            item3,
+            item4,
+            item5,
+            item6
+        );
+    }
+
+    public <T> Tuple6<T1,T,T3,T4,T5,T6> map2(Function<T2,T> function) {
+        return Tuple.of(
+            item1,
+            function.apply(item2),
+            item3,
+            item4,
+            item5,
+            item6
+        );
+    }
+
+    public <T> Tuple6<T1,T2,T,T4,T5,T6> map3(Function<T3,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            function.apply(item3),
+            item4,
+            item5,
+            item6
+        );
+    }
+
+    public <T> Tuple6<T1,T2,T3,T,T5,T6> map4(Function<T4,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            function.apply(item4),
+            item5,
+            item6
+        );
+    }
+
+    public <T> Tuple6<T1,T2,T3,T4,T,T6> map5(Function<T5,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            function.apply(item5),
+            item6
+        );
+    }
+
+    public <T> Tuple6<T1,T2,T3,T4,T5,T> map6(Function<T6,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            item4,
+            item5,
+            function.apply(item6)
+        );
     }
 }

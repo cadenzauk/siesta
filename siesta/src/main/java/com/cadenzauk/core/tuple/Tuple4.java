@@ -26,6 +26,8 @@ import com.cadenzauk.core.function.Function4;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.function.Function;
+
 public class Tuple4<T1, T2, T3, T4> implements Tuple {
     private final T1 item1;
     private final T2 item2;
@@ -92,5 +94,41 @@ public class Tuple4<T1, T2, T3, T4> implements Tuple {
 
     public <T> T map(Function4<T1,T2,T3,T4,T> function) {
         return function.apply(item1, item2, item3, item4);
+    }
+
+    public <T> Tuple4<T,T2,T3,T4> map1(Function<T1,T> function) {
+        return Tuple.of(
+            function.apply(item1),
+            item2,
+            item3,
+            item4
+        );
+    }
+
+    public <T> Tuple4<T1,T,T3,T4> map2(Function<T2,T> function) {
+        return Tuple.of(
+            item1,
+            function.apply(item2),
+            item3,
+            item4
+        );
+    }
+
+    public <T> Tuple4<T1,T2,T,T4> map3(Function<T3,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            function.apply(item3),
+            item4
+        );
+    }
+
+    public <T> Tuple4<T1,T2,T3,T> map4(Function<T4,T> function) {
+        return Tuple.of(
+            item1,
+            item2,
+            item3,
+            function.apply(item4)
+        );
     }
 }

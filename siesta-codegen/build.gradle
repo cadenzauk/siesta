@@ -19,7 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+version '1.0.0-SNAPSHOT'
 
-rootProject.name = 'cadenzauk'
-
-include ":siesta-codegen", ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird"
+dependencies {
+    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
+}

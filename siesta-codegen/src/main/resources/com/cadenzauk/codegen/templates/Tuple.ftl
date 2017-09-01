@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,13 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'cadenzauk'
+package com.cadenzauk.core.tuple;
 
-include ":siesta-codegen", ":siesta", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird"
+public interface Tuple {
+<#list 2..n as i>
+    static <T1<#list 2..i as j>, T${j}</#list>> Tuple${i}<T1<#list 2..i as j>,T${j}</#list>> of(T1 item1<#list 2..i as j>, T${j} item${j}</#list>) {
+        return new Tuple${i}<>(item1<#list 2..i as j>, item${j}</#list>);
+    }
+
+</#list>
+}
