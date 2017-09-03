@@ -27,7 +27,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
@@ -75,7 +75,7 @@ class CaseExpressionTest extends MockitoTest {
     private RowMapper<String> rowMapper;
 
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -179,9 +179,9 @@ class CaseExpressionTest extends MockitoTest {
 
         database.from(w)
             .select(f.apply(w).orElse(literal("DEFAULT")), "name")
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), any());
+        verify(transaction).query(sql.capture(), args.capture(), any());
         assertThat(sql.getValue(), is("select case " + expected + " else 'DEFAULT' end as name " +
             "from SIESTA.WIDGET w"));
         assertThat(args.getValue(), is(expectedArgs));
@@ -231,9 +231,9 @@ class CaseExpressionTest extends MockitoTest {
 
         database.from(w)
             .select(f.apply(ExpressionBuilder.when(literal(1)).isEqualTo(literal(2)).then("UNLIKELY"), w), "name")
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), any());
+        verify(transaction).query(sql.capture(), args.capture(), any());
         assertThat(sql.getValue(), is("select case when 1 = 2 then 'UNLIKELY' " + expected + " end as name " +
             "from SIESTA.WIDGET w"));
         assertThat(args.getValue(), is(expectedArgs));

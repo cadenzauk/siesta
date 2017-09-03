@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 
 class BetweenBuilderTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
     @Captor
     private ArgumentCaptor<String> sql;
     @Captor
@@ -86,9 +86,9 @@ class BetweenBuilderTest {
             .select(SalespersonRow::firstName, "name")
             .where(SalespersonRow::firstName)
             .isBetween(SalespersonRow::middleNames);
-        method.apply(between, alias).list(sqlExecutor);
+        method.apply(between, alias).list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select s.FIRST_NAME as name from SIESTA.SALESPERSON s where s.FIRST_NAME between s.MIDDLE_NAMES and " + expectedSql));
         assertThat(args.getValue(), is(expectedArgs));
     }

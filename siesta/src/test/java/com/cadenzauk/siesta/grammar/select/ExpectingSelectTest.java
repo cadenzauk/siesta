@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.verify;
 
 class ExpectingSelectTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
     @Captor
     private ArgumentCaptor<String> sql;
     @Captor
@@ -97,9 +97,9 @@ class ExpectingSelectTest {
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
         method.apply(database.from(alias), alias)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select " + expectedSql + " from SIESTA.SALESPERSON s"));
         assertThat(args.getValue(), arrayWithSize(0));
     }

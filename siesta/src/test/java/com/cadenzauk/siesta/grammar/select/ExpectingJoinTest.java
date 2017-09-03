@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 
 class ExpectingJoinTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
     @Captor
     private ArgumentCaptor<String> sql;
     @Captor
@@ -192,9 +192,9 @@ class ExpectingJoinTest {
 
         method.apply(database.from(alias[0]), alias)
             .select(alias[0], SalespersonRow::firstName, "name")
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select s1.FIRST_NAME as name from SIESTA.SALESPERSON s1 " + expectedSql));
         assertThat(args.getValue(), arrayWithSize(0));
     }

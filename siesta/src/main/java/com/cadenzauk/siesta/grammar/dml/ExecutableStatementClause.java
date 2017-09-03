@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 
 public class ExecutableStatementClause {
     protected final ExecutableStatement statement;
@@ -32,12 +33,18 @@ public class ExecutableStatementClause {
         this.statement = statement;
     }
 
-    public int execute(SqlExecutor sqlExecutor) {
-        return statement.execute(sqlExecutor);
+    public int execute() {
+        return execute(database().getDefaultSqlExecutor());
     }
 
-    public int execute() {
-        return statement.execute(database().getDefaultSqlExecutor());
+    public int execute(SqlExecutor sqlExecutor) {
+        try (Transaction transaction = sqlExecutor.beginTransaction()) {
+            return statement.execute(transaction);
+        }
+    }
+
+    public int execute(Transaction transaction) {
+        return statement.execute(transaction);
     }
 
     public String sql() {

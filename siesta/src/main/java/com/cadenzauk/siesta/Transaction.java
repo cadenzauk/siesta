@@ -20,32 +20,24 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.model;
+package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Dialect;
-import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
+import com.cadenzauk.core.sql.RowMapper;
 
-import javax.sql.DataSource;
+import java.util.List;
+import java.util.stream.Stream;
 
-public class TestDatabase {
-    public static Database testDatabase(DataSource dataSource, Dialect dialect) {
-        return testDatabaseBuilder(dialect)
-            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource, 0))
-            .build();
-    }
+public interface Transaction extends AutoCloseable {
+    @Override
+    void close();
 
-    public static Database testDatabase(Dialect dialect) {
-        return testDatabaseBuilder(dialect).build();
-    }
+    void commit();
 
-    public static Database.Builder testDatabaseBuilder(Dialect dialect) {
-        return Database.newBuilder()
-            .defaultSchema("SIESTA")
-            .dialect(dialect)
-            .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
-            .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
-            .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
-            .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
-    }
+    void rollback();
+
+    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
+
+    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
+
+    int update(String sql, Object[] args);
 }

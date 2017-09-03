@@ -232,4 +232,14 @@ public class AnsiDialect implements Dialect {
     public String charType(int len) {
         return String.format("char(%d)", len);
     }
+
+    @Override
+    public boolean requiresBeginTransaction() {
+        return false;
+    }
+
+    @Override
+    public String beginTransaction() {
+        return "";
+    }
 }

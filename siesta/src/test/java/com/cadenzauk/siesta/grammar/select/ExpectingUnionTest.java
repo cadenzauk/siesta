@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 
 class ExpectingUnionTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
     @Captor
     private ArgumentCaptor<String> sql;
     @Captor
@@ -57,9 +57,9 @@ class ExpectingUnionTest extends MockitoTest {
             .union(database.select(TypedExpression.literal(2), "two"))
             .unionAll(database.select(TypedExpression.value(3), "three"))
             .orderBy(1)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select ? as one from DUAL union select 2 as two from DUAL union all select ? as three from DUAL order by 1 asc"));
         assertThat(args.getValue(), is(toArray(1, 3)));
     }

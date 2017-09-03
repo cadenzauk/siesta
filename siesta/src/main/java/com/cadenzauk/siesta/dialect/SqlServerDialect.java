@@ -124,4 +124,14 @@ public class SqlServerDialect extends AnsiDialect {
             .map(p -> String.format("datetime2(%d)", p))
             .orElse("datetime2");
     }
+
+    @Override
+    public boolean requiresBeginTransaction() {
+        return true;
+    }
+
+    @Override
+    public String beginTransaction() {
+        return "begin tran";
+    }
 }

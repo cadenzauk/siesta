@@ -105,4 +105,8 @@ public interface Dialect {
     String varcharType(int size);
 
     String charType(int len);
+
+    boolean requiresBeginTransaction();
+
+    String beginTransaction();
 }

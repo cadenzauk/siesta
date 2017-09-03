@@ -46,7 +46,7 @@ import static org.mockito.Mockito.verify;
 
 class Select1Test extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -91,9 +91,9 @@ class Select1Test extends MockitoTest {
         Alias<Parent> p = database.table(Parent.class).as("p");
         Alias<Child> c = database.table(Child.class).as("c");
 
-        join.apply(c, database.from(p)).optional(sqlExecutor);
+        join.apply(c, database.from(p)).optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select p.ID as p_ID, c.PARENT_ID as c_PARENT_ID, c.ALIAS_ID as c_ALIAS_ID from SIESTA.PARENT p " + expected));
         assertThat(args.getValue(), arrayWithSize(0));
     }

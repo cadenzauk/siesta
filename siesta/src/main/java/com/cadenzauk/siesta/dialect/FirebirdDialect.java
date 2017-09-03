@@ -96,6 +96,16 @@ public class FirebirdDialect extends AnsiDialect {
     }
 
     @Override
+    public boolean requiresBeginTransaction() {
+        return true;
+    }
+
+    @Override
+    public String beginTransaction() {
+        return "set transaction";
+    }
+
+    @Override
     public String qualifiedTableName(String catalog, String schema, String table) {
         return table;
     }

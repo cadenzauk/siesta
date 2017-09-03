@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.Iterables;
@@ -119,19 +119,26 @@ class SelectStatement<RT> {
         fetchFirst = Optional.of(i);
     }
 
-    Optional<RT> optional(SqlExecutor sqlExecutor) {
-        return OptionalUtil.ofOnly(list(sqlExecutor));
-    }
-
-    Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable autoCloseable) {
+    List<RT> list(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return autoCloseable.add(sqlExecutor.stream(sql, args, rowMapper()));
+        return transaction.query(sql, args, rowMapper());
     }
 
-    RT single(SqlExecutor sqlExecutor) {
-        return Iterables.getOnlyElement(list(sqlExecutor));
+    Optional<RT> optional(Transaction transaction) {
+        return OptionalUtil.ofOnly(list(transaction));
+    }
+
+    Stream<RT> stream(Transaction transaction, CompositeAutoCloseable autoCloseable) {
+        Object[] args = args(scope).toArray();
+        String sql = sql();
+        LOG.debug(sql);
+        return autoCloseable.add(transaction.stream(sql, args, rowMapper()));
+    }
+
+    RT single(Transaction transaction) {
+        return Iterables.getOnlyElement(list(transaction));
     }
 
     From from() {
@@ -140,13 +147,6 @@ class SelectStatement<RT> {
 
     Scope scope() {
         return scope;
-    }
-
-    List<RT> list(SqlExecutor sqlExecutor) {
-        Object[] args = args(scope).toArray();
-        String sql = sql();
-        LOG.debug(sql);
-        return sqlExecutor.query(sql, args, rowMapper());
     }
 
     String sql() {

@@ -23,12 +23,42 @@
 package com.cadenzauk.core.sql;
 
 import com.cadenzauk.core.util.UtilityClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ConnectionUtil extends UtilityClass {
+    private static final Logger LOG = LoggerFactory.getLogger(ConnectionUtil.class);
+
+    public static void commit(Connection connection) {
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
+
+    public static void rollback(Connection connection) {
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
+
+    public static boolean execute(Connection connection, String sql) {
+        try (Statement statement = connection.createStatement()) {
+            LOG.debug(sql);
+            return statement.execute(sql);
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
+
     public static PreparedStatement prepare(Connection connection, String sql) {
         try {
             return connection.prepareStatement(sql);

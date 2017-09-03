@@ -27,7 +27,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -67,7 +67,7 @@ class ExpressionBuilderTest extends MockitoTest {
     private RowMapper<String> rowMapper;
 
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -247,9 +247,9 @@ class ExpressionBuilderTest extends MockitoTest {
         ExpressionBuilder<String,InWhereExpectingAnd<String>> select = database.from(alias)
             .select(SalespersonRow::firstName, "name")
             .where(SalespersonRow::firstName);
-        method.apply(select, alias).list(sqlExecutor);
+        method.apply(select, alias).list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), any());
+        verify(transaction).query(sql.capture(), args.capture(), any());
         assertThat(sql.getValue(), is("select s.FIRST_NAME as name from SIESTA.SALESPERSON s where s.FIRST_NAME " + expectedSql));
         assertThat(args.getValue(), is(expectedArgs));
     }

@@ -29,6 +29,7 @@ import com.cadenzauk.core.sql.PreparedStatementUtil;
 import com.cadenzauk.core.sql.ResultSetSpliterator;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -51,18 +52,25 @@ public class JdbcSqlExecutor implements SqlExecutor {
         this.fetchSize = fetchSize;
     }
 
-    @Override
-    public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
-        try (CompositeAutoCloseable closeable = new CompositeAutoCloseable()) {
-            return closeable.add(stream(sql, args, rowMapper)).collect(toList());
-        }
+    Connection connect() {
+        return DataSourceUtil.connection(dataSource);
     }
 
     @Override
-    public <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper) {
+    public JdbcTransaction beginTransaction() {
+        return new JdbcTransaction(this);
+    }
+
+    <T> List<T> query(JdbcTransaction transaction, String sql, Object[] args, RowMapper<T> rowMapper) {
+        try (CompositeAutoCloseable closeable = new CompositeAutoCloseable()) {
+            return closeable.add(stream(transaction, sql, args, rowMapper)).collect(toList());
+        }
+    }
+
+    <T> Stream<T> stream(JdbcTransaction transaction, String sql, Object[] args, RowMapper<T> rowMapper) {
         CompositeAutoCloseable closeable = new CompositeAutoCloseable();
         try {
-            PreparedStatement preparedStatement = prepare(sql, args, closeable);
+            PreparedStatement preparedStatement = prepare(transaction, sql, args, closeable);
             preparedStatement.setFetchSize(fetchSize);
             ResultSet resultSet = closeable.add(preparedStatement.executeQuery());
             return StreamSupport
@@ -77,26 +85,26 @@ public class JdbcSqlExecutor implements SqlExecutor {
         }
     }
 
-    @Override
-    public int update(String sql, Object[] args) {
+    int update(Transaction transaction, String sql, Object[] args) {
         try (CompositeAutoCloseable closeable = new CompositeAutoCloseable()) {
-            PreparedStatement preparedStatement = prepare(sql, args, closeable);
+            PreparedStatement preparedStatement = prepare(transaction, sql, args, closeable);
             return PreparedStatementUtil.executeUpdate(preparedStatement);
         }
     }
 
-    private PreparedStatement prepare(String sql, Object[] args, CompositeAutoCloseable closeable) {
-        Connection connection = closeable.add(DataSourceUtil.connection(dataSource));
+    private PreparedStatement prepare(Transaction transaction, String sql, Object[] args, CompositeAutoCloseable closeable) {
+        JdbcTransaction jdbcTransaction = (JdbcTransaction) transaction;
+        Connection connection = jdbcTransaction.connection();
         PreparedStatement preparedStatement = closeable.add(ConnectionUtil.prepare(connection, sql));
         IntStream.range(0, args.length).forEach(i -> registry.setParameter(preparedStatement, i + 1, args[i]));
         return preparedStatement;
     }
 
-    public static SqlExecutor of(DataSource dataSource) {
+    public static JdbcSqlExecutor of(DataSource dataSource) {
         return new JdbcSqlExecutor(dataSource, 0);
     }
 
-    public static SqlExecutor of(DataSource dataSource, int fetchSize) {
+    public static JdbcSqlExecutor of(DataSource dataSource, int fetchSize) {
         return new JdbcSqlExecutor(dataSource, fetchSize);
     }
 }

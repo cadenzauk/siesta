@@ -34,7 +34,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
@@ -118,11 +118,11 @@ public class Table<R> {
         return Alias.of(this, alias);
     }
 
-    public void insert(SqlExecutor sqlExecutor, R[] rows) {
+    public void insert(Transaction transaction, R[] rows) {
         if (database().dialect().supportsMultiInsert()) {
-            impl.insert(sqlExecutor, rows);
+            impl.insert(transaction, rows);
         } else {
-            Arrays.stream(rows).forEach(r -> impl.insert(sqlExecutor, r));
+            Arrays.stream(rows).forEach(r -> impl.insert(transaction, r));
         }
     }
 
@@ -156,7 +156,7 @@ public class Table<R> {
 
         @SuppressWarnings("unchecked")
         @SafeVarargs
-        final void insert(SqlExecutor sqlExecutor, R... rows) {
+        final void insert(Transaction transaction, R... rows) {
             if (rows.length == 0) {
                 return;
             }
@@ -178,7 +178,7 @@ public class Table<R> {
                         .orElse(null)))
                 .toArray();
 
-            sqlExecutor.update(sql, args);
+            transaction.update(sql, args);
         }
 
         public RowMapper<R> rowMapper() {

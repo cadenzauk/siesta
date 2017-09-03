@@ -146,25 +146,24 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
     @Test
     public void update() {
-        Database database = testDatabase(dialect);
+        Database database = testDatabase(dataSource, dialect);
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(newId())
             .manufacturerId(newId())
             .name("Dodacky")
             .description(Optional.of("Thingamibob"))
             .build();
-        SqlExecutor sqlExecutor = JdbcSqlExecutor.of(dataSource);
-        database.insert(sqlExecutor, aWidget);
+        database.insert(aWidget);
 
         int updated = database.update(WidgetRow.class)
             .set(WidgetRow::name).to("Sprocket")
             .set(WidgetRow::description).toNull()
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
-            .execute(sqlExecutor);
+            .execute();
 
         Optional<WidgetRow> sprocket = database.from(WidgetRow.class)
             .where(WidgetRow::widgetId).isEqualTo(aWidget.widgetId())
-            .optional(sqlExecutor);
+            .optional();
         assertThat(sprocket.map(WidgetRow::name), is(Optional.of("Sprocket")));
         assertThat(sprocket.flatMap(WidgetRow::description), is(Optional.empty()));
         assertThat(updated, is(1));

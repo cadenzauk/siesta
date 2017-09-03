@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 
 class InProjectionExpectingCommaTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
     @Captor
     private ArgumentCaptor<String> sql;
     @Captor
@@ -246,9 +246,9 @@ class InProjectionExpectingCommaTest {
 
         InProjectionExpectingComma1<String> sut = database.from(alias)
             .select(SalespersonRow::firstName, "name");
-        method.apply(sut, alias).list(sqlExecutor);
+        method.apply(sut, alias).list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         Pattern pattern = Pattern.compile("select s.FIRST_NAME as name, " + expectedSql + " from SIESTA.SALESPERSON s");
         assertThat(pattern.matcher(sql.getValue()).matches(), is(true));
         assertThat(args.getValue(), is(expectedArgs));

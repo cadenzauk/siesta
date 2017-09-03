@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
@@ -51,27 +52,50 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public List<RT> list(SqlExecutor sqlExecutor) {
-        return statement.list(sqlExecutor);
+        try (Transaction transaction = sqlExecutor.beginTransaction()) {
+            return statement.list(transaction);
+        }
+    }
+
+    public List<RT> list(Transaction transaction) {
+        return statement.list(transaction);
     }
 
     public Optional<RT> optional() {
-        return statement.optional(defaultSqlExecutor());
+        return optional(defaultSqlExecutor());
     }
 
     public Optional<RT> optional(SqlExecutor sqlExecutor) {
-        return statement.optional(sqlExecutor);
+        try (Transaction transaction = sqlExecutor.beginTransaction()) {
+            return statement.optional(transaction);
+        }
+    }
+
+    public Optional<RT> optional(Transaction transaction) {
+        return statement.optional(transaction);
     }
 
     public Stream<RT> stream(CompositeAutoCloseable compositeAutoCloseable) {
-        return statement.stream(defaultSqlExecutor(), compositeAutoCloseable);
+        return stream(defaultSqlExecutor(), compositeAutoCloseable);
     }
 
     public Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable compositeAutoCloseable) {
-        return statement.stream(sqlExecutor, compositeAutoCloseable);
+        Transaction transaction = compositeAutoCloseable.add(sqlExecutor.beginTransaction());
+        return statement.stream(transaction, compositeAutoCloseable);
+    }
+
+    public Stream<RT> stream(Transaction transaction, CompositeAutoCloseable compositeAutoCloseable) {
+        return statement.stream(transaction, compositeAutoCloseable);
     }
 
     public RT single() {
         return single(defaultSqlExecutor());
+    }
+
+    private RT single(SqlExecutor sqlExecutor) {
+        try (Transaction transaction = sqlExecutor.beginTransaction()) {
+            return statement.single(transaction);
+        }
     }
 
     public Select<RT> fetchFirst(long i) {
@@ -82,10 +106,6 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     @Override
     public TypeToken<RT> type() {
         return statement.rowType();
-    }
-
-    private RT single(SqlExecutor sqlExecutor) {
-        return statement.single(sqlExecutor);
     }
 
     public String sql() {

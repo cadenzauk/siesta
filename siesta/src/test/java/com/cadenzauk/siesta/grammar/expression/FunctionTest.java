@@ -27,7 +27,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.TestRow;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +50,7 @@ abstract class FunctionTest extends MockitoTest {
     @Mock
     protected Scope scope;
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
     @Captor
     private ArgumentCaptor<String> sql;
     @Captor
@@ -67,9 +67,9 @@ abstract class FunctionTest extends MockitoTest {
 
         database.from(alias)
             .select(sutSupplier.apply(alias), "foo")
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select " + expectedSql + " as foo from SIESTA.TEST_TABLE s"));
         assertThat(args.getValue(), is(expectedArgs));
     }

@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 
 class SelectGroupByTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -59,9 +59,9 @@ class SelectGroupByTest extends MockitoTest {
         database.from(WidgetRow.class, "w")
             .select(WidgetRow::manufacturerId).comma(max(WidgetRow::name))
             .groupBy(WidgetRow::manufacturerId)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, max(w.NAME) as max_w_NAME " +
             "from SIESTA.WIDGET w " +
             "group by w.MANUFACTURER_ID"));
@@ -75,9 +75,9 @@ class SelectGroupByTest extends MockitoTest {
         database.from(WidgetRow.class, "w")
             .select(WidgetRow::manufacturerId).comma(WidgetRow::description).comma(max(WidgetRow::name))
             .groupBy(WidgetRow::manufacturerId).comma(WidgetRow::description)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, w.DESCRIPTION as w_DESCRIPTION, max(w.NAME) as max_w_NAME " +
             "from SIESTA.WIDGET w " +
             "group by w.MANUFACTURER_ID, w.DESCRIPTION"));
@@ -92,9 +92,9 @@ class SelectGroupByTest extends MockitoTest {
             .select(WidgetRow::manufacturerId, "id").comma(max(WidgetRow::name), "name")
             .where(WidgetRow::description).isLike("ABC%")
             .groupBy(WidgetRow::manufacturerId)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as id, max(w.NAME) as name from SIESTA.WIDGET w " +
             "where w.DESCRIPTION like ? " +
             "group by w.MANUFACTURER_ID"));
@@ -111,9 +111,9 @@ class SelectGroupByTest extends MockitoTest {
             .select(WidgetRow::manufacturerId, "id").comma(ManufacturerRow::name, "manufacturer").comma(max(WidgetRow::name), "name")
             .where(WidgetRow::description).isLike("ABC%")
             .groupBy(WidgetRow::manufacturerId).comma(ManufacturerRow::name)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as id, m.NAME as manufacturer, max(w.NAME) as name " +
             "from SIESTA.WIDGET w " +
             "left join SIESTA.MANUFACTURER m on m.MANUFACTURER_ID = w.MANUFACTURER_ID " +
@@ -132,9 +132,9 @@ class SelectGroupByTest extends MockitoTest {
             .where(WidgetRow::description).isLike("ABC%")
             .groupBy(WidgetRow::manufacturerId)
             .orderBy(WidgetRow::manufacturerId).then(max(WidgetRow::name))
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as id, max(w.NAME) as name from SIESTA.WIDGET w " +
             "where w.DESCRIPTION like ? " +
             "group by w.MANUFACTURER_ID " +

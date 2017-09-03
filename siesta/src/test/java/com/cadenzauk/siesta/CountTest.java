@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 
 class CountTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -59,9 +59,9 @@ class CountTest extends MockitoTest {
         database.from(WidgetRow.class, "w")
             .select(count(), "n")
             .where(WidgetRow::manufacturerId).isEqualTo(4002L)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select count(*) as n " +
             "from SIESTA.WIDGET w " +
             "where w.MANUFACTURER_ID = ?"));
@@ -75,9 +75,9 @@ class CountTest extends MockitoTest {
         database.from(WidgetRow.class, "w")
             .select(countDistinct(WidgetRow::name), "n")
             .where(WidgetRow::manufacturerId).isEqualTo(4002L)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select count(distinct w.NAME) as n " +
             "from SIESTA.WIDGET w " +
             "where w.MANUFACTURER_ID = ?"));

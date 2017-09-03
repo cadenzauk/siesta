@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 
 class SelectHavingTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -158,9 +158,9 @@ class SelectHavingTest extends MockitoTest {
             .from(w)
             .select(WidgetRow::manufacturerId).comma(WidgetRow::description).comma(max(WidgetRow::name))
             .groupBy(WidgetRow::manufacturerId).comma(WidgetRow::description))
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, w.DESCRIPTION as w_DESCRIPTION, max(w.NAME) as max_w_NAME " +
             "from SIESTA.WIDGET w " +
             "group by w.MANUFACTURER_ID, w.DESCRIPTION " +

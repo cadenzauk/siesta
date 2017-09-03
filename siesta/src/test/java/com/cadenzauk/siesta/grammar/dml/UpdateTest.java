@@ -24,7 +24,7 @@ package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 
 class UpdateTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -62,9 +62,9 @@ class UpdateTest extends MockitoTest {
             .where(WidgetRow::widgetId).isEqualTo(1L)
             .and(column(WidgetRow::description).isBetween("A").and("w", WidgetRow::name)
                 .or(column(WidgetRow::description).isNull()))
-            .execute(sqlExecutor);
+            .execute(transaction);
 
-        verify(sqlExecutor).update(sql.capture(), args.capture());
+        verify(transaction).update(sql.capture(), args.capture());
         assertThat(sql.getValue(), is("update SIESTA.WIDGET w " +
             "set NAME = ?, " +
             "DESCRIPTION = ? " +

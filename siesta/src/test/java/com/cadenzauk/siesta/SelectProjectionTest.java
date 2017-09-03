@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
 
 class SelectProjectionTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -68,9 +68,9 @@ class SelectProjectionTest extends MockitoTest {
             .comma(w, WidgetRow::description, "d3")
             .comma(w, WidgetRow::manufacturerId, "m3")
             .where(WidgetRow::name).isEqualTo("Bob")
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select " +
             "w.NAME as n1, w.DESCRIPTION as d1, w.MANUFACTURER_ID as m1, " +
             "w.NAME as n2, w.DESCRIPTION as d2, w.MANUFACTURER_ID as m2, " +
@@ -94,9 +94,9 @@ class SelectProjectionTest extends MockitoTest {
             .with(WidgetRow::description).as(WidgetViewRow::description)
             .with(WidgetRow::manufacturerId).as(WidgetViewRow::manufacturerId)
             .with(ManufacturerRow::name).as(WidgetViewRow::manufacturerName)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.WIDGET_ID as v_WIDGET_ID, " +
             "w.NAME as v_WIDGET_NAME, " +
             "w.DESCRIPTION as v_DESCRIPTION, " +

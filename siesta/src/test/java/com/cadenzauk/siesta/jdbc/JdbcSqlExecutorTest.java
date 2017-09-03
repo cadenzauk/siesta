@@ -25,7 +25,6 @@ package com.cadenzauk.siesta.jdbc;
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RuntimeSqlException;
-import com.cadenzauk.siesta.SqlExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -58,6 +57,9 @@ class JdbcSqlExecutorTest extends MockitoTest {
     private Connection connection;
 
     @Mock
+    private JdbcTransaction transaction;
+
+    @Mock
     private PreparedStatement preparedStatement;
 
     @Mock
@@ -68,7 +70,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @BeforeEach
     void wireUpMocks() throws SQLException {
-        when(dataSource.getConnection()).thenReturn(connection);
+        when(transaction.connection()).thenReturn(connection);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
     }
 
@@ -77,13 +79,13 @@ class JdbcSqlExecutorTest extends MockitoTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenReturn("Barney").thenThrow(new AssertionError("Unexpected call to row mapper"));
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = ?";
 
-        List<String> result = sut.query(sql, toArray(2L), rowMapper);
+        List<String> result = sut.query(transaction, sql, toArray(2L), rowMapper);
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, 2L);
         verify(preparedStatement).setFetchSize(0);
@@ -100,16 +102,16 @@ class JdbcSqlExecutorTest extends MockitoTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenReturn("Barney").thenThrow(new AssertionError("Unexpected call to row mapper"));
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource, 100);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource, 100);
         String sql = "select name from foo where bar = ?";
 
         List<String> result;
-        try (Stream<String> stream = sut.stream(sql, toArray("Bob"), rowMapper)) {
+        try (Stream<String> stream = sut.stream(transaction, sql, toArray("Bob"), rowMapper)) {
             result = stream.collect(Collectors.toList());
         }
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, "Bob");
         verify(preparedStatement).setFetchSize(100);
@@ -126,19 +128,19 @@ class JdbcSqlExecutorTest extends MockitoTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenThrow(new IllegalArgumentException("Exception while mapping"));
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = ?";
 
         calling(() -> {
-            try (Stream<String> stream = sut.stream(sql, toArray("Bob", "Burt"), rowMapper)) {
+            try (Stream<String> stream = sut.stream(transaction, sql, toArray("Bob", "Burt"), rowMapper)) {
                 return stream.collect(Collectors.toList());
             }
         })
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Exception while mapping"));
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, "Bob");
         verify(preparedStatement).setObject(2, "Burt");
@@ -155,11 +157,11 @@ class JdbcSqlExecutorTest extends MockitoTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenThrow(new SQLException("Connection lost"));
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred");
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = ?";
 
         calling(() -> {
-            try (Stream<String> stream = sut.stream(sql, toArray("Bob", "Burt"), rowMapper)) {
+            try (Stream<String> stream = sut.stream(transaction, sql, toArray("Bob", "Burt"), rowMapper)) {
                 return stream.collect(Collectors.toList());
             }
         })
@@ -167,8 +169,8 @@ class JdbcSqlExecutorTest extends MockitoTest {
             .withCause(SQLException.class)
             .withMessage(is("Connection lost"));
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, "Bob");
         verify(preparedStatement).setObject(2, "Burt");
@@ -184,11 +186,11 @@ class JdbcSqlExecutorTest extends MockitoTest {
     void streamWhenExecuteThrows() throws SQLException {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(preparedStatement.executeQuery()).thenThrow(new SQLException("No permission"));
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = 'fred'";
 
         calling(() -> {
-            try (Stream<String> stream = sut.stream(sql, toArray(), rowMapper)) {
+            try (Stream<String> stream = sut.stream(transaction, sql, toArray(), rowMapper)) {
                 return stream.collect(Collectors.toList());
             }
         })
@@ -196,8 +198,8 @@ class JdbcSqlExecutorTest extends MockitoTest {
             .withCause(SQLException.class)
             .withMessage(is("No permission"));
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setFetchSize(0);
         verify(preparedStatement).close();
@@ -207,13 +209,13 @@ class JdbcSqlExecutorTest extends MockitoTest {
     @Test
     void update() throws SQLException {
         when(preparedStatement.executeUpdate()).thenReturn(5);
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "update foo set num = ?";
 
-        int result = sut.update(sql, toArray(3));
+        int result = sut.update(transaction, sql, toArray(3));
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeUpdate();
         verify(preparedStatement).setObject(1, 3);
         verify(preparedStatement).close();
@@ -224,16 +226,16 @@ class JdbcSqlExecutorTest extends MockitoTest {
     @Test
     void updateWhenExecuteThrows() throws SQLException {
         when(preparedStatement.executeUpdate()).thenThrow(new SQLException("Update failed."));
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "update foo set num = ?";
 
-        calling(() -> sut.update(sql, toArray(3)))
+        calling(() -> sut.update(transaction, sql, toArray(3)))
             .shouldThrow(RuntimeSqlException.class)
             .withCause(SQLException.class)
             .withMessage(is("Update failed."));
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verify(preparedStatement).executeUpdate();
         verify(preparedStatement).setObject(1, 3);
         verify(preparedStatement).close();
@@ -244,15 +246,15 @@ class JdbcSqlExecutorTest extends MockitoTest {
     void updateWhenPrepareThrows() throws SQLException {
         String sql = "update foo set num = ?";
         when(connection.prepareStatement(sql)).thenThrow(new SQLException("Syntax error."));
-        SqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
 
-        calling(() -> sut.update(sql, toArray(3)))
+        calling(() -> sut.update(transaction, sql, toArray(3)))
             .shouldThrow(RuntimeSqlException.class)
             .withCause(SQLException.class)
             .withMessage(is("Syntax error."));
 
+        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
-        verify(connection).close();
         verifyNoMoreInteractions(connection, preparedStatement, resultSet, rowMapper);
     }
 }

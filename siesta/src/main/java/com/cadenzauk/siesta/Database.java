@@ -204,18 +204,31 @@ public class Database {
         return defaultSqlExecutor.orElseThrow(() -> new IllegalStateException("Default SQL executor has not been set."));
     }
 
-    @SuppressWarnings("unchecked")
-    public <R> void insert(SqlExecutor sqlExecutor, R... rows) {
-        if (rows.length == 0) {
-            return;
-        }
-        Class<R> rowClass = (Class<R>) rows[0].getClass();
-        table(rowClass).insert(sqlExecutor, rows);
+    public Transaction beginTransaction() {
+        return getDefaultSqlExecutor().beginTransaction();
     }
 
     @SuppressWarnings("unchecked")
     public <R> void insert(R... rows) {
-        insert(getDefaultSqlExecutor(), rows);
+        try (Transaction transaction = beginTransaction()) {
+            insert(transaction, rows);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> void insert(SqlExecutor sqlExecutor, R... rows) {
+        try (Transaction transaction = sqlExecutor.beginTransaction()) {
+            insert(transaction, rows);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> void insert(Transaction transaction, R... rows) {
+        if (rows.length == 0) {
+            return;
+        }
+        Class<R> rowClass = (Class<R>) rows[0].getClass();
+        table(rowClass).insert(transaction, rows);
     }
 
     public CommonTableExpressionBuilder with(String name) {

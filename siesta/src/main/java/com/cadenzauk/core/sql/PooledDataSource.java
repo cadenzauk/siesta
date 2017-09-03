@@ -34,7 +34,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -74,13 +73,7 @@ public class PooledDataSource implements DataSource, AutoCloseable {
     }
 
     private Connection init(Connection connection) {
-        initString.ifPresent(s -> {
-            try (Statement statement = connection.createStatement()) {
-                statement.execute(s);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        initString.ifPresent(s -> ConnectionUtil.execute(connection, s));
         return connection;
     }
 

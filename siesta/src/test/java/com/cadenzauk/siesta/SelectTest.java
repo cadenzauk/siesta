@@ -86,7 +86,7 @@ class SelectTest extends MockitoTest {
     }
 
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Mock
     private Stream<Row1> stream;
@@ -106,9 +106,9 @@ class SelectTest extends MockitoTest {
 
         database.from(Row1.class)
             .where(Row1::name).isEqualTo(Row1::description)
-            .optional(sqlExecutor);
+            .optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select ROW1.NAME as ROW1_NAME, ROW1.DESCRIPTION as ROW1_DESCRIPTION " +
             "from SIESTA.ROW1 ROW1 " +
             "where ROW1.NAME = ROW1.DESCRIPTION"));
@@ -121,9 +121,9 @@ class SelectTest extends MockitoTest {
 
         database.from(Row1.class, "w")
             .where(Row1::name).isEqualTo(Row1::description)
-            .optional(sqlExecutor);
+            .optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION " +
             "from SIESTA.ROW1 w " +
             "where w.NAME = w.DESCRIPTION"));
@@ -136,9 +136,9 @@ class SelectTest extends MockitoTest {
 
         database.from(Row1.class, "w")
             .where(Row1::name).isEqualTo("w", Row1::description)
-            .optional(sqlExecutor);
+            .optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION " +
             "from SIESTA.ROW1 w " +
             "where w.NAME = w.DESCRIPTION"));
@@ -151,9 +151,9 @@ class SelectTest extends MockitoTest {
 
         database.from(Row1.class, "w")
             .where(Row1::description).isEqualTo("fred")
-            .optional(sqlExecutor);
+            .optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION " +
             "from SIESTA.ROW1 w " +
             "where w.DESCRIPTION = ?"));
@@ -167,9 +167,9 @@ class SelectTest extends MockitoTest {
         database.from(Row1.class, "w")
             .where(Row1::description).isEqualTo("fred")
             .and(Row1::name).isEqualTo("bob")
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select w.NAME as w_NAME, w.DESCRIPTION as w_DESCRIPTION " +
             "from SIESTA.ROW1 w " +
             "where w.DESCRIPTION = ? and w.NAME = ?"));
@@ -183,9 +183,9 @@ class SelectTest extends MockitoTest {
         database.from(Row2.class, "x")
             .where(Row2::name).isEqualTo(Row2::comment)
             .orderBy(Row2::description, Order.DESC)
-            .list(sqlExecutor);
+            .list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select x.NAME as x_NAME, x.DESCRIPTION as x_DESCRIPTION, x.COMMENT as x_COMMENT " +
             "from SIESTA.ROW2 x " +
             "where x.NAME = x.COMMENT " +
@@ -217,9 +217,9 @@ class SelectTest extends MockitoTest {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
 
         Alias<Row2> alias = database.table(Row2.class).as("q");
-        where.apply(alias, database.from(Row2.class, "q")).list(sqlExecutor);
+        where.apply(alias, database.from(Row2.class, "q")).list(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from SIESTA.ROW2 q " + expected));
         assertThat(args.getValue(), arrayWithSize(0));
     }
@@ -266,9 +266,9 @@ class SelectTest extends MockitoTest {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
-        orderBy.apply(alias, database.from(alias)).optional(sqlExecutor);
+        orderBy.apply(alias, database.from(alias)).optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from SIESTA.ROW2 q order by " + expected));
         assertThat(args.getValue(), arrayWithSize(0));
     }
@@ -317,9 +317,9 @@ class SelectTest extends MockitoTest {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
-        orderBy.apply(alias, database.from(alias).where(Row2::name).isEqualTo("joe")).optional(sqlExecutor);
+        orderBy.apply(alias, database.from(alias).where(Row2::name).isEqualTo("joe")).optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select q.NAME as q_NAME, q.DESCRIPTION as q_DESCRIPTION, q.COMMENT as q_COMMENT from SIESTA.ROW2 q where q.NAME = ? order by " + expected));
         assertThat(args.getValue(), arrayContaining("joe"));
     }
@@ -327,10 +327,10 @@ class SelectTest extends MockitoTest {
     @Test
     void optionalOfNoRowsIsEmpty() {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
-        when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of());
+        when(transaction.query(any(), any(), any())).thenReturn(ImmutableList.of());
 
         Optional<Row1> result = database.from(Row1.class, "w")
-            .optional(sqlExecutor);
+            .optional(transaction);
 
         assertThat(result, is(Optional.empty()));
     }
@@ -339,12 +339,12 @@ class SelectTest extends MockitoTest {
     void optionalOfOneRowIsRow() {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Row1 row1 = new Row1();
-        when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1));
+        when(transaction.query(any(), any(), any())).thenReturn(ImmutableList.of(row1));
 
         Optional<Row1> result = database.from(Row1.class, "w")
-            .optional(sqlExecutor);
+            .optional(transaction);
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(result, is(Optional.of(row1)));
     }
 
@@ -352,13 +352,13 @@ class SelectTest extends MockitoTest {
     void optionalOfTwoRowsIsException() {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Row1 row1 = new Row1();
-        when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1, row1));
+        when(transaction.query(any(), any(), any())).thenReturn(ImmutableList.of(row1, row1));
 
-        calling(() -> database.from(Row1.class, "w").optional(sqlExecutor))
+        calling(() -> database.from(Row1.class, "w").optional(transaction))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(startsWith("expected one element but was: "));
 
-        verify(sqlExecutor).query(sql.capture(), args.capture(), rowMapper.capture());
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
     }
 
     @Test
@@ -366,9 +366,9 @@ class SelectTest extends MockitoTest {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Row1 row1 = new Row1();
         Row1 row2 = new Row1();
-        when(sqlExecutor.query(any(), any(), any())).thenReturn(ImmutableList.of(row1, row2));
+        when(transaction.query(any(), any(), any())).thenReturn(ImmutableList.of(row1, row2));
 
-        List<Row1> result = database.from(Row1.class, "w").list(sqlExecutor);
+        List<Row1> result = database.from(Row1.class, "w").list(transaction);
 
         assertThat(result, contains(row1, row2));
     }
@@ -376,11 +376,11 @@ class SelectTest extends MockitoTest {
     @Test
     void stream() {
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
-        when(sqlExecutor.stream(any(), any(), Mockito.<RowMapper<Row1>>any())).thenReturn(stream);
+        when(transaction.stream(any(), any(), Mockito.<RowMapper<Row1>>any())).thenReturn(stream);
 
         Stream<Row1> result;
         try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
-            result = database.from(Row1.class, "w").stream(sqlExecutor, autoCloseable);
+            result = database.from(Row1.class, "w").stream(transaction, autoCloseable);
         }
 
         assertThat(result, sameInstance(stream));

@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.grammar.dml;
 import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 
 class ExpectingWhereTest extends MockitoTest {
     @Mock
-    private SqlExecutor sqlExecutor;
+    private Transaction transaction;
 
     @Captor
     private ArgumentCaptor<String> sql;
@@ -164,9 +164,9 @@ class ExpectingWhereTest extends MockitoTest {
             .build();
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
 
-        whereClause.apply(w, database.delete(w)).execute(sqlExecutor);
+        whereClause.apply(w, database.delete(w)).execute(transaction);
 
-        verify(sqlExecutor).update(sql.capture(), args.capture());
+        verify(transaction).update(sql.capture(), args.capture());
         assertThat(sql.getValue(), is("delete from SIESTA.WIDGET w where " + expectedSql));
         assertThat(args.getValue(), is(expectedArgs));
     }
