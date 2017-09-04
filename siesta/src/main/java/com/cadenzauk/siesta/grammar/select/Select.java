@@ -52,9 +52,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public List<RT> list(SqlExecutor sqlExecutor) {
-        try (Transaction transaction = sqlExecutor.beginTransaction()) {
-            return statement.list(transaction);
-        }
+        return statement.list(sqlExecutor);
     }
 
     public List<RT> list(Transaction transaction) {
@@ -66,9 +64,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public Optional<RT> optional(SqlExecutor sqlExecutor) {
-        try (Transaction transaction = sqlExecutor.beginTransaction()) {
-            return statement.optional(transaction);
-        }
+        return statement.optional(sqlExecutor);
     }
 
     public Optional<RT> optional(Transaction transaction) {
@@ -80,8 +76,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable compositeAutoCloseable) {
-        Transaction transaction = compositeAutoCloseable.add(sqlExecutor.beginTransaction());
-        return statement.stream(transaction, compositeAutoCloseable);
+        return statement.stream(sqlExecutor, compositeAutoCloseable);
     }
 
     public Stream<RT> stream(Transaction transaction, CompositeAutoCloseable compositeAutoCloseable) {
@@ -92,10 +87,12 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return single(defaultSqlExecutor());
     }
 
-    private RT single(SqlExecutor sqlExecutor) {
-        try (Transaction transaction = sqlExecutor.beginTransaction()) {
-            return statement.single(transaction);
-        }
+    public RT single(SqlExecutor sqlExecutor) {
+        return statement.single(sqlExecutor);
+    }
+
+    public RT single(Transaction transaction) {
+        return statement.single(transaction);
     }
 
     public Select<RT> fetchFirst(long i) {

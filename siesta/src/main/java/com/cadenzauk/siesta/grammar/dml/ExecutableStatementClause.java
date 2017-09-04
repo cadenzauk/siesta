@@ -38,9 +38,7 @@ public class ExecutableStatementClause {
     }
 
     public int execute(SqlExecutor sqlExecutor) {
-        try (Transaction transaction = sqlExecutor.beginTransaction()) {
-            return statement.execute(transaction);
-        }
+        return statement.execute(sqlExecutor);
     }
 
     public int execute(Transaction transaction) {

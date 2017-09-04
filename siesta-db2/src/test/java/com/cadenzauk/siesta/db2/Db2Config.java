@@ -22,9 +22,28 @@
 
 package com.cadenzauk.siesta.db2;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.testutil.PooledDataSource;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.Db2Dialect;
+import com.ibm.db2.jcc.DB2ConnectionPoolDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+import javax.sql.DataSource;
+import java.sql.SQLException;
+
+@Configuration
+public class Db2Config {
+    @Bean
+    public DataSource dataSource() throws SQLException {
+        DB2ConnectionPoolDataSource pool = new DB2ConnectionPoolDataSource();
+        pool.setDatabaseName("SIESTA");
+        pool.setDriverType(2);
+        return new PooledDataSource(pool);
+    }
+
+    @Bean
+    public Dialect dialect() {
+        return new Db2Dialect();
+    }
 }

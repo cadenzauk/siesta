@@ -22,34 +22,9 @@
 
 package com.cadenzauk.siesta.sqlserver;
 
-import com.cadenzauk.core.sql.PooledDataSource;
-import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.TableIntegrationTest;
-import com.cadenzauk.siesta.dialect.SqlServerDialect;
-import com.microsoft.sqlserver.jdbc.SQLServerConnectionPoolDataSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
-
-@ContextConfiguration
+@ContextConfiguration(classes = SqlServerConfig.class)
 public class TableIntegrationTestSqlServer extends TableIntegrationTest {
-    @Configuration
-    public static class Config {
-        @Bean
-        public DataSource dataSource() throws SQLException {
-            SQLServerConnectionPoolDataSource pool = new SQLServerConnectionPoolDataSource();
-            pool.setServerName("localhost\\SQLEXPRESS");
-            pool.setDatabaseName("SIESTA");
-            pool.setIntegratedSecurity(true);
-            return new PooledDataSource(pool);
-        }
-
-        @Bean
-        public Dialect dialect() {
-            return new SqlServerDialect();
-        }
-    }
 }

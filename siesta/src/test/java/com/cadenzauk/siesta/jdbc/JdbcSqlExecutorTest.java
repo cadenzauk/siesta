@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.jdbc;
 
 import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +71,6 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @BeforeEach
     void wireUpMocks() throws SQLException {
-        when(transaction.connection()).thenReturn(connection);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
     }
 
@@ -82,9 +82,8 @@ class JdbcSqlExecutorTest extends MockitoTest {
         JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = ?";
 
-        List<String> result = sut.query(transaction, sql, toArray(2L), rowMapper);
+        List<String> result = sut.query(connection, sql, toArray(2L), rowMapper);
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, 2L);
@@ -99,6 +98,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void stream() throws SQLException {
+        CompositeAutoCloseable closeable = new CompositeAutoCloseable();
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenReturn("Barney").thenThrow(new AssertionError("Unexpected call to row mapper"));
@@ -106,11 +106,10 @@ class JdbcSqlExecutorTest extends MockitoTest {
         String sql = "select name from foo where bar = ?";
 
         List<String> result;
-        try (Stream<String> stream = sut.stream(transaction, sql, toArray("Bob"), rowMapper)) {
+        try (Stream<String> stream = sut.stream(connection, sql, toArray("Bob"), rowMapper, closeable)) {
             result = stream.collect(Collectors.toList());
         }
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, "Bob");
@@ -125,6 +124,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void streamWhenMapperThrows() throws SQLException {
+        CompositeAutoCloseable closeable = new CompositeAutoCloseable();
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenThrow(new IllegalArgumentException("Exception while mapping"));
@@ -132,14 +132,13 @@ class JdbcSqlExecutorTest extends MockitoTest {
         String sql = "select name from foo where bar = ?";
 
         calling(() -> {
-            try (Stream<String> stream = sut.stream(transaction, sql, toArray("Bob", "Burt"), rowMapper)) {
+            try (Stream<String> stream = sut.stream(connection, sql, toArray("Bob", "Burt"), rowMapper, closeable)) {
                 return stream.collect(Collectors.toList());
             }
         })
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Exception while mapping"));
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, "Bob");
@@ -154,6 +153,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void streamWhenNextThrows() throws SQLException {
+        CompositeAutoCloseable closeable = new CompositeAutoCloseable();
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenThrow(new SQLException("Connection lost"));
         when(rowMapper.mapRow(resultSet)).thenReturn("Fred");
@@ -161,7 +161,7 @@ class JdbcSqlExecutorTest extends MockitoTest {
         String sql = "select name from foo where bar = ?";
 
         calling(() -> {
-            try (Stream<String> stream = sut.stream(transaction, sql, toArray("Bob", "Burt"), rowMapper)) {
+            try (Stream<String> stream = sut.stream(connection, sql, toArray("Bob", "Burt"), rowMapper, closeable)) {
                 return stream.collect(Collectors.toList());
             }
         })
@@ -169,7 +169,6 @@ class JdbcSqlExecutorTest extends MockitoTest {
             .withCause(SQLException.class)
             .withMessage(is("Connection lost"));
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setObject(1, "Bob");
@@ -184,13 +183,14 @@ class JdbcSqlExecutorTest extends MockitoTest {
 
     @Test
     void streamWhenExecuteThrows() throws SQLException {
+        CompositeAutoCloseable closeable = new CompositeAutoCloseable();
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(preparedStatement.executeQuery()).thenThrow(new SQLException("No permission"));
         JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "select name from foo where bar = 'fred'";
 
         calling(() -> {
-            try (Stream<String> stream = sut.stream(transaction, sql, toArray(), rowMapper)) {
+            try (Stream<String> stream = sut.stream(connection, sql, toArray(), rowMapper, closeable)) {
                 return stream.collect(Collectors.toList());
             }
         })
@@ -198,7 +198,6 @@ class JdbcSqlExecutorTest extends MockitoTest {
             .withCause(SQLException.class)
             .withMessage(is("No permission"));
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeQuery();
         verify(preparedStatement).setFetchSize(0);
@@ -212,9 +211,8 @@ class JdbcSqlExecutorTest extends MockitoTest {
         JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "update foo set num = ?";
 
-        int result = sut.update(transaction, sql, toArray(3));
+        int result = sut.update(connection, sql, toArray(3));
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeUpdate();
         verify(preparedStatement).setObject(1, 3);
@@ -229,12 +227,11 @@ class JdbcSqlExecutorTest extends MockitoTest {
         JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
         String sql = "update foo set num = ?";
 
-        calling(() -> sut.update(transaction, sql, toArray(3)))
+        calling(() -> sut.update(connection, sql, toArray(3)))
             .shouldThrow(RuntimeSqlException.class)
             .withCause(SQLException.class)
             .withMessage(is("Update failed."));
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verify(preparedStatement).executeUpdate();
         verify(preparedStatement).setObject(1, 3);
@@ -248,12 +245,11 @@ class JdbcSqlExecutorTest extends MockitoTest {
         when(connection.prepareStatement(sql)).thenThrow(new SQLException("Syntax error."));
         JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
 
-        calling(() -> sut.update(transaction, sql, toArray(3)))
+        calling(() -> sut.update(connection, sql, toArray(3)))
             .shouldThrow(RuntimeSqlException.class)
             .withCause(SQLException.class)
             .withMessage(is("Syntax error."));
 
-        verify(transaction).connection();
         verify(connection).prepareStatement(sql);
         verifyNoMoreInteractions(connection, preparedStatement, resultSet, rowMapper);
     }

@@ -210,16 +210,16 @@ public class Database {
 
     @SuppressWarnings("unchecked")
     public <R> void insert(R... rows) {
-        try (Transaction transaction = beginTransaction()) {
-            insert(transaction, rows);
-        }
+        insert(getDefaultSqlExecutor(), rows);
     }
 
     @SuppressWarnings("unchecked")
     public <R> void insert(SqlExecutor sqlExecutor, R... rows) {
-        try (Transaction transaction = sqlExecutor.beginTransaction()) {
-            insert(transaction, rows);
+        if (rows.length == 0) {
+            return;
         }
+        Class<R> rowClass = (Class<R>) rows[0].getClass();
+        table(rowClass).insert(sqlExecutor, rows);
     }
 
     @SuppressWarnings("unchecked")

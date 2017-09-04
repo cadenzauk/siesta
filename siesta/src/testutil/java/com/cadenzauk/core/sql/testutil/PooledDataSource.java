@@ -20,11 +20,12 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.core.sql.testutil;
 
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
-import com.cadenzauk.core.tuple.Tuple;
-import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.sql.ConnectionUtil;
+import com.cadenzauk.core.sql.RuntimeSqlException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.ConnectionPoolDataSource;
@@ -35,41 +36,34 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Stack;
 import java.util.logging.Logger;
 
 public class PooledDataSource implements DataSource, AutoCloseable {
     private final CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable();
-    private final ConcurrentHashMap<Tuple2<String,String>,PooledConnection> connectionMap = new ConcurrentHashMap<>();
+    private final Object lock = new Object();
+    private final Stack<PooledConnection> freeList = new Stack<>();
     private final ConnectionPoolDataSource poolDataSource;
-    private final PooledConnection pooledConnection;
     private final Optional<String> initString;
 
     public PooledDataSource(ConnectionPoolDataSource poolDataSource) throws SQLException {
         this.poolDataSource = poolDataSource;
-        pooledConnection = autoCloseable.add(poolDataSource.getPooledConnection(), PooledConnection::close);
         initString = Optional.empty();
     }
 
     public PooledDataSource(ConnectionPoolDataSource poolDataSource, String initial) throws SQLException {
         this.poolDataSource = poolDataSource;
-        pooledConnection = autoCloseable.add(poolDataSource.getPooledConnection(), PooledConnection::close);
         initString = Optional.ofNullable(initial).filter(StringUtils::isNotBlank);
     }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return init(pooledConnection.getConnection());
+        return init(new PoolConnection(allocateConnection(), this::release));
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        try {
-            Connection connection = connectionMap.computeIfAbsent(Tuple.of(username, password), k -> openConnection(username, password)).getConnection();
-            return init(connection);
-        } catch (RuntimeSqlException e) {
-            throw e.getCause();
-        }
+        throw new NotImplementedException("Not yet implemented.");
     }
 
     private Connection init(Connection connection) {
@@ -120,9 +114,24 @@ public class PooledDataSource implements DataSource, AutoCloseable {
         autoCloseable.close();
     }
 
-    private PooledConnection openConnection(String username, String password) {
+    private PooledConnection allocateConnection() {
+        synchronized (lock) {
+            if (!freeList.empty()) {
+                return freeList.pop();
+            }
+        }
+        return newConnection();
+    }
+
+    private void release(PooledConnection pooledConnection) {
+        synchronized (lock) {
+            freeList.push(pooledConnection);
+        }
+    }
+
+    private PooledConnection newConnection() {
         try {
-            return autoCloseable.add(poolDataSource.getPooledConnection(username, password), PooledConnection::close);
+            return autoCloseable.add(poolDataSource.getPooledConnection(), PooledConnection::close);
         } catch (SQLException e) {
             throw new RuntimeSqlException(e);
         }

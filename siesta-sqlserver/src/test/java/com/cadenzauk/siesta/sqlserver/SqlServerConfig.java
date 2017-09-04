@@ -20,11 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.db2;
+package com.cadenzauk.siesta.sqlserver;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.testutil.PooledDataSource;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.SqlServerDialect;
+import com.microsoft.sqlserver.jdbc.SQLServerConnectionPoolDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+import javax.sql.DataSource;
+import java.sql.SQLException;
+
+@Configuration
+public class SqlServerConfig {
+    @Bean
+    public DataSource dataSource() throws SQLException {
+        SQLServerConnectionPoolDataSource pool = new SQLServerConnectionPoolDataSource();
+        pool.setServerName("localhost\\SQLEXPRESS");
+        pool.setDatabaseName("SIESTA");
+        pool.setIntegratedSecurity(true);
+        return new PooledDataSource(pool);
+    }
+
+    @Bean
+    public Dialect dialect() {
+        return new SqlServerDialect();
+    }
 }

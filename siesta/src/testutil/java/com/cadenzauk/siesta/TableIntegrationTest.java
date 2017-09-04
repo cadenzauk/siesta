@@ -25,7 +25,6 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
-import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.core.tuple.Tuple6;
@@ -43,12 +42,10 @@ import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,8 +53,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.IntStream;
 
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
@@ -91,11 +86,6 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(JUnitParamsRunner.class)
 public abstract class TableIntegrationTest extends IntegrationTest {
-    private static final AtomicLong ids = new AtomicLong();
-
-    @Resource
-    private Dialect dialect;
-
     @Test
     public void selectFromDatabaseOneTable() {
         Database database = testDatabase(dataSource, dialect);
@@ -847,27 +837,5 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         T result = database.select(castExpr).single();
 
         assertThat(result, is(expectedResult));
-    }
-
-    private SalespersonRow aRandomSalesperson() {
-        return SalespersonRow.newBuilder()
-            .salespersonId(newId())
-            .firstName(RandomStringUtils.randomAlphabetic(3, 12))
-            .surname(RandomStringUtils.randomAlphabetic(5, 15))
-            .build();
-    }
-
-    private Tuple2<Long,Long> insertSalespeople(Database database, int n) {
-        long lowerBound = ids.get();
-        SalespersonRow[] salesPeople = IntStream.range(0, n)
-            .mapToObj(i -> aRandomSalesperson())
-            .toArray(SalespersonRow[]::new);
-        database.insert(salesPeople);
-        long upperBound = ids.get();
-        return Tuple.of(lowerBound + 1, upperBound);
-    }
-
-    private static long newId() {
-        return ids.incrementAndGet();
     }
 }

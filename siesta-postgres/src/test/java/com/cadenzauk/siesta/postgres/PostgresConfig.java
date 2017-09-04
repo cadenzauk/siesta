@@ -20,11 +20,30 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.db2;
+package com.cadenzauk.siesta.postgres;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.testutil.PooledDataSource;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.PostgresDialect;
+import org.postgresql.ds.PGConnectionPoolDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+import javax.sql.DataSource;
+import java.sql.SQLException;
+
+@Configuration
+public class PostgresConfig {
+    @Bean
+    public DataSource dataSource() throws SQLException {
+        PGConnectionPoolDataSource pool = new PGConnectionPoolDataSource();
+        pool.setUser("siesta");
+        pool.setDatabaseName("postgres");
+        return new PooledDataSource(pool);
+    }
+
+    @Bean
+    public Dialect dialect() {
+        return new PostgresDialect();
+    }
 }

@@ -22,8 +22,12 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.dialect.H2Dialect;
+import com.cadenzauk.siesta.model.SalespersonRow;
 import liquibase.integration.spring.SpringLiquibase;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +41,8 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.IntStream;
 
 @ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -46,6 +52,36 @@ public abstract class IntegrationTest {
 
     @Rule
     public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+    private static final AtomicLong ids = new AtomicLong();
+
+    @Resource
+    protected DataSource dataSource;
+
+    @Resource
+    protected Dialect dialect;
+
+    protected Tuple2<Long,Long> insertSalespeople(Database database, int n) {
+        long lowerBound = ids.get();
+        SalespersonRow[] salesPeople = IntStream.range(0, n)
+            .mapToObj(i -> aRandomSalesperson())
+            .toArray(SalespersonRow[]::new);
+        database.insert(salesPeople);
+        long upperBound = ids.get();
+        return Tuple.of(lowerBound + 1, upperBound);
+    }
+
+    protected SalespersonRow aRandomSalesperson() {
+        return SalespersonRow.newBuilder()
+            .salespersonId(newId())
+            .firstName(RandomStringUtils.randomAlphabetic(3, 12))
+            .surname(RandomStringUtils.randomAlphabetic(5, 15))
+            .build();
+    }
+
+    protected static long newId() {
+        return ids.incrementAndGet();
+    }
 
     @Configuration
     public static class Config {
@@ -73,7 +109,4 @@ public abstract class IntegrationTest {
             return new H2Dialect();
         }
     }
-
-    @Resource
-    protected DataSource dataSource;
 }

@@ -38,6 +38,8 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -93,13 +95,13 @@ class JdbcTransactionTest extends MockitoTest {
         Object[] args = new Object[0];
         RowMapper<String> rowMapper = s -> "Hello";
         List<String> list = ImmutableList.of("A", "B");
-        when(sqlExecutor.query(sut, sql, args, rowMapper)).thenReturn(list);
+        when(sqlExecutor.query(connection, sql, args, rowMapper)).thenReturn(list);
 
         List<String> result = sut.query(sql, args, rowMapper);
 
         assertThat(result, sameInstance(list));
         verify(connection).setAutoCommit(false);
-        verify(sqlExecutor).query(sut, sql, args, rowMapper);
+        verify(sqlExecutor).query(connection, sql, args, rowMapper);
         verifyNoMoreInteractions(sqlExecutor, connection);
     }
 
@@ -111,13 +113,13 @@ class JdbcTransactionTest extends MockitoTest {
         Object[] args = new Object[0];
         RowMapper<String> rowMapper = s -> "Hello";
         Stream<String> stream = Stream.of("Hello");
-        when(sqlExecutor.stream(sut, sql, args, rowMapper)).thenReturn(stream);
+        when(sqlExecutor.stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any())).thenReturn(stream);
 
         Stream<String> result = sut.stream(sql, args, rowMapper);
 
         assertThat(result, sameInstance(stream));
         verify(connection).setAutoCommit(false);
-        verify(sqlExecutor).stream(sut, sql, args, rowMapper);
+        verify(sqlExecutor).stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any());
         verifyNoMoreInteractions(sqlExecutor, connection);
     }
 
@@ -128,13 +130,13 @@ class JdbcTransactionTest extends MockitoTest {
         String sql = RandomStringUtils.randomAlphabetic(20, 30);
         Object[] args = new Object[0];
         int rowsUpdated = RandomValues.randomShort();
-        when(sqlExecutor.update(sut, sql, args)).thenReturn(rowsUpdated);
+        when(sqlExecutor.update(connection, sql, args)).thenReturn(rowsUpdated);
 
         int result = sut.update(sql, args);
 
         assertThat(result, is(rowsUpdated));
         verify(connection).setAutoCommit(false);
-        verify(sqlExecutor).update(sut, sql, args);
+        verify(sqlExecutor).update(connection, sql, args);
         verifyNoMoreInteractions(sqlExecutor, connection);
     }
 

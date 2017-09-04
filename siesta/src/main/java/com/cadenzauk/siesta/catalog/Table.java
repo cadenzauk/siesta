@@ -34,6 +34,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
 import com.google.common.collect.ImmutableList;
@@ -118,6 +119,14 @@ public class Table<R> {
         return Alias.of(this, alias);
     }
 
+    public void insert(SqlExecutor sqlExecutor, R[] rows) {
+        if (database().dialect().supportsMultiInsert()) {
+            impl.insert(sqlExecutor, rows);
+        } else {
+            Arrays.stream(rows).forEach(r -> impl.insert(sqlExecutor, r));
+        }
+    }
+
     public void insert(Transaction transaction, R[] rows) {
         if (database().dialect().supportsMultiInsert()) {
             impl.insert(transaction, rows);
@@ -156,10 +165,38 @@ public class Table<R> {
 
         @SuppressWarnings("unchecked")
         @SafeVarargs
+        final void insert(SqlExecutor sqlExecutor, R... rows) {
+            if (rows.length == 0) {
+                return;
+            }
+            String sql = sql(rows);
+            Object[] args = args(rows);
+            sqlExecutor.update(sql, args);
+        }
+
+        @SuppressWarnings("unchecked")
+        @SafeVarargs
         final void insert(Transaction transaction, R... rows) {
             if (rows.length == 0) {
                 return;
             }
+            String sql = sql(rows);
+            Object[] args = args(rows);
+            transaction.update(sql, args);
+        }
+
+        private Object[] args(R[] rows) {
+            return Arrays.stream(rows)
+                .flatMap(r -> columns
+                    .stream()
+                    .map(c -> c.getter()
+                        .apply(r)
+                        .map(v -> c.dataType().toDatabase(database, v))
+                        .orElse(null)))
+                .toArray();
+        }
+
+        private String sql(R[] rows) {
             int nCols = columns.size();
             String sql = String.format("insert into %s (%s) values %s",
                 qualifiedName(),
@@ -168,17 +205,7 @@ public class Table<R> {
                     .mapToObj(i -> "(" + IntStream.range(0, nCols).mapToObj(j -> "?").collect(joining(", ")) + ")")
                     .collect(joining(", ")));
             LOG.debug(sql);
-
-            Object[] args = Arrays.stream(rows)
-                .flatMap(r -> columns
-                    .stream()
-                    .map(c -> c.getter()
-                        .apply(r)
-                        .map(v -> c.dataType().toDatabase(database, v))
-                        .orElse(null)))
-                .toArray();
-
-            transaction.update(sql, args);
+            return sql;
         }
 
         public RowMapper<R> rowMapper() {

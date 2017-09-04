@@ -22,9 +22,9 @@
 
 package com.cadenzauk.siesta.db2;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+public class TransactionIntegrationTestDb2 extends TransactionIntegrationTest {
 }

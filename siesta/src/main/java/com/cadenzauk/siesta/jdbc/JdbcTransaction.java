@@ -59,17 +59,17 @@ public class JdbcTransaction implements Transaction {
 
     @Override
     public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return sqlExecutor.query(this, sql, args, rowMapper);
+        return sqlExecutor.query(connection, sql, args, rowMapper);
     }
 
     @Override
     public <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return sqlExecutor.stream(this, sql, args, rowMapper);
+        return sqlExecutor.stream(connection, sql, args, rowMapper, new CompositeAutoCloseable());
     }
 
     @Override
     public int update(String sql, Object[] args) {
-        return sqlExecutor.update(this, sql, args);
+        return sqlExecutor.update(connection, sql, args);
     }
 
     @Override

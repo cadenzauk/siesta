@@ -20,11 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.db2;
+package com.cadenzauk.siesta.h2;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.siesta.TransactionIntegrationTest;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+public class TransactionIntegrationTestH2 extends TransactionIntegrationTest {
 }

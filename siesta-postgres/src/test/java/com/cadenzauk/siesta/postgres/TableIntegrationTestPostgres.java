@@ -22,33 +22,9 @@
 
 package com.cadenzauk.siesta.postgres;
 
-import com.cadenzauk.core.sql.PooledDataSource;
-import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.TableIntegrationTest;
-import com.cadenzauk.siesta.dialect.PostgresDialect;
-import org.postgresql.ds.PGConnectionPoolDataSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
-
-@ContextConfiguration
+@ContextConfiguration(classes = PostgresConfig.class)
 public class TableIntegrationTestPostgres extends TableIntegrationTest {
-    @Configuration
-    public static class Config {
-        @Bean
-        public DataSource dataSource() throws SQLException {
-            PGConnectionPoolDataSource pool = new PGConnectionPoolDataSource();
-            pool.setUser("siesta");
-            pool.setDatabaseName("postgres");
-            return new PooledDataSource(pool);
-        }
-
-        @Bean
-        public Dialect dialect() {
-            return new PostgresDialect();
-        }
-    }
 }

@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.db2;
+package com.cadenzauk.siesta.oracle;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+@ContextConfiguration(classes = OracleConfig.class)
+public class TransactionIntegrationTestOracle extends TransactionIntegrationTest {
 }

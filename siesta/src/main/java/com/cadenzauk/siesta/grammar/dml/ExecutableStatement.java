@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import org.slf4j.Logger;
@@ -38,6 +39,13 @@ public abstract class ExecutableStatement {
 
     protected ExecutableStatement(Scope scope) {
         this.scope = scope;
+    }
+
+    int execute(SqlExecutor sqlExecutor) {
+        Object[] args = args(scope).toArray();
+        String sql = sql(scope);
+        LOG.debug(sql);
+        return sqlExecutor.update(sql, args);
     }
 
     int execute(Transaction transaction) {

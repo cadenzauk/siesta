@@ -20,11 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.db2;
+package com.cadenzauk.siesta.oracle;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.testutil.PooledDataSource;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.OracleDialect;
+import oracle.jdbc.pool.OracleConnectionPoolDataSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class TableIntegrationTestDb2 extends TableIntegrationTest {
+import javax.sql.DataSource;
+import java.sql.SQLException;
+
+@Configuration
+public class OracleConfig {
+    @Bean
+    public DataSource dataSource() throws SQLException {
+        OracleConnectionPoolDataSource pool = new OracleConnectionPoolDataSource();
+        pool.setUser("siesta");
+        pool.setPassword("siesta");
+        pool.setURL("jdbc:oracle:thin:@127.0.0.1:1521:xe");
+        return new PooledDataSource(pool, "ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'");
+    }
+
+    @Bean
+    public Dialect dialect() {
+        return new OracleDialect();
+    }
 }
