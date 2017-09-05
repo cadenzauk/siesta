@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.model.SalespersonRow;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
@@ -76,9 +77,32 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
             Integer count = database.from(SalespersonRow.class)
                 .select(count())
                 .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
+                .withIsolation(IsolationLevel.READ_COMMITTED)
                 .single();
 
             assertThat(count, is(0));
+        }
+    }
+
+    @Test
+    public void whenUncommittedThenVisibleWithUr() {
+        if (!dialect.supportsIsolationLevelInQuery()) {
+            throw new AssumptionViolatedException("Database doesn't supprt isolation levels in query");
+        }
+        Database database = testDatabase(dataSource, dialect);
+
+        SalespersonRow salesperson = aRandomSalesperson();
+        try (Transaction transaction = database.beginTransaction()) {
+            database.insert(transaction, salesperson);
+
+            Integer count = database.from(SalespersonRow.class)
+                .select(count())
+                .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
+                .fetchFirst(1)
+                .withIsolation(IsolationLevel.UNCOMMITTED_READ)
+                .single();
+
+            assertThat(count, is(1));
         }
     }
 }

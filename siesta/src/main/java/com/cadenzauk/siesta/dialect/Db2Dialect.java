@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.IsolationLevel;
+
 import static com.cadenzauk.core.lang.StringUtil.hex;
 
 public class Db2Dialect extends AnsiDialect {
@@ -48,5 +50,25 @@ public class Db2Dialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return String.format("%s fetch first %d rows only", sql, n);
+    }
+
+    @Override
+    public boolean supportsIsolationLevelInQuery() {
+        return true;
+    }
+
+    @Override
+    public String isolationLevelSql(String sql, IsolationLevel level) {
+        switch (level) {
+            case UNCOMMITTED_READ:
+                return sql + " with ur";
+            case READ_COMMITTED:
+                return sql + " with cs";
+            case REPEATABLE_READ:
+                return sql + " with rs";
+            case SERIALIZABLE:
+                return sql + " with rr";
+        }
+        return sql;
     }
 }

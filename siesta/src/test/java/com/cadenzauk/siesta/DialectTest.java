@@ -36,6 +36,7 @@ import org.junit.jupiter.params.provider.ObjectArrayArguments;
 
 import java.util.stream.Stream;
 
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -53,6 +54,7 @@ class DialectTest {
         return ObjectArrayArguments.create(dialect, sql);
     }
 
+    @SuppressWarnings("unused")
     private static Stream<Arguments> parametersForFetchFirst() {
         return Stream.of(
             testCase(new AnsiDialect(), "select * from (select *, row_number() over() as x_row_number from (select * from invoices)) where x_row_number <= 10"),
@@ -73,6 +75,7 @@ class DialectTest {
         assertThat(result, is(expectedSql));
     }
 
+    @SuppressWarnings("unused")
     private static Stream<Arguments> parametersForSelectivity() {
         return Stream.of(
             testCase(new AnsiDialect(), "select INVOICE.ID as INVOICE_ID from AP.INVOICE INVOICE where INVOICE.ID = ?"),
@@ -99,5 +102,62 @@ class DialectTest {
             .sql();
 
         assertThat(sql, is(expectSql));
+    }
+
+    private static Arguments isolationLevelTest(Dialect dialect, IsolationLevel level, String expectSql) {
+        return ObjectArrayArguments.create(dialect, level, expectSql);
+    }
+
+    @SuppressWarnings("unused")
+    private static Stream<Arguments> parametersForIsolationLevel() {
+        return Stream.of(
+            isolationLevelTest(new AnsiDialect(), IsolationLevel.UNCOMMITTED_READ, ""),
+            isolationLevelTest(new AnsiDialect(), IsolationLevel.READ_COMMITTED, ""),
+            isolationLevelTest(new AnsiDialect(), IsolationLevel.REPEATABLE_READ, ""),
+            isolationLevelTest(new AnsiDialect(), IsolationLevel.SERIALIZABLE, ""),
+            isolationLevelTest(new Db2Dialect(), IsolationLevel.UNCOMMITTED_READ, " with ur"),
+            isolationLevelTest(new Db2Dialect(), IsolationLevel.READ_COMMITTED, " with cs"),
+            isolationLevelTest(new Db2Dialect(), IsolationLevel.REPEATABLE_READ, " with rs"),
+            isolationLevelTest(new Db2Dialect(), IsolationLevel.SERIALIZABLE, " with rr"),
+            isolationLevelTest(new FirebirdDialect(), IsolationLevel.UNCOMMITTED_READ, ""),
+            isolationLevelTest(new FirebirdDialect(), IsolationLevel.READ_COMMITTED, ""),
+            isolationLevelTest(new FirebirdDialect(), IsolationLevel.REPEATABLE_READ, ""),
+            isolationLevelTest(new FirebirdDialect(), IsolationLevel.SERIALIZABLE, ""),
+            isolationLevelTest(new H2Dialect(), IsolationLevel.UNCOMMITTED_READ, ""),
+            isolationLevelTest(new H2Dialect(), IsolationLevel.READ_COMMITTED, ""),
+            isolationLevelTest(new H2Dialect(), IsolationLevel.REPEATABLE_READ, ""),
+            isolationLevelTest(new H2Dialect(), IsolationLevel.SERIALIZABLE, ""),
+            isolationLevelTest(new OracleDialect(), IsolationLevel.UNCOMMITTED_READ, ""),
+            isolationLevelTest(new OracleDialect(), IsolationLevel.READ_COMMITTED, ""),
+            isolationLevelTest(new OracleDialect(), IsolationLevel.REPEATABLE_READ, ""),
+            isolationLevelTest(new OracleDialect(), IsolationLevel.SERIALIZABLE, ""),
+            isolationLevelTest(new PostgresDialect(), IsolationLevel.UNCOMMITTED_READ, ""),
+            isolationLevelTest(new PostgresDialect(), IsolationLevel.READ_COMMITTED, ""),
+            isolationLevelTest(new PostgresDialect(), IsolationLevel.REPEATABLE_READ, ""),
+            isolationLevelTest(new PostgresDialect(), IsolationLevel.SERIALIZABLE, ""),
+            isolationLevelTest(new SqlServerDialect(), IsolationLevel.UNCOMMITTED_READ, ""),
+            isolationLevelTest(new SqlServerDialect(), IsolationLevel.READ_COMMITTED, ""),
+            isolationLevelTest(new SqlServerDialect(), IsolationLevel.REPEATABLE_READ, ""),
+            isolationLevelTest(new SqlServerDialect(), IsolationLevel.SERIALIZABLE, "")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource(names = "parametersForIsolationLevel")
+    void isolationLevelIntegrationTest(Dialect dialect, IsolationLevel level, String expectSql) {
+        Database database = Database.newBuilder()
+            .defaultSchema("AP")
+            .dialect(dialect)
+            .build();
+
+        String sql = database.from(Invoice.class)
+            .where(Invoice::id).isEqualTo(literal(4))
+            .withIsolation(level)
+            .sql();
+
+        String expectedResult = String.format("select INVOICE.ID as INVOICE_ID from %s INVOICE where INVOICE.ID = 4%s",
+            dialect.qualifiedTableName("", "AP", "INVOICE"),
+            expectSql);
+        assertThat(sql, is(expectedResult));
     }
 }

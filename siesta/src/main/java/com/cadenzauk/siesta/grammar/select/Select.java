@@ -27,6 +27,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.From;
+import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
@@ -97,6 +98,11 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     public Select<RT> fetchFirst(long i) {
         statement.fetchFirst(i);
+        return this;
+    }
+
+    public Select<RT> withIsolation(IsolationLevel level) {
+        statement.withIsolation(level);
         return this;
     }
 

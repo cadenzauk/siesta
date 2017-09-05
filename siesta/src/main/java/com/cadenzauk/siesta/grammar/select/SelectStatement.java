@@ -28,6 +28,7 @@ import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.From;
+import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
@@ -63,6 +64,7 @@ class SelectStatement<RT> {
     private BooleanExpression havingClause;
     private final List<Tuple2<UnionType,SelectStatement<RT>>> unions = new ArrayList<>();
     private final List<OrderingClause> orderByClauses = new ArrayList<>();
+    private Optional<IsolationLevel> isolationLevel = Optional.empty();
     private Optional<Long> fetchFirst = Optional.empty();
 
     SelectStatement(Scope scope, TypeToken<RT> rowType, From from, RowMapper<RT> rowMapper, Projection projection) {
@@ -114,6 +116,10 @@ class SelectStatement<RT> {
 
     Projection projection() {
         return projection;
+    }
+
+    void withIsolation(IsolationLevel level) {
+        isolationLevel = Optional.of(level);
     }
 
     void fetchFirst(long i) {
@@ -303,6 +309,16 @@ class SelectStatement<RT> {
             havingClauseSql(innerScope),
             unionsSql(innerScope),
             orderByClauseSql(innerScope));
+        sql = fetchFirstSql(sql);
+        sql = isolationLevelSql(sql);
+        return sql;
+    }
+
+    private String fetchFirstSql(String sql) {
         return fetchFirst.map(n -> scope.dialect().fetchFirst(sql, n)).orElse(sql);
+    }
+
+    private String isolationLevelSql(String sql) {
+        return isolationLevel.map(i -> scope.dialect().isolationLevelSql(sql, i)).orElse(sql);
     }
 }

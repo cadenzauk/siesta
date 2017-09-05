@@ -84,6 +84,10 @@ public interface Dialect {
 
     String fetchFirst(String sql, long n);
 
+    boolean supportsIsolationLevelInQuery();
+
+    String isolationLevelSql(String sql, IsolationLevel level);
+
     String tinyintType();
 
     String smallintType();
@@ -105,8 +109,4 @@ public interface Dialect {
     String varcharType(int size);
 
     String charType(int len);
-
-    boolean requiresBeginTransaction();
-
-    String beginTransaction();
 }

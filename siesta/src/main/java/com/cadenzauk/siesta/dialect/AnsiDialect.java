@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.IsolationLevel;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -177,6 +178,16 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public boolean supportsIsolationLevelInQuery() {
+        return false;
+    }
+
+    @Override
+    public String isolationLevelSql(String sql, IsolationLevel level) {
+        return sql;
+    }
+
+    @Override
     public String tinyintType() {
         return "smallint";
     }
@@ -231,15 +242,5 @@ public class AnsiDialect implements Dialect {
     @Override
     public String charType(int len) {
         return String.format("char(%d)", len);
-    }
-
-    @Override
-    public boolean requiresBeginTransaction() {
-        return false;
-    }
-
-    @Override
-    public String beginTransaction() {
-        return "";
     }
 }

@@ -84,25 +84,10 @@ public class FirebirdDialect extends AnsiDialect {
     public String fetchFirst(String sql, long n) {
         return String.format("%s rows %d", sql, n);
     }
-//
-//    @Override
-//    public String binaryType(int size) {
-//        return String.format("varbinary", size);
-//    }
 
     @Override
     public String timestampType(Optional<Integer> prec) {
         return "timestamp";
-    }
-
-    @Override
-    public boolean requiresBeginTransaction() {
-        return true;
-    }
-
-    @Override
-    public String beginTransaction() {
-        return "set transaction";
     }
 
     @Override
