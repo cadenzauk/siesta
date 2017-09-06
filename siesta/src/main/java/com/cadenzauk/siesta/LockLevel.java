@@ -22,10 +22,8 @@
 
 package com.cadenzauk.siesta;
 
-public enum IsolationLevel {
-    UNSPECIFIED,
-    UNCOMMITTED_READ,
-    READ_COMMITTED,
-    REPEATABLE_READ,
-    SERIALIZABLE
+public enum LockLevel {
+    SHARE,
+    UPDATE,
+    EXCLUSIVE
 }

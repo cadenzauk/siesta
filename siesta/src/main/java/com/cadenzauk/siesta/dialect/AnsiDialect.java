@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
+import com.cadenzauk.siesta.LockLevel;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -183,7 +184,7 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public String isolationLevelSql(String sql, IsolationLevel level) {
+    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
         return sql;
     }
 

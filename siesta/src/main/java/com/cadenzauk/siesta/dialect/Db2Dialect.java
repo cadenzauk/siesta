@@ -23,6 +23,10 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.IsolationLevel;
+import com.cadenzauk.siesta.LockLevel;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
 
@@ -58,8 +62,24 @@ public class Db2Dialect extends AnsiDialect {
     }
 
     @Override
-    public String isolationLevelSql(String sql, IsolationLevel level) {
+    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
+        return keepLocks
+            .map(kl -> isolationLevelSqlWithLocks(sql, level, kl))
+            .orElseGet(() -> isolationLevelWithNoLocks(sql, level));
+    }
+
+    private String isolationLevelSqlWithLocks(String sql, IsolationLevel level, LockLevel keepLocks) {
+        return String.format("%s for read only with %s use and keep %s locks",
+            sql,
+            level.ordinal() <= IsolationLevel.REPEATABLE_READ.ordinal() ? "rs" : "rr",
+            keepLocks);
+    }
+
+    @Nullable
+    private String isolationLevelWithNoLocks(String sql, IsolationLevel level) {
         switch (level) {
+            case UNSPECIFIED:
+                return sql;
             case UNCOMMITTED_READ:
                 return sql + " with ur";
             case READ_COMMITTED:

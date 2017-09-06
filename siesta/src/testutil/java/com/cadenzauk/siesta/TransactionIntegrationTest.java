@@ -26,6 +26,8 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -74,13 +76,14 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
         try (Transaction transaction = database.beginTransaction()) {
             database.insert(transaction, salesperson);
 
-            Integer count = database.from(SalespersonRow.class)
-                .select(count())
+            Optional<Long> result = database.from(SalespersonRow.class)
+                .select(SalespersonRow::salespersonId)
                 .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
-                .withIsolation(IsolationLevel.READ_COMMITTED)
-                .single();
+                .withIsolation(IsolationLevel.REPEATABLE_READ)
+                .keepLocks(LockLevel.UPDATE)
+                .optional();
 
-            assertThat(count, is(0));
+            assertThat(result.isPresent(), is(false));
         }
     }
 

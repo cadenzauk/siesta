@@ -86,7 +86,7 @@ public interface Dialect {
 
     boolean supportsIsolationLevelInQuery();
 
-    String isolationLevelSql(String sql, IsolationLevel level);
+    String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks);
 
     String tinyintType();
 

@@ -22,6 +22,11 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.IsolationLevel;
+import com.cadenzauk.siesta.LockLevel;
+
+import java.util.Optional;
+
 public class H2Dialect extends AnsiDialect {
     @Override
     public boolean supportsMultiInsert() {
@@ -36,6 +41,14 @@ public class H2Dialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return String.format("%s limit %d", sql, n);
+    }
+
+    @Override
+    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
+        return keepLocks
+            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
+            .map(ll -> sql + " for update")
+            .orElse(sql);
     }
 
     @Override
