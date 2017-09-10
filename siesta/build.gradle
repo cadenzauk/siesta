@@ -66,3 +66,52 @@ artifacts {
     archives sourcesJar
     archives testutilJar
 }
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: project.hasProperty("ossrhUsername") ? ossrhUsername : "", password: project.hasProperty("ossrhPassword") ? ossrhPassword : "")
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: project.hasProperty("ossrhUsername") ? ossrhUsername : "", password: project.hasProperty("ossrhPassword") ? ossrhPassword : "")
+            }
+
+            pom.project {
+                name 'Cadenza UK SIESTA'
+                packaging 'jar'
+                artifactId 'siesta'
+                description 'SIESTA Is an Easy SQL Typesafe API'
+                url 'https://github.com/cadenzauk/siesta'
+
+                scm {
+                    url 'scm:git@github.com:cadenzauk/siesta.git'
+                    connection 'scm:git@github.com:cadenzauk/siesta.git'
+                    developerConnection 'scm:git@github.com:cadenzauk/siesta.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The MIT License'
+                        url 'https://raw.githubusercontent.com/cadenzauk/siesta/master/LICENCE'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mdrodg'
+                        name 'Mark Rodgers'
+                    }
+                }
+            }
+        }
+    }
+}
