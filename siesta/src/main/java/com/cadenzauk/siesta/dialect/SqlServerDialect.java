@@ -124,4 +124,9 @@ public class SqlServerDialect extends AnsiDialect {
             .map(p -> String.format("datetime2(%d)", p))
             .orElse("datetime2");
     }
+
+    @Override
+    public String nextFromSequence(String catalog, String schema, String sequenceName) {
+        return "next value for " + qualifiedName(catalog, schema, sequenceName);
+    }
 }

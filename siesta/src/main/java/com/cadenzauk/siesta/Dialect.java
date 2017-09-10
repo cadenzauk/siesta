@@ -34,7 +34,7 @@ public interface Dialect {
 
     boolean requiresFromDual();
 
-    String qualifiedTableName(String catalog, String schema, String table);
+    String qualifiedName(String catalog, String schema, String name);
 
     String dual();
 
@@ -109,4 +109,6 @@ public interface Dialect {
     String varcharType(int size);
 
     String charType(int len);
+
+    String nextFromSequence(String catalog, String schema, String sequenceName);
 }

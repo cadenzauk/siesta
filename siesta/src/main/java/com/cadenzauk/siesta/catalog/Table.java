@@ -112,7 +112,7 @@ public class Table<R> {
     }
 
     public String qualifiedName() {
-        return database.dialect().qualifiedTableName(catalog, schema, tableName());
+        return database.dialect().qualifiedName(catalog, schema, tableName());
     }
 
     public Alias<R> as(String alias) {

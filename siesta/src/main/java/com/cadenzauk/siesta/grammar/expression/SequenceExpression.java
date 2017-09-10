@@ -20,29 +20,55 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.Sequence;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.google.common.reflect.TypeToken;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public interface Transaction extends AutoCloseable {
+public class SequenceExpression<T> implements TypedExpression<T> {
+    private final LabelGenerator labelGenerator = new LabelGenerator("sequence_");
+    private final Sequence<T> sequence;
+
+    public SequenceExpression(Sequence<T> sequence) {
+        this.sequence = sequence;
+    }
+
     @Override
-    void close();
+    public String label(Scope scope) {
+        return labelGenerator.label();
+    }
 
-    void commit();
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return sequence.rowMapper(label);
+    }
 
-    void rollback();
+    @Override
+    public TypeToken<T> type() {
+        return sequence.type();
+    }
 
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
+    @Override
+    public String sql(Scope scope) {
+        return sequence.sql();
+    }
 
-    <T> CompletableFuture<List<T>> queryAsync(String sql, Object[] args, RowMapper<T> rowMapper);
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return Stream.empty();
+    }
 
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
+    @Override
+    public Precedence precedence() {
+        return Precedence.UNARY;
+    }
 
-    int update(String sql, Object[] args);
-
-    CompletableFuture<Integer> updateAsync(String sql, Object[] args);
+    public T single() {
+        return sequence.single();
+    }
 }

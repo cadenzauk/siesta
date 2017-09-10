@@ -156,7 +156,7 @@ class DialectTest {
             .sql();
 
         String expectedResult = String.format("select INVOICE.ID as INVOICE_ID from %s INVOICE where INVOICE.ID = 4%s",
-            dialect.qualifiedTableName("", "AP", "INVOICE"),
+            dialect.qualifiedName("", "AP", "INVOICE"),
             expectSql);
         assertThat(sql, is(expectedResult));
     }

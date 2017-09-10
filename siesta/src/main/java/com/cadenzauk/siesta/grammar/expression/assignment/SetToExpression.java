@@ -20,29 +20,27 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.grammar.expression.assignment;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public interface Transaction extends AutoCloseable {
+public class SetToExpression implements AssignmentValue {
+    private final TypedExpression<?> expression;
+
+    public SetToExpression(TypedExpression<?> expression) {
+        this.expression = expression;
+    }
+
     @Override
-    void close();
+    public String sql(Scope scope) {
+        return " = " + expression.sql(scope);
+    }
 
-    void commit();
-
-    void rollback();
-
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> CompletableFuture<List<T>> queryAsync(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    int update(String sql, Object[] args);
-
-    CompletableFuture<Integer> updateAsync(String sql, Object[] args);
+    @Override
+    public Stream<Object> args(Scope scope) {
+        return expression.args(scope);
+    }
 }

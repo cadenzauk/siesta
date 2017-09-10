@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -146,6 +147,13 @@ class SelectStatement<RT> {
         return transaction.query(sql, args, rowMapper());
     }
 
+    CompletableFuture<List<RT>> listAsync(Transaction transaction) {
+        Object[] args = args(scope).toArray();
+        String sql = sql();
+        LOG.debug(sql);
+        return transaction.queryAsync(sql, args, rowMapper());
+    }
+
     Optional<RT> optional(SqlExecutor sqlExecutor) {
         return OptionalUtil.ofOnly(list(sqlExecutor));
     }
@@ -174,6 +182,10 @@ class SelectStatement<RT> {
 
     RT single(Transaction transaction) {
         return Iterables.getOnlyElement(list(transaction));
+    }
+
+    CompletableFuture<RT> singleAsync(Transaction transaction) {
+        return listAsync(transaction).thenApply(Iterables::getOnlyElement);
     }
 
     From from() {

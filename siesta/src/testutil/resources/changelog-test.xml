@@ -25,6 +25,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <changeSet id="create int sequence for firebird" author="mark" dbms="firebird">
+        <createSequence sequenceName="widget_seq" />
+    </changeSet>
+
+    <changeSet id="create int sequence for others" author="mark" dbms="oracle,db2,h2,postgresql,mssql">
+        <createSequence sequenceName="widget_seq" startValue="1"/>
+    </changeSet>
+
     <changeSet id="create widget table" author="mark">
         <createTable tableName="WIDGET" schemaName="SIESTA">
             <column name="WIDGET_ID" type="BIGINT">

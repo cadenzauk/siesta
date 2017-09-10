@@ -86,4 +86,9 @@ public class PostgresDialect extends AnsiDialect {
         return String.format("%s offset 0 rows fetch next %d rows only", sql, n);
     }
 
+    @Override
+    public String nextFromSequence(String catalog, String schema, String sequenceName) {
+        return "nextval('" + sequenceName + "')";
+    }
+
 }

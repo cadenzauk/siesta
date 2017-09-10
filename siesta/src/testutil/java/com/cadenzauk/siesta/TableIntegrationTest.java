@@ -79,6 +79,7 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -810,14 +811,14 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     public <T> Object[] castExpressionTestCase(TypedExpression<T> castExpr, T expectedResult) {
-        return new Object[] { castExpr, expectedResult };
+        return new Object[]{castExpr, expectedResult};
     }
 
     public Object[][] parametersForCastExpression() {
-        return new Object[][] {
+        return new Object[][]{
             castExpressionTestCase(cast(134).asChar(3), "134"),
-            castExpressionTestCase(cast(126).asTinyInteger(), (byte)126),
-            castExpressionTestCase(cast(32767L).asSmallInteger(), (short)32767),
+            castExpressionTestCase(cast(126).asTinyInteger(), (byte) 126),
+            castExpressionTestCase(cast(32767L).asSmallInteger(), (short) 32767),
             castExpressionTestCase(cast(123456L).asInteger(), 123456),
             castExpressionTestCase(cast("789101112").asBigInteger(), 789101112L),
             castExpressionTestCase(cast(literal(LocalDateTime.of(2017, 1, 3, 12, 0, 1))).asDate(), LocalDate.of(2017, 1, 3)),
@@ -837,5 +838,32 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         T result = database.select(castExpr).single();
 
         assertThat(result, is(expectedResult));
+    }
+
+    @Test
+    public void sequence() {
+        Database database = testDatabase(dataSource, dialect);
+        Sequence<Integer> widgetSeq = database.sequence("widget_seq");
+        long salespersonId = newId();
+        int seq1 = widgetSeq.single();
+        SalespersonRow salesPerson = SalespersonRow.newBuilder()
+            .salespersonId(salespersonId)
+            .firstName("Terry")
+            .surname("McCann")
+            .numberOfSales(seq1)
+            .build();
+        database.insert(salesPerson);
+
+        database.update(SalespersonRow.class)
+            .set(SalespersonRow::numberOfSales).to(widgetSeq.nextVal())
+            .where(SalespersonRow::salespersonId).isEqualTo(literal(salespersonId))
+            .execute();
+
+        int seq2 = database.from(SalespersonRow.class)
+            .select(SalespersonRow::numberOfSales)
+            .where(SalespersonRow::salespersonId).isEqualTo(literal(salespersonId))
+            .single();
+
+        assertThat(seq2, greaterThan(seq1));
     }
 }

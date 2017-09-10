@@ -91,7 +91,12 @@ public class FirebirdDialect extends AnsiDialect {
     }
 
     @Override
-    public String qualifiedTableName(String catalog, String schema, String table) {
-        return table;
+    public String nextFromSequence(String catalog, String schema, String sequenceName) {
+        return "next value for " + qualifiedName(catalog, schema, sequenceName);
+    }
+
+    @Override
+    public String qualifiedName(String catalog, String schema, String name) {
+        return name;
     }
 }

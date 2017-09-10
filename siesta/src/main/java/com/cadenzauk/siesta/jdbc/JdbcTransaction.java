@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.Transaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class JdbcTransaction implements Transaction {
@@ -63,6 +64,11 @@ public class JdbcTransaction implements Transaction {
     }
 
     @Override
+    public <T> CompletableFuture<List<T>> queryAsync(String sql, Object[] args, RowMapper<T> rowMapper) {
+        return sqlExecutor.queryAsync(connection, sql, args, rowMapper);
+    }
+
+    @Override
     public <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper) {
         return sqlExecutor.stream(connection, sql, args, rowMapper, new CompositeAutoCloseable());
     }
@@ -70,6 +76,11 @@ public class JdbcTransaction implements Transaction {
     @Override
     public int update(String sql, Object[] args) {
         return sqlExecutor.update(connection, sql, args);
+    }
+
+    @Override
+    public CompletableFuture<Integer> updateAsync(String sql, Object[] args) {
+        return sqlExecutor.updateAsync(connection, sql, args);
     }
 
     @Override

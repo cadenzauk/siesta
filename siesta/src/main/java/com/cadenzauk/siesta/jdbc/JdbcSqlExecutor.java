@@ -35,6 +35,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -44,11 +47,13 @@ import static java.util.stream.Collectors.toList;
 public class JdbcSqlExecutor implements SqlExecutor {
     private final DataSource dataSource;
     private final int fetchSize;
+    private final Executor executor;
     private final JdbcDataTypeRegistry registry = new JdbcDataTypeRegistry();
 
-    private JdbcSqlExecutor(DataSource dataSource, int fetchSize) {
+    private JdbcSqlExecutor(DataSource dataSource, int fetchSize, Executor executor) {
         this.dataSource = dataSource;
         this.fetchSize = fetchSize;
+        this.executor = executor;
     }
 
     Connection connect() {
@@ -89,6 +94,10 @@ public class JdbcSqlExecutor implements SqlExecutor {
         }
     }
 
+    <T> CompletableFuture<List<T>> queryAsync(Connection connection, String sql, Object[] args, RowMapper<T> rowMapper) {
+        return CompletableFuture.supplyAsync(() -> query(connection, sql, args, rowMapper));
+    }
+
     <T> Stream<T> stream(Connection connection, String sql, Object[] args, RowMapper<T> rowMapper, CompositeAutoCloseable closeable) {
         try {
             PreparedStatement preparedStatement = prepare(connection, sql, args, closeable);
@@ -113,6 +122,10 @@ public class JdbcSqlExecutor implements SqlExecutor {
         }
     }
 
+    public CompletableFuture<Integer> updateAsync(Connection connection, String sql, Object[] args) {
+        return CompletableFuture.supplyAsync(() -> update(connection, sql, args), executor);
+    }
+
     private PreparedStatement prepare(Connection connection, String sql, Object[] args, CompositeAutoCloseable closeable) {
         PreparedStatement preparedStatement = closeable.add(ConnectionUtil.prepare(connection, sql));
         IntStream.range(0, args.length).forEach(i -> registry.setParameter(preparedStatement, i + 1, args[i]));
@@ -120,10 +133,18 @@ public class JdbcSqlExecutor implements SqlExecutor {
     }
 
     public static JdbcSqlExecutor of(DataSource dataSource) {
-        return new JdbcSqlExecutor(dataSource, 0);
+        return new JdbcSqlExecutor(dataSource, 0, ForkJoinPool.commonPool());
     }
 
     public static JdbcSqlExecutor of(DataSource dataSource, int fetchSize) {
-        return new JdbcSqlExecutor(dataSource, fetchSize);
+        return new JdbcSqlExecutor(dataSource, fetchSize, ForkJoinPool.commonPool());
+    }
+
+    public static JdbcSqlExecutor of(DataSource dataSource, Executor executor) {
+        return new JdbcSqlExecutor(dataSource, 0, executor);
+    }
+
+    public static JdbcSqlExecutor of(DataSource dataSource, int fetchSize, Executor executor) {
+        return new JdbcSqlExecutor(dataSource, fetchSize, executor);
     }
 }

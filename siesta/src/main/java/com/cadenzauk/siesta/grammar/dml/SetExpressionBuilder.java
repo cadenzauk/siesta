@@ -23,8 +23,10 @@
 package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.siesta.grammar.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
+import com.cadenzauk.siesta.grammar.expression.assignment.SetToExpression;
 import com.cadenzauk.siesta.grammar.expression.assignment.SetToNull;
 import com.cadenzauk.siesta.grammar.expression.assignment.SetToValue;
 
@@ -48,6 +50,10 @@ public class SetExpressionBuilder<T, N> {
         return value
             .map(v -> complete(new SetToValue<>(v)))
             .orElseGet(() -> complete(new SetToNull()));
+    }
+
+    public N to(TypedExpression<T> expression) {
+        return complete(new SetToExpression(expression));
     }
 
     public N toNull() {

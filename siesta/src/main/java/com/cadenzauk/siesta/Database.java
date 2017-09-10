@@ -102,6 +102,24 @@ public class Database {
         return dialect().timestampWithTimeZoneLiteral(val, databaseTimeZone);
     }
 
+    public Sequence<Integer> sequence(String name) {
+        return sequence(Integer.class, defaultCatalog, defaultSchema, name);
+    }
+
+    public <T extends Number> Sequence<T> sequence(Class<T> valueClass, String name) {
+        return sequence(valueClass, defaultCatalog, defaultSchema, name);
+    }
+
+    public <T extends Number> Sequence<T> sequence(Class<T> valueClass, String catalog, String schema, String name) {
+        return Sequence.<T>newBuilder()
+            .database(this)
+            .catalog(catalog)
+            .schema(schema)
+            .sequenceName(name)
+            .dataType(getDataTypeOf(valueClass))
+            .build();
+    }
+
     @SuppressWarnings("unchecked")
     public <R> Table<R> table(Class<R> rowClass) {
         return table(TypeToken.of(rowClass), Function.identity());

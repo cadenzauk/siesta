@@ -108,4 +108,25 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
             assertThat(count, is(1));
         }
     }
+
+    @Test
+    public void whenUncommittedThenVisibleWithinTransaction() {
+        Database database = testDatabase(dataSource, dialect);
+
+        SalespersonRow salesperson = aRandomSalesperson();
+        try (Transaction transaction = database.beginTransaction()) {
+            database.insert(transaction, salesperson);
+
+            Integer count = database.from(SalespersonRow.class)
+                .select(count())
+                .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
+                .fetchFirst(1)
+                .withIsolation(IsolationLevel.UNCOMMITTED_READ)
+                .singleAsync(transaction)
+                .join();
+
+            assertThat(count, is(1));
+        }
+    }
+
 }

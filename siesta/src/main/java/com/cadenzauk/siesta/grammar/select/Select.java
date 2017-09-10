@@ -40,6 +40,7 @@ import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public abstract class Select<RT> implements TypedExpression<RT> {
@@ -95,6 +96,10 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     public RT single(Transaction transaction) {
         return statement.single(transaction);
+    }
+
+    public CompletableFuture<RT> singleAsync(Transaction transaction) {
+        return statement.singleAsync(transaction);
     }
 
     public Select<RT> fetchFirst(long i) {

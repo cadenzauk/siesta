@@ -50,11 +50,11 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public String qualifiedTableName(String catalog, String schema, String table) {
+    public String qualifiedName(String catalog, String schema, String name) {
         return Optional.ofNullable(schema)
             .filter(StringUtils::isNotBlank)
-            .map(s -> String.format("%s.%s", s, table))
-            .orElse(table);
+            .map(s -> String.format("%s.%s", s, name))
+            .orElse(name);
     }
 
     @Override
@@ -243,5 +243,10 @@ public class AnsiDialect implements Dialect {
     @Override
     public String charType(int len) {
         return String.format("char(%d)", len);
+    }
+
+    @Override
+    public String nextFromSequence(String catalog, String schema, String sequenceName) {
+        return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
     }
 }
