@@ -30,6 +30,7 @@ import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
+import com.cadenzauk.siesta.grammar.expression.DateFunctions;
 import com.cadenzauk.siesta.grammar.expression.LiteralExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
@@ -53,6 +54,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
@@ -647,7 +649,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
-            TestRow input = new TestRow(expected);
+            TestRow input = TestRow.of(expected);
 
             database.insert(input);
             LocalDateTime result = database
@@ -666,7 +668,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             ZonedDateTime expected = randomZonedDateTime(ZoneId.of("UTC"));
-            TestRow input = new TestRow(expected);
+            TestRow input = TestRow.of(expected);
 
             database.insert(input);
             ZonedDateTime result = database
@@ -841,6 +843,45 @@ public abstract class TableIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void roundTripNulls() {
+        Database database = testDatabase(dataSource, dialect);
+        String guid = UUID.randomUUID().toString();
+        database.insert(TestRow.newBuilder()
+            .guid(guid)
+            .decimalOpt(null)
+            .decimalReq(null)
+            .integerOpt(null)
+            .integerReq(null)
+            .localDateOpt(null)
+            .localDateReq(null)
+            .localDateTimeOpt(null)
+            .localDateTimeReq(null)
+            .stringOpt(null)
+            .stringReq(null)
+            .utcDateTimeOpt(null)
+            .utcDateTimeReq(null)
+            .build());
+
+        TestRow result = database
+            .from(TestRow.class)
+            .where(TestRow::guid).isEqualTo(guid)
+            .single();
+
+            assertThat(result.decimalOpt(), is(Optional.empty()));
+            assertThat(result.decimalReq(), nullValue());
+            assertThat(result.integerOpt(), is(Optional.empty()));
+            assertThat(result.integerReq(), nullValue());
+            assertThat(result.localDateOpt(), is(Optional.empty()));
+            assertThat(result.localDateReq(), nullValue());
+            assertThat(result.localDateTimeOpt(), is(Optional.empty()));
+            assertThat(result.localDateTimeReq(), nullValue());
+            assertThat(result.stringOpt(), is(Optional.empty()));
+            assertThat(result.stringReq(), nullValue());
+            assertThat(result.utcDateTimeOpt(), is(Optional.empty()));
+            assertThat(result.utcDateTimeReq(), nullValue());
+    }
+
+    @Test
     public void sequence() {
         Database database = testDatabase(dataSource, dialect);
         Sequence<Integer> widgetSeq = database.sequence("widget_seq");
@@ -865,5 +906,23 @@ public abstract class TableIntegrationTest extends IntegrationTest {
             .single();
 
         assertThat(seq2, greaterThan(seq1));
+    }
+
+    @Test
+    public void dateAdd() {
+        Database database = testDatabase(dataSource, dialect);
+        String guid = UUID.randomUUID().toString();
+        LocalDate localDate = RandomValues.randomLocalDate();
+        database.insert(TestRow.newBuilder()
+            .guid(guid)
+            .localDateReq(localDate)
+            .build());
+
+        LocalDate result = database.from(TestRow.class)
+            .select(DateFunctions.addDays(TestRow::localDateReq, 7))
+            .where(TestRow::guid).isEqualTo(guid)
+            .single();
+
+        assertThat(result, is(localDate.plusDays(7)));
     }
 }

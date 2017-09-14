@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -29,39 +31,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class FirebirdDialect extends AnsiDialect {
+    public FirebirdDialect() {
+        DateFunctionSpecs.registerExtract(functions());
+        DateFunctionSpecs.registerDateAdd(functions());
+    }
+
     @Override
     public String dual() {
         return "RDB$DATABASE";
-    }
-
-    @Override
-    public String year(String arg) {
-        return String.format("extract(year from %s)", arg);
-    }
-
-    @Override
-    public String month(String arg) {
-        return String.format("extract(month from %s)", arg);
-    }
-
-    @Override
-    public String day(String arg) {
-        return String.format("extract(day from %s)", arg);
-    }
-
-    @Override
-    public String hour(String arg) {
-        return String.format("extract(hour from %s)", arg);
-    }
-
-    @Override
-    public String minute(String arg) {
-        return String.format("extract(minute from %s)", arg);
-    }
-
-    @Override
-    public String second(String arg) {
-        return String.format("extract(second from %s)", arg);
     }
 
     @Override

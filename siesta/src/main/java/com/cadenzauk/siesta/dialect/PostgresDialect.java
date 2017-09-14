@@ -22,9 +22,18 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+
 import static com.cadenzauk.core.lang.StringUtil.octal;
 
 public class PostgresDialect extends AnsiDialect {
+    public PostgresDialect() {
+        DateFunctionSpecs.registerExtract(functions());
+        DateFunctionSpecs.registerPlusNumber(functions());
+        functions().register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"));
+    }
+
     @Override
     public boolean supportsMultiInsert() {
         return true;
@@ -33,41 +42,6 @@ public class PostgresDialect extends AnsiDialect {
     @Override
     public boolean requiresFromDual() {
         return false;
-    }
-
-    @Override
-    public String currentTimestamp() {
-        return "localtimestamp";
-    }
-
-    @Override
-    public String year(String arg) {
-        return String.format("extract(year from %s)", arg);
-    }
-
-    @Override
-    public String month(String arg) {
-        return String.format("extract(month from %s)", arg);
-    }
-
-    @Override
-    public String day(String arg) {
-        return String.format("extract(day from %s)", arg);
-    }
-
-    @Override
-    public String hour(String arg) {
-        return String.format("extract(hour from %s)", arg);
-    }
-
-    @Override
-    public String minute(String arg) {
-        return String.format("extract(minute from %s)", arg);
-    }
-
-    @Override
-    public String second(String arg) {
-        return String.format("extract(second from %s)", arg);
     }
 
     @Override

@@ -79,7 +79,10 @@ public final class Getter extends UtilityClass {
             return t -> Optional.ofNullable(boxedType(argType).cast(MethodUtil.invoke(method, t)));
         }
         if (method.getReturnType() == Optional.class && argType.isAssignableFrom(actualTypeArgument((ParameterizedType) method.getGenericReturnType(), 0))) {
-            return t -> ((Optional<Object>) MethodUtil.invoke(method, t)).map(argType::cast);
+            return t -> {
+                Optional<Object> fieldValue = (Optional<Object>) MethodUtil.invoke(method, t);
+                return Optional.ofNullable(fieldValue).flatMap(o -> o.map(argType::cast));
+            };
         }
         throw new IllegalArgumentException(String.format("Cannot convert %s into a Function<%s,Optional<%s>>.", method, targetClass, argType));
     }
@@ -91,7 +94,10 @@ public final class Getter extends UtilityClass {
             return t -> Optional.ofNullable(boxedType(argType).cast(FieldUtil.get(field, t)));
         }
         if (field.getType() == Optional.class && argType.isAssignableFrom(actualTypeArgument((ParameterizedType) field.getGenericType(), 0))) {
-            return t -> ((Optional<Object>) FieldUtil.get(field, t)).map(argType::cast);
+            return t -> {
+                Optional<Object> fieldValue = (Optional<Object>) FieldUtil.get(field, t);
+                return Optional.ofNullable(fieldValue).flatMap(o -> o.map(argType::cast));
+            };
         }
         throw new IllegalArgumentException(String.format("Cannot convert %s into a Function<%s,Optional<%s>>.", field, targetClass, argType));
     }

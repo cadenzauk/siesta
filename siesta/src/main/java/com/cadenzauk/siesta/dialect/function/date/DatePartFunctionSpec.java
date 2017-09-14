@@ -20,44 +20,23 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.dialect.function.date;
 
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 
-import java.util.Optional;
+public class DatePartFunctionSpec implements FunctionSpec {
+    private final String part;
 
-public class H2Dialect extends AnsiDialect {
-    public H2Dialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
+    private DatePartFunctionSpec(String part) {
+        this.part = part;
     }
 
     @Override
-    public boolean supportsMultiInsert() {
-        return true;
+    public String sql(String[] argsSql) {
+        return String.format("datepart(%s, %s)", part, argsSql[0]);
     }
 
-    @Override
-    public String byteLiteral(byte val) {
-        return String.format("cast(%d as tinyint)", val);
-    }
-
-    @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
-    }
-
-    @Override
-    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
-        return keepLocks
-            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
-            .map(ll -> sql + " for update")
-            .orElse(sql);
-    }
-
-    @Override
-    public String tinyintType() {
-        return "tinyint";
+    public static DatePartFunctionSpec of(String part) {
+        return new DatePartFunctionSpec(part);
     }
 }

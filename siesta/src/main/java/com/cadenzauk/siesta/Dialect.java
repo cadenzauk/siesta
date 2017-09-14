@@ -22,6 +22,9 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.siesta.dialect.function.FunctionName;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -38,21 +41,7 @@ public interface Dialect {
 
     String dual();
 
-    String currentTimestamp();
-
-    String year(String arg);
-
-    String month(String arg);
-
-    String day(String arg);
-
-    String hour(String arg);
-
-    String minute(String arg);
-
-    String second(String arg);
-
-    String today();
+    FunctionSpec function(FunctionName name);
 
     boolean supportsMultiInsert();
 

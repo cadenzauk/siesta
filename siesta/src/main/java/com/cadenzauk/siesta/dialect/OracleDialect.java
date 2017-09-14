@@ -22,50 +22,24 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
 
 public class OracleDialect extends AnsiDialect {
+    public OracleDialect() {
+        DateFunctionSpecs.registerExtract(functions());
+        DateFunctionSpecs.registerPlusNumToDsInterval(functions());
+        functions().register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"));
+    }
+
     @Override
     public String dateLiteral(LocalDate date) {
         return String.format("to_date('%s', 'yyyy-mm-dd')", date.format(DateTimeFormatter.ISO_DATE));
-    }
-
-    @Override
-    public String currentTimestamp() {
-        return "localtimestamp";
-    }
-
-    @Override
-    public String year(String arg) {
-        return String.format("extract(year from %s)", arg);
-    }
-
-    @Override
-    public String month(String arg) {
-        return String.format("extract(month from %s)", arg);
-    }
-
-    @Override
-    public String day(String arg) {
-        return String.format("extract(day from %s)", arg);
-    }
-
-    @Override
-    public String hour(String arg) {
-        return String.format("extract(hour from %s)", arg);
-    }
-
-    @Override
-    public String minute(String arg) {
-        return String.format("extract(minute from %s)", arg);
-    }
-
-    @Override
-    public String second(String arg) {
-        return String.format("extract(second from %s)", arg);
     }
 
     @Override

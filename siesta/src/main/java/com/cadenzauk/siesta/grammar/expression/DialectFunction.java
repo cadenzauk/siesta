@@ -22,11 +22,9 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.Function2;
 import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
@@ -36,22 +34,23 @@ import java.util.stream.Stream;
 
 public class DialectFunction<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator;
+    private final FunctionName functionName;
     private final TypeToken<T> type;
-    private final BiFunction<Dialect,String[],String> sqlFunction;
     private final TypedExpression<?>[] args;
     private final BiFunction<Scope,String,RowMapper<T>> rowMapperFactory;
 
-    private DialectFunction(String name, TypeToken<T> type, BiFunction<Dialect,String[],String> sqlFunction, BiFunction<Scope, String, RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
-        labelGenerator = new LabelGenerator(name + "_");
+    private DialectFunction(FunctionName functionName, TypeToken<T> type, BiFunction<Scope, String, RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
+        labelGenerator = new LabelGenerator(functionName.name() + "_");
+        this.functionName = functionName;
         this.type = type;
-        this.sqlFunction = sqlFunction;
         this.args = args;
         this.rowMapperFactory = rowMapperFactory;
     }
 
     @Override
     public String sql(Scope scope) {
-        return sqlFunction.apply(scope.database().dialect(), Arrays.stream(args).map(a -> a.sql(scope)).toArray(String[]::new));
+        String[] argsSql = Arrays.stream(args).map(a -> a.sql(scope)).toArray(String[]::new);
+        return scope.dialect().function(functionName).sql(argsSql);
     }
 
     @Override
@@ -71,7 +70,7 @@ public class DialectFunction<T> implements TypedExpression<T> {
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Arrays.stream(args).flatMap(a -> a.args(scope));
+        return scope.dialect().function(functionName).args(scope, args);
     }
 
     @Override
@@ -79,11 +78,15 @@ public class DialectFunction<T> implements TypedExpression<T> {
         return Precedence.UNARY;
     }
 
-    public static <T> DialectFunction<T> of(String name, Function1<Dialect,String> sqlFunction, Class<T> resultClass) {
-        return new DialectFunction<>(name, TypeToken.of(resultClass), (d, a) -> sqlFunction.apply(d), Scope.makeMapper(resultClass));
+    public static <T> DialectFunction<T> of(FunctionName name, Class<T> resultClass) {
+        return new DialectFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass));
     }
 
-    public static <T> DialectFunction<T> of(String name, Function2<Dialect,String,String> sqlFunction, TypedExpression<?> arg, Class<T> resultClass) {
-        return new DialectFunction<>(name, TypeToken.of(resultClass), (d, a) -> sqlFunction.apply(d, a[0]), Scope.makeMapper(resultClass), arg);
+    public static <T> DialectFunction<T> of(FunctionName name, TypedExpression<?> arg, Class<T> resultClass) {
+        return new DialectFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass), arg);
+    }
+
+    public static <T> DialectFunction<T> of(FunctionName name, TypedExpression<?> arg1, TypedExpression<?> arg2, TypeToken<T> resultClass) {
+        return new DialectFunction<>(name, resultClass, Scope.makeMapper(resultClass), arg1, arg2);
     }
 }

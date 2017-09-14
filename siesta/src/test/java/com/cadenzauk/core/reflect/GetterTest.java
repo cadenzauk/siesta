@@ -80,6 +80,16 @@ class GetterTest {
     }
 
     @Test
+    void forOptionalFieldWithNoGetterAndNullValue() {
+        Function<GetterTestClass,Optional<Long>> fieldWithNoGetter
+            = Getter.forField(GetterTestClass.class, Long.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithNoGetterNull"));
+
+        Optional<Long> result = fieldWithNoGetter.apply(new GetterTestClass());
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
     void forFieldWithUnprefixedGetter() {
         Function<GetterTestClass,Optional<BigDecimal>> fieldWithNoGetter
             = Getter.forField(GetterTestClass.class, BigDecimal.class, getDeclaredField(GetterTestClass.class, "fieldWithUnprefixedGetter"));
@@ -103,6 +113,20 @@ class GetterTest {
         Optional<Integer> result = fieldWithNoGetter.apply(mock);
 
         assertThat(result, is(Optional.of(3141569)));
+        verify(mock).optionalFieldWithUnprefixedGetter();
+        verifyNoMoreInteractions(mock);
+    }
+
+    @Test
+    void forOptionalFieldWithUnprefixedGetterThatIsNull() {
+        Function<GetterTestClass,Optional<Integer>> fieldWithNoGetter
+            = Getter.forField(GetterTestClass.class, Integer.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithUnprefixedGetter"));
+        GetterTestClass mock = mock(GetterTestClass.class);
+        when(mock.optionalFieldWithUnprefixedGetter()).thenReturn(null);
+
+        Optional<Integer> result = fieldWithNoGetter.apply(mock);
+
+        assertThat(result, is(Optional.empty()));
         verify(mock).optionalFieldWithUnprefixedGetter();
         verifyNoMoreInteractions(mock);
     }
@@ -220,6 +244,7 @@ class GetterTest {
     private static class GetterTestClass {
         private String fieldWithNoGetter = "whatever";
         private Optional<Long> optionalFieldWithNoGetter = Optional.of(54323928574L);
+        private Optional<Long> optionalFieldWithNoGetterNull;
         private BigDecimal fieldWithUnprefixedGetter;
         private Optional<Integer> optionalFieldWithUnprefixedGetter;
         private short fieldWithGetPrefixedGetter;

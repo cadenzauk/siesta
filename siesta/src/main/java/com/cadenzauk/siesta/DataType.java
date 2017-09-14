@@ -184,12 +184,12 @@ public class DataType<T> {
 
     private static LocalDateTime getLocalDateTime(ResultSet rs, String col) throws SQLException {
         Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
-        return timestamp.toLocalDateTime();
+        return rs.wasNull() ? null : timestamp.toLocalDateTime();
     }
 
     private static LocalDateTime getLocalDateTime(ResultSet rs, int col) throws SQLException {
         Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
-        return timestamp.toLocalDateTime();
+        return rs.wasNull() ? null : timestamp.toLocalDateTime();
     }
 
     private static Timestamp getTimestamp(ResultSet resultSet, String columnLabel, Database db) throws SQLException {
@@ -205,13 +205,13 @@ public class DataType<T> {
             @Override
             public ZonedDateTime get(ResultSet rs, String col, Database db) throws SQLException {
                 Timestamp timestamp = getTimestamp(rs, col, db);
-                return TimestampUtil.toZonedDateTime(timestamp, db.databaseTimeZone(), ZoneId.of("UTC"));
+                return rs.wasNull() ? null : TimestampUtil.toZonedDateTime(timestamp, db.databaseTimeZone(), ZoneId.of("UTC"));
             }
 
             @Override
             public ZonedDateTime get(ResultSet rs, int col, Database db) throws SQLException {
                 Timestamp timestamp = getTimestamp(rs, col, db);
-                return TimestampUtil.toZonedDateTime(timestamp, db.databaseTimeZone(), ZoneId.of("UTC"));
+                return rs.wasNull() ? null : TimestampUtil.toZonedDateTime(timestamp, db.databaseTimeZone(), ZoneId.of("UTC"));
             }
         };
     }

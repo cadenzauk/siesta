@@ -22,6 +22,9 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,9 +40,10 @@ import static java.util.stream.Collectors.joining;
 public class SqlServerDialect extends AnsiDialect {
     private static final Pattern SELECT_PATTERN = Pattern.compile("(select (distinct )?)");
 
-    @Override
-    public String today() {
-        return "getdate()";
+    public SqlServerDialect() {
+        DateFunctionSpecs.registerDatePart(functions());
+        DateFunctionSpecs.registerDateAdd(functions());
+        functions().register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"));
     }
 
     @Override
@@ -50,21 +54,6 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public boolean requiresFromDual() {
         return false;
-    }
-
-    @Override
-    public String hour(String arg) {
-        return String.format("datepart(hour, %s)", arg);
-    }
-
-    @Override
-    public String minute(String arg) {
-        return String.format("datepart(minute, %s)", arg);
-    }
-
-    @Override
-    public String second(String arg) {
-        return String.format("datepart(second, %s)", arg);
     }
 
     @Override

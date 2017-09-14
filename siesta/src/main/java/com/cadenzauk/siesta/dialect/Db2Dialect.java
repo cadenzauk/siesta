@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -31,6 +32,10 @@ import java.util.Optional;
 import static com.cadenzauk.core.lang.StringUtil.hex;
 
 public class Db2Dialect extends AnsiDialect {
+    public Db2Dialect() {
+        DateFunctionSpecs.registerPlusUnits(functions());
+    }
+
     @Override
     public String selectivity(double s) {
         return String.format(" selectivity %f", s);

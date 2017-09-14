@@ -20,44 +20,21 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.dialect.function;
 
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+public class SimpleFunctionSpec implements FunctionSpec {
+    private final String name;
 
-import java.util.Optional;
-
-public class H2Dialect extends AnsiDialect {
-    public H2Dialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
+    private SimpleFunctionSpec(String name) {
+        this.name = name;
     }
 
     @Override
-    public boolean supportsMultiInsert() {
-        return true;
+    public String sql(String[] argsSql) {
+        return String.format("%s(%s)", name, String.join(", ", argsSql));
     }
 
-    @Override
-    public String byteLiteral(byte val) {
-        return String.format("cast(%d as tinyint)", val);
-    }
-
-    @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
-    }
-
-    @Override
-    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
-        return keepLocks
-            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
-            .map(ll -> sql + " for update")
-            .orElse(sql);
-    }
-
-    @Override
-    public String tinyintType() {
-        return "tinyint";
+    public static FunctionSpec of(String name) {
+        return new SimpleFunctionSpec(name);
     }
 }

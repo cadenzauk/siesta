@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.sql.RowMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Optional;
@@ -96,6 +97,13 @@ public class Scope {
     public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {
         return (scope, label) -> {
             final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
+            return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+        };
+    }
+
+    public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(TypeToken<S> resultType) {
+        return (scope, label) -> {
+            final DataType<S> dataType = scope.database().getDataTypeOf(resultType);
             return rs -> dataType.get(rs, label, scope.database()).orElse(null);
         };
     }

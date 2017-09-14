@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.TypeUtil;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Map;
 import java.util.Objects;
@@ -61,6 +62,12 @@ public class DataTypeRegistry {
     @SuppressWarnings("unchecked")
     public <T> Optional<DataType<T>> dataTypeOf(Class<T> javaClass) {
         return Optional.ofNullable(entries.get(TypeUtil.boxedType(javaClass)))
+            .map(dataType -> (DataType<T>) dataType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Optional<DataType<T>> dataTypeOf(TypeToken<T> javaType) {
+        return Optional.ofNullable(entries.get(TypeUtil.boxedType(javaType.getRawType())))
             .map(dataType -> (DataType<T>) dataType);
     }
 }

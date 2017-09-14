@@ -20,44 +20,39 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.dialect.function;
 
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Optional;
+public class FunctionName {
+    private final String name;
 
-public class H2Dialect extends AnsiDialect {
-    public H2Dialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
+    public FunctionName(String name) {
+        this.name = name;
     }
 
     @Override
-    public boolean supportsMultiInsert() {
-        return true;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FunctionName that = (FunctionName) o;
+
+        return new EqualsBuilder()
+            .append(name, that.name)
+            .isEquals();
     }
 
     @Override
-    public String byteLiteral(byte val) {
-        return String.format("cast(%d as tinyint)", val);
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(name)
+            .toHashCode();
     }
 
-    @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
-    }
-
-    @Override
-    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
-        return keepLocks
-            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
-            .map(ll -> sql + " for update")
-            .orElse(sql);
-    }
-
-    @Override
-    public String tinyintType() {
-        return "tinyint";
+    public String name() {
+        return name;
     }
 }

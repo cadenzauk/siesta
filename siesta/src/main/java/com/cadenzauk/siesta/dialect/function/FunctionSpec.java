@@ -20,44 +20,18 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.dialect.function;
 
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
-public class H2Dialect extends AnsiDialect {
-    public H2Dialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
-    }
+public interface FunctionSpec {
+    String sql(String[] argsSql);
 
-    @Override
-    public boolean supportsMultiInsert() {
-        return true;
-    }
-
-    @Override
-    public String byteLiteral(byte val) {
-        return String.format("cast(%d as tinyint)", val);
-    }
-
-    @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
-    }
-
-    @Override
-    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
-        return keepLocks
-            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
-            .map(ll -> sql + " for update")
-            .orElse(sql);
-    }
-
-    @Override
-    public String tinyintType() {
-        return "tinyint";
+    default Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+        return Arrays.stream(args).flatMap(a -> a.args(scope));
     }
 }

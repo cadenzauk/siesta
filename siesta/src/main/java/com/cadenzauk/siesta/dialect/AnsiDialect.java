@@ -25,6 +25,10 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
+import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -39,6 +43,12 @@ import static com.cadenzauk.core.lang.StringUtil.hex;
 import static java.util.stream.Collectors.joining;
 
 public class AnsiDialect implements Dialect {
+    private final FunctionRegistry functions = new FunctionRegistry();
+
+    public AnsiDialect() {
+        DateFunctionSpecs.registerDefaults(functions);
+    }
+
     @Override
     public String selectivity(double s) {
         return "";
@@ -63,43 +73,9 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public String currentTimestamp() {
-        return "current_timestamp";
-    }
-
-    @Override
-    public String year(String arg) {
-        return String.format("year(%s)", arg);
-    }
-
-    @Override
-    public String month(String arg) {
-        return String.format("month(%s)", arg);
-    }
-
-    @Override
-    public String day(String arg) {
-        return String.format("day(%s)", arg);
-    }
-
-    @Override
-    public String hour(String arg) {
-        return String.format("hour(%s)", arg);
-    }
-
-    @Override
-    public String minute(String arg) {
-        return String.format("minute(%s)", arg);
-    }
-
-    @Override
-    public String second(String arg) {
-        return String.format("second(%s)", arg);
-    }
-
-    @Override
-    public String today() {
-        return "current_date";
+    public FunctionSpec function(FunctionName name) {
+        return functions.get(name)
+            .orElseThrow(() -> new IllegalArgumentException("No function " + name + " registered with dialect " + getClass().getSimpleName()));
     }
 
     @Override
@@ -248,5 +224,9 @@ public class AnsiDialect implements Dialect {
     @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
         return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
+    }
+
+    protected FunctionRegistry functions() {
+        return functions;
     }
 }
