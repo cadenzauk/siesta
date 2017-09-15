@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -106,10 +105,11 @@ class CastExpressionTest extends MockitoTest {
     void label() {
         CastBuilder<String> builder = new CastBuilder<>(expression);
         CastExpression<String,Integer> sut = builder.asInteger();
+        when(scope.newLabel()).thenReturn(345L);
 
         String result = sut.label(scope);
 
-        assertThat(result, startsWith("cast_"));
+        assertThat(result, is("cast_345"));
         verifyZeroInteractions(expression, scope, dialect, database, resultSet);
     }
 

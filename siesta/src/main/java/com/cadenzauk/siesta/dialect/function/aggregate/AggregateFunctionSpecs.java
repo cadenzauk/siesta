@@ -20,46 +20,22 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.siesta.dialect.function.aggregate;
 
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
+import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 
-import java.util.stream.Stream;
+public class AggregateFunctionSpecs {
+    public static final FunctionName MAX = new FunctionName("max");
+    public static final FunctionName MIN = new FunctionName("min");
+    public static final FunctionName SUM = new FunctionName("sum");
+    public static final FunctionName AVG = new FunctionName("avg");
 
-public class CountFunction implements TypedExpression<Integer> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("count_");
-
-    @Override
-    public String sql(Scope scope) {
-        return "count(*)";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> DataType.INTEGER.get(rs, label, scope.database()).orElse(null);
-    }
-
-    @Override
-    public TypeToken<Integer> type() {
-        return TypeToken.of(Integer.class);
+    public static void registerDefaults(FunctionRegistry functions) {
+        functions.register(MAX, SimpleFunctionSpec.of("max"));
+        functions.register(MIN, SimpleFunctionSpec.of("min"));
+        functions.register(SUM, SimpleFunctionSpec.of("sum"));
+        functions.register(AVG, SimpleFunctionSpec.of("avg"));
     }
 }

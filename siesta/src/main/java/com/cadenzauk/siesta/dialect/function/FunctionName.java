@@ -33,6 +33,11 @@ public class FunctionName {
     }
 
     @Override
+    public String toString() {
+        return name + " function";
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
 

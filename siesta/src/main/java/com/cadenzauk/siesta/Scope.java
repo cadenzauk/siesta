@@ -28,6 +28,7 @@ import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
 import static java.util.stream.Collectors.toList;
@@ -36,6 +37,7 @@ public class Scope {
     private final Optional<Scope> outer;
     private final List<Alias<?>> aliases;
     private final Database database;
+    private final AtomicLong labelCounter = new AtomicLong();
 
     public Scope(Database database, Alias<?>... aliases) {
         this.database = database;
@@ -92,6 +94,12 @@ public class Scope {
 
     public boolean isOutermost() {
         return !outer.isPresent();
+    }
+
+    public long newLabel() {
+        return outer
+            .map(Scope::newLabel)
+            .orElseGet(labelCounter::incrementAndGet);
     }
 
     public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {

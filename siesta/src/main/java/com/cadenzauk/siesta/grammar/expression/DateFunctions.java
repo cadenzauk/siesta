@@ -33,261 +33,288 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
-import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.ADD_DAYS;
 
 public final class DateFunctions extends UtilityClass {
     //--
     public static TypedExpression<LocalDate> currentDate() {
-        return DialectFunction.of(DateFunctionSpecs.CURRENT_DATE, LocalDate.class);
+        return SqlFunction.of(DateFunctionSpecs.CURRENT_DATE, LocalDate.class, new TypedExpression<?>[0]);
     }
 
     //--
     public static TypedExpression<LocalDateTime> currentTimestampLocal() {
-        return DialectFunction.of(DateFunctionSpecs.CURRENT_TIMESTAMP, LocalDateTime.class);
+        return SqlFunction.of(DateFunctionSpecs.CURRENT_TIMESTAMP, LocalDateTime.class, new TypedExpression<?>[0]);
     }
 
     //--
     public static TypedExpression<ZonedDateTime> currentTimestamp() {
-        return DialectFunction.of(DateFunctionSpecs.CURRENT_TIMESTAMP, ZonedDateTime.class);
+        return SqlFunction.of(DateFunctionSpecs.CURRENT_TIMESTAMP, ZonedDateTime.class, new TypedExpression<?>[0]);
     }
 
     //--
     public static TypedExpression<Integer> year(LocalDate value) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> year(LocalDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> year(ZonedDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, ValueExpression.of(value));
     }
 
     public static <T extends Temporal> TypedExpression<Integer> year(TypedExpression<T> expression) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, expression, Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, expression);
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> year(Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, UnresolvedColumn.of(methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> year(FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, UnresolvedColumn.of(methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> year(FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> year(String alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, UnresolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> year(String alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, UnresolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> year(String alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> year(Alias<R> alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, ResolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> year(Alias<R> alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.YEAR, ResolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> year(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.YEAR, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
     //--
     public static TypedExpression<Integer> month(LocalDate value) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> month(LocalDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> month(ZonedDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, ValueExpression.of(value));
     }
 
     public static <T extends Temporal> TypedExpression<Integer> month(TypedExpression<T> expression) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, expression, Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, expression);
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> month(Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, UnresolvedColumn.of(methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> month(FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, UnresolvedColumn.of(methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> month(FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> month(String alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, UnresolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> month(String alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, UnresolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> month(String alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> month(Alias<R> alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, ResolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> month(Alias<R> alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MONTH, ResolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> month(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.MONTH, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
     //--
     public static TypedExpression<Integer> day(LocalDate value) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> day(LocalDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> day(ZonedDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, ValueExpression.of(value));
     }
 
     public static <T extends Temporal> TypedExpression<Integer> day(TypedExpression<T> expression) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, expression, Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, expression);
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> day(Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, UnresolvedColumn.of(methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> day(FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, UnresolvedColumn.of(methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> day(FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> day(String alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, UnresolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> day(String alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, UnresolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> day(String alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> day(Alias<R> alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, ResolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> day(Alias<R> alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.DAY, ResolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> day(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.DAY, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
     //--
     public static TypedExpression<Integer> hour(LocalDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> hour(ZonedDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, ValueExpression.of(value));
     }
 
     public static <T extends Temporal> TypedExpression<Integer> hour(TypedExpression<T> expression) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, expression, Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, expression);
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> hour(Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, UnresolvedColumn.of(methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> hour(FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, UnresolvedColumn.of(methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> hour(FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> hour(String alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, UnresolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> hour(String alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, UnresolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> hour(String alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> hour(Alias<R> alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, ResolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> hour(Alias<R> alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.HOUR, ResolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> hour(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.HOUR, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
     //--
     public static TypedExpression<Integer> minute(LocalDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> minute(ZonedDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, ValueExpression.of(value));
     }
 
     public static <T extends Temporal> TypedExpression<Integer> minute(TypedExpression<T> expression) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, expression, Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, expression);
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> minute(Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, UnresolvedColumn.of(methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> minute(FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, UnresolvedColumn.of(methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> minute(FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> minute(String alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, UnresolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> minute(String alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, UnresolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> minute(String alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> minute(Alias<R> alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, ResolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> minute(Alias<R> alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.MINUTE, ResolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> minute(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.MINUTE, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
     //--
     public static TypedExpression<Integer> second(LocalDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, ValueExpression.of(value));
     }
 
     public static TypedExpression<Integer> second(ZonedDateTime value) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, ValueExpression.of(value), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, ValueExpression.of(value));
     }
 
     public static <T extends Temporal> TypedExpression<Integer> second(TypedExpression<T> expression) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, expression, Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, expression);
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> second(Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, UnresolvedColumn.of(methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> second(FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, UnresolvedColumn.of(methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> second(FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, UnresolvedColumn.of(methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> second(String alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, UnresolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> second(String alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, UnresolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> second(String alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, UnresolvedColumn.of(alias, methodReference));
     }
 
     public static <R, T extends Temporal> TypedExpression<Integer> second(Alias<R> alias, Function1<R,T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, ResolvedColumn.of(alias, methodReference), Integer.class);
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
-    public static <R, T extends Temporal> TypedExpression<Integer> second(Alias<R> alias, FunctionOptional1<R, T> methodReference) {
-        return DialectFunction.of(DateFunctionSpecs.SECOND, ResolvedColumn.of(alias, methodReference), Integer.class);
+    public static <R, T extends Temporal> TypedExpression<Integer> second(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return SqlFunction.of(DateFunctionSpecs.SECOND, Integer.class, ResolvedColumn.of(alias, methodReference));
     }
 
     //--
-    public static <R, T extends Temporal> TypedExpression<T> addDays(Function1<R, T> methodReference, int days) {
-        UnresolvedColumn<T,R> column = UnresolvedColumn.of(methodReference);
-        return DialectFunction.of(DateFunctionSpecs.ADD_DAYS, column, value(days), column.type());
+    public static <T extends Temporal> TypedExpression<T> addDays(TypedExpression<T> date, int days) {
+        return addDays(date, ValueExpression.of(days));
+    }
+
+    public static <R, T extends Temporal> TypedExpression<T> addDays(Function1<R,T> date, int days) {
+        return addDays(UnresolvedColumn.of(date), ValueExpression.of(days));
+    }
+
+    public static <R, T extends Temporal> TypedExpression<T> addDays(FunctionOptional1<R,T> date, int days) {
+        return addDays(UnresolvedColumn.of(date), ValueExpression.of(days));
+    }
+
+    public static <R, T extends Temporal> TypedExpression<T> addDays(String alias, Function1<R,T> date, int days) {
+        return addDays(UnresolvedColumn.of(alias, date), ValueExpression.of(days));
+    }
+
+    public static <R, T extends Temporal> TypedExpression<T> addDays(String alias, FunctionOptional1<R,T> date, int days) {
+        return addDays(UnresolvedColumn.of(alias, date), ValueExpression.of(days));
+    }
+
+    public static <R, T extends Temporal> TypedExpression<T> addDays(Alias<R> alias, Function1<R,T> date, int days) {
+        return addDays(ResolvedColumn.of(alias, date), ValueExpression.of(days));
+    }
+
+    public static <R, T extends Temporal> TypedExpression<T> addDays(Alias<R> alias, FunctionOptional1<R,T> date, int days) {
+        return addDays(ResolvedColumn.of(alias, date), ValueExpression.of(days));
+    }
+
+    public static <T extends Temporal> TypedExpression<T> addDays(TypedExpression<T> date, TypedExpression<Integer> days) {
+        return SqlFunction.of(ADD_DAYS, date.type(), date, days);
     }
 }

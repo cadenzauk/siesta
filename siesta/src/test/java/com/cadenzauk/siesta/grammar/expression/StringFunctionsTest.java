@@ -22,6 +22,9 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.model.TestRow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
@@ -49,6 +52,12 @@ class StringFunctionsTest extends FunctionTest {
     @Mock
     private TypedExpression<Integer> expression2;
 
+    @Mock
+    private Dialect dialect;
+
+    @Mock
+    private FunctionSpec substrFunction;
+
     @Test
     void isUtility() {
         assertThat(StringFunctions.class, isUtilityClass());
@@ -58,11 +67,14 @@ class StringFunctionsTest extends FunctionTest {
     void substrSql() {
         when(expression1.sql(scope)).thenReturn("sql1");
         when(expression2.sql(scope)).thenReturn("sql2");
+        when(scope.dialect()).thenReturn(dialect);
+        when(dialect.function(StringFunctionSpecs.SUBSTR)).thenReturn(substrFunction);
+        when(substrFunction.sql(toArray("sql1", "sql2"))).thenReturn("substring(sql2, sql1)");
         TypedExpression<String> sut = substr(expression1, expression2);
 
         String result = sut.sql(scope);
 
-        assertThat(result, is("substr(sql1, sql2)"));
+        assertThat(result, is("substring(sql2, sql1)"));
         verify(expression1).sql(scope);
         verify(expression2).sql(scope);
         verifyNoMoreInteractions(expression1, expression2);

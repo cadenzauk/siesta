@@ -22,10 +22,10 @@
 
 package com.cadenzauk.siesta.grammar;
 
-import java.util.concurrent.atomic.AtomicLong;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 public class LabelGenerator {
-    private static final AtomicLong counter = new AtomicLong();
     private final String prefix;
     private String label;
 
@@ -33,9 +33,16 @@ public class LabelGenerator {
         this.prefix = prefix;
     }
 
-    public String label() {
+    public String label(Scope scope) {
         if (label == null) {
-            label = prefix + counter.incrementAndGet();
+            label = prefix + scope.newLabel();
+        }
+        return label;
+    }
+
+    public String label(Scope scope, TypedExpression<?> arg) {
+        if (label == null) {
+            label = prefix + arg.label(scope);
         }
         return label;
     }

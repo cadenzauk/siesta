@@ -37,7 +37,7 @@ public class DateFunctionSpecs {
     public static final FunctionName MINUTE = new FunctionName("hour");
     public static final FunctionName SECOND = new FunctionName("second");
 
-    public static final FunctionName ADD_DAYS = new FunctionName("dateadd");
+    public static final FunctionName ADD_DAYS = new FunctionName("add_days");
 
     public static void registerDefaults(FunctionRegistry functions) {
         functions.register(CURRENT_DATE, ArgumentlessFunctionSpec.of("current_date"));
@@ -49,6 +49,8 @@ public class DateFunctionSpecs {
         functions.register(HOUR, SimpleFunctionSpec.of("hour"));
         functions.register(MINUTE, SimpleFunctionSpec.of("minute"));
         functions.register(SECOND, SimpleFunctionSpec.of("second"));
+
+        registerDateAdd(functions);
     }
 
     public static void registerExtract(FunctionRegistry functions) {

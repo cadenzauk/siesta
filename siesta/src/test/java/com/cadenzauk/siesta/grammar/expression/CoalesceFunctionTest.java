@@ -23,9 +23,9 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.MockitoTest;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.WidgetRow;
@@ -44,9 +44,7 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -109,15 +107,15 @@ class CoalesceFunctionTest extends MockitoTest {
     void label() {
         CoalesceFunction<String> sut1 = coalesce(expression1).orElse(expression2);
         CoalesceFunction<String> sut2 = coalesce(expression1).orElse(expression2);
+        when(scope.newLabel()).thenReturn(345L).thenReturn(245L);
 
         String label1 = sut1.label(scope);
         String label2 = sut1.label(scope);
         String label3 = sut2.label(scope);
 
-        assertThat(label1, is(label2));
-        assertThat(label1, not(is(label3)));
-        assertThat(label1, startsWith("coalesce_"));
-        assertThat(label3, startsWith("coalesce_"));
+        assertThat(label1, is("coalesce_345"));
+        assertThat(label2, is("coalesce_345"));
+        assertThat(label3, is("coalesce_245"));
     }
 
     @Test

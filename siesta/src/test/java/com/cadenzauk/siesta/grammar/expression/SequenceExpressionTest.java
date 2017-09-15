@@ -37,9 +37,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.iterableWithSize;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.when;
 
 class SequenceExpressionTest extends MockitoTest {
@@ -59,15 +57,15 @@ class SequenceExpressionTest extends MockitoTest {
     void label() {
         SequenceExpression<Integer> sut1 = new SequenceExpression<>(intSequence);
         SequenceExpression<Integer> sut2 = new SequenceExpression<>(intSequence);
+        when(scope.newLabel()).thenReturn(563L).thenReturn(564L);
 
         String label1 = sut1.label(scope);
         String label2 = sut1.label(scope);
         String label3 = sut2.label(scope);
 
-        assertThat(label1, is(label2));
-        assertThat(label1, not(is(label3)));
-        assertThat(label1, startsWith("sequence_"));
-        assertThat(label3, startsWith("sequence_"));
+        assertThat(label1, is("sequence_563"));
+        assertThat(label2, is("sequence_563"));
+        assertThat(label3, is("sequence_564"));
     }
 
     @Test

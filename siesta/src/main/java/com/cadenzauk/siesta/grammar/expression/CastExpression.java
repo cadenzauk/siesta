@@ -47,7 +47,7 @@ public class CastExpression<F, T> implements TypedExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        return labelGenerator.label();
+        return labelGenerator.label(scope);
     }
 
     @Override

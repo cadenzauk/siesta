@@ -36,12 +36,14 @@ import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.addDays;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.day;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hour;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minute;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -122,8 +124,16 @@ class DateFunctionsTest extends FunctionTest {
             testCase(s -> second("s", TestRow::localDateTimeReq), "second(s.LOCAL_DATE_TIME_REQ)", toArray()),
             testCase(s -> second("s", TestRow::localDateTimeOpt), "second(s.LOCAL_DATE_TIME_OPT)", toArray()),
             testCase(s -> second(s, TestRow::localDateTimeReq), "second(s.LOCAL_DATE_TIME_REQ)", toArray()),
-            testCase(s -> second(s, TestRow::localDateTimeOpt), "second(s.LOCAL_DATE_TIME_OPT)", toArray())
-            
+            testCase(s -> second(s, TestRow::localDateTimeOpt), "second(s.LOCAL_DATE_TIME_OPT)", toArray()),
+
+            testCase(s -> addDays(TypedExpression.value(randomZonedDateTime), 1), "dateadd(day, ?, cast(? as timestamp))", toArray(1, Timestamp.valueOf(randomZonedDateTime.toLocalDateTime()))),
+            testCase(s -> addDays(TypedExpression.value(randomZonedDateTime), literal(4)), "dateadd(day, 4, cast(? as timestamp))", toArray(Timestamp.valueOf(randomZonedDateTime.toLocalDateTime()))),
+            testCase(s -> addDays(TestRow::localDateTimeReq, 1), "dateadd(day, ?, s.LOCAL_DATE_TIME_REQ)", toArray(1)),
+            testCase(s -> addDays(TestRow::localDateTimeOpt, 1), "dateadd(day, ?, s.LOCAL_DATE_TIME_OPT)", toArray(1)),
+            testCase(s -> addDays("s", TestRow::localDateTimeReq, 2), "dateadd(day, ?, s.LOCAL_DATE_TIME_REQ)", toArray(2)),
+            testCase(s -> addDays("s", TestRow::localDateTimeOpt, 2), "dateadd(day, ?, s.LOCAL_DATE_TIME_OPT)", toArray(2)),
+            testCase(s -> addDays(s, TestRow::localDateTimeReq, 3), "dateadd(day, ?, s.LOCAL_DATE_TIME_REQ)", toArray(3)),
+            testCase(s -> addDays(s, TestRow::localDateTimeOpt, 3), "dateadd(day, ?, s.LOCAL_DATE_TIME_OPT)", toArray(3))
         );
     }
 }

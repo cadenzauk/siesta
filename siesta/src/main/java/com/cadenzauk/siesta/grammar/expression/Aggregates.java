@@ -27,133 +27,139 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.siesta.Alias;
 
+import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.AVG;
+import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.MAX;
+import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.MIN;
+import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.SUM;
+
 public final class Aggregates extends UtilityClass {
+
     public static <T> TypedExpression<T> max(T arg) {
-        return UnaryFunction.of(TypedExpression.value(arg), "max");
+        return SqlFunction.of(MAX, TypedExpression.value(arg));
     }
 
     public static <T> TypedExpression<T> max(TypedExpression<T> arg) {
-        return UnaryFunction.of(arg, "max");
+        return SqlFunction.of(MAX, arg);
     }
 
     public static <T, R> TypedExpression<T> max(Function1<R,T> arg) {
-        return UnaryFunction.of(arg, "max");
+        return SqlFunction.of(MAX, arg);
     }
 
     public static <T, R> TypedExpression<T> max(FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(arg, "max");
+        return SqlFunction.of(MAX, arg);
     }
 
     public static <T, R> TypedExpression<T> max(String alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "max");
+        return SqlFunction.of(MAX, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> max(String alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "max");
+        return SqlFunction.of(MAX, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> max(Alias<R> alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "max");
+        return SqlFunction.of(MAX, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> max(Alias<R> alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "max");
+        return SqlFunction.of(MAX, alias, arg);
     }
 
     public static <T> TypedExpression<T> min(T arg) {
-        return UnaryFunction.of(TypedExpression.value(arg), "min");
+        return SqlFunction.of(MIN, TypedExpression.value(arg));
     }
 
     public static <T> TypedExpression<T> min(TypedExpression<T> arg) {
-        return UnaryFunction.of(arg, "min");
+        return SqlFunction.of(MIN, arg);
     }
 
     public static <T, R> TypedExpression<T> min(Function1<R,T> arg) {
-        return UnaryFunction.of(arg, "min");
+        return SqlFunction.of(MIN, arg);
     }
 
     public static <T, R> TypedExpression<T> min(FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(arg, "min");
+        return SqlFunction.of(MIN, arg);
     }
 
     public static <T, R> TypedExpression<T> min(String alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "min");
+        return SqlFunction.of(MIN, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> min(String alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "min");
+        return SqlFunction.of(MIN, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> min(Alias<R> alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "min");
+        return SqlFunction.of(MIN, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> min(Alias<R> alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "min");
+        return SqlFunction.of(MIN, alias, arg);
     }
 
     public static <T> TypedExpression<T> sum(T arg) {
-        return UnaryFunction.of(TypedExpression.value(arg), "sum");
+        return SqlFunction.of(SUM, TypedExpression.value(arg));
     }
 
     public static <T extends Number> TypedExpression<T> sum(TypedExpression<T> arg) {
-        return UnaryFunction.of(arg, "sum");
+        return SqlFunction.of(SUM, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> sum(Function1<R,T> arg) {
-        return UnaryFunction.of(arg, "sum");
+        return SqlFunction.of(SUM, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> sum(FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(arg, "sum");
+        return SqlFunction.of(SUM, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> sum(String alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "sum");
+        return SqlFunction.of(SUM, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> sum(String alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "sum");
+        return SqlFunction.of(SUM, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> sum(Alias<R> alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "sum");
+        return SqlFunction.of(SUM, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> sum(Alias<R> alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "sum");
+        return SqlFunction.of(SUM, alias, arg);
     }
 
     public static <T> TypedExpression<T> avg(T arg) {
-        return UnaryFunction.of(TypedExpression.value(arg), "avg");
+        return SqlFunction.of(AVG, TypedExpression.value(arg));
     }
 
     public static <T extends Number> TypedExpression<T> avg(TypedExpression<T> arg) {
-        return UnaryFunction.of(arg, "avg");
+        return SqlFunction.of(AVG, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(Function1<R,T> arg) {
-        return UnaryFunction.of(arg, "avg");
+        return SqlFunction.of(AVG, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(arg, "avg");
+        return SqlFunction.of(AVG, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(String alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "avg");
+        return SqlFunction.of(AVG, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(String alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "avg");
+        return SqlFunction.of(AVG, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(Alias<R> alias, Function1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "avg");
+        return SqlFunction.of(AVG, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(Alias<R> alias, FunctionOptional1<R,T> arg) {
-        return UnaryFunction.of(alias, arg, "avg");
+        return SqlFunction.of(AVG, alias, arg);
     }
 
     public static TypedExpression<Integer> count() {

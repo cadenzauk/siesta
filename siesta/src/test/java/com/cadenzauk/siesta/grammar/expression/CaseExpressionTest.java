@@ -121,6 +121,7 @@ class CaseExpressionTest extends MockitoTest {
     void label() {
         CaseExpression<String> sut1 = new CaseExpression<>(condition, expression1);
         CaseExpression<String> sut2 = new CaseExpression<>(condition, expression2);
+        when(scope.newLabel()).thenReturn(1L).thenReturn(2L);
 
         String label1 = sut1.label(scope);
         String label2 = sut1.label(scope);

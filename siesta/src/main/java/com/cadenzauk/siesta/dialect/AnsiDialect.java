@@ -25,10 +25,12 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -46,7 +48,9 @@ public class AnsiDialect implements Dialect {
     private final FunctionRegistry functions = new FunctionRegistry();
 
     public AnsiDialect() {
+        AggregateFunctionSpecs.registerDefaults(functions);
         DateFunctionSpecs.registerDefaults(functions);
+        StringFunctionSpecs.registerDefaults(functions);
     }
 
     @Override

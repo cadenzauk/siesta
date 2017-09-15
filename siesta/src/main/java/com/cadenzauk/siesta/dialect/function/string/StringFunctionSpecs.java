@@ -20,46 +20,22 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.siesta.dialect.function.string;
 
-import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
+import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 
-import java.util.stream.Stream;
+public class StringFunctionSpecs {
+    public static final FunctionName UPPER = new FunctionName("upper");
+    public static final FunctionName LOWER = new FunctionName("lower");
+    public static final FunctionName SUBSTR = new FunctionName("substr");
+    public static final FunctionName LENGTH = new FunctionName("length");
 
-public class CountFunction implements TypedExpression<Integer> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("count_");
-
-    @Override
-    public String sql(Scope scope) {
-        return "count(*)";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> DataType.INTEGER.get(rs, label, scope.database()).orElse(null);
-    }
-
-    @Override
-    public TypeToken<Integer> type() {
-        return TypeToken.of(Integer.class);
+    public static void registerDefaults(FunctionRegistry functions) {
+        functions.register(UPPER, SimpleFunctionSpec.of("upper"));
+        functions.register(LOWER, SimpleFunctionSpec.of("lower"));
+        functions.register(SUBSTR, SimpleFunctionSpec.of("substr"));
+        functions.register(LENGTH, SimpleFunctionSpec.of("length"));
     }
 }

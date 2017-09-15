@@ -22,8 +22,12 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
@@ -31,18 +35,16 @@ import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
-
 public class SqlFunction<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator;
-    private final String name;
+    private final FunctionName functionName;
     private final TypeToken<T> type;
     private final TypedExpression<?>[] args;
     private final BiFunction<Scope,String,RowMapper<T>> rowMapperFactory;
 
-    private SqlFunction(String name, TypeToken<T> type, BiFunction<Scope,String,RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
-        labelGenerator = new LabelGenerator(name + "_");
-        this.name = name;
+    private SqlFunction(FunctionName functionName, TypeToken<T> type, BiFunction<Scope, String, RowMapper<T>> rowMapperFactory, TypedExpression<?>... args) {
+        labelGenerator = new LabelGenerator(functionName.name() + "_");
+        this.functionName = functionName;
         this.type = type;
         this.args = args;
         this.rowMapperFactory = rowMapperFactory;
@@ -50,12 +52,15 @@ public class SqlFunction<T> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return String.format("%s(%s)", name, Arrays.stream(args).map(a -> a.sql(scope)).collect(joining(", ")));
+        String[] argsSql = Arrays.stream(args).map(a -> a.sql(scope)).toArray(String[]::new);
+        return scope.dialect().function(functionName).sql(argsSql);
     }
 
     @Override
     public String label(Scope scope) {
-        return labelGenerator.label();
+        return args.length == 1
+            ? labelGenerator.label(scope, args[0])
+            : labelGenerator.label(scope);
     }
 
     @Override
@@ -70,7 +75,7 @@ public class SqlFunction<T> implements TypedExpression<T> {
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Arrays.stream(args).flatMap(a -> a.args(scope));
+        return scope.dialect().function(functionName).args(scope, args);
     }
 
     @Override
@@ -78,15 +83,68 @@ public class SqlFunction<T> implements TypedExpression<T> {
         return Precedence.UNARY;
     }
 
-    public static <T, U, S> SqlFunction<S> of(String name, Class<S> resultClass) {
-        return new SqlFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass));
+    public static <T> SqlFunction<T> of(FunctionName name, T val) {
+        return of(name, TypedExpression.value(val));
     }
 
-    public static <T, U, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2, String name, Class<S> resultClass) {
-        return new SqlFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass), arg1, arg2);
+    public static <T> SqlFunction<T> of(FunctionName name, TypedExpression<T> arg) {
+        return of(name, arg.type(), arg);
     }
 
-    public static <T, U, V, S> SqlFunction<S> of(TypedExpression<T> arg1, TypedExpression<U> arg2, TypedExpression<V> arg3, String name, Class<S> resultClass) {
-        return new SqlFunction<>(name, TypeToken.of(resultClass), Scope.makeMapper(resultClass), arg1, arg2, arg3);
+    public static <R,T> SqlFunction<T> of(FunctionName name, Function1<R,T> methodReference) {
+        return of(name, UnresolvedColumn.of(methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, FunctionOptional1<R,T> methodReference) {
+        return of(name, UnresolvedColumn.of(methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, String alias, Function1<R,T> methodReference) {
+        return of(name, UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, String alias, FunctionOptional1<R,T> methodReference) {
+        return of(name, UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Alias<R> alias, Function1<R,T> methodReference) {
+        return of(name, ResolvedColumn.of(alias, methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return of(name, ResolvedColumn.of(alias, methodReference));
+    }
+
+    public static <T> SqlFunction<T> of(FunctionName name, TypeToken<T> resultType, TypedExpression<?>... args) {
+        return new SqlFunction<>(name, resultType, Scope.makeMapper(resultType), args);
+    }
+
+    public static <T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, TypedExpression<?>... args) {
+        TypeToken<T> resultType = TypeToken.of(resultClass);
+        return new SqlFunction<>(name, resultType, Scope.makeMapper(resultType), args);
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, Function1<R,?> methodReference) {
+        return of(name, resultClass, UnresolvedColumn.of(methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, FunctionOptional1<R,?> methodReference) {
+        return of(name, resultClass, UnresolvedColumn.of(methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, String alias, Function1<R,?> methodReference) {
+        return of(name, resultClass, UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, String alias, FunctionOptional1<R,?> methodReference) {
+        return of(name, resultClass, UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, Alias<R> alias, Function1<R,?> methodReference) {
+        return of(name, resultClass, ResolvedColumn.of(alias, methodReference));
+    }
+
+    public static <R,T> SqlFunction<T> of(FunctionName name, Class<T> resultClass, Alias<R> alias, FunctionOptional1<R,?> methodReference) {
+        return of(name, resultClass, ResolvedColumn.of(alias, methodReference));
     }
 }
