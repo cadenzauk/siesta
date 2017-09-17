@@ -34,6 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.ADD_DAYS;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.DAY_DIFF;
 
 public final class DateFunctions extends UtilityClass {
     //--
@@ -316,5 +317,10 @@ public final class DateFunctions extends UtilityClass {
 
     public static <T extends Temporal> TypedExpression<T> addDays(TypedExpression<T> date, TypedExpression<Integer> days) {
         return SqlFunction.of(ADD_DAYS, date.type(), date, days);
+    }
+
+    //--
+    public static <T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> dayDiff(TypedExpression<T1> date1, TypedExpression<T2> date2) {
+        return SqlFunction.of(DAY_DIFF, Integer.class, date1, date2);
     }
 }

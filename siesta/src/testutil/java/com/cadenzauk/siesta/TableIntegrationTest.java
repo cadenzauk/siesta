@@ -925,4 +925,21 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
         assertThat(result, is(localDate.plusDays(7)));
     }
+
+    @Test
+    public void dateDifference() {
+        Database database = testDatabase(dataSource, dialect);
+        String guid = UUID.randomUUID().toString();
+        LocalDate localDate = RandomValues.randomLocalDate();
+        database.insert(TestRow.newBuilder()
+            .guid(guid)
+            .localDateReq(localDate)
+            .build());
+
+        int result = database
+            .select(DateFunctions.dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
+            .single();
+
+        assertThat(result, is(9));
+    }
 }

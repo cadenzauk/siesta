@@ -43,6 +43,8 @@ public class SqlServerDialect extends AnsiDialect {
     public SqlServerDialect() {
         DateFunctionSpecs.registerDatePart(functions());
         DateFunctionSpecs.registerDateAdd(functions());
+        DateFunctionSpecs.registerDateDiff(functions());
+
         functions().register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"));
     }
 
