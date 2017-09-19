@@ -29,6 +29,12 @@ import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import javax.sql.DataSource;
 
 public class TestDatabase {
+    public static Database testDatabase(DataSource dataSource) {
+        return testDatabaseBuilder()
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource, 0))
+            .build();
+    }
+
     public static Database testDatabase(DataSource dataSource, Dialect dialect) {
         return testDatabaseBuilder(dialect)
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource, 0))
@@ -39,13 +45,17 @@ public class TestDatabase {
         return testDatabaseBuilder(dialect).build();
     }
 
-    public static Database.Builder testDatabaseBuilder(Dialect dialect) {
+    public static Database.Builder testDatabaseBuilder() {
         return Database.newBuilder()
             .defaultSchema("SIESTA")
-            .dialect(dialect)
             .table(ManufacturerRow.class, t -> t.builder(ManufacturerRow.Builder::build))
             .table(WidgetRow.class, t -> t.builder(WidgetRow.Builder::build))
             .table(PartRow.class, t -> t.builder(PartRow.Builder::build))
             .table(WidgetViewRow.class, t -> t.builder(WidgetViewRow.Builder::build));
+    }
+
+    public static Database.Builder testDatabaseBuilder(Dialect dialect) {
+        return testDatabaseBuilder()
+            .dialect(dialect);
     }
 }

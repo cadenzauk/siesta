@@ -27,12 +27,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ConnectionUtil extends UtilityClass {
     private static final Logger LOG = LoggerFactory.getLogger(ConnectionUtil.class);
+
+    public static DatabaseMetaData getMetaData(Connection connection) {
+        try {
+            return connection.getMetaData();
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
 
     public static void commit(Connection connection) {
         try {

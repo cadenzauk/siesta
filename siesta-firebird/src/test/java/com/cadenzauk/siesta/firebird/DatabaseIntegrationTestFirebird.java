@@ -20,21 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.firebird;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.DatabaseIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface SqlExecutor {
-    Dialect dialect();
-
-    Transaction beginTransaction();
-
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    int update(String sql, Object[] args);
+@ContextConfiguration(classes = FirebirdConfig.class)
+public class DatabaseIntegrationTestFirebird extends DatabaseIntegrationTest {
 }

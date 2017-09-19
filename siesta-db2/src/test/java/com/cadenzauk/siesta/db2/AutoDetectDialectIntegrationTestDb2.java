@@ -20,21 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.db2;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface SqlExecutor {
-    Dialect dialect();
-
-    Transaction beginTransaction();
-
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    int update(String sql, Object[] args);
+@ContextConfiguration(classes = Db2Config.class)
+public class AutoDetectDialectIntegrationTestDb2 extends AutoDetectDialectIntegrationTest {
 }

@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.firebird;
+package com.cadenzauk.siesta.sqlserver;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = FirebirdConfig.class)
-public class TableIntegrationTestFirebird extends TableIntegrationTest {
+@ContextConfiguration(classes = SqlServerConfig.class)
+public class AutoDetectDialectIntegrationTestSqlServer extends AutoDetectDialectIntegrationTest {
 }

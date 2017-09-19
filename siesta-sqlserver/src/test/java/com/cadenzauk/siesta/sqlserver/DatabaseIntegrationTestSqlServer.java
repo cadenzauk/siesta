@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.postgres;
+package com.cadenzauk.siesta.sqlserver;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = PostgresConfig.class)
-public class TableIntegrationTestPostgres extends TableIntegrationTest {
+@ContextConfiguration(classes = SqlServerConfig.class)
+public class DatabaseIntegrationTestSqlServer extends DatabaseIntegrationTest {
 }

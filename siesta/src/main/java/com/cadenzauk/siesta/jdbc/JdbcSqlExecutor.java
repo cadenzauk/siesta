@@ -28,7 +28,9 @@ import com.cadenzauk.core.sql.DataSourceUtil;
 import com.cadenzauk.core.sql.PreparedStatementUtil;
 import com.cadenzauk.core.sql.ResultSetSpliterator;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.SqlExecutor;
+import com.cadenzauk.siesta.dialect.AutoDetectDialect;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -58,6 +60,11 @@ public class JdbcSqlExecutor implements SqlExecutor {
 
     Connection connect() {
         return DataSourceUtil.connection(dataSource);
+    }
+
+    @Override
+    public Dialect dialect() {
+        return AutoDetectDialect.from(dataSource);
     }
 
     @Override

@@ -83,12 +83,13 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnitParamsRunner.class)
-public abstract class TableIntegrationTest extends IntegrationTest {
+public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
     public void selectFromDatabaseOneTable() {
         Database database = testDatabase(dataSource, dialect);
@@ -630,6 +631,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         };
     }
 
+    @SuppressWarnings("UnnecessaryLocalVariable")
     @Test
     @Parameters(method = "parametersForLocalDateTimeLiteral")
     public void localDateTimeLiteral(String timeZone, LocalDateTime value) {
@@ -769,7 +771,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
 
     @Test
     public void fetchFirst() {
-        Database database = testDatabase(dataSource, dialect);
+        Database database = testDatabase(dataSource);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
 
         List<SalespersonRow> fullList = database.from(SalespersonRow.class)
@@ -842,6 +844,7 @@ public abstract class TableIntegrationTest extends IntegrationTest {
         assertThat(result, is(expectedResult));
     }
 
+    @SuppressWarnings("OptionalAssignedToNull")
     @Test
     public void roundTripNulls() {
         Database database = testDatabase(dataSource, dialect);
@@ -941,5 +944,12 @@ public abstract class TableIntegrationTest extends IntegrationTest {
             .single();
 
         assertThat(result, is(9));
+    }
+
+    @Test
+    public void defaultDialect() {
+        Database database = testDatabase(dataSource);
+
+        assertThat(database.dialect(), instanceOf(dialect.getClass()));
     }
 }

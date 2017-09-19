@@ -93,6 +93,8 @@ public class CompositeAutoCloseable implements UncheckedAutoCloseable {
     private void closeOne(AutoCloseable closeable) {
         try {
             closeable.close();
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

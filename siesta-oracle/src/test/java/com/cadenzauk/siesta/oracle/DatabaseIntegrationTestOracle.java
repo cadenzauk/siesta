@@ -20,9 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.h2;
+package com.cadenzauk.siesta.oracle;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.DatabaseIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-public class TableIntegrationTestH2 extends TableIntegrationTest {
+@ContextConfiguration(classes = OracleConfig.class)
+public class DatabaseIntegrationTestOracle extends DatabaseIntegrationTest {
 }

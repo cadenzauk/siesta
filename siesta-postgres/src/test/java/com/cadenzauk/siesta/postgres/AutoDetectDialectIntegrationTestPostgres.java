@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.oracle;
+package com.cadenzauk.siesta.postgres;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
+import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = OracleConfig.class)
-public class TableIntegrationTestOracle extends TableIntegrationTest {
+@ContextConfiguration(classes = PostgresConfig.class)
+public class AutoDetectDialectIntegrationTestPostgres extends AutoDetectDialectIntegrationTest {
 }

@@ -20,11 +20,20 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.sqlserver;
+package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.siesta.TableIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.IntegrationTest;
+import org.hamcrest.Matchers;
+import org.junit.Test;
 
-@ContextConfiguration(classes = SqlServerConfig.class)
-public class TableIntegrationTestSqlServer extends TableIntegrationTest {
+import static org.hamcrest.MatcherAssert.assertThat;
+
+public abstract class AutoDetectDialectIntegrationTest extends IntegrationTest {
+    @Test
+    public void detectedCorrectly() {
+        Dialect result = AutoDetectDialect.from(dataSource);
+
+        assertThat(result, Matchers.instanceOf(dialect.getClass()));
+    }
 }

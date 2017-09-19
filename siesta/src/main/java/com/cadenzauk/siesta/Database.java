@@ -68,7 +68,7 @@ public class Database {
         defaultCatalog = builder.defaultCatalog;
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
-        dialect = builder.dialect;
+        dialect = builder.dialect();
         defaultSqlExecutor = builder.defaultSqlExecutor;
         databaseTimeZone = builder.databaseTimeZone;
         builder.tables.forEach(t -> t.accept(this));
@@ -310,7 +310,7 @@ public class Database {
         private String defaultCatalog = "";
         private String defaultSchema = "";
         private NamingStrategy namingStrategy = new UppercaseUnderscores();
-        private Dialect dialect = new AnsiDialect();
+        private Optional<Dialect> dialect = Optional.empty();
         private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
         private ZoneId databaseTimeZone = ZoneId.systemDefault();
         private final List<Consumer<Database>> tables = new ArrayList<>();
@@ -339,7 +339,7 @@ public class Database {
         }
 
         public Builder dialect(Dialect val) {
-            dialect = val;
+            dialect = Optional.of(val);
             return this;
         }
 
@@ -351,6 +351,16 @@ public class Database {
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
             tables.add(database -> database.table(TypeToken.of(rowClass), init));
             return this;
+        }
+
+        private Dialect dialect() {
+            return dialect.orElseGet(this::detectDialect);
+        }
+
+        private Dialect detectDialect() {
+            return defaultSqlExecutor
+                .map(SqlExecutor::dialect)
+                .orElseGet(AnsiDialect::new);
         }
 
         public Database build() {

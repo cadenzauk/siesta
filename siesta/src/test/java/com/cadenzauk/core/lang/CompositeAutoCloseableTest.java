@@ -104,8 +104,7 @@ class CompositeAutoCloseableTest {
         Mockito.doThrow(illegalStateException).when(closeable).close();
 
         calling(() -> sut.add(closeable))
-            .shouldThrow(RuntimeException.class)
-            .withCause(IllegalStateException.class)
+            .shouldThrow(IllegalStateException.class)
             .withMessage(is("can't close"));
 
         verify(closeable).close();
