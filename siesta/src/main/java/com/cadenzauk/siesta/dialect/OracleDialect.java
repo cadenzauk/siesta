@@ -22,19 +22,38 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 
 public class OracleDialect extends AnsiDialect {
     public OracleDialect() {
         DateFunctionSpecs.registerExtract(functions());
         DateFunctionSpecs.registerPlusNumToDsInterval(functions());
         functions().register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"));
+        functions().register(HOUR_DIFF, new FunctionSpec() {
+            @Override
+            public String sql(String[] a) {
+                return String.format("extract(day from (%1$s - %2$s)) * 24 + extract(hour from (%1$s - %2$s))", a[0], a[1]);
+            }
+
+            @Override
+            public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+                return Stream.concat(
+                    Arrays.stream(args),
+                    Arrays.stream(args)).flatMap(a -> a.args(scope));
+            }
+        });
     }
 
     @Override

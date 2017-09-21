@@ -30,10 +30,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 
 public class Db2Dialect extends AnsiDialect {
     public Db2Dialect() {
         DateFunctionSpecs.registerPlusUnits(functions());
+        functions().register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(" + a[0] + " - " + a[1] + "))");
     }
 
     @Override

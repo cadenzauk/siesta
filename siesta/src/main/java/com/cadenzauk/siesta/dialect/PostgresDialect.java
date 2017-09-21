@@ -22,16 +22,36 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.octal;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 
 public class PostgresDialect extends AnsiDialect {
     public PostgresDialect() {
         DateFunctionSpecs.registerExtract(functions());
         DateFunctionSpecs.registerPlusNumber(functions());
         functions().register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"));
+        functions().register(HOUR_DIFF, new FunctionSpec() {
+            @Override
+            public String sql(String[] argsSql) {
+                return String.format("date_part('day', %1$s - %2$s) * 24 + date_part('hour', %1$s - %2$s)", argsSql[0], argsSql[1]);
+            }
+
+            @Override
+            public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+                return Stream.concat(
+                    Arrays.stream(args),
+                    Arrays.stream(args)).flatMap(a -> a.args(scope));
+            }
+        });
     }
 
     @Override

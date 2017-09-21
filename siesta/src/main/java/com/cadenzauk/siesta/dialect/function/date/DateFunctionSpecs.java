@@ -39,6 +39,7 @@ public class DateFunctionSpecs {
 
     public static final FunctionName ADD_DAYS = new FunctionName("add_days");
     public static final FunctionName DAY_DIFF = new FunctionName("day_diff");
+    public static final FunctionName HOUR_DIFF = new FunctionName("hour_diff");
 
     public static void registerDefaults(FunctionRegistry functions) {
         functions.register(CURRENT_DATE, ArgumentlessFunctionSpec.of("current_date"));
@@ -52,7 +53,9 @@ public class DateFunctionSpecs {
         functions.register(SECOND, SimpleFunctionSpec.of("second"));
 
         registerDateAdd(functions);
+
         functions.register(DAY_DIFF, a -> a[0] + " - " + a[1]);
+        functions.register(HOUR_DIFF, new DateDiffFunctionSpec("hour"));
     }
 
     public static void registerExtract(FunctionRegistry functions) {
@@ -88,5 +91,6 @@ public class DateFunctionSpecs {
 
     public static void registerDateDiff(FunctionRegistry functions) {
         functions.register(DAY_DIFF, new DateDiffFunctionSpec("day"));
+        functions.register(HOUR_DIFF, new DateDiffFunctionSpec("hour"));
     }
 }

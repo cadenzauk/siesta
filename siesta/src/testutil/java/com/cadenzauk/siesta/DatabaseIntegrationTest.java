@@ -27,6 +27,7 @@ import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.core.tuple.Tuple4;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -68,7 +69,9 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestampLocal;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.day;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.dayDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hour;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hourDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minute;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
@@ -939,11 +942,17 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .localDateReq(localDate)
             .build());
 
-        int result = database
-            .select(DateFunctions.dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
+        Tuple4<Integer,Integer,Integer,Integer> result = database
+            .select(dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
+            .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 31, 0)), value(LocalDateTime.of(2018, 2, 17, 11, 0, 0))))
+            .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
+            .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 15, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
             .single();
 
-        assertThat(result, is(9));
+        assertThat(result.item1(), is(9));
+        assertThat(result.item2(), is(71));
+        assertThat(result.item3(), is(73));
+        assertThat(result.item4(), is(-47));
     }
 
     @Test
