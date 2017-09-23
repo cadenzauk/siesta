@@ -22,10 +22,13 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DefaultIntegerTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultLocalDateTimeTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultZonedDateTimeTypeAdapter;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -34,27 +37,32 @@ public class FirebirdDialect extends AnsiDialect {
     public FirebirdDialect() {
         DateFunctionSpecs.registerExtract(functions());
         DateFunctionSpecs.registerDateAdd(functions());
+
+        types()
+            .register(Integer.class, new DefaultIntegerTypeAdapter() {
+                @Override
+                public String parameter(Database database, Integer value) {
+                    return "cast(? as integer)";
+                }
+            })
+            .register(LocalDateTime.class, new DefaultLocalDateTimeTypeAdapter() {
+                @Override
+                public String literal(Database database, LocalDateTime value) {
+                    return String.format("TIMESTAMP '%s'", value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")));
+                }
+            })
+            .register(ZonedDateTime.class, new DefaultZonedDateTimeTypeAdapter() {
+                @Override
+                public String literal(Database database, ZonedDateTime value) {
+                    ZonedDateTime localDateTime = value.withZoneSameInstant(database.databaseTimeZone());
+                    return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")));
+                }
+            });
     }
 
     @Override
     public String dual() {
         return "RDB$DATABASE";
-    }
-
-    @Override
-    public String timestampLiteral(LocalDateTime date, ZoneId databaseTimeZone) {
-        return String.format("TIMESTAMP '%s'", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")));
-    }
-
-    @Override
-    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
-        ZonedDateTime localDateTime = date.withZoneSameInstant(databaseTimeZone);
-        return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")));
-    }
-
-    @Override
-    public String integerParameter(int val) {
-        return "cast(? as integer)";
     }
 
     @Override

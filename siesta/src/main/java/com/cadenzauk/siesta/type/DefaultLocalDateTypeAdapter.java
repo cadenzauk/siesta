@@ -20,49 +20,44 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.type;
 
+import com.cadenzauk.core.sql.SqlDateUtil;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultByteTypeAdapter;
 
-import java.util.Optional;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
-public class H2Dialect extends AnsiDialect {
-    public H2Dialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
-
-        types()
-            .register(Byte.class, new DefaultByteTypeAdapter() {
-                @Override
-                public String literal(Database database, Byte value) {
-                    return String.format("cast(%d as tinyint)", value);
-                }
-            });
+public class DefaultLocalDateTypeAdapter implements TypeAdapter<LocalDate> {
+    @Override
+    public LocalDate getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
+        return SqlDateUtil.toLocalDate(date);
     }
 
     @Override
-    public boolean supportsMultiInsert() {
-        return true;
+    public LocalDate getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
+        return SqlDateUtil.toLocalDate(date);
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
+    public Object convertToDatabase(Database database, LocalDate value) {
+        return SqlDateUtil.valueOf(value);
     }
 
     @Override
-    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
-        return keepLocks
-            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
-            .map(ll -> sql + " for update")
-            .orElse(sql);
+    public String literal(Database database, LocalDate value) {
+        return String.format("DATE '%s'", value.format(DateTimeFormatter.ISO_DATE));
     }
 
     @Override
-    public String tinyintType() {
-        return "tinyint";
+    public String parameter(Database database, LocalDate value) {
+        return "cast(? as date)";
     }
 }

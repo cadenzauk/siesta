@@ -20,45 +20,27 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.siesta.type;
 
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
+import com.cadenzauk.siesta.Database;
 
-import java.util.stream.Stream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class CountFunction implements TypedExpression<Integer> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("count_");
+public interface TypeAdapter<T> {
+    T getColumnValue(Database database, ResultSet rs, String col) throws SQLException;
 
-    @Override
-    public String sql(Scope scope) {
-        return "count(*)";
+    T getColumnValue(Database database, ResultSet rs, int col) throws SQLException;
+
+    default Object convertToDatabase(Database database, T value) {
+        return value;
     }
 
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
+    default String literal(Database database, T value) {
+        return value.toString();
     }
 
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> scope.database().getDataTypeOf(Integer.class).get(rs, label, scope.database()).orElse(null);
-    }
-
-    @Override
-    public TypeToken<Integer> type() {
-        return TypeToken.of(Integer.class);
+    default String parameter(Database database, T value) {
+        return "?";
     }
 }

@@ -25,27 +25,24 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.type.TypeAdapter;
+import com.cadenzauk.siesta.type.TypeAdapterRegistry;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.core.lang.StringUtil.hex;
 import static java.util.stream.Collectors.joining;
 
 public class AnsiDialect implements Dialect {
     private final FunctionRegistry functions = new FunctionRegistry();
+    private final TypeAdapterRegistry types = new TypeAdapterRegistry();
 
     public AnsiDialect() {
         AggregateFunctionSpecs.registerDefaults(functions);
@@ -77,9 +74,24 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public void registerFunction(FunctionName functionName, FunctionSpec functionSpec) {
+        functions.register(functionName, functionSpec);
+    }
+
+    @Override
     public FunctionSpec function(FunctionName name) {
         return functions.get(name)
             .orElseThrow(() -> new IllegalArgumentException("No function " + name + " registered with dialect " + getClass().getSimpleName()));
+    }
+
+    @Override
+    public <T> void registerType(Class<T> javaClass, TypeAdapter<T> type) {
+        types.register(javaClass, type);
+    }
+
+    @Override
+    public <T> TypeAdapter<T> type(Class<T> javaClass) {
+        return types.get(javaClass);
     }
 
     @Override
@@ -90,67 +102,6 @@ public class AnsiDialect implements Dialect {
     @Override
     public String concat(Stream<String> sql) {
         return sql.collect(joining(" || "));
-    }
-
-    @Override
-    public String binaryLiteral(byte[] bytes) {
-        return String.format("X'%s'", hex(bytes));
-    }
-
-    @Override
-    public String byteLiteral(byte val) {
-        return String.format("cast(%d as smallint)", val);
-    }
-
-    @Override
-    public String dateLiteral(LocalDate date) {
-        return String.format("DATE '%s'", date.format(DateTimeFormatter.ISO_DATE));
-    }
-
-    @Override
-    public String floatLiteral(float val) {
-        return String.format("cast(%s as real)", val);
-    }
-
-    @Override
-    public String smallIntLiteral(short val) {
-        return String.format("cast(%d as smallint)", val);
-    }
-
-    @Override
-    public String timestampLiteral(LocalDateTime date, ZoneId databaseTimeZone) {
-        return String.format("TIMESTAMP '%s'", date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
-    }
-
-    @Override
-    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
-        ZonedDateTime localDateTime = date.withZoneSameInstant(databaseTimeZone);
-        return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
-    }
-
-    @Override
-    public String stringLiteral(String val) {
-        return "'" + val.replaceAll("'", "''") + "'";
-    }
-
-    @Override
-    public String dateParameter(LocalDate val) {
-        return "cast(? as date)";
-    }
-
-    @Override
-    public String integerParameter(int val) {
-        return "?";
-    }
-
-    @Override
-    public String timestampParameter(LocalDateTime val) {
-        return "cast(? as timestamp)";
-    }
-
-    @Override
-    public String timestampWithTimeZoneParameter(ZonedDateTime val) {
-        return "cast(? as timestamp)";
     }
 
     @Override
@@ -228,6 +179,10 @@ public class AnsiDialect implements Dialect {
     @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
         return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
+    }
+
+    protected TypeAdapterRegistry types() {
+        return types;
     }
 
     protected FunctionRegistry functions() {

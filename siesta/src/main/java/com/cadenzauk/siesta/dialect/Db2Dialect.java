@@ -22,9 +22,11 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -36,6 +38,15 @@ public class Db2Dialect extends AnsiDialect {
     public Db2Dialect() {
         DateFunctionSpecs.registerPlusUnits(functions());
         functions().register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(" + a[0] + " - " + a[1] + "))");
+
+        types()
+            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+
+                @Override
+                public String literal(Database database, byte[] value) {
+                    return String.format("HEXTORAW('%s')", hex(value));
+                }
+            });
     }
 
     @Override
@@ -51,11 +62,6 @@ public class Db2Dialect extends AnsiDialect {
     @Override
     public boolean supportsMultiInsert() {
         return true;
-    }
-
-    @Override
-    public String binaryLiteral(byte[] bytes) {
-        return String.format("HEXTORAW('%s')", hex(bytes));
     }
 
     @Override

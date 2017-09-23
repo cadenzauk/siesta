@@ -27,6 +27,7 @@ import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.sql.ResultSetGet;
 import com.cadenzauk.core.sql.SqlBiConsumer;
+import com.cadenzauk.siesta.dialect.AnsiDialect;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -120,6 +121,10 @@ class DataTypeTest extends MockitoTest {
     @ParameterizedTest
     @MethodSource(names = "parametersForToDatabase")
     <T> void toDatabase(DataType<T> dataType, T input, Object expected) {
+        if (input != null) {
+            when(db.dialect()).thenReturn(new AnsiDialect());
+        }
+
         Object actual = dataType.toDatabase(db, input);
 
         assertThat(actual, is(expected));
@@ -128,6 +133,10 @@ class DataTypeTest extends MockitoTest {
     @ParameterizedTest
     @MethodSource(names = "parametersForToDatabase")
     <T> void toDatabaseOfOptional(DataType<T> dataType, T input, Object expected) {
+        if (input != null) {
+            when(db.dialect()).thenReturn(new AnsiDialect());
+        }
+
         Object actual = dataType.toDatabase(db, Optional.ofNullable(input));
 
         assertThat(actual, is(expected));
@@ -139,6 +148,7 @@ class DataTypeTest extends MockitoTest {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDate input = RandomValues.randomLocalDate();
             Date expected = Date.valueOf(input);
+            when(db.dialect()).thenReturn(new AnsiDialect());
 
             Object result = DataType.LOCAL_DATE.toDatabase(db, input);
 
@@ -157,6 +167,7 @@ class DataTypeTest extends MockitoTest {
         try (UncheckedAutoCloseable ignored = withTimeZone(jvmTimeZone)) {
             LocalDateTime input = RandomValues.randomLocalDateTime();
             Timestamp expected = Timestamp.valueOf(input);
+            when(db.dialect()).thenReturn(new AnsiDialect());
 
             Object result = DataType.LOCAL_DATE_TIME.toDatabase(db, input);
 
@@ -175,6 +186,7 @@ class DataTypeTest extends MockitoTest {
             ZonedDateTime dbTime = input.withZoneSameInstant(dbZone);
             Timestamp expected = Timestamp.valueOf(dbTime.toLocalDateTime());
             when(db.databaseTimeZone()).thenReturn(dbZone);
+            when(db.dialect()).thenReturn(new AnsiDialect());
 
             Object result = DataType.ZONED_DATE_TIME.toDatabase(db, input);
 
@@ -201,6 +213,7 @@ class DataTypeTest extends MockitoTest {
     @MethodSource(names = "parametersForGet")
     <T> void get(DataType<T> sut, SqlBiConsumer<ResultSet,String> resultSetExtractor, Optional<ZoneId> dbTimeZone, T expected) throws SQLException {
         resultSetExtractor.accept(rs, "someColumn");
+        when(db.dialect()).thenReturn(new AnsiDialect());
         dbTimeZone.ifPresent(zone -> when(db.databaseTimeZone()).thenReturn(zone));
 
         Optional<T> result = sut.get(rs, "someColumn", db);
@@ -218,6 +231,7 @@ class DataTypeTest extends MockitoTest {
     void getLocalDate(String timeZone) throws SQLException {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDate expected = randomLocalDate();
+            when(db.dialect()).thenReturn(new AnsiDialect());
             when(rs.getDate(eq("someColumn"), any())).thenReturn(Date.valueOf(expected));
 
             Optional<LocalDate> result = DataType.LOCAL_DATE.get(rs, "someColumn", db);
@@ -231,6 +245,7 @@ class DataTypeTest extends MockitoTest {
     void getLocalDateTime(String timeZone) throws SQLException {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
+            when(db.dialect()).thenReturn(new AnsiDialect());
             when(rs.getTimestamp(eq("someColumn"), any())).thenReturn(Timestamp.valueOf(expected));
 
             Optional<LocalDateTime> result = DataType.LOCAL_DATE_TIME.get(rs, "someColumn", db);
@@ -246,6 +261,7 @@ class DataTypeTest extends MockitoTest {
         Timestamp returnVal = Timestamp.from(expected.toInstant());
         when(rs.getTimestamp(eq("someColumn"), any())).thenReturn(returnVal);
         when(db.databaseTimeZone()).thenReturn(ZoneId.of(timeZone));
+        when(db.dialect()).thenReturn(new AnsiDialect());
 
         Optional<ZonedDateTime> result = DataType.ZONED_DATE_TIME.get(rs, "someColumn", db);
 

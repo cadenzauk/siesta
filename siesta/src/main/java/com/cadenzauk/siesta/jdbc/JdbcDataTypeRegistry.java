@@ -28,6 +28,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.GregorianCalendar;
 import java.util.Map;
@@ -55,7 +56,8 @@ public class JdbcDataTypeRegistry {
     private static Map<Class<?>,JdbcParameterSetter<Object>> parameterSetters() {
         return ImmutableMap.copyOf(
             ImmutableList.of(
-                entry(Timestamp.class, (ps, i, ts) -> ps.setTimestamp(i, ts, new GregorianCalendar(TimeZone.getDefault())))
+                entry(Timestamp.class, (ps, i, ts) -> ps.setTimestamp(i, ts, new GregorianCalendar(TimeZone.getDefault()))),
+                entry(Time.class, (ps, i, ts) -> ps.setTime(i, ts, new GregorianCalendar(TimeZone.getDefault())))
             )
         );
     }

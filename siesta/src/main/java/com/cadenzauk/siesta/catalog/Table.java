@@ -29,6 +29,7 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
@@ -62,6 +63,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.core.reflect.util.ClassUtil.hasAnnotation;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -271,7 +273,10 @@ public class Table<R> {
             this.builderType = builderType;
             this.buildRow = buildRow;
 
-            Optional<javax.persistence.Table> tableAnnotation = ClassUtil.annotation(rowType.getRawType(), javax.persistence.Table.class);
+            Optional<javax.persistence.Table> tableAnnotation = ClassUtil.superclasses(rowType.getRawType())
+                .map(cls -> ClassUtil.annotation(cls, javax.persistence.Table.class))
+                .flatMap(StreamUtil::of)
+                .findFirst();
             this.catalog = tableAnnotation
                 .map(javax.persistence.Table::catalog)
                 .flatMap(OptionalUtil::ofBlankable)
@@ -310,7 +315,7 @@ public class Table<R> {
         private Stream<Class<?>> mappedClasses(Class<?> startingWith) {
             return Stream.concat(
                 ClassUtil.superclass(startingWith)
-                    .filter(cls -> ClassUtil.hasAnnotation(cls, MappedSuperclass.class))
+                    .filter(cls -> hasAnnotation(cls, MappedSuperclass.class) || hasAnnotation(cls, javax.persistence.Table.class))
                     .map(this::mappedClasses)
                     .orElseGet(Stream::empty),
                 Stream.of(startingWith));

@@ -30,6 +30,7 @@ import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -49,6 +50,8 @@ public class TestRow {
     private final Optional<LocalDate> localDateOpt;
     private final LocalDateTime localDateTimeReq;
     private final Optional<LocalDateTime> localDateTimeOpt;
+    private final LocalTime localTimeReq;
+    private final Optional<LocalTime> localTimeOpt;
     private final ZonedDateTime utcDateTimeReq;
     private final Optional<ZonedDateTime> utcDateTimeOpt;
 
@@ -64,6 +67,8 @@ public class TestRow {
         localDateOpt = builder.localDateOpt;
         localDateTimeReq = builder.localDateTimeReq;
         localDateTimeOpt = builder.localDateTimeOpt;
+        localTimeReq = builder.localTimeReq;
+        localTimeOpt = builder.localTimeOpt;
         utcDateTimeReq = builder.utcDateTimeReq;
         utcDateTimeOpt = builder.utcDateTimeOpt;
     }
@@ -120,6 +125,20 @@ public class TestRow {
         return utcDateTimeOpt;
     }
 
+    public LocalTime localTimeReq() {
+        return localTimeReq;
+    }
+
+    public Optional<LocalTime> localTimeOpt() {
+        return localTimeOpt;
+    }
+
+    public static TestRow of(LocalTime localTimeOpt) {
+        return TestRow.newBuilder()
+            .localTimeOpt(Optional.of(localTimeOpt))
+            .build();
+    }
+
     public static TestRow of(LocalDateTime localDateTimeOpt) {
         return TestRow.newBuilder()
             .localDateTimeOpt(Optional.of(localDateTimeOpt))
@@ -148,6 +167,8 @@ public class TestRow {
         private Optional<LocalDate> localDateOpt;
         private LocalDateTime localDateTimeReq;
         private Optional<LocalDateTime> localDateTimeOpt;
+        private LocalTime localTimeReq;
+        private Optional<LocalTime> localTimeOpt;
         private ZonedDateTime utcDateTimeReq;
         private Optional<ZonedDateTime> utcDateTimeOpt;
 
@@ -219,6 +240,16 @@ public class TestRow {
 
         public Builder localDateTimeOpt(Optional<LocalDateTime> localDateTimeOpt) {
             this.localDateTimeOpt = localDateTimeOpt;
+            return this;
+        }
+
+        public Builder localTimeReq(LocalTime localTimeReq) {
+            this.localTimeReq = localTimeReq;
+            return this;
+        }
+
+        public Builder localTimeOpt(Optional<LocalTime> localTimeOpt) {
+            this.localTimeOpt = localTimeOpt;
             return this;
         }
 

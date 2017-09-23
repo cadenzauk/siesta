@@ -24,11 +24,8 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+import com.cadenzauk.siesta.type.TypeAdapter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -41,35 +38,17 @@ public interface Dialect {
 
     String dual();
 
+    void registerFunction(FunctionName functionName, FunctionSpec functionSpec);
+
     FunctionSpec function(FunctionName name);
+
+    <T> void registerType(Class<T> javaClass, TypeAdapter<T> type);
+
+    <T> TypeAdapter<T> type(Class<T> type);
 
     boolean supportsMultiInsert();
 
     String concat(Stream<String> sql);
-
-    String binaryLiteral(byte[] bytes);
-
-    String byteLiteral(byte val);
-
-    String dateLiteral(LocalDate date);
-
-    String floatLiteral(float val);
-
-    String smallIntLiteral(short val);
-
-    String timestampLiteral(LocalDateTime date, ZoneId databaseTimeZone);
-
-    String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone);
-
-    String stringLiteral(String val);
-
-    String dateParameter(LocalDate val);
-
-    String integerParameter(int val);
-
-    String timestampParameter(LocalDateTime val);
-
-    String timestampWithTimeZoneParameter(ZonedDateTime val);
 
     String fetchFirst(String sql, long n);
 
@@ -100,4 +79,5 @@ public interface Dialect {
     String charType(int len);
 
     String nextFromSequence(String catalog, String schema, String sequenceName);
+
 }

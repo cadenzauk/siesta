@@ -29,6 +29,10 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
+import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+import com.cadenzauk.siesta.type.EnumByNameTypeAdapter;
+import com.cadenzauk.siesta.type.TypeAdapter;
 import com.cadenzauk.siesta.grammar.dml.Delete;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InSetExpectingWhere;
@@ -42,10 +46,7 @@ import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import com.google.common.reflect.TypeToken;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ import java.util.function.Function;
 
 public class Database {
     private final Map<TypeToken<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
-    private final DataTypeRegistry dataTypeRegistry = new DataTypeRegistry();
+    private final DataTypeRegistry dataTypeRegistry;
     private final String defaultCatalog;
     private final String defaultSchema;
     private final NamingStrategy namingStrategy;
@@ -65,12 +66,16 @@ public class Database {
     private final ZoneId databaseTimeZone;
 
     private Database(Builder builder) {
+        dataTypeRegistry = new DataTypeRegistry();
         defaultCatalog = builder.defaultCatalog;
         defaultSchema = builder.defaultSchema;
         namingStrategy = builder.namingStrategy;
         dialect = builder.dialect();
         defaultSqlExecutor = builder.defaultSqlExecutor;
         databaseTimeZone = builder.databaseTimeZone;
+
+        builder.customizations.forEach(c -> c.accept(dialect));
+        builder.dataTypes.forEach(d -> d.accept(dataTypeRegistry));
         builder.tables.forEach(t -> t.accept(this));
     }
 
@@ -88,18 +93,6 @@ public class Database {
 
     public Dialect dialect() {
         return dialect;
-    }
-
-    public String dateLiteral(LocalDate val) {
-        return dialect().dateLiteral(val);
-    }
-
-    public String timestampLiteral(LocalDateTime val) {
-        return dialect().timestampLiteral(val, databaseTimeZone);
-    }
-
-    public String timestampWithTimeZoneLiteral(ZonedDateTime val) {
-        return dialect().timestampWithTimeZoneLiteral(val, databaseTimeZone);
     }
 
     public Sequence<Integer> sequence(String name) {
@@ -313,6 +306,8 @@ public class Database {
         private Optional<Dialect> dialect = Optional.empty();
         private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
         private ZoneId databaseTimeZone = ZoneId.systemDefault();
+        private final List<Consumer<Dialect>> customizations = new ArrayList<>();
+        private final List<Consumer<DataTypeRegistry>> dataTypes = new ArrayList<>();
         private final List<Consumer<Database>> tables = new ArrayList<>();
 
         private Builder() {
@@ -346,6 +341,21 @@ public class Database {
         public Builder databaseTimeZone(ZoneId val) {
             databaseTimeZone = val;
             return this;
+        }
+
+        public <T> Builder function(FunctionName functionName, FunctionSpec functionSpec) {
+            customizations.add(dialect -> dialect.registerFunction(functionName, functionSpec));
+            return this;
+        }
+
+        public <T> Builder type(Class<T> javaClass, TypeAdapter<T> type) {
+            customizations.add(dialect -> dialect.registerType(javaClass, type));
+            dataTypes.add(reg -> reg.register(new DataType<>(javaClass)));
+            return this;
+        }
+
+        public <T extends Enum<T>> Builder enumByName(Class<T> javaClass) {
+            return type(javaClass, new EnumByNameTypeAdapter<>(javaClass));
         }
 
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {

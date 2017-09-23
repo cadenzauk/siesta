@@ -20,49 +20,34 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.type;
 
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultByteTypeAdapter;
 
-import java.util.Optional;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class H2Dialect extends AnsiDialect {
-    public H2Dialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
+public class DefaultTypeAdapter<T> implements TypeAdapter<T> {
+    private final SqlBiFunction<ResultSet,String,T> byLabel;
+    private final SqlBiFunction<ResultSet,Integer,T> byColNo;
 
-        types()
-            .register(Byte.class, new DefaultByteTypeAdapter() {
-                @Override
-                public String literal(Database database, Byte value) {
-                    return String.format("cast(%d as tinyint)", value);
-                }
-            });
+    public DefaultTypeAdapter(SqlBiFunction<ResultSet,String,T> byLabel, SqlBiFunction<ResultSet,Integer,T> byColNo) {
+        this.byLabel = byLabel;
+        this.byColNo = byColNo;
     }
 
     @Override
-    public boolean supportsMultiInsert() {
-        return true;
+    public T getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+        return byLabel.apply(rs, col);
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
+    public T getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+        return byColNo.apply(rs, col);
     }
 
-    @Override
-    public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
-        return keepLocks
-            .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
-            .map(ll -> sql + " for update")
-            .orElse(sql);
-    }
-
-    @Override
-    public String tinyintType() {
-        return "tinyint";
+    @FunctionalInterface
+    public interface SqlBiFunction<T1, T2, R> {
+        R apply(T1 arg1, T2 arg2) throws SQLException;
     }
 }

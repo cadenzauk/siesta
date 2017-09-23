@@ -25,6 +25,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+    <property dbms="oracle" name="time" value="interval day to second(0)"/>
+    <property name="time" value="time"/>
+
     <changeSet id="create int sequence for firebird" author="mark" dbms="firebird">
         <createSequence sequenceName="widget_seq" />
     </changeSet>
@@ -58,6 +61,7 @@
             <column name="DESCRIPTION" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
+            <column name="PART_TYPE" type="VARCHAR(100)"/>
         </createTable>
 
         <createTable tableName="MANUFACTURER" schemaName="SIESTA">
@@ -100,6 +104,8 @@
             <column name="LOCAL_DATE_OPT" type="DATE"/>
             <column name="LOCAL_DATE_TIME_REQ" type="TIMESTAMP"/>
             <column name="LOCAL_DATE_TIME_OPT" type="TIMESTAMP"/>
+            <column name="LOCAL_TIME_REQ" type="${time}"/>
+            <column name="LOCAL_TIME_OPT" type="${time}"/>
             <column name="UTC_DATE_TIME_REQ" type="TIMESTAMP"/>
             <column name="UTC_DATE_TIME_OPT" type="TIMESTAMP"/>
         </createTable>

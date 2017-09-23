@@ -22,12 +22,19 @@
 
 package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultByteTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultLocalDateTimeTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultLocalDateTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultLocalTimeTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultZonedDateTimeTypeAdapter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -46,6 +53,55 @@ public class SqlServerDialect extends AnsiDialect {
         DateFunctionSpecs.registerDateDiff(functions());
 
         functions().register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"));
+
+        types()
+            .register(Byte.class, new DefaultByteTypeAdapter() {
+                @Override
+                public String literal(Database database, Byte value) {
+                    return String.format("cast(%d as tinyint)", value & 0xff);
+                }
+            })
+            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+                @Override
+                public String literal(Database database, byte[] value) {
+                    return String.format("0x%s", hex(value));
+                }
+            })
+            .register(LocalDate.class, new DefaultLocalDateTypeAdapter() {
+                @Override
+                public String literal(Database database, LocalDate value) {
+                    return String.format("cast('%s' as date)", value.format(DateTimeFormatter.ISO_DATE));
+                }
+            })
+            .register(LocalDateTime.class, new DefaultLocalDateTimeTypeAdapter() {
+                @Override
+                public String literal(Database database, LocalDateTime value) {
+                    return String.format("cast('%s' as datetime2(6))", value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+                }
+
+                @Override
+                public String parameter(Database database, LocalDateTime value) {
+                    return "cast(? as datetime2)";
+                }
+            })
+            .register(LocalTime.class, new DefaultLocalTimeTypeAdapter() {
+                @Override
+                public String literal(Database database, LocalTime value) {
+                    return String.format("cast('%s' as time)", value.format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSS")));
+                }
+            })
+            .register(ZonedDateTime.class, new DefaultZonedDateTimeTypeAdapter() {
+                @Override
+                public String literal(Database database, ZonedDateTime value) {
+                    ZonedDateTime localDateTime = value.withZoneSameInstant(database.databaseTimeZone());
+                    return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+                }
+
+                @Override
+                public String parameter(Database database, ZonedDateTime value) {
+                    return "cast(? as datetime2)";
+                }
+            });
     }
 
     @Override
@@ -61,42 +117,6 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public String concat(Stream<String> sql) {
         return "concat(" + sql.collect(joining(", ")) + ")";
-    }
-
-    @Override
-    public String dateLiteral(LocalDate date) {
-        return String.format("cast('%s' as date)", date.format(DateTimeFormatter.ISO_DATE));
-    }
-
-    @Override
-    public String timestampLiteral(LocalDateTime localDateTime, ZoneId databaseTimeZone) {
-        return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
-    }
-
-    @Override
-    public String timestampWithTimeZoneLiteral(ZonedDateTime date, ZoneId databaseTimeZone) {
-        ZonedDateTime localDateTime = date.withZoneSameInstant(databaseTimeZone);
-        return String.format("cast('%s' as datetime2(6))", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
-    }
-
-    @Override
-    public String timestampParameter(LocalDateTime val) {
-        return "cast(? as datetime2)";
-    }
-
-    @Override
-    public String timestampWithTimeZoneParameter(ZonedDateTime val) {
-        return "cast(? as datetime2)";
-    }
-
-    @Override
-    public String binaryLiteral(byte[] bytes) {
-        return String.format("0x%s", hex(bytes));
-    }
-
-    @Override
-    public String byteLiteral(byte val) {
-        return String.format("cast(%d as tinyint)", val & 0xff);
     }
 
     @Override

@@ -22,65 +22,35 @@
 
 package com.cadenzauk.siesta.model;
 
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Table;
+public class PartWithTypeRow extends PartRow {
+    private final PartType partType;
 
-@MappedSuperclass
-@Table(name = "PART", schema = "SIESTA")
-public class PartRow {
-    @Id
-    private final long partId;
-    private final long widgetId;
-    private final String description;
-
-    PartRow(Builder builder) {
-        partId = builder.partId;
-        widgetId = builder.widgetId;
-        description = builder.description;
+    private PartWithTypeRow(Builder builder) {
+        super(builder);
+        partType = builder.partType;
     }
 
-    public long partId() {
-        return partId;
-    }
-
-    public long widgetId() {
-        return widgetId;
-    }
-
-    public String description() {
-        return description;
+    public PartType partType() {
+        return partType;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public static class Builder {
-        private long partId;
-        private long widgetId;
-        private String description;
+    public static final class Builder extends PartRow.Builder {
+        private PartType partType;
 
-        Builder() {
+        private Builder() {
         }
 
-        public Builder partId(long val) {
-            partId = val;
+        public Builder partType(PartType val) {
+            partType = val;
             return this;
         }
 
-        public Builder widgetId(long val) {
-            widgetId = val;
-            return this;
-        }
-
-        public Builder description(String val) {
-            description = val;
-            return this;
-        }
-
-        public PartRow build() {
-            return new PartRow(this);
+        public PartWithTypeRow build() {
+            return new PartWithTypeRow(this);
         }
     }
 }

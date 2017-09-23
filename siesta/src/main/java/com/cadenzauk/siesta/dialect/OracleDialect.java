@@ -22,15 +22,24 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultLocalDateTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultLocalTimeTypeAdapter;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
@@ -54,16 +63,55 @@ public class OracleDialect extends AnsiDialect {
                     Arrays.stream(args)).flatMap(a -> a.args(scope));
             }
         });
-    }
 
-    @Override
-    public String dateLiteral(LocalDate date) {
-        return String.format("to_date('%s', 'yyyy-mm-dd')", date.format(DateTimeFormatter.ISO_DATE));
-    }
+        types()
+            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+                @Override
+                public String literal(Database database, byte[] value) {
+                    return String.format("hextoraw('%s')", hex(value));
+                }
+            })
+            .register(LocalDate.class, new DefaultLocalDateTypeAdapter() {
+                @Override
+                public String literal(Database database, LocalDate value) {
+                    return String.format("to_date('%s', 'yyyy-mm-dd')", value.format(DateTimeFormatter.ISO_DATE));
+                }
+            })
+            .register(LocalTime.class, new DefaultLocalTimeTypeAdapter() {
+                @Override
+                public String literal(Database database, LocalTime value) {
+                    return String.format("INTERVAL '%s' HOUR TO SECOND", value.format(DateTimeFormatter.ISO_TIME));
+                }
 
-    @Override
-    public String binaryLiteral(byte[] bytes) {
-        return String.format("hextoraw('%s')", hex(bytes));
+                @Override
+                public Object convertToDatabase(Database database, LocalTime value) {
+                    return "0 " + value.format(DateTimeFormatter.ISO_TIME);
+                }
+
+                @Override
+                public LocalTime getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+                    String string = rs.getString(col);
+                    return string == null || rs.wasNull() ? null : parse(string);
+                }
+
+                @Override
+                public LocalTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+                    String string = rs.getString(col);
+                    return string == null || rs.wasNull() ? null : parse(string);
+                }
+
+                private LocalTime parse(String string) {
+                    Matcher matcher = Pattern.compile("0 (\\d+):(\\d+):(\\d+)(\\.\\d+)?").matcher(string);
+                    if (matcher.matches()) {
+                        return LocalTime.of(
+                            Integer.parseInt(matcher.group(1)),
+                            Integer.parseInt(matcher.group(2)),
+                            Integer.parseInt(matcher.group(3))
+                        );
+                    }
+                    return LocalTime.parse(string);
+                }
+            });
     }
 
     @Override

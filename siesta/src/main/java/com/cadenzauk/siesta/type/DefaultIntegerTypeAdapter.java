@@ -20,45 +20,12 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.siesta.type;
 
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
+import java.sql.ResultSet;
 
-import java.util.stream.Stream;
-
-public class CountFunction implements TypedExpression<Integer> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("count_");
-
-    @Override
-    public String sql(Scope scope) {
-        return "count(*)";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> scope.database().getDataTypeOf(Integer.class).get(rs, label, scope.database()).orElse(null);
-    }
-
-    @Override
-    public TypeToken<Integer> type() {
-        return TypeToken.of(Integer.class);
+public class DefaultIntegerTypeAdapter extends DefaultTypeAdapter<Integer> {
+    public DefaultIntegerTypeAdapter() {
+        super(ResultSet::getInt, ResultSet::getInt);
     }
 }

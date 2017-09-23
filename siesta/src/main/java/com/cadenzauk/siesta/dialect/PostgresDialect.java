@@ -22,10 +22,12 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.Arrays;
@@ -52,6 +54,20 @@ public class PostgresDialect extends AnsiDialect {
                     Arrays.stream(args)).flatMap(a -> a.args(scope));
             }
         });
+
+        types()
+            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+                @Override
+                public String literal(Database database, byte[] value) {
+                    StringBuilder builder = new StringBuilder("E'");
+                    for (byte b : value) {
+                        builder.append("\\\\");
+                        builder.append(octal(b));
+                    }
+                    builder.append("'::bytea");
+                    return builder.toString();
+                }
+            });
     }
 
     @Override
@@ -65,17 +81,6 @@ public class PostgresDialect extends AnsiDialect {
     }
 
     @Override
-    public String binaryLiteral(byte[] bytes) {
-        StringBuilder builder = new StringBuilder("E'");
-        for (byte b : bytes) {
-            builder.append("\\\\");
-            builder.append(octal(b));
-        }
-        builder.append("'::bytea");
-        return builder.toString();
-    }
-
-    @Override
     public String fetchFirst(String sql, long n) {
         return String.format("%s offset 0 rows fetch next %d rows only", sql, n);
     }
@@ -84,5 +89,4 @@ public class PostgresDialect extends AnsiDialect {
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
         return "nextval('" + sequenceName + "')";
     }
-
 }

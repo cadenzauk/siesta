@@ -27,6 +27,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.type.DefaultIntegerTypeAdapter;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -118,6 +119,8 @@ class CastExpressionTest extends MockitoTest {
         when(resultSet.getInt("bob")).thenReturn(44);
         when(resultSet.wasNull()).thenReturn(false);
         when(scope.database()).thenReturn(database);
+        when(database.dialect()).thenReturn(dialect);
+        when(dialect.type(Integer.class)).thenReturn(new DefaultIntegerTypeAdapter());
         CastBuilder<String> builder = new CastBuilder<>(expression);
         CastExpression<String,Integer> sut = builder.asInteger();
 

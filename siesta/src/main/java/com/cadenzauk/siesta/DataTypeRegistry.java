@@ -23,13 +23,14 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
 
 public class DataTypeRegistry {
     private final Map<Class<?>,DataType<?>> entries = new ConcurrentHashMap<>();
@@ -43,14 +44,15 @@ public class DataTypeRegistry {
         register(DataType.INTEGER);
         register(DataType.LOCAL_DATE);
         register(DataType.LOCAL_DATE_TIME);
+        register(DataType.LOCAL_TIME);
         register(DataType.LONG);
         register(DataType.SHORT);
         register(DataType.STRING);
         register(DataType.ZONED_DATE_TIME);
     }
 
-    private <T> void register(DataType<T> dataType) {
-        entries.put(dataType.javaClass(), dataType);
+    public <T> void register(DataType<T> dataType) {
+        entries.putIfAbsent(dataType.javaClass(), dataType);
     }
 
     public <T> Optional<DataType<T>> dataTypeOf(T value) {
@@ -61,13 +63,13 @@ public class DataTypeRegistry {
 
     @SuppressWarnings("unchecked")
     public <T> Optional<DataType<T>> dataTypeOf(Class<T> javaClass) {
-        return Optional.ofNullable(entries.get(TypeUtil.boxedType(javaClass)))
+        return Optional.ofNullable(entries.get(boxedType(javaClass)))
             .map(dataType -> (DataType<T>) dataType);
     }
 
     @SuppressWarnings("unchecked")
     public <T> Optional<DataType<T>> dataTypeOf(TypeToken<T> javaType) {
-        return Optional.ofNullable(entries.get(TypeUtil.boxedType(javaType.getRawType())))
+        return Optional.ofNullable(entries.get(boxedType(javaType.getRawType())))
             .map(dataType -> (DataType<T>) dataType);
     }
 }

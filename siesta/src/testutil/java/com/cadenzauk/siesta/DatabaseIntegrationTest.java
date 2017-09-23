@@ -38,6 +38,8 @@ import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
+import com.cadenzauk.siesta.model.PartType;
+import com.cadenzauk.siesta.model.PartWithTypeRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
@@ -51,6 +53,7 @@ import org.junit.runner.RunWith;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -58,6 +61,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
+import static com.cadenzauk.core.RandomValues.randomLocalTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
 import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
@@ -648,6 +652,29 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
+    @SuppressWarnings("unused")
+    private Object[][] parametersForLocalTimeLiteral() {
+        return new Object[][]{
+            {"UTC", LocalTime.of(5, 4, 3)},
+            {"Europe/Paris", LocalTime.of(5, 4, 3)},
+            {"Pacific/Chatham", LocalTime.of(5, 4, 3)}
+        };
+    }
+
+    @SuppressWarnings("UnnecessaryLocalVariable")
+    @Test
+    @Parameters(method = "parametersForLocalTimeLiteral")
+    public void localTimeiteral(String timeZone, LocalTime value) {
+        Database database = testDatabase(dataSource, dialect);
+        try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
+            LocalTime expected = value;
+
+            LocalTime result = database.select(literal(value)).single();
+
+            assertThat(result, is(expected));
+        }
+    }
+
     @Test
     @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
     public void canRoundTripLocalDateTimes(String timeZone) {
@@ -660,6 +687,25 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             LocalDateTime result = database
                 .from(TestRow.class)
                 .select(TestRow::localDateTimeOpt)
+                .where(TestRow::guid).isEqualTo(input.guid())
+                .single();
+
+            assertThat(result, is(expected));
+        }
+    }
+
+    @Test
+    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
+    public void canRoundTripLocalTimes(String timeZone) {
+        Database database = testDatabase(dataSource, dialect);
+        try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
+            LocalTime expected = randomLocalTime();
+            TestRow input = TestRow.of(expected);
+
+            database.insert(input);
+            LocalTime result = database
+                .from(TestRow.class)
+                .select(TestRow::localTimeOpt)
                 .where(TestRow::guid).isEqualTo(input.guid())
                 .single();
 
@@ -873,18 +919,18 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .where(TestRow::guid).isEqualTo(guid)
             .single();
 
-            assertThat(result.decimalOpt(), is(Optional.empty()));
-            assertThat(result.decimalReq(), nullValue());
-            assertThat(result.integerOpt(), is(Optional.empty()));
-            assertThat(result.integerReq(), nullValue());
-            assertThat(result.localDateOpt(), is(Optional.empty()));
-            assertThat(result.localDateReq(), nullValue());
-            assertThat(result.localDateTimeOpt(), is(Optional.empty()));
-            assertThat(result.localDateTimeReq(), nullValue());
-            assertThat(result.stringOpt(), is(Optional.empty()));
-            assertThat(result.stringReq(), nullValue());
-            assertThat(result.utcDateTimeOpt(), is(Optional.empty()));
-            assertThat(result.utcDateTimeReq(), nullValue());
+        assertThat(result.decimalOpt(), is(Optional.empty()));
+        assertThat(result.decimalReq(), nullValue());
+        assertThat(result.integerOpt(), is(Optional.empty()));
+        assertThat(result.integerReq(), nullValue());
+        assertThat(result.localDateOpt(), is(Optional.empty()));
+        assertThat(result.localDateReq(), nullValue());
+        assertThat(result.localDateTimeOpt(), is(Optional.empty()));
+        assertThat(result.localDateTimeReq(), nullValue());
+        assertThat(result.stringOpt(), is(Optional.empty()));
+        assertThat(result.stringReq(), nullValue());
+        assertThat(result.utcDateTimeOpt(), is(Optional.empty()));
+        assertThat(result.utcDateTimeReq(), nullValue());
     }
 
     @Test
@@ -953,6 +999,26 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result.item2(), is(71));
         assertThat(result.item3(), is(73));
         assertThat(result.item4(), is(-47));
+    }
+
+    @Test
+    public void enumType() {
+        Database database = testDatabaseBuilder(dialect)
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource, 0))
+            .enumByName(PartType.class)
+            .build();
+        database.insert(PartWithTypeRow.newBuilder()
+            .partType(PartType.GADGET)
+            .partId(newId())
+            .widgetId(100)
+            .description("A Gadget")
+            .build());
+
+        PartWithTypeRow result = database.from(PartWithTypeRow.class)
+            .where(PartWithTypeRow::partType).isEqualTo(literal(PartType.GADGET))
+            .single();
+
+        assertThat(result.partType(), is(PartType.GADGET));
     }
 
     @Test
