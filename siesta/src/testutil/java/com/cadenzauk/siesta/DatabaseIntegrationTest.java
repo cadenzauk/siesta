@@ -868,13 +868,14 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     public Object[][] parametersForCastExpression() {
-        return new Object[][]{
+        return new Object[][] {
             castExpressionTestCase(cast(134).asChar(3), "134"),
             castExpressionTestCase(cast(126).asTinyInteger(), (byte) 126),
             castExpressionTestCase(cast(32767L).asSmallInteger(), (short) 32767),
             castExpressionTestCase(cast(123456L).asInteger(), 123456),
             castExpressionTestCase(cast("789101112").asBigInteger(), 789101112L),
             castExpressionTestCase(cast(literal(LocalDateTime.of(2017, 1, 3, 12, 0, 1))).asDate(), LocalDate.of(2017, 1, 3)),
+            castExpressionTestCase(cast(literal(LocalTime.parse("12:00:01"))).asTime(), LocalTime.of(12, 0, 1)),
             castExpressionTestCase(cast(literal(LocalDate.of(2017, 1, 3))).asTimestamp(), LocalDateTime.of(2017, 1, 3, 0, 0, 0)),
             castExpressionTestCase(cast(literal(LocalDate.of(2017, 1, 3))).asTimestamp(6), LocalDateTime.of(2017, 1, 3, 0, 0, 0)),
             castExpressionTestCase(cast(LocalDate.of(2017, 1, 3)).asVarchar(20), "2017-01-03"),

@@ -125,6 +125,11 @@ public class OracleDialect extends AnsiDialect {
     }
 
     @Override
+    public String timeType() {
+        return "INTERVAL DAY TO SECOND";
+    }
+
+    @Override
     public String varcharType(int size) {
         return String.format("varchar2(%d)", size);
     }

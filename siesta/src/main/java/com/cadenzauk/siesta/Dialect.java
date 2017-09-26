@@ -72,6 +72,8 @@ public interface Dialect {
 
     String dateType();
 
+    String timeType();
+
     String timestampType(Optional<Integer> prec);
 
     String varcharType(int size);

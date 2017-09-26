@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Dialect;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 public class CastBuilder<T> {
@@ -54,6 +55,10 @@ public class CastBuilder<T> {
 
     public CastExpression<T,LocalDate> asDate() {
         return new CastExpression<>(expression, DataType.LOCAL_DATE, Dialect::dateType);
+    }
+
+    public CastExpression<T,LocalTime> asTime() {
+        return new CastExpression<>(expression, DataType.LOCAL_TIME, Dialect::timeType);
     }
 
     public CastExpression<T,LocalDateTime> asTimestamp() {

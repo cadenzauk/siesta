@@ -160,6 +160,11 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public String timeType() {
+        return "time";
+    }
+
+    @Override
     public String timestampType(Optional<Integer> prec) {
         return prec
             .map(p -> String.format("timestamp(%d)", p))

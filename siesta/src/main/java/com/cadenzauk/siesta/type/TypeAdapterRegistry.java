@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.type;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,16 +36,16 @@ public class TypeAdapterRegistry {
 
     public TypeAdapterRegistry() {
         this
-            .register(BigDecimal.class, new DefaultTypeAdapter<>(ResultSet::getBigDecimal, ResultSet::getBigDecimal))
+            .register(BigDecimal.class, new DefaultBigDecimalAdapter())
             .register(Byte.class, new DefaultByteTypeAdapter())
             .register(byte[].class, new DefaultBinaryTypeAdapter())
-            .register(Double.class, new DefaultTypeAdapter<>(ResultSet::getDouble, ResultSet::getDouble))
+            .register(Double.class, new DefaultDoubleTypeAdapter())
             .register(Float.class, new DefaultFloatTypeAdapter())
             .register(Integer.class, new DefaultIntegerTypeAdapter())
             .register(LocalDate.class, new DefaultLocalDateTypeAdapter())
             .register(LocalDateTime.class, new DefaultLocalDateTimeTypeAdapter())
             .register(LocalTime.class, new DefaultLocalTimeTypeAdapter())
-            .register(Long.class, new DefaultTypeAdapter<>(ResultSet::getLong, ResultSet::getLong))
+            .register(Long.class, new DefaultLongTypeAdapter())
             .register(Short.class, new DefaultShortTypeAdapter())
             .register(String.class, new DefaultStringTypeAdapter())
             .register(ZonedDateTime.class, new DefaultZonedDateTimeTypeAdapter())
