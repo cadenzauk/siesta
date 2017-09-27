@@ -27,10 +27,14 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultLocalDateTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultLocalTimeTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultBigint;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
+import com.cadenzauk.siesta.type.DefaultDate;
+import com.cadenzauk.siesta.type.DefaultTime;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultVarchar;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -65,19 +69,26 @@ public class OracleDialect extends AnsiDialect {
         });
 
         types()
-            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+            .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.BIGINT, new DefaultBigint() {
+                @Override
+                public String sqlType() {
+                    return "number(19)";
+                }
+            })
+            .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
                 @Override
                 public String literal(Database database, byte[] value) {
                     return String.format("hextoraw('%s')", hex(value));
                 }
             })
-            .register(LocalDate.class, new DefaultLocalDateTypeAdapter() {
+            .register(DbTypeId.DATE, new DefaultDate() {
                 @Override
                 public String literal(Database database, LocalDate value) {
                     return String.format("to_date('%s', 'yyyy-mm-dd')", value.format(DateTimeFormatter.ISO_DATE));
                 }
             })
-            .register(LocalTime.class, new DefaultLocalTimeTypeAdapter() {
+            .register(DbTypeId.TIME, new DefaultTime() {
                 @Override
                 public String literal(Database database, LocalTime value) {
                     return String.format("INTERVAL '%s' HOUR TO SECOND", value.format(DateTimeFormatter.ISO_TIME));
@@ -100,6 +111,11 @@ public class OracleDialect extends AnsiDialect {
                     return string == null || rs.wasNull() ? null : parse(string);
                 }
 
+                @Override
+                public String sqlType() {
+                    return "interval day to second";
+                }
+
                 private LocalTime parse(String string) {
                     Matcher matcher = Pattern.compile("0 (\\d+):(\\d+):(\\d+)(\\.\\d+)?").matcher(string);
                     if (matcher.matches()) {
@@ -111,7 +127,13 @@ public class OracleDialect extends AnsiDialect {
                     }
                     return LocalTime.parse(string);
                 }
-            });
+            })
+        .register(DbTypeId.VARCHAR, new DefaultVarchar() {
+            @Override
+            public String sqlType() {
+                return "varchar2";
+            }
+        });
     }
 
     @Override
@@ -119,18 +141,4 @@ public class OracleDialect extends AnsiDialect {
         return String.format("select * from (%s) where rownum <= %d", sql, n);
     }
 
-    @Override
-    public String bigintType() {
-        return "NUMBER(19)";
-    }
-
-    @Override
-    public String timeType() {
-        return "INTERVAL DAY TO SECOND";
-    }
-
-    @Override
-    public String varcharType(int size) {
-        return String.format("varchar2(%d)", size);
-    }
 }

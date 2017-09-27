@@ -27,8 +27,10 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -56,7 +58,8 @@ public class PostgresDialect extends AnsiDialect {
         });
 
         types()
-            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+            .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
                 @Override
                 public String literal(Database database, byte[] value) {
                     StringBuilder builder = new StringBuilder("E'");

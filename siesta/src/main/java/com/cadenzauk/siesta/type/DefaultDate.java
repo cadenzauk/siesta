@@ -22,19 +22,47 @@
 
 package com.cadenzauk.siesta.type;
 
+import com.cadenzauk.core.sql.SqlDateUtil;
 import com.cadenzauk.siesta.Database;
 
+import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
-import static com.cadenzauk.core.lang.StringUtil.hex;
-
-public class DefaultBinaryTypeAdapter extends DefaultTypeAdapter<byte[]> {
-    public DefaultBinaryTypeAdapter() {
-        super(ResultSet::getBytes, ResultSet::getBytes);
+public class DefaultDate implements DbType<LocalDate> {
+    @Override
+    public LocalDate getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
+        return SqlDateUtil.toLocalDate(date);
     }
 
     @Override
-    public String literal(Database database, byte[] value) {
-        return String.format("X'%s'", hex(value));
+    public LocalDate getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
+        return SqlDateUtil.toLocalDate(date);
+    }
+
+    @Override
+    public String sqlType() {
+        return "date";
+    }
+
+    @Override
+    public Object convertToDatabase(Database database, LocalDate value) {
+        return SqlDateUtil.valueOf(value);
+    }
+
+    @Override
+    public String literal(Database database, LocalDate value) {
+        return String.format("DATE '%s'", value.format(DateTimeFormatter.ISO_DATE));
+    }
+
+    @Override
+    public String parameter(Database database, LocalDate value) {
+        return "cast(? as date)";
     }
 }

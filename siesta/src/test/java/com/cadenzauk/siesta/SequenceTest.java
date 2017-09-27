@@ -26,7 +26,8 @@ import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.grammar.expression.SequenceExpression;
 import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
-import com.cadenzauk.siesta.type.DefaultIntegerTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultInteger;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -92,7 +93,7 @@ class SequenceTest extends MockitoTest {
     @Test
     void rowMapper() throws SQLException {
         when(database.dialect()).thenReturn(dialect);
-        when(dialect.type(Integer.class)).thenReturn(new DefaultIntegerTypeAdapter());
+        when(dialect.type(DbTypeId.INTEGER)).thenReturn(new DefaultInteger());
         when(resultSet.getInt("bob")).thenReturn(1034);
         Sequence<Integer> sut = createSut();
 

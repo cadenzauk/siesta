@@ -272,7 +272,7 @@ class DataTypeTest extends MockitoTest {
     static Stream<Arguments> parametersForLiteral() {
         return Stream.of(
             literalTestCase(DataType.BIG_DECIMAL, new BigDecimal("5001.12"), "5001.12"),
-            literalTestCase(DataType.BYTE, (byte) 127, "cast(127 as smallint)"),
+            literalTestCase(DataType.BYTE, (byte) 127, "cast(127 as tinyint)"),
             literalTestCase(DataType.BYTE_ARRAY, new byte[]{0x02, 0x7f, -1}, "X'027fff'"),
             literalTestCase(DataType.DOUBLE, 3.1415, "3.1415"),
             literalTestCase(DataType.FLOAT, 2.71f, "cast(2.71 as real)"),

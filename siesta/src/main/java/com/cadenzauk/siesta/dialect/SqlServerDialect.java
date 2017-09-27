@@ -25,19 +25,19 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultByteTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultLocalDateTimeTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultLocalDateTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultLocalTimeTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultZonedDateTimeTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultTimestamp;
+import com.cadenzauk.siesta.type.DefaultDate;
+import com.cadenzauk.siesta.type.DefaultTime;
+import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
+import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -55,25 +55,30 @@ public class SqlServerDialect extends AnsiDialect {
         functions().register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"));
 
         types()
-            .register(Byte.class, new DefaultByteTypeAdapter() {
+            .register(DbTypeId.TINYINT, new DefaultTinyint() {
                 @Override
                 public String literal(Database database, Byte value) {
                     return String.format("cast(%d as tinyint)", value & 0xff);
                 }
             })
-            .register(byte[].class, new DefaultBinaryTypeAdapter() {
+            .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
                 @Override
                 public String literal(Database database, byte[] value) {
                     return String.format("0x%s", hex(value));
                 }
             })
-            .register(LocalDate.class, new DefaultLocalDateTypeAdapter() {
+            .register(DbTypeId.DATE, new DefaultDate() {
                 @Override
                 public String literal(Database database, LocalDate value) {
                     return String.format("cast('%s' as date)", value.format(DateTimeFormatter.ISO_DATE));
                 }
             })
-            .register(LocalDateTime.class, new DefaultLocalDateTimeTypeAdapter() {
+            .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
+                @Override
+                public String sqlType() {
+                    return "datetime2";
+                }
+
                 @Override
                 public String literal(Database database, LocalDateTime value) {
                     return String.format("cast('%s' as datetime2(6))", value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
@@ -84,13 +89,18 @@ public class SqlServerDialect extends AnsiDialect {
                     return "cast(? as datetime2)";
                 }
             })
-            .register(LocalTime.class, new DefaultLocalTimeTypeAdapter() {
+            .register(DbTypeId.TIME, new DefaultTime() {
                 @Override
                 public String literal(Database database, LocalTime value) {
                     return String.format("cast('%s' as time)", value.format(DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSS")));
                 }
             })
-            .register(ZonedDateTime.class, new DefaultZonedDateTimeTypeAdapter() {
+            .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp() {
+                @Override
+                public String sqlType() {
+                    return "datetime2";
+                }
+
                 @Override
                 public String literal(Database database, ZonedDateTime value) {
                     ZonedDateTime localDateTime = value.withZoneSameInstant(database.databaseTimeZone());
@@ -122,18 +132,6 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return SELECT_PATTERN.matcher(sql).replaceFirst("$1top " + n + " ");
-    }
-
-    @Override
-    public String tinyintType() {
-        return "tinyint";
-    }
-
-    @Override
-    public String timestampType(Optional<Integer> prec) {
-        return prec
-            .map(p -> String.format("datetime2(%d)", p))
-            .orElse("datetime2");
     }
 
     @Override

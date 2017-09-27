@@ -32,7 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-public class DefaultLocalTimeTypeAdapter implements TypeAdapter<LocalTime> {
+public class DefaultTime implements DbType<LocalTime> {
     @Override
     public String literal(Database database, LocalTime value) {
         return String.format("TIME '%s'", value.format(DateTimeFormatter.ISO_TIME));
@@ -58,5 +58,10 @@ public class DefaultLocalTimeTypeAdapter implements TypeAdapter<LocalTime> {
     public LocalTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
         Time time = rs.getTime(col, new GregorianCalendar(TimeZone.getDefault()));
         return rs.wasNull() ? null : time.toLocalTime();
+    }
+
+    @Override
+    public String sqlType() {
+        return "time";
     }
 }

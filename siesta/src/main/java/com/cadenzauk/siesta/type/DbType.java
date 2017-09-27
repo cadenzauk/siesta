@@ -25,14 +25,32 @@ package com.cadenzauk.siesta.type;
 import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class DefaultFloatTypeAdapter extends DefaultTypeAdapter<Float> {
-    public DefaultFloatTypeAdapter() {
-        super(ResultSet::getFloat, ResultSet::getFloat);
+public interface DbType<T> {
+    T getColumnValue(Database database, ResultSet rs, String col) throws SQLException;
+
+    T getColumnValue(Database database, ResultSet rs, int col) throws SQLException;
+
+    String sqlType();
+
+    default String sqlType(int arg) {
+        return String.format("%s(%d)", sqlType(), arg);
     }
 
-    @Override
-    public String literal(Database database, Float value) {
-        return String.format("cast(%s as real)", value);
+    default String sqlType(int arg1, int arg2) {
+        return String.format("%s(%d,%d)", sqlType(), arg1, arg2);
+    }
+
+    default Object convertToDatabase(Database database, T value) {
+        return value;
+    }
+
+    default String literal(Database database, T value) {
+        return value.toString();
+    }
+
+    default String parameter(Database database, T value) {
+        return "?";
     }
 }

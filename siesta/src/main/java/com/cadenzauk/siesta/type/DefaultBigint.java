@@ -24,8 +24,8 @@ package com.cadenzauk.siesta.type;
 
 import java.sql.ResultSet;
 
-public class DefaultDoubleTypeAdapter extends DefaultTypeAdapter<Double> {
-    public DefaultDoubleTypeAdapter() {
-        super(ResultSet::getDouble, ResultSet::getDouble);
+public class DefaultBigint extends DefaultDbType<Long> {
+    public DefaultBigint() {
+        super("bigint", ResultSet::getLong, ResultSet::getLong);
     }
 }

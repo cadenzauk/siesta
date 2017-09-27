@@ -24,7 +24,8 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
-import com.cadenzauk.siesta.type.TypeAdapter;
+import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DbType;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,9 +43,9 @@ public interface Dialect {
 
     FunctionSpec function(FunctionName name);
 
-    <T> void registerType(Class<T> javaClass, TypeAdapter<T> type);
+    <T> void registerType(DbTypeId<T> dbTypeId, DbType<T> type);
 
-    <T> TypeAdapter<T> type(Class<T> type);
+    <T> DbType<T> type(DbTypeId<T> type);
 
     boolean supportsMultiInsert();
 
@@ -55,30 +56,6 @@ public interface Dialect {
     boolean supportsIsolationLevelInQuery();
 
     String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks);
-
-    String tinyintType();
-
-    String smallintType();
-
-    String integerType();
-
-    String bigintType();
-
-    String decimalType(int size, int prec);
-
-    String doubleType();
-
-    String realType();
-
-    String dateType();
-
-    String timeType();
-
-    String timestampType(Optional<Integer> prec);
-
-    String varcharType(int size);
-
-    String charType(int len);
 
     String nextFromSequence(String catalog, String schema, String sequenceName);
 

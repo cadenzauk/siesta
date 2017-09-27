@@ -22,25 +22,15 @@
 
 package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultByteTypeAdapter;
 
 import java.util.Optional;
 
 public class H2Dialect extends AnsiDialect {
     public H2Dialect() {
         DateFunctionSpecs.registerDateAdd(functions());
-
-        types()
-            .register(Byte.class, new DefaultByteTypeAdapter() {
-                @Override
-                public String literal(Database database, Byte value) {
-                    return String.format("cast(%d as tinyint)", value);
-                }
-            });
     }
 
     @Override
@@ -61,8 +51,4 @@ public class H2Dialect extends AnsiDialect {
             .orElse(sql);
     }
 
-    @Override
-    public String tinyintType() {
-        return "tinyint";
-    }
 }

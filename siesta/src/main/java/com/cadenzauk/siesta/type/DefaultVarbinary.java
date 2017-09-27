@@ -26,13 +26,19 @@ import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
 
-public class DefaultStringTypeAdapter extends DefaultTypeAdapter<String> {
-    public DefaultStringTypeAdapter() {
-        super(ResultSet::getString, ResultSet::getString);
+import static com.cadenzauk.core.lang.StringUtil.hex;
+
+public class DefaultVarbinary extends DefaultDbType<byte[]> {
+    public DefaultVarbinary() {
+        super("varbinary", ResultSet::getBytes, ResultSet::getBytes);
+    }
+
+    public DefaultVarbinary(String sqlType) {
+        super(sqlType, ResultSet::getBytes, ResultSet::getBytes);
     }
 
     @Override
-    public String literal(Database database, String value) {
-        return "'" + value.replaceAll("'", "''") + "'";
+    public String literal(Database database, byte[] value) {
+        return String.format("X'%s'", hex(value));
     }
 }

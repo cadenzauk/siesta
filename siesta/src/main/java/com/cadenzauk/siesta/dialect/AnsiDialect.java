@@ -31,8 +31,9 @@ import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
-import com.cadenzauk.siesta.type.TypeAdapter;
-import com.cadenzauk.siesta.type.TypeAdapterRegistry;
+import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeRegistry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
@@ -42,7 +43,7 @@ import static java.util.stream.Collectors.joining;
 
 public class AnsiDialect implements Dialect {
     private final FunctionRegistry functions = new FunctionRegistry();
-    private final TypeAdapterRegistry types = new TypeAdapterRegistry();
+    private final DbTypeRegistry types = new DbTypeRegistry();
 
     public AnsiDialect() {
         AggregateFunctionSpecs.registerDefaults(functions);
@@ -85,12 +86,12 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public <T> void registerType(Class<T> javaClass, TypeAdapter<T> type) {
-        types.register(javaClass, type);
+    public <T> void registerType(DbTypeId<T> dbTypeId, DbType<T> type) {
+        types.register(dbTypeId, type);
     }
 
     @Override
-    public <T> TypeAdapter<T> type(Class<T> javaClass) {
+    public <T> DbType<T> type(DbTypeId<T> javaClass) {
         return types.get(javaClass);
     }
 
@@ -120,73 +121,11 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public String tinyintType() {
-        return "smallint";
-    }
-
-    @Override
-    public String smallintType() {
-        return "smallint";
-    }
-
-    @Override
-    public String integerType() {
-        return "integer";
-    }
-
-    @Override
-    public String bigintType() {
-        return "bigint";
-    }
-
-    @Override
-    public String decimalType(int size, int prec) {
-        return String.format("decimal(%d,%d)", size, prec);
-    }
-
-    @Override
-    public String doubleType() {
-        return "double precision";
-    }
-
-    @Override
-    public String realType() {
-        return "real";
-    }
-
-    @Override
-    public String dateType() {
-        return "date";
-    }
-
-    @Override
-    public String timeType() {
-        return "time";
-    }
-
-    @Override
-    public String timestampType(Optional<Integer> prec) {
-        return prec
-            .map(p -> String.format("timestamp(%d)", p))
-            .orElse("timestamp");
-    }
-
-    @Override
-    public String varcharType(int size) {
-        return String.format("varchar(%d)", size);
-    }
-
-    @Override
-    public String charType(int len) {
-        return String.format("char(%d)", len);
-    }
-
-    @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
         return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
     }
 
-    protected TypeAdapterRegistry types() {
+    protected DbTypeRegistry types() {
         return types;
     }
 

@@ -22,10 +22,21 @@
 
 package com.cadenzauk.siesta.type;
 
+import com.cadenzauk.siesta.Database;
+
 import java.sql.ResultSet;
 
-public class DefaultLongTypeAdapter extends DefaultTypeAdapter<Long> {
-    public DefaultLongTypeAdapter() {
-        super(ResultSet::getLong, ResultSet::getLong);
+public class DefaultTinyint extends DefaultDbType<Byte> {
+    public DefaultTinyint() {
+        super("tinyint", ResultSet::getByte, ResultSet::getByte);
+    }
+
+    public DefaultTinyint(String sqlType) {
+        super(sqlType, ResultSet::getByte, ResultSet::getByte);
+    }
+
+    @Override
+    public String literal(Database database, Byte value) {
+        return String.format("cast(%d as %s)", value, sqlType());
     }
 }

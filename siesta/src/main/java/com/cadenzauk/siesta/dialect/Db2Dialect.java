@@ -26,7 +26,9 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultBinaryTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
+import com.cadenzauk.siesta.type.DbTypeId;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -40,8 +42,8 @@ public class Db2Dialect extends AnsiDialect {
         functions().register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(" + a[0] + " - " + a[1] + "))");
 
         types()
-            .register(byte[].class, new DefaultBinaryTypeAdapter() {
-
+            .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
                 @Override
                 public String literal(Database database, byte[] value) {
                     return String.format("HEXTORAW('%s')", hex(value));

@@ -25,8 +25,8 @@ package com.cadenzauk.siesta.type;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 
-public class DefaultBigDecimalAdapter extends DefaultTypeAdapter<BigDecimal> {
-    public DefaultBigDecimalAdapter() {
-        super(ResultSet::getBigDecimal, ResultSet::getBigDecimal);
+public class DefaultDecimal extends DefaultDbType<BigDecimal> {
+    public DefaultDecimal() {
+        super("decimal", ResultSet::getBigDecimal, ResultSet::getBigDecimal);
     }
 }

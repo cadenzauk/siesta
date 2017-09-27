@@ -27,7 +27,9 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.type.DefaultIntegerTypeAdapter;
+import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultInteger;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +41,6 @@ import org.mockito.Mock;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -66,33 +67,32 @@ class CastExpressionTest extends MockitoTest {
     @Mock
     private Database database;
 
-    private static <T> Arguments testCaseForSql(String type, Function<CastBuilder<String>,CastExpression<String,T>> castFunction, Function<Dialect,String> dialectType) {
-        return ObjectArrayArguments.create(type, castFunction, dialectType);
+    private static <T> Arguments testCaseForSql(String type, Function<CastBuilder<String>,CastExpression<String,T>> castFunction) {
+        return ObjectArrayArguments.create(type, castFunction);
     }
 
     @SuppressWarnings("unused")
     private static Stream<Arguments> parametersForSql() {
         return Stream.of(
-            testCaseForSql("bigint", CastBuilder::asBigInteger, Dialect::bigintType),
-            testCaseForSql("char(3)", c -> c.asChar(3), d -> d.charType(3)),
-            testCaseForSql("date", CastBuilder::asDate, Dialect::dateType),
-            testCaseForSql("double precision", CastBuilder::asDoublePrecision, Dialect::doubleType),
-            testCaseForSql("integer", CastBuilder::asInteger, Dialect::integerType),
-            testCaseForSql("real", CastBuilder::asReal, Dialect::realType),
-            testCaseForSql("smallint", CastBuilder::asSmallInteger, Dialect::smallintType),
-            testCaseForSql("timestamp", CastBuilder::asTimestamp, d -> d.timestampType(Optional.empty())),
-            testCaseForSql("timestamp(6)", c -> c.asTimestamp(6), d -> d.timestampType(Optional.of(6))),
-            testCaseForSql("tinyint", CastBuilder::asTinyInteger, Dialect::tinyintType),
-            testCaseForSql("varchar(8)", c -> c.asVarchar(8), d -> d.varcharType(8))
+            testCaseForSql("bigint", CastBuilder::asBigInteger),
+            testCaseForSql("char(3)", c -> c.asChar(3)),
+            testCaseForSql("date", CastBuilder::asDate),
+            testCaseForSql("double precision", CastBuilder::asDoublePrecision),
+            testCaseForSql("integer", CastBuilder::asInteger),
+            testCaseForSql("real", CastBuilder::asReal),
+            testCaseForSql("smallint", CastBuilder::asSmallInteger),
+            testCaseForSql("timestamp", CastBuilder::asTimestamp),
+            testCaseForSql("timestamp(6)", c -> c.asTimestamp(6)),
+            testCaseForSql("tinyint", CastBuilder::asTinyInteger),
+            testCaseForSql("varchar(8)", c -> c.asVarchar(8))
         );
     }
 
     @ParameterizedTest
     @MethodSource(names = "parametersForSql")
-    <T> void sql(String type, Function<CastBuilder<String>,CastExpression<String,T>> castFunction, Function<Dialect,String> dialectType) {
+    <T> void sql(String type, Function<CastBuilder<String>,CastExpression<String,T>> castFunction) {
         when(expression.sql(scope)).thenReturn("input");
-        when(scope.dialect()).thenReturn(dialect);
-        when(dialectType.apply(dialect)).thenReturn(type);
+        when(scope.dialect()).thenReturn(new AnsiDialect());
         CastBuilder<String> builder = new CastBuilder<>(expression);
         CastExpression<String,T> sut = castFunction.apply(builder);
 
@@ -120,7 +120,7 @@ class CastExpressionTest extends MockitoTest {
         when(resultSet.wasNull()).thenReturn(false);
         when(scope.database()).thenReturn(database);
         when(database.dialect()).thenReturn(dialect);
-        when(dialect.type(Integer.class)).thenReturn(new DefaultIntegerTypeAdapter());
+        when(dialect.type(DbTypeId.INTEGER)).thenReturn(new DefaultInteger());
         CastBuilder<String> builder = new CastBuilder<>(expression);
         CastExpression<String,Integer> sut = builder.asInteger();
 

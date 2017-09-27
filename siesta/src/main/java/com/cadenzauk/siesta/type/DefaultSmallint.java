@@ -25,22 +25,14 @@ package com.cadenzauk.siesta.type;
 import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
-public interface TypeAdapter<T> {
-    T getColumnValue(Database database, ResultSet rs, String col) throws SQLException;
-
-    T getColumnValue(Database database, ResultSet rs, int col) throws SQLException;
-
-    default Object convertToDatabase(Database database, T value) {
-        return value;
+public class DefaultSmallint extends DefaultDbType<Short> {
+    public DefaultSmallint() {
+        super("smallint", ResultSet::getShort, ResultSet::getShort);
     }
 
-    default String literal(Database database, T value) {
-        return value.toString();
-    }
-
-    default String parameter(Database database, T value) {
-        return "?";
+    @Override
+    public String literal(Database database, Short value) {
+        return String.format("cast(%d as smallint)", value);
     }
 }

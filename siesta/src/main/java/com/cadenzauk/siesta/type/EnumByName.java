@@ -26,37 +26,49 @@ import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.sql.Types;
 
-public class DefaultLocalDateTimeTypeAdapter implements TypeAdapter<LocalDateTime> {
-    @Override
-    public LocalDateTime getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
-        Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
-        return rs.wasNull() ? null : timestamp.toLocalDateTime();
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+public class EnumByName<T extends Enum<T>> implements DbType<T> {
+    private final Class<T> enumClass;
+
+    public EnumByName(Class<T> enumClass) {
+        this.enumClass = enumClass;
     }
 
     @Override
-    public LocalDateTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
-        Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getDefault()));
-        return rs.wasNull() ? null : timestamp.toLocalDateTime();
+    public T getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+        String name = type(database).getColumnValue(database, rs, col);
+        return isBlank(name) ? null : Enum.valueOf(enumClass, name);
     }
 
     @Override
-    public Object convertToDatabase(Database database, LocalDateTime value) {
-        return Timestamp.valueOf(value);
+    public T getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+        String name = type(database).getColumnValue(database, rs, col);
+        return isBlank(name) ? null : Enum.valueOf(enumClass, name);
     }
 
     @Override
-    public String literal(Database database, LocalDateTime value) {
-        return String.format("TIMESTAMP '%s'", value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+    public String sqlType() {
+        return "varchar(80)";
     }
 
     @Override
-    public String parameter(Database database, LocalDateTime value) {
-        return "cast(? as timestamp)";
+    public Object convertToDatabase(Database database, T value) {
+        return type(database).convertToDatabase(database, value.name());
+    }
+
+    @Override
+    public String literal(Database database, T value) {
+        return type(database).literal(database, value.name());
+    }
+
+    private DbType<String> type(Database database) {
+        return database.dialect().type(DbTypeId.VARCHAR);
+    }
+
+    public static <T extends Enum<T>> DbTypeId<T> id(Class<T> javaClass) {
+        return new DbTypeId<>(javaClass.getCanonicalName(), Types.VARCHAR, javaClass);
     }
 }

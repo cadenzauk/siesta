@@ -22,42 +22,17 @@
 
 package com.cadenzauk.siesta.type;
 
-import com.cadenzauk.core.sql.SqlDateUtil;
 import com.cadenzauk.siesta.Database;
 
-import java.sql.Date;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
-public class DefaultLocalDateTypeAdapter implements TypeAdapter<LocalDate> {
-    @Override
-    public LocalDate getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
-        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
-        return SqlDateUtil.toLocalDate(date);
+public class DefaultReal extends DefaultDbType<Float> {
+    public DefaultReal() {
+        super("real", ResultSet::getFloat, ResultSet::getFloat);
     }
 
     @Override
-    public LocalDate getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
-        Date date = rs.getDate(col, new GregorianCalendar(TimeZone.getDefault()));
-        return SqlDateUtil.toLocalDate(date);
-    }
-
-    @Override
-    public Object convertToDatabase(Database database, LocalDate value) {
-        return SqlDateUtil.valueOf(value);
-    }
-
-    @Override
-    public String literal(Database database, LocalDate value) {
-        return String.format("DATE '%s'", value.format(DateTimeFormatter.ISO_DATE));
-    }
-
-    @Override
-    public String parameter(Database database, LocalDate value) {
-        return "cast(? as date)";
+    public String literal(Database database, Float value) {
+        return String.format("cast(%s as real)", value);
     }
 }

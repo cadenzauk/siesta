@@ -31,8 +31,6 @@ import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
-import com.cadenzauk.siesta.type.EnumByNameTypeAdapter;
-import com.cadenzauk.siesta.type.TypeAdapter;
 import com.cadenzauk.siesta.grammar.dml.Delete;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InSetExpectingWhere;
@@ -44,6 +42,9 @@ import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
+import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.EnumByName;
 import com.google.common.reflect.TypeToken;
 
 import java.time.ZoneId;
@@ -348,14 +349,14 @@ public class Database {
             return this;
         }
 
-        public <T> Builder type(Class<T> javaClass, TypeAdapter<T> type) {
-            customizations.add(dialect -> dialect.registerType(javaClass, type));
-            dataTypes.add(reg -> reg.register(new DataType<>(javaClass)));
+        public <T> Builder type(Class<T> javaClass, DbTypeId<T> dbTypeId, DbType<T> dbType) {
+            customizations.add(dialect -> dialect.registerType(dbTypeId, dbType));
+            dataTypes.add(reg -> reg.register(new DataType<>(javaClass, dbTypeId)));
             return this;
         }
 
         public <T extends Enum<T>> Builder enumByName(Class<T> javaClass) {
-            return type(javaClass, new EnumByNameTypeAdapter<>(javaClass));
+            return type(javaClass, EnumByName.id(javaClass), new EnumByName<>(javaClass));
         }
 
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {

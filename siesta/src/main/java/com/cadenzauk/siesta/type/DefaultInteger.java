@@ -22,32 +22,10 @@
 
 package com.cadenzauk.siesta.type;
 
-import com.cadenzauk.siesta.Database;
-
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
-public class DefaultTypeAdapter<T> implements TypeAdapter<T> {
-    private final SqlBiFunction<ResultSet,String,T> byLabel;
-    private final SqlBiFunction<ResultSet,Integer,T> byColNo;
-
-    public DefaultTypeAdapter(SqlBiFunction<ResultSet,String,T> byLabel, SqlBiFunction<ResultSet,Integer,T> byColNo) {
-        this.byLabel = byLabel;
-        this.byColNo = byColNo;
-    }
-
-    @Override
-    public T getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
-        return byLabel.apply(rs, col);
-    }
-
-    @Override
-    public T getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
-        return byColNo.apply(rs, col);
-    }
-
-    @FunctionalInterface
-    public interface SqlBiFunction<T1, T2, R> {
-        R apply(T1 arg1, T2 arg2) throws SQLException;
+public class DefaultInteger extends DefaultDbType<Integer> {
+    public DefaultInteger() {
+        super("integer", ResultSet::getInt, ResultSet::getInt);
     }
 }

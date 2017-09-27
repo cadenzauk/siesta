@@ -25,14 +25,36 @@ package com.cadenzauk.siesta.type;
 import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class DefaultShortTypeAdapter extends DefaultTypeAdapter<Short> {
-    public DefaultShortTypeAdapter() {
-        super(ResultSet::getShort, ResultSet::getShort);
+public class DefaultDbType<T> implements DbType<T> {
+    private final String sqlType;
+    private final SqlBiFunction<ResultSet,String,T> byLabel;
+    private final SqlBiFunction<ResultSet,Integer,T> byColNo;
+
+    public DefaultDbType(String sqlType, SqlBiFunction<ResultSet,String,T> byLabel, SqlBiFunction<ResultSet,Integer,T> byColNo) {
+        this.sqlType = sqlType;
+        this.byLabel = byLabel;
+        this.byColNo = byColNo;
     }
 
     @Override
-    public String literal(Database database, Short value) {
-        return String.format("cast(%d as smallint)", value);
+    public T getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+        return byLabel.apply(rs, col);
+    }
+
+    @Override
+    public T getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+        return byColNo.apply(rs, col);
+    }
+
+    @Override
+    public String sqlType() {
+        return sqlType;
+    }
+
+    @FunctionalInterface
+    public interface SqlBiFunction<T1, T2, R> {
+        R apply(T1 arg1, T2 arg2) throws SQLException;
     }
 }

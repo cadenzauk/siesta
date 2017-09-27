@@ -26,13 +26,17 @@ import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
 
-public class DefaultByteTypeAdapter extends DefaultTypeAdapter<Byte> {
-    public DefaultByteTypeAdapter() {
-        super(ResultSet::getByte, ResultSet::getByte);
+public class DefaultVarchar extends DefaultDbType<String> {
+    public DefaultVarchar() {
+        super("varchar", ResultSet::getString, ResultSet::getString);
+    }
+
+    public DefaultVarchar(String sqlType) {
+        super(sqlType, ResultSet::getString, ResultSet::getString);
     }
 
     @Override
-    public String literal(Database database, Byte value) {
-        return String.format("cast(%d as smallint)", value);
+    public String literal(Database database, String value) {
+        return "'" + value.replaceAll("'", "''") + "'";
     }
 }

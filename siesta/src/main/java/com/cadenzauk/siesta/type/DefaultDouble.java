@@ -24,8 +24,8 @@ package com.cadenzauk.siesta.type;
 
 import java.sql.ResultSet;
 
-public class DefaultIntegerTypeAdapter extends DefaultTypeAdapter<Integer> {
-    public DefaultIntegerTypeAdapter() {
-        super(ResultSet::getInt, ResultSet::getInt);
+public class DefaultDouble extends DefaultDbType<Double> {
+    public DefaultDouble() {
+        super("double precision", ResultSet::getDouble, ResultSet::getDouble);
     }
 }

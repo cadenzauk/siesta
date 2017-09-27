@@ -24,10 +24,11 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.DataType;
-import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.google.common.reflect.TypeToken;
 
 import java.util.function.Function;
@@ -37,11 +38,13 @@ public class CastExpression<F, T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator = new LabelGenerator("cast_");
     private final TypedExpression<F> from;
     private final DataType<T> to;
-    private final Function<Dialect,String> toSql;
+    private final DbTypeId<T> toType;
+    private final Function<DbType,String> toSql;
 
-    public CastExpression(TypedExpression<F> from, DataType<T> to, Function<Dialect, String> toSql) {
+    public CastExpression(TypedExpression<F> from, DataType<T> to, DbTypeId<T> toType, Function<DbType, String> toSql) {
         this.from = from;
         this.to = to;
+        this.toType = toType;
         this.toSql = toSql;
     }
 
@@ -62,7 +65,7 @@ public class CastExpression<F, T> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return String.format("cast(%s as %s)", from.sql(scope), toSql.apply(scope.dialect()));
+        return String.format("cast(%s as %s)", from.sql(scope), toSql.apply(scope.dialect().type(toType)));
     }
 
     @Override
@@ -77,6 +80,6 @@ public class CastExpression<F, T> implements TypedExpression<T> {
 
     @Override
     public String toString() {
-        return String.format("cast(%s as %s)", from, toSql.apply(new AnsiDialect()));
+        return String.format("cast(%s as %s)", from, toSql.apply(new AnsiDialect().type(toType)));
     }
 }

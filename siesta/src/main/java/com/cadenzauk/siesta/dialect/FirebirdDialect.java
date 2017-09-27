@@ -24,14 +24,15 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultIntegerTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultLocalDateTimeTypeAdapter;
-import com.cadenzauk.siesta.type.DefaultZonedDateTimeTypeAdapter;
+import com.cadenzauk.siesta.type.DefaultInteger;
+import com.cadenzauk.siesta.type.DefaultTimestamp;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
+import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 public class FirebirdDialect extends AnsiDialect {
     public FirebirdDialect() {
@@ -39,19 +40,40 @@ public class FirebirdDialect extends AnsiDialect {
         DateFunctionSpecs.registerDateAdd(functions());
 
         types()
-            .register(Integer.class, new DefaultIntegerTypeAdapter() {
+            .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.INTEGER, new DefaultInteger() {
                 @Override
                 public String parameter(Database database, Integer value) {
                     return "cast(? as integer)";
                 }
             })
-            .register(LocalDateTime.class, new DefaultLocalDateTimeTypeAdapter() {
+            .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
+                @Override
+                public String sqlType(int arg) {
+                    return sqlType();
+                }
+
+                @Override
+                public String sqlType(int arg1, int arg2) {
+                    return sqlType();
+                }
+
                 @Override
                 public String literal(Database database, LocalDateTime value) {
                     return String.format("TIMESTAMP '%s'", value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")));
                 }
             })
-            .register(ZonedDateTime.class, new DefaultZonedDateTimeTypeAdapter() {
+            .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp() {
+                @Override
+                public String sqlType(int arg) {
+                    return sqlType();
+                }
+
+                @Override
+                public String sqlType(int arg1, int arg2) {
+                    return sqlType();
+                }
+
                 @Override
                 public String literal(Database database, ZonedDateTime value) {
                     ZonedDateTime localDateTime = value.withZoneSameInstant(database.databaseTimeZone());
@@ -68,11 +90,6 @@ public class FirebirdDialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return String.format("%s rows %d", sql, n);
-    }
-
-    @Override
-    public String timestampType(Optional<Integer> prec) {
-        return "timestamp";
     }
 
     @Override

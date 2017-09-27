@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-public class DefaultZonedDateTimeTypeAdapter implements TypeAdapter<ZonedDateTime> {
+public class DefaultUtcTimestamp implements DbType<ZonedDateTime> {
     @Override
     public ZonedDateTime getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
         Timestamp timestamp = getTimestamp(rs, col, database);
@@ -45,6 +45,11 @@ public class DefaultZonedDateTimeTypeAdapter implements TypeAdapter<ZonedDateTim
     public ZonedDateTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
         Timestamp timestamp = getTimestamp(rs, col, database);
         return rs.wasNull() ? null : TimestampUtil.toZonedDateTime(timestamp, database.databaseTimeZone(), ZoneId.of("UTC"));
+    }
+
+    @Override
+    public String sqlType() {
+        return "timestamp";
     }
 
     @Override
