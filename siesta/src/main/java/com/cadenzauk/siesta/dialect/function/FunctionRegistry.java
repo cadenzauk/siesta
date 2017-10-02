@@ -33,7 +33,8 @@ public class FunctionRegistry {
         return Optional.ofNullable(functions.get(name));
     }
 
-    public void register(FunctionName name, FunctionSpec function) {
+    public FunctionRegistry register(FunctionName name, FunctionSpec function) {
         functions.put(name, function);
+        return this;
     }
 }

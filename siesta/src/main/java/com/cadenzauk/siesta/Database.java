@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.reflect.FieldInfo;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.catalog.Column;
@@ -46,6 +47,8 @@ import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.EnumByName;
 import com.google.common.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -53,10 +56,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Database {
+    private static final Logger LOG = LoggerFactory.getLogger(Database.class);
+
     private final Map<TypeToken<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
     private final DataTypeRegistry dataTypeRegistry;
     private final String defaultCatalog;
@@ -112,6 +118,32 @@ public class Database {
             .sequenceName(name)
             .dataType(getDataTypeOf(valueClass))
             .build();
+    }
+
+    public UncheckedAutoCloseable withLockTimeout(long time, TimeUnit unit) {
+        return withLockTimeout(getDefaultSqlExecutor(), time, unit);
+    }
+
+    public UncheckedAutoCloseable withLockTimeout(SqlExecutor executor, long time, TimeUnit unit) {
+        String sql = dialect.setLockTimeout(time, unit);
+        LOG.debug(sql);
+        executor.update(sql);
+        return () -> {
+            String resetSql = dialect.resetLockTimeout();
+            LOG.debug(resetSql);
+            executor.update(resetSql);
+        };
+    }
+
+    public UncheckedAutoCloseable withLockTimeout(Transaction transaction, long time, TimeUnit unit) {
+        String sql = dialect.setLockTimeout(time, unit);
+        LOG.debug(sql);
+        transaction.execute(sql, new Object[0]);
+        return () -> {
+            String resetSql = dialect.resetLockTimeout();
+            LOG.debug(resetSql);
+            transaction.execute(resetSql, new Object[0]);
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -231,21 +263,21 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> void insert(SqlExecutor sqlExecutor, R... rows) {
+    public <R> int insert(SqlExecutor sqlExecutor, R... rows) {
         if (rows.length == 0) {
-            return;
+            return 0;
         }
         Class<R> rowClass = (Class<R>) rows[0].getClass();
-        table(rowClass).insert(sqlExecutor, rows);
+        return table(rowClass).insert(sqlExecutor, rows);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> void insert(Transaction transaction, R... rows) {
+    public <R> int insert(Transaction transaction, R... rows) {
         if (rows.length == 0) {
-            return;
+            return 0;
         }
         Class<R> rowClass = (Class<R>) rows[0].getClass();
-        table(rowClass).insert(transaction, rows);
+        return table(rowClass).insert(transaction, rows);
     }
 
     public CommonTableExpressionBuilder with(String name) {

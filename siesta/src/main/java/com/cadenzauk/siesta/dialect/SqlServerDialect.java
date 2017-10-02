@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -132,6 +133,22 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return SELECT_PATTERN.matcher(sql).replaceFirst("$1top " + n + " ");
+    }
+
+    @Override
+    public boolean supportsLockTimeout() {
+        return true;
+    }
+
+    @Override
+    public String setLockTimeout(long time, TimeUnit unit) {
+        return String.format("set lock_timeout %d", unit.toMillis(time));
+        //return "set LOCK_TIMEOUT 100";
+    }
+
+    @Override
+    public String resetLockTimeout() {
+        return "set lock_timeout -1";
     }
 
     @Override

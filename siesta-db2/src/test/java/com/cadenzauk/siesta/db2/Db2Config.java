@@ -39,6 +39,7 @@ public class Db2Config {
         DB2ConnectionPoolDataSource pool = new DB2ConnectionPoolDataSource();
         pool.setDatabaseName("SIESTA");
         pool.setDriverType(2);
+        pool.setConcurrentAccessResolution(1);
         return new PooledDataSource(pool);
     }
 

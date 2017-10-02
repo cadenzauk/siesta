@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class H2Dialect extends AnsiDialect {
     public H2Dialect() {
@@ -49,6 +50,21 @@ public class H2Dialect extends AnsiDialect {
             .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())
             .map(ll -> sql + " for update")
             .orElse(sql);
+    }
+
+    @Override
+    public boolean supportsLockTimeout() {
+        return true;
+    }
+
+    @Override
+    public String setLockTimeout(long time, TimeUnit unit) {
+        return String.format("set lock_timeout %d", unit.toMillis(time));
+    }
+
+    @Override
+    public String resetLockTimeout() {
+        return "set lock_timeout 1000";
     }
 
 }

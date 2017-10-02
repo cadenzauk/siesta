@@ -37,6 +37,7 @@ import com.cadenzauk.siesta.type.DbTypeRegistry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -118,6 +119,21 @@ public class AnsiDialect implements Dialect {
     @Override
     public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
         return sql;
+    }
+
+    @Override
+    public boolean supportsLockTimeout() {
+        return false;
+    }
+
+    @Override
+    public String setLockTimeout(long time, TimeUnit unit) {
+        throw new UnsupportedOperationException(String.format("%s does not support lock timeouts.", getClass().getName()));
+    }
+
+    @Override
+    public String resetLockTimeout() {
+        throw new UnsupportedOperationException(String.format("%s does not support lock timeouts.", getClass().getName()));
     }
 
     @Override

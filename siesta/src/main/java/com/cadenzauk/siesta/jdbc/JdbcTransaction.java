@@ -79,13 +79,18 @@ public class JdbcTransaction implements Transaction {
     }
 
     @Override
+    public boolean execute(String sql, Object[] args) {
+        return sqlExecutor.execute(connection, sql, args);
+    }
+
+    @Override
     public CompletableFuture<Integer> updateAsync(String sql, Object[] args) {
         return sqlExecutor.updateAsync(connection, sql, args);
     }
 
     @Override
     public void close() {
-        commit();
+        rollback();
         autoCloseable.close();
     }
 

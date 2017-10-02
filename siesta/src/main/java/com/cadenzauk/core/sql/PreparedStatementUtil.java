@@ -43,4 +43,12 @@ public class PreparedStatementUtil extends UtilityClass {
             throw new RuntimeSqlException(e);
         }
     }
+
+    public static boolean execute(PreparedStatement preparedStatement) {
+        try {
+            return preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
 }

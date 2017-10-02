@@ -28,17 +28,10 @@ import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbType;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public interface Dialect {
-    String selectivity(double s);
-
-    boolean requiresFromDual();
-
-    String qualifiedName(String catalog, String schema, String name);
-
-    String dual();
-
     void registerFunction(FunctionName functionName, FunctionSpec functionSpec);
 
     FunctionSpec function(FunctionName name);
@@ -47,16 +40,29 @@ public interface Dialect {
 
     <T> DbType<T> type(DbTypeId<T> type);
 
+    String selectivity(double s);
+
     boolean supportsMultiInsert();
 
-    String concat(Stream<String> sql);
+    boolean requiresFromDual();
 
-    String fetchFirst(String sql, long n);
+    String dual();
 
     boolean supportsIsolationLevelInQuery();
 
     String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks);
 
-    String nextFromSequence(String catalog, String schema, String sequenceName);
+    boolean supportsLockTimeout();
 
+    String setLockTimeout(long time, TimeUnit unit);
+
+    String resetLockTimeout();
+
+    String qualifiedName(String catalog, String schema, String name);
+
+    String concat(Stream<String> sql);
+
+    String fetchFirst(String sql, long n);
+
+    String nextFromSequence(String catalog, String schema, String sequenceName);
 }

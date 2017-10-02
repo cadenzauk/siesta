@@ -24,11 +24,11 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultInteger;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
-import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;

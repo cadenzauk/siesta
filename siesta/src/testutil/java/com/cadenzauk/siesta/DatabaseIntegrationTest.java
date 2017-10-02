@@ -27,7 +27,7 @@ import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.core.tuple.Tuple4;
+import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -77,6 +77,7 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.dayDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hour;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hourDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minute;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minuteDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
@@ -989,17 +990,19 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .localDateReq(localDate)
             .build());
 
-        Tuple4<Integer,Integer,Integer,Integer> result = database
+        Tuple5<Integer,Integer,Integer,Integer,Integer> result = database
             .select(dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 31, 0)), value(LocalDateTime.of(2018, 2, 17, 11, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 15, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
+            .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59))))
             .single();
 
         assertThat(result.item1(), is(9));
         assertThat(result.item2(), is(71));
         assertThat(result.item3(), is(73));
         assertThat(result.item4(), is(-47));
+        assertThat(result.item5(), is(250));
     }
 
     @Test

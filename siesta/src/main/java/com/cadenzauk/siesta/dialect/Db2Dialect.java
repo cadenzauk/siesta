@@ -32,14 +32,19 @@ import com.cadenzauk.siesta.type.DbTypeId;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 
 public class Db2Dialect extends AnsiDialect {
     public Db2Dialect() {
         DateFunctionSpecs.registerPlusUnits(functions());
-        functions().register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(" + a[0] + " - " + a[1] + "))");
+        functions()
+            .register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(trunc(" + a[0] + ", 'HH24') - trunc(" + a[1] + ", 'HH24')))")
+            .register(MINUTE_DIFF, a -> "TIMESTAMPDIFF(4, char(trunc(" + a[0] + ", 'MI') - trunc(" + a[1] + ", 'MI')))")
+        ;
 
         types()
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
@@ -81,6 +86,21 @@ public class Db2Dialect extends AnsiDialect {
         return keepLocks
             .map(kl -> isolationLevelSqlWithLocks(sql, level, kl))
             .orElseGet(() -> isolationLevelWithNoLocks(sql, level));
+    }
+
+    @Override
+    public boolean supportsLockTimeout() {
+        return true;
+    }
+
+    @Override
+    public String setLockTimeout(long time, TimeUnit unit) {
+        return String.format("set current lock timeout %d", unit.toSeconds(time));
+    }
+
+    @Override
+    public String resetLockTimeout() {
+        return "set current lock timeout null";
     }
 
     private String isolationLevelSqlWithLocks(String sql, IsolationLevel level, LockLevel keepLocks) {

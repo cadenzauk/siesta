@@ -20,31 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.model;
 
-import com.cadenzauk.core.sql.RowMapper;
+import javax.persistence.Table;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
+@Table(name = "LOCK_TEST")
+public class LockTestRow {
+    private final long id;
+    private final int revision;
+    private final String updatedBy;
 
-public interface Transaction extends AutoCloseable {
-    @Override
-    void close();
+    public LockTestRow(long id, int revision, String updatedBy) {
+        this.id = id;
+        this.revision = revision;
+        this.updatedBy = updatedBy;
+    }
 
-    void commit();
+    public long id() {
+        return id;
+    }
 
-    void rollback();
+    public int revision() {
+        return revision;
+    }
 
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> CompletableFuture<List<T>> queryAsync(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    int update(String sql, Object[] args);
-
-    boolean execute(String sql, Object[] args);
-
-    CompletableFuture<Integer> updateAsync(String sql, Object[] args);
+    public String updatedBy() {
+        return updatedBy;
+    }
 }

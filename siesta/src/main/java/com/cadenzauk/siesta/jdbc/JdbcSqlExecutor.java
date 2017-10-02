@@ -129,6 +129,16 @@ public class JdbcSqlExecutor implements SqlExecutor {
         }
     }
 
+    boolean execute(Connection connection, String sql, Object[] args) {
+        if (args.length == 0) {
+            return ConnectionUtil.execute(connection, sql);
+        }
+        try (CompositeAutoCloseable closeable = new CompositeAutoCloseable()) {
+            PreparedStatement preparedStatement = prepare(connection, sql, args, closeable);
+            return PreparedStatementUtil.execute(preparedStatement);
+        }
+    }
+
     public CompletableFuture<Integer> updateAsync(Connection connection, String sql, Object[] args) {
         return CompletableFuture.supplyAsync(() -> update(connection, sql, args), executor);
     }

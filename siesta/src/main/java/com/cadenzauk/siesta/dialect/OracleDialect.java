@@ -48,25 +48,29 @@ import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 
 public class OracleDialect extends AnsiDialect {
     public OracleDialect() {
         DateFunctionSpecs.registerExtract(functions());
         DateFunctionSpecs.registerPlusNumToDsInterval(functions());
-        functions().register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"));
-        functions().register(HOUR_DIFF, new FunctionSpec() {
-            @Override
-            public String sql(String[] a) {
-                return String.format("extract(day from (%1$s - %2$s)) * 24 + extract(hour from (%1$s - %2$s))", a[0], a[1]);
-            }
+        functions()
+            .register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"))
+            .register(HOUR_DIFF, new FunctionSpec() {
+                @Override
+                public String sql(String[] a) {
+                    return String.format("extract(day from (%1$s - %2$s)) * 24 + extract(hour from (%1$s - %2$s))", a[0], a[1]);
+                }
 
-            @Override
-            public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
-                return Stream.concat(
-                    Arrays.stream(args),
-                    Arrays.stream(args)).flatMap(a -> a.args(scope));
-            }
-        });
+                @Override
+                public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+                    return Stream.concat(
+                        Arrays.stream(args),
+                        Arrays.stream(args)).flatMap(a -> a.args(scope));
+                }
+            })
+            .register(MINUTE_DIFF, a -> String.format("round((trunc(cast(%1$s as date), 'MI') - trunc(cast(%2$s as date), 'MI')) * 1440)", a[0], a[1]))
+        ;
 
         types()
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
@@ -128,12 +132,12 @@ public class OracleDialect extends AnsiDialect {
                     return LocalTime.parse(string);
                 }
             })
-        .register(DbTypeId.VARCHAR, new DefaultVarchar() {
-            @Override
-            public String sqlType() {
-                return "varchar2";
-            }
-        });
+            .register(DbTypeId.VARCHAR, new DefaultVarchar() {
+                @Override
+                public String sqlType() {
+                    return "varchar2";
+                }
+            });
     }
 
     @Override

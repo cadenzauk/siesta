@@ -29,7 +29,7 @@
     <property name="time" value="time"/>
 
     <changeSet id="create int sequence for firebird" author="mark" dbms="firebird">
-        <createSequence sequenceName="widget_seq" />
+        <createSequence sequenceName="widget_seq"/>
     </changeSet>
 
     <changeSet id="create int sequence for others" author="mark" dbms="oracle,db2,h2,postgresql,mssql">
@@ -108,6 +108,18 @@
             <column name="LOCAL_TIME_OPT" type="${time}"/>
             <column name="UTC_DATE_TIME_REQ" type="TIMESTAMP"/>
             <column name="UTC_DATE_TIME_OPT" type="TIMESTAMP"/>
+        </createTable>
+
+        <createTable tableName="LOCK_TEST">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="revision" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="varchar(80)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

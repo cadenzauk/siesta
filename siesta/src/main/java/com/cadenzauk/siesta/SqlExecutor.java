@@ -36,5 +36,5 @@ public interface SqlExecutor {
 
     <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
 
-    int update(String sql, Object[] args);
+    int update(String sql, Object... args);
 }

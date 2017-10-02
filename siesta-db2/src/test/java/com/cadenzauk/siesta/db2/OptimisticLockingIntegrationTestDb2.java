@@ -20,31 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.db2;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.OptimisticLockingIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
-public interface Transaction extends AutoCloseable {
-    @Override
-    void close();
-
-    void commit();
-
-    void rollback();
-
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> CompletableFuture<List<T>> queryAsync(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
-
-    int update(String sql, Object[] args);
-
-    boolean execute(String sql, Object[] args);
-
-    CompletableFuture<Integer> updateAsync(String sql, Object[] args);
+@ContextConfiguration(classes = Db2Config.class)
+public class OptimisticLockingIntegrationTestDb2 extends OptimisticLockingIntegrationTest {
 }

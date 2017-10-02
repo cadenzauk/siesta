@@ -148,7 +148,7 @@ class JdbcTransactionTest extends MockitoTest {
         sut.close();
 
         verify(connection).setAutoCommit(false);
-        verify(connection).commit();
+        verify(connection).rollback();
         verify(connection).close();
         verifyNoMoreInteractions(sqlExecutor, connection);
     }

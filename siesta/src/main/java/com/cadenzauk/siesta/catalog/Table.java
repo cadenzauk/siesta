@@ -121,19 +121,23 @@ public class Table<R> {
         return Alias.of(this, alias);
     }
 
-    public void insert(SqlExecutor sqlExecutor, R[] rows) {
+    public int insert(SqlExecutor sqlExecutor, R[] rows) {
         if (database().dialect().supportsMultiInsert()) {
-            impl.insert(sqlExecutor, rows);
+            return impl.insert(sqlExecutor, rows);
         } else {
-            Arrays.stream(rows).forEach(r -> impl.insert(sqlExecutor, r));
+            return Arrays.stream(rows)
+                .mapToInt(r -> impl.insert(sqlExecutor, r))
+                .sum();
         }
     }
 
-    public void insert(Transaction transaction, R[] rows) {
+    public int insert(Transaction transaction, R[] rows) {
         if (database().dialect().supportsMultiInsert()) {
-            impl.insert(transaction, rows);
+            return impl.insert(transaction, rows);
         } else {
-            Arrays.stream(rows).forEach(r -> impl.insert(transaction, r));
+            return Arrays.stream(rows)
+                .mapToInt(r -> impl.insert(transaction, r))
+                .sum();
         }
     }
 
@@ -167,24 +171,24 @@ public class Table<R> {
 
         @SuppressWarnings("unchecked")
         @SafeVarargs
-        final void insert(SqlExecutor sqlExecutor, R... rows) {
+        final int insert(SqlExecutor sqlExecutor, R... rows) {
             if (rows.length == 0) {
-                return;
+                return 0;
             }
             String sql = sql(rows);
             Object[] args = args(rows);
-            sqlExecutor.update(sql, args);
+            return sqlExecutor.update(sql, args);
         }
 
         @SuppressWarnings("unchecked")
         @SafeVarargs
-        final void insert(Transaction transaction, R... rows) {
+        final int insert(Transaction transaction, R... rows) {
             if (rows.length == 0) {
-                return;
+                return 0;
             }
             String sql = sql(rows);
             Object[] args = args(rows);
-            transaction.update(sql, args);
+            return transaction.update(sql, args);
         }
 
         private Object[] args(R[] rows) {

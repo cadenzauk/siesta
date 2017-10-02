@@ -90,7 +90,7 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
     @Test
     public void whenUncommittedThenVisibleWithUr() {
         if (!dialect.supportsIsolationLevelInQuery()) {
-            throw new AssumptionViolatedException("Database doesn't supprt isolation levels in query");
+            throw new AssumptionViolatedException("Database doesn't support isolation levels in query");
         }
         Database database = testDatabase(dataSource, dialect);
 
