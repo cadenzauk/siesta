@@ -37,6 +37,7 @@ import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.ADD_D
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.DAY_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
 
 public final class DateFunctions extends UtilityClass {
     //--
@@ -406,5 +407,34 @@ public final class DateFunctions extends UtilityClass {
 
     public static <T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> minuteDiff(TypedExpression<T1> date1, TypedExpression<T2> date2) {
         return SqlFunction.of(MINUTE_DIFF, Integer.class, date1, date2);
+    }
+
+    //--
+    public static <R, T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(Function1<R,T1> date1, T2 date2) {
+        return secondDiff(UnresolvedColumn.of(date1), ValueExpression.of(date2));
+    }
+
+    public static <R, T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(FunctionOptional1<R,T1> date1, T2 date2) {
+        return secondDiff(UnresolvedColumn.of(date1), ValueExpression.of(date2));
+    }
+
+    public static <R, T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(String alias, Function1<R,T1> date1, T2 date2) {
+        return secondDiff(UnresolvedColumn.of(alias, date1), ValueExpression.of(date2));
+    }
+
+    public static <R, T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(String alias, FunctionOptional1<R,T1> date1, T2 date2) {
+        return secondDiff(UnresolvedColumn.of(alias, date1), ValueExpression.of(date2));
+    }
+
+    public static <R, T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(Alias<R> alias, Function1<R,T1> date1, T2 date2) {
+        return secondDiff(ResolvedColumn.of(alias, date1), ValueExpression.of(date2));
+    }
+
+    public static <R, T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(Alias<R> alias, FunctionOptional1<R,T1> date1, T2 date2) {
+        return secondDiff(ResolvedColumn.of(alias, date1), ValueExpression.of(date2));
+    }
+
+    public static <T1 extends Temporal, T2 extends Temporal> TypedExpression<Integer> secondDiff(TypedExpression<T1> date1, TypedExpression<T2> date2) {
+        return SqlFunction.of(SECOND_DIFF, Integer.class, date1, date2);
     }
 }

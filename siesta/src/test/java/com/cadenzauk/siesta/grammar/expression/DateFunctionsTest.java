@@ -42,8 +42,10 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.dayDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hour;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.hourDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minute;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.minuteDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
+import static com.cadenzauk.siesta.grammar.expression.DateFunctions.secondDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
@@ -136,6 +138,22 @@ class DateFunctionsTest extends FunctionTest {
             testCase(s -> addDays("s", TestRow::localDateTimeOpt, 2), "dateadd(day, ?, s.LOCAL_DATE_TIME_OPT)", toArray(2)),
             testCase(s -> addDays(s, TestRow::localDateTimeReq, 3), "dateadd(day, ?, s.LOCAL_DATE_TIME_REQ)", toArray(3)),
             testCase(s -> addDays(s, TestRow::localDateTimeOpt, 3), "dateadd(day, ?, s.LOCAL_DATE_TIME_OPT)", toArray(3)),
+
+            testCase(s -> secondDiff(TypedExpression.value(randomZonedDateTime), literal(LocalDate.of(2013, 12, 25))), "datediff(second, DATE '2013-12-25', cast(? as timestamp))", toArray(Timestamp.valueOf(randomZonedDateTime.toLocalDateTime()))),
+            testCase(s -> secondDiff(TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(second, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> secondDiff(TestRow::localDateTimeOpt, LocalDate.of(2013, 12, 25)), "datediff(second, cast(? as date), s.LOCAL_DATE_TIME_OPT)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> secondDiff("s", TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(second, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> secondDiff("s", TestRow::localDateTimeOpt, LocalDate.of(2013, 12, 25)), "datediff(second, cast(? as date), s.LOCAL_DATE_TIME_OPT)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> secondDiff(s, TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(second, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> secondDiff(s, TestRow::localDateTimeOpt, LocalDate.of(2013, 12, 25)), "datediff(second, cast(? as date), s.LOCAL_DATE_TIME_OPT)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+
+            testCase(s -> minuteDiff(TypedExpression.value(randomZonedDateTime), literal(LocalDate.of(2013, 12, 25))), "datediff(minute, DATE '2013-12-25', cast(? as timestamp))", toArray(Timestamp.valueOf(randomZonedDateTime.toLocalDateTime()))),
+            testCase(s -> minuteDiff(TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(minute, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> minuteDiff(TestRow::localDateTimeOpt, LocalDate.of(2013, 12, 25)), "datediff(minute, cast(? as date), s.LOCAL_DATE_TIME_OPT)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> minuteDiff("s", TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(minute, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> minuteDiff("s", TestRow::localDateTimeOpt, LocalDate.of(2013, 12, 25)), "datediff(minute, cast(? as date), s.LOCAL_DATE_TIME_OPT)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> minuteDiff(s, TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(minute, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
+            testCase(s -> minuteDiff(s, TestRow::localDateTimeOpt, LocalDate.of(2013, 12, 25)), "datediff(minute, cast(? as date), s.LOCAL_DATE_TIME_OPT)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),
 
             testCase(s -> hourDiff(TypedExpression.value(randomZonedDateTime), literal(LocalDate.of(2013, 12, 25))), "datediff(hour, DATE '2013-12-25', cast(? as timestamp))", toArray(Timestamp.valueOf(randomZonedDateTime.toLocalDateTime()))),
             testCase(s -> hourDiff(TestRow::localDateTimeReq, LocalDate.of(2013, 12, 25)), "datediff(hour, cast(? as date), s.LOCAL_DATE_TIME_REQ)", toArray(Date.valueOf(LocalDate.of(2013, 12, 25)))),

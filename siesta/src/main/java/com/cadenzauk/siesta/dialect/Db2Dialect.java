@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import static com.cadenzauk.core.lang.StringUtil.hex;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
 
 public class Db2Dialect extends AnsiDialect {
     public Db2Dialect() {
@@ -44,6 +45,7 @@ public class Db2Dialect extends AnsiDialect {
         functions()
             .register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(trunc(" + a[0] + ", 'HH24') - trunc(" + a[1] + ", 'HH24')))")
             .register(MINUTE_DIFF, a -> "TIMESTAMPDIFF(4, char(trunc(" + a[0] + ", 'MI') - trunc(" + a[1] + ", 'MI')))")
+            .register(SECOND_DIFF, a -> "TIMESTAMPDIFF(2, char(trunc(" + a[0] + ", 'SS') - trunc(" + a[1] + ", 'SS')))")
         ;
 
         types()

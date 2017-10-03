@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 import static com.cadenzauk.core.lang.StringUtil.hex;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
 
 public class OracleDialect extends AnsiDialect {
     public OracleDialect() {
@@ -70,6 +71,7 @@ public class OracleDialect extends AnsiDialect {
                 }
             })
             .register(MINUTE_DIFF, a -> String.format("round((trunc(cast(%1$s as date), 'MI') - trunc(cast(%2$s as date), 'MI')) * 1440)", a[0], a[1]))
+            .register(SECOND_DIFF, a -> String.format("round((cast(%1$s as date) - cast(%2$s as date)) * 86400)", a[0], a[1]))
         ;
 
         types()
