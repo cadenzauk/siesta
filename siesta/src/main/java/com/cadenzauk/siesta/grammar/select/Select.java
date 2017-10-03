@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.IsolationLevel;
@@ -133,7 +134,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public String label(Scope scope) {
-        return statement.label();
+        return statement.label(scope);
     }
 
     @Override
@@ -143,7 +144,8 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     @Override
     public RowMapper<RT> rowMapper(Scope scope, String label) {
-        return statement.rowMapper();
+        final DataType<RT> dataType = scope.database().getDataTypeOf(type());
+        return rs -> dataType.get(rs, label, scope.database()).orElse(null);
     }
 
     @Override

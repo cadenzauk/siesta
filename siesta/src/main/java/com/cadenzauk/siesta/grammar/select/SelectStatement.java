@@ -35,6 +35,7 @@ import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.Iterables;
@@ -56,6 +57,7 @@ class SelectStatement<RT> {
     private static final Logger LOG = LoggerFactory.getLogger(SelectStatement.class);
 
     protected final Scope scope;
+    private final LabelGenerator labelGenerator = new LabelGenerator("select_");
     private final List<CommonTableExpression<?>> commonTableExpressions = new ArrayList<>();
     private final TypeToken<RT> rowType;
     private final From from;
@@ -100,8 +102,8 @@ class SelectStatement<RT> {
         return "(" + sqlImpl(outerScope) + ")";
     }
 
-    String label() {
-        return null;
+    String label(Scope outerScope) {
+        return labelGenerator.label(outerScope);
     }
 
     Stream<Object> args(Scope outerScope) {
