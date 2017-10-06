@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -93,7 +92,7 @@ class BooleanExpressionTest {
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
         Scope scope = new Scope(database, alias);
-        when(sut.appendAnd(any())).thenReturn(sut);
+        when(sut.precedence()).thenReturn(Precedence.UNARY);
 
         method.apply(alias, sut);
 
@@ -108,7 +107,7 @@ class BooleanExpressionTest {
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
         Scope scope = new Scope(database, alias);
-        when(sut.appendAnd(any())).thenReturn(sut);
+        when(sut.precedence()).thenReturn(Precedence.UNARY);
 
         method.apply(alias, sut);
 

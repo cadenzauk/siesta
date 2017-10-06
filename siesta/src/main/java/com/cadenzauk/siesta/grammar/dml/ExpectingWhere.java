@@ -27,7 +27,6 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
-import com.cadenzauk.siesta.grammar.expression.ParenthesisedExpression;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -38,7 +37,7 @@ public class ExpectingWhere extends ExecutableStatementClause {
     }
 
     public InWhereExpectingAnd where(BooleanExpression e) {
-        return statement.setWhereClause(new ParenthesisedExpression(e));
+        return statement.setWhereClause(e);
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd> where(TypedExpression<T> lhs) {

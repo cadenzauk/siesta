@@ -23,24 +23,39 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
 
 import java.util.stream.Stream;
 
-public class Assignment {
-    private final UnresolvedColumn<?,?> lhs;
-    private final AssignmentValue rhs;
+public class Assignment<T> {
+    private final UnresolvedColumn<T,?> lhs;
+    private TypedExpression<T> rhs;
 
-    public Assignment(UnresolvedColumn<?,?> lhs, AssignmentValue rhs) {
+    public Assignment(UnresolvedColumn<T,?> lhs, TypedExpression<T> rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
     public String sql(Scope scope) {
-        return lhs.columnName(scope) + rhs.sql(scope);
+        return lhs.columnName(scope) + " = " + rhs.sql(scope);
     }
 
     public Stream<Object> args(Scope scope) {
         return Stream.concat(lhs.args(scope), rhs.args(scope));
+    }
+
+    public void plus(TypedExpression<T> value) {
+        rhs = rhs.plus(value);
+    }
+
+    public void minus(TypedExpression<T> value) {
+        rhs = rhs.minus(value);
+    }
+
+    public void times(TypedExpression<T> value) {
+        rhs = rhs.times(value);
+    }
+
+    public void dividedBy(TypedExpression<T> value) {
+        rhs = rhs.dividedBy(value);
     }
 }

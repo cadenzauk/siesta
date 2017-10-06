@@ -89,12 +89,12 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @RunWith(JUnitParamsRunner.class)
 public abstract class DatabaseIntegrationTest extends IntegrationTest {
@@ -1032,5 +1032,28 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource);
 
         assertThat(database.dialect(), instanceOf(dialect.getClass()));
+    }
+
+
+    @Test
+    public void updateWithExpression() {
+        Database database = testDatabase(dataSource);
+        SalespersonRow salespersonRow = aRandomSalesperson();
+        database.insert(salespersonRow);
+        database.update(SalespersonRow.class)
+            .set(SalespersonRow::numberOfSales).to(20).plus(literal(2)).times(literal(5).plus(literal(3))).plus(literal(11))
+            .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
+            .execute();
+        database.update(SalespersonRow.class)
+            .set(SalespersonRow::numberOfSales).to(SalespersonRow::numberOfSales).plus(1)
+            .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
+            .execute();
+
+        int result= database.from(SalespersonRow.class)
+            .select(SalespersonRow::numberOfSales)
+            .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
+            .single();
+
+        assertThat(result, is(48));
     }
 }

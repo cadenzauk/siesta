@@ -97,7 +97,7 @@ class SelectHavingTest extends MockitoTest {
                 toArray("C")),
 
             havingTest((w, sel) -> sel.having(WidgetRow::manufacturerId).isEqualTo(1L).and(column(WidgetRow::description).isEqualTo("(A)")),
-                "having w.MANUFACTURER_ID = ? and (w.DESCRIPTION = ?)",
+                "having w.MANUFACTURER_ID = ? and w.DESCRIPTION = ?",
                 toArray(1L, "(A)")),
             havingTest((w, sel) -> sel.having(WidgetRow::manufacturerId).isEqualTo(1L).and(max(WidgetRow::name)).isEqualTo("(A)"),
                 "having w.MANUFACTURER_ID = ? and max(w.NAME) = ?",
@@ -122,7 +122,7 @@ class SelectHavingTest extends MockitoTest {
                 toArray("C", 3L)),
 
             havingTest((w, sel) -> sel.having(WidgetRow::manufacturerId).isEqualTo(1L).or(column(WidgetRow::description).isEqualTo("(A)")),
-                "having w.MANUFACTURER_ID = ? or (w.DESCRIPTION = ?)",
+                "having w.MANUFACTURER_ID = ? or w.DESCRIPTION = ?",
                 toArray(1L, "(A)")),
             havingTest((w, sel) -> sel.having(WidgetRow::manufacturerId).isEqualTo(1L).or(max(WidgetRow::name)).isEqualTo("(A)"),
                 "having w.MANUFACTURER_ID = ? or max(w.NAME) = ?",

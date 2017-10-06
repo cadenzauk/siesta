@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
 
 import java.util.stream.Stream;
 
@@ -33,7 +34,9 @@ public abstract class From {
 
     public abstract void on(BooleanExpression expression);
 
-    public abstract BooleanExpression on();
+    public abstract void appendAnd(BooleanExpression expression);
+
+    public abstract void appendOr(BooleanExpression expression);
 
     private static class FromAlias extends From {
         private final Alias<?> alias;
@@ -56,12 +59,14 @@ public abstract class From {
 
         @Override
         public void on(BooleanExpression expression) {
-
         }
 
         @Override
-        public BooleanExpression on() {
-            return null;
+        public void appendAnd(BooleanExpression expression) {
+        }
+
+        @Override
+        public void appendOr(BooleanExpression expression) {
         }
     }
 
@@ -69,7 +74,7 @@ public abstract class From {
         private final From lhs;
         private final JoinType join;
         private final Alias<?> next;
-        private BooleanExpression onClause;
+        private final BooleanExpressionChain onClause = new BooleanExpressionChain();
 
         FromJoin(From lhs, JoinType join, Alias<?> next) {
             this.lhs = lhs;
@@ -93,12 +98,17 @@ public abstract class From {
 
         @Override
         public void on(BooleanExpression expression) {
-            onClause = expression;
+            onClause.start(expression);
         }
 
         @Override
-        public BooleanExpression on() {
-            return onClause;
+        public void appendAnd(BooleanExpression expression) {
+            onClause.appendAnd(expression);
+        }
+
+        @Override
+        public void appendOr(BooleanExpression expression) {
+            onClause.appendOr(expression);
         }
     }
 

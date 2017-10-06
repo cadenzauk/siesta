@@ -22,50 +22,50 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.cadenzauk.siesta.grammar.expression.Precedence;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.reflect.TypeToken;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+public class NullExpression<T> implements TypedExpression<T> {
+    private final LabelGenerator labelGenerator = new LabelGenerator("null_");
+    private final TypeToken<T> typeToken;
 
-public class OrExpression extends BooleanExpression {
-    private final List<BooleanExpression> expressions = new ArrayList<>();
-
-    public OrExpression(BooleanExpression lhs, BooleanExpression rhs) {
-        expressions.add(lhs);
-        expressions.add(rhs);
+    public NullExpression(TypeToken<T> typeToken) {
+        this.typeToken = typeToken;
     }
 
     @Override
     public String sql(Scope scope) {
-        return expressions.stream()
-            .map(e -> sql(e, scope))
-            .collect(joining(" or "));
+        return "null";
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return expressions.stream()
-            .flatMap(e -> e.args(scope));
+        return Stream.empty();
     }
 
     @Override
     public Precedence precedence() {
-        return Precedence.OR;
+        return Precedence.UNARY;
     }
 
     @Override
-    public BooleanExpression appendOr(BooleanExpression expression) {
-        expressions.add(expression);
-        return this;
+    public String label(Scope scope) {
+        return labelGenerator.label(scope);
     }
 
     @Override
-    public BooleanExpression appendAnd(BooleanExpression expression) {
-        BooleanExpression last = expressions.remove(expressions.size() - 1);
-        expressions.add(last.appendAnd(expression));
-        return this;
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return rs -> null;
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return typeToken;
     }
 }

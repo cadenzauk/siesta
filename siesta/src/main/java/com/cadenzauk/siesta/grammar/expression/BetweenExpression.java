@@ -53,14 +53,4 @@ public class BetweenExpression<T> extends BooleanExpression {
     public Precedence precedence() {
         return Precedence.BETWEEN;
     }
-
-    @Override
-    public BooleanExpression appendOr(BooleanExpression expression) {
-        return new OrExpression(this, expression);
-    }
-
-    @Override
-    public BooleanExpression appendAnd(BooleanExpression expression) {
-        return new AndExpression(this, expression);
-    }
 }

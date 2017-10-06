@@ -22,21 +22,27 @@
 
 package com.cadenzauk.siesta.grammar.dml;
 
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Assignment;
+import com.cadenzauk.siesta.grammar.expression.ParenthesisedArithmeticExpression;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.collect.Iterables;
+import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 public class Update<U> extends ExecutableStatement {
     private final Alias<U> alias;
-    private final List<Assignment> sets = new ArrayList<>();
+    private final List<Assignment<?>> sets = new ArrayList<>();
 
     private Update(Database database, Alias<U> alias) {
         super(new Scope(database, alias));
@@ -58,9 +64,31 @@ public class Update<U> extends ExecutableStatement {
         );
     }
 
-    InSetExpectingWhere<U> addSet(Assignment expression) {
+    <T> SetExpressionBuilder<U,T> addSet(Assignment<T> expression) {
         sets.add(expression);
-        return new InSetExpectingWhere<>(this);
+        return new SetExpressionBuilder<>(this);
+    }
+
+    <T> void plus(TypedExpression<T> value) {
+        apply(Assignment::plus, value);
+    }
+
+    <T> void minus(TypedExpression<T> value) {
+        apply(Assignment::minus, value);
+    }
+
+    <T> void times(TypedExpression<T> value) {
+        apply(Assignment::times, value);
+    }
+
+    <T> void dividedBy(TypedExpression<T> value) {
+        apply(Assignment::dividedBy, value);
+    }
+
+    private <T> SetExpressionBuilder<U,T> apply(BiConsumer<Assignment<T>,TypedExpression<T>> fun, TypedExpression<T> value) {
+        OptionalUtil.as(new TypeToken<Assignment<T>>() {}, Iterables.getLast(sets))
+            .ifPresent(v -> fun.accept(v, ParenthesisedArithmeticExpression.wrapIfNecessary(value)));
+        return new SetExpressionBuilder<>(this);
     }
 
     private InSetExpectingWhere<U> setClause() {
@@ -70,6 +98,7 @@ public class Update<U> extends ExecutableStatement {
     public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
         return update(database, Alias.of(table));
     }
+
     public static <U> InSetExpectingWhere<U> update(Database database, Alias<U> alias) {
         return new Update<>(database, alias).setClause();
     }

@@ -23,14 +23,28 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 public enum Precedence {
-    PARENTHESES,
     SELECT,
     OR,
     AND,
     NOT,
     BETWEEN,
     COMPARISON,
+    PLUS_MINUS,
+    TIMES_DIVIDE,
     CONCAT,
+    PARENTHESES,
     UNARY,
-    COLUMN
+    COLUMN;
+
+    public boolean isHigherThan(Precedence other) {
+        return compareTo(other) > 0;
+    }
+
+    public boolean isLowerThan(Precedence other) {
+        return compareTo(other) < 0;
+    }
+
+    public static Precedence min(Precedence a, Precedence b) {
+        return a.isHigherThan(b) ? b : a;
+    }
 }

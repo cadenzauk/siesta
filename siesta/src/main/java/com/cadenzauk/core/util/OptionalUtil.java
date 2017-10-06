@@ -23,6 +23,7 @@
 package com.cadenzauk.core.util;
 
 import com.google.common.collect.Iterables;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
@@ -42,9 +43,21 @@ public final class OptionalUtil extends UtilityClass {
             .map(targetClass::cast);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T,U> Optional<U> as(TypeToken<U> targetType, Optional<T> source) {
+        Class<U> rawType = (Class<U>) targetType.getRawType();
+        return as(rawType, source);
+    }
+
     public static <T,U> Optional<U> as(Class<U> targetClass, T source) {
         return Optional.ofNullable(source)
             .filter(v -> targetClass.isAssignableFrom(v.getClass()))
             .map(targetClass::cast);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T,U> Optional<U> as(TypeToken<U> targetType, T source) {
+        Class<U> rawType = (Class<U>) targetType.getRawType();
+        return as(rawType, source);
     }
 }

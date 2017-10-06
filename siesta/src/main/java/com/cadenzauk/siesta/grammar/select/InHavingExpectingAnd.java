@@ -27,7 +27,6 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
-import com.cadenzauk.siesta.grammar.expression.ParenthesisedExpression;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -38,7 +37,7 @@ public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
     }
 
     public InHavingExpectingAnd<RT> and(BooleanExpression expression) {
-        return andHaving(new ParenthesisedExpression(expression));
+        return andHaving(expression);
     }
 
     public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> and(TypedExpression<T> lhs) {
@@ -70,7 +69,7 @@ public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
     }
 
     public InHavingExpectingAnd<RT> or(BooleanExpression expression) {
-        return orHaving(new ParenthesisedExpression(expression));
+        return orHaving(expression);
     }
 
     public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(TypedExpression<T> lhs) {

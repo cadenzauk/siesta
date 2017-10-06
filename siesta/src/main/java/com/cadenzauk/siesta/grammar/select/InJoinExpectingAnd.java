@@ -25,11 +25,10 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.grammar.expression.AndExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 
 public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT> extends ExpectingSelect<RT> {
     protected InJoinExpectingAnd(SelectStatement<RT> statement) {
@@ -60,9 +59,39 @@ public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT>
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onAnd);
     }
 
+    public <T, R> ExpressionBuilder<T,S> or(Function1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,S> or(FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,S> or(String alias, Function1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,S> or(String alias, FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,S> or(Alias<R> alias, Function1<R,T> lhs) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onOr);
+    }
+
+    public <T, R> ExpressionBuilder<T,S> or(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onOr);
+    }
+
     @SuppressWarnings("unchecked")
     private S onAnd(BooleanExpression rhs) {
-        statement.from().on(new AndExpression(statement.from().on(), rhs));
+        statement.from().appendAnd(rhs);
+        return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    private S onOr(BooleanExpression rhs) {
+        statement.from().appendOr(rhs);
         return (S) this;
     }
 }

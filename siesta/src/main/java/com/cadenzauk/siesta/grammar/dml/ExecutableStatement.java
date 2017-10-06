@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 public abstract class ExecutableStatement {
     private final static Logger LOG = LoggerFactory.getLogger(ExecutableStatement.class);
     private final Scope scope;
-    private BooleanExpression whereClause;
+    private final BooleanExpressionChain whereClause = new BooleanExpressionChain();
 
     protected ExecutableStatement(Scope scope) {
         this.scope = scope;
@@ -64,24 +65,24 @@ public abstract class ExecutableStatement {
     }
 
     protected String whereClauseSql(Scope scope) {
-        return whereClause == null ? "" : " where " + whereClause.sql(scope);
+        return whereClause.sql(scope, " where ");
     }
 
     protected Stream<Object> whereClauseArgs(Scope scope) {
-        return whereClause == null ? Stream.empty() : whereClause.args(scope);
+        return whereClause.args(scope);
     }
 
     InWhereExpectingAnd setWhereClause(BooleanExpression e) {
-        whereClause = e;
+        whereClause.start(e);
         return new InWhereExpectingAnd(this);
     }
 
     void andWhere(BooleanExpression newClause) {
-        whereClause = whereClause.appendAnd(newClause);
+        whereClause.appendAnd(newClause);
     }
 
     void orWhere(BooleanExpression newClause) {
-        whereClause = whereClause.appendOr(newClause);
+        whereClause.appendOr(newClause);
     }
 
     protected abstract String sql(Scope scope);

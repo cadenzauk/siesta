@@ -34,11 +34,11 @@ public class InSetExpectingWhere<U> extends ExpectingWhere {
         this.statement = statement;
     }
 
-    public <T> SetExpressionBuilder<T,InSetExpectingWhere<U>> set(Function1<U,T> lhs) {
-        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::addSet);
+    public <T> ExpectingTo<U,T,SetExpressionBuilder<U,T>> set(Function1<U,T> lhs) {
+        return ExpectingTo.of(UnresolvedColumn.of(lhs), statement::addSet);
     }
 
-    public <T> SetExpressionBuilder<T,InSetExpectingWhere<U>> set(FunctionOptional1<U,T> lhs) {
-        return SetExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::addSet);
+    public <T> ExpectingTo<U,T,SetExpressionBuilder<U,T>> set(FunctionOptional1<U,T> lhs) {
+        return ExpectingTo.of(UnresolvedColumn.of(lhs), statement::addSet);
     }
 }

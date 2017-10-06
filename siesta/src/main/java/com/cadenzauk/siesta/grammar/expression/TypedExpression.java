@@ -38,6 +38,134 @@ public interface TypedExpression<T> extends Expression {
 
     TypeToken<T> type();
 
+    default TypedExpression<T> plus(T value) {
+        return plus(value(value));
+    }
+
+    default TypedExpression<T> plus(TypedExpression<T> value) {
+        return new ArithmeticExpressionChain<>(this).plus(value);
+    }
+
+    default <R> TypedExpression<T> plus(Function1<R,T> value) {
+        return plus(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> plus(FunctionOptional1<R,T> value) {
+        return plus(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> plus(String alias, Function1<R,T> value) {
+        return plus(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> plus(String alias, FunctionOptional1<R,T> value) {
+        return plus(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> plus(Alias<R> alias, Function1<R,T> value) {
+        return plus(ResolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> plus(Alias<R> alias, FunctionOptional1<R,T> value) {
+        return plus(ResolvedColumn.of(alias, value));
+    }
+
+    default TypedExpression<T> minus(T value) {
+        return minus(value(value));
+    }
+
+    default TypedExpression<T> minus(TypedExpression<T> value) {
+        return new ArithmeticExpressionChain<>(this).minus(value);
+    }
+
+    default <R> TypedExpression<T> minus(Function1<R,T> value) {
+        return minus(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> minus(FunctionOptional1<R,T> value) {
+        return minus(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> minus(String alias, Function1<R,T> value) {
+        return minus(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> minus(String alias, FunctionOptional1<R,T> value) {
+        return minus(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> minus(Alias<R> alias, Function1<R,T> value) {
+        return minus(ResolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> minus(Alias<R> alias, FunctionOptional1<R,T> value) {
+        return minus(ResolvedColumn.of(alias, value));
+    }
+
+    default TypedExpression<T> times(T value) {
+        return times(value(value));
+    }
+
+    default TypedExpression<T> times(TypedExpression<T> value) {
+        return new ArithmeticExpressionChain<>(this).times(value);
+    }
+
+    default <R> TypedExpression<T> times(Function1<R,T> value) {
+        return times(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> times(FunctionOptional1<R,T> value) {
+        return times(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> times(String alias, Function1<R,T> value) {
+        return times(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> times(String alias, FunctionOptional1<R,T> value) {
+        return times(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> times(Alias<R> alias, Function1<R,T> value) {
+        return times(ResolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> times(Alias<R> alias, FunctionOptional1<R,T> value) {
+        return times(ResolvedColumn.of(alias, value));
+    }
+
+    default TypedExpression<T> dividedBy(T value) {
+        return dividedBy(value(value));
+    }
+
+    default TypedExpression<T> dividedBy(TypedExpression<T> value) {
+        return new ArithmeticExpressionChain<>(this).dividedBy(value);
+    }
+
+    default <R> TypedExpression<T> dividedBy(Function1<R,T> value) {
+        return dividedBy(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> dividedBy(FunctionOptional1<R,T> value) {
+        return dividedBy(UnresolvedColumn.of(value));
+    }
+
+    default <R> TypedExpression<T> dividedBy(String alias, Function1<R,T> value) {
+        return dividedBy(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> dividedBy(String alias, FunctionOptional1<R,T> value) {
+        return dividedBy(UnresolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> dividedBy(Alias<R> alias, Function1<R,T> value) {
+        return dividedBy(ResolvedColumn.of(alias, value));
+    }
+
+    default <R> TypedExpression<T> dividedBy(Alias<R> alias, FunctionOptional1<R,T> value) {
+        return dividedBy(ResolvedColumn.of(alias, value));
+    }
+
     static <T> ExpressionBuilder<T,BooleanExpression> column(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, Function.identity());
     }

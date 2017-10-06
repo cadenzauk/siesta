@@ -27,9 +27,6 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 
 public abstract class BooleanExpression implements Expression {
-    public abstract BooleanExpression appendOr(BooleanExpression expression);
-    public abstract BooleanExpression appendAnd(BooleanExpression expression);
-
     public BooleanExpression and(BooleanExpression lhs) {
         return this.appendAnd(lhs);
     }
@@ -92,5 +89,13 @@ public abstract class BooleanExpression implements Expression {
 
     public <T, R> ExpressionBuilder<T,BooleanExpression> or(Alias<R> alias, FunctionOptional1<R,T> lhs) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::appendOr);
+    }
+
+    protected BooleanExpression appendOr(BooleanExpression expression) {
+        return new BooleanExpressionChain(this).appendOr(expression);
+    }
+
+    protected BooleanExpression appendAnd(BooleanExpression expression) {
+        return new BooleanExpressionChain(this).appendAnd(expression);
     }
 }

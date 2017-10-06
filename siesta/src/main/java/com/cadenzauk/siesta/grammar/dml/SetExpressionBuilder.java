@@ -22,49 +22,181 @@
 
 package com.cadenzauk.siesta.grammar.dml;
 
-import com.cadenzauk.siesta.grammar.expression.Assignment;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.expression.assignment.AssignmentValue;
-import com.cadenzauk.siesta.grammar.expression.assignment.SetToExpression;
-import com.cadenzauk.siesta.grammar.expression.assignment.SetToNull;
-import com.cadenzauk.siesta.grammar.expression.assignment.SetToValue;
 
-import java.util.Optional;
-import java.util.function.Function;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 
-public class SetExpressionBuilder<T, N> {
-    private final UnresolvedColumn<T,?> lhs;
-    private final Function<Assignment,N> onComplete;
+public class SetExpressionBuilder<T,U> extends InSetExpectingWhere<T> {
+    private final Update<T> statement;
 
-    private SetExpressionBuilder(UnresolvedColumn<T,?> lhs, Function<Assignment,N> onComplete) {
-        this.lhs = lhs;
-        this.onComplete = onComplete;
+    SetExpressionBuilder(Update<T> statement) {
+        super(statement);
+        this.statement = statement;
     }
 
-    public N to(T value) {
-        return to(Optional.ofNullable(value));
+    public SetExpressionBuilder<T,U> plus(U val) {
+        statement.plus(value(val));
+        return this;
     }
 
-    public N to(Optional<T> value) {
-        return value
-            .map(v -> complete(new SetToValue<>(v)))
-            .orElseGet(() -> complete(new SetToNull()));
+    public SetExpressionBuilder<T,U> plus(TypedExpression<U> val) {
+        statement.plus(val);
+        return this;
     }
 
-    public N to(TypedExpression<T> expression) {
-        return complete(new SetToExpression(expression));
+    public <R> SetExpressionBuilder<T,U> plus(Function1<R,U> val) {
+        statement.plus(UnresolvedColumn.of(val));
+        return this;
     }
 
-    public N toNull() {
-        return complete(new SetToNull());
+    public <R> SetExpressionBuilder<T,U> plus(FunctionOptional1<R,U> val) {
+        statement.plus(UnresolvedColumn.of(val));
+        return this;
     }
 
-    private N complete(AssignmentValue rhs) {
-        return onComplete.apply(new Assignment(lhs, rhs));
+    public <R> SetExpressionBuilder<T,U> plus(String alias, Function1<R,U> val) {
+        statement.plus(UnresolvedColumn.of(alias, val));
+        return this;
     }
 
-    public static <T, R, N> SetExpressionBuilder<T,N> of(UnresolvedColumn<T,R> lhs, Function<Assignment,N> onComplete) {
-        return new SetExpressionBuilder<>(lhs, onComplete);
+    public <R> SetExpressionBuilder<T,U> plus(String alias, FunctionOptional1<R,U> val) {
+        statement.plus(UnresolvedColumn.of(alias, val));
+        return this;
     }
+
+    public <R> SetExpressionBuilder<T,U> plus(Alias<R> alias, Function1<R,U> val) {
+        statement.plus(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> plus(Alias<R> alias, FunctionOptional1<R,U> val) {
+        statement.plus(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public SetExpressionBuilder<T,U> minus(U val) {
+        statement.minus(value(val));
+        return this;
+    }
+
+    public SetExpressionBuilder<T,U> minus(TypedExpression<U> val) {
+        statement.minus(val);
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> minus(Function1<R,U> val) {
+        statement.minus(UnresolvedColumn.of(val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> minus(FunctionOptional1<R,U> val) {
+        statement.minus(UnresolvedColumn.of(val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> minus(String alias, Function1<R,U> val) {
+        statement.minus(UnresolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> minus(String alias, FunctionOptional1<R,U> val) {
+        statement.minus(UnresolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> minus(Alias<R> alias, Function1<R,U> val) {
+        statement.minus(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> minus(Alias<R> alias, FunctionOptional1<R,U> val) {
+        statement.minus(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public SetExpressionBuilder<T,U> times(U val) {
+        statement.times(value(val));
+        return this;
+    }
+
+    public SetExpressionBuilder<T,U> times(TypedExpression<U> val) {
+        statement.times(val);
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> times(Function1<R,U> val) {
+        statement.times(UnresolvedColumn.of(val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> times(FunctionOptional1<R,U> val) {
+        statement.times(UnresolvedColumn.of(val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> times(String alias, Function1<R,U> val) {
+        statement.times(UnresolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> times(String alias, FunctionOptional1<R,U> val) {
+        statement.times(UnresolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> times(Alias<R> alias, Function1<R,U> val) {
+        statement.times(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> times(Alias<R> alias, FunctionOptional1<R,U> val) {
+        statement.times(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public SetExpressionBuilder<T,U> dividedBy(U val) {
+        statement.dividedBy(value(val));
+        return this;
+    }
+
+    public SetExpressionBuilder<T,U> dividedBy(TypedExpression<U> val) {
+        statement.dividedBy(val);
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> dividedBy(Function1<R,U> val) {
+        statement.dividedBy(UnresolvedColumn.of(val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> dividedBy(FunctionOptional1<R,U> val) {
+        statement.dividedBy(UnresolvedColumn.of(val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> dividedBy(String alias, Function1<R,U> val) {
+        statement.dividedBy(UnresolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> dividedBy(String alias, FunctionOptional1<R,U> val) {
+        statement.dividedBy(UnresolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> dividedBy(Alias<R> alias, Function1<R,U> val) {
+        statement.dividedBy(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
+    public <R> SetExpressionBuilder<T,U> dividedBy(Alias<R> alias, FunctionOptional1<R,U> val) {
+        statement.dividedBy(ResolvedColumn.of(alias, val));
+        return this;
+    }
+
 }

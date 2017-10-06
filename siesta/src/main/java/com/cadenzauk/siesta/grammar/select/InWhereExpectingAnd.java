@@ -25,9 +25,8 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
-import com.cadenzauk.siesta.grammar.expression.ParenthesisedExpression;
+import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -38,7 +37,7 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
     }
 
     public InWhereExpectingAnd<RT> and(BooleanExpression expression) {
-        return andWhere(new ParenthesisedExpression(expression));
+        return andWhere(expression);
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(TypedExpression<T> lhs) {
@@ -70,7 +69,7 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
     }
 
     public InWhereExpectingAnd<RT> or(BooleanExpression expression) {
-        return orWhere(new ParenthesisedExpression(expression));
+        return orWhere(expression);
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(TypedExpression<T> lhs) {

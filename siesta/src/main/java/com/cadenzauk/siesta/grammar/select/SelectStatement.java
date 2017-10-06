@@ -37,6 +37,7 @@ import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
@@ -63,9 +64,9 @@ class SelectStatement<RT> {
     private final From from;
     private final RowMapper<RT> rowMapper;
     private final Projection projection;
-    private BooleanExpression whereClause;
+    private final BooleanExpressionChain whereClause = new BooleanExpressionChain();
     private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
-    private BooleanExpression havingClause;
+    private final BooleanExpressionChain havingClause = new BooleanExpressionChain();
     private final List<Tuple2<UnionType,SelectStatement<RT>>> unions = new ArrayList<>();
     private final List<OrderingClause> orderByClauses = new ArrayList<>();
     private Optional<Long> fetchFirst = Optional.empty();
@@ -219,20 +220,20 @@ class SelectStatement<RT> {
     }
 
     InWhereExpectingAnd<RT> setWhereClause(BooleanExpression e) {
-        whereClause = e;
+        whereClause.start(e);
         return new InWhereExpectingAnd<>(this);
     }
 
     void andWhere(BooleanExpression e) {
-        whereClause = whereClause.appendAnd(e);
+        whereClause.appendAnd(e);
     }
 
     void orWhere(BooleanExpression e) {
-        whereClause = whereClause.appendOr(e);
+        whereClause.appendOr(e);
     }
 
     InHavingExpectingAnd<RT> setHavingClause(BooleanExpression e) {
-        havingClause = e;
+        havingClause.start(e);
         return new InHavingExpectingAnd<>(this);
     }
 
@@ -243,11 +244,11 @@ class SelectStatement<RT> {
     }
 
     void andHaving(BooleanExpression e) {
-        havingClause = havingClause.appendAnd(e);
+        havingClause.appendAnd(e);
     }
 
     void orHaving(BooleanExpression e) {
-        havingClause = havingClause.appendOr(e);
+        havingClause.appendOr(e);
     }
 
     @NotNull
@@ -259,16 +260,12 @@ class SelectStatement<RT> {
 
     @NotNull
     private Stream<Object> whereClauseArgs(Scope actualScope) {
-        return whereClause == null
-            ? Stream.empty()
-            : whereClause.args(actualScope);
+        return whereClause.args(actualScope);
     }
 
     @NotNull
     private String whereClauseSql(Scope actualScope) {
-        return whereClause == null
-            ? ""
-            : " where " + whereClause.sql(actualScope);
+        return whereClause.sql(actualScope, " where ");
     }
 
     @NotNull
@@ -287,21 +284,17 @@ class SelectStatement<RT> {
 
     @NotNull
     private Stream<Object> havingClauseArgs(Scope actualScope) {
-        return havingClause == null
-            ? Stream.empty()
-            : havingClause.args(actualScope);
+        return havingClause.args(actualScope);
+    }
+
+    @NotNull
+    private String havingClauseSql(Scope actualScope) {
+        return havingClause.sql(actualScope, " having ");
     }
 
     @NotNull
     private Stream<Object> unionsArgs(Scope actualScope) {
         return unions.stream().flatMap(u -> u.item2().args(actualScope));
-    }
-
-    @NotNull
-    private String havingClauseSql(Scope actualScope) {
-        return havingClause == null
-            ? ""
-            : " having " + havingClause.sql(actualScope);
     }
 
     @NotNull

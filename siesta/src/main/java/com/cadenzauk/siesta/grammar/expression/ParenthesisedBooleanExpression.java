@@ -24,46 +24,33 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.Scope;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+public class ParenthesisedBooleanExpression extends BooleanExpression {
+    private final BooleanExpression inner;
 
-public class AndExpression extends BooleanExpression {
-    private final List<BooleanExpression> expressions = new ArrayList<>();
-
-    public AndExpression(BooleanExpression lhs, BooleanExpression rhs) {
-        expressions.add(lhs);
-        expressions.add(rhs);
+    private ParenthesisedBooleanExpression(BooleanExpression inner) {
+        this.inner = inner;
     }
 
     @Override
     public String sql(Scope scope) {
-        return expressions.stream()
-                .map(e -> sql(e, scope))
-                .collect(joining(" and "));
+        return "(" + inner.sql(scope) + ")";
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return expressions.stream()
-            .flatMap(e -> e.args(scope));
+        return inner.args(scope);
     }
 
     @Override
     public Precedence precedence() {
-        return Precedence.AND;
+        return Precedence.PARENTHESES;
     }
 
-    @Override
-    public BooleanExpression appendOr(BooleanExpression expression) {
-        return new OrExpression(this, expression);
-    }
-
-    @Override
-    public BooleanExpression appendAnd(BooleanExpression expression) {
-        expressions.add(expression);
-        return this;
+    public static BooleanExpression wrapIfNecessary(BooleanExpression expression) {
+        return expression.precedence().isHigherThan(Precedence.AND)
+            ? expression
+            : new ParenthesisedBooleanExpression(expression);
     }
 }

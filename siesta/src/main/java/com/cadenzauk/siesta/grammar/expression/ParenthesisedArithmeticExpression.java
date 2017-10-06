@@ -20,30 +20,54 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.assignment;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.reflect.TypeToken;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
-public class SetToValue<T> implements AssignmentValue {
-    private final T value;
+public class ParenthesisedArithmeticExpression<T> implements TypedExpression<T> {
+    private final TypedExpression<T> inner;
 
-    public SetToValue(T value) {
-        Objects.requireNonNull(value);
-        this.value = value;
+    private ParenthesisedArithmeticExpression(TypedExpression<T> inner) {
+        this.inner = inner;
     }
 
     @Override
     public String sql(Scope scope) {
-        return " = ?";
+        return "(" + inner.sql(scope) + ")";
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return Stream.of(dataType.toDatabase(scope.database(), value));
+        return inner.args(scope);
+    }
+
+    @Override
+    public Precedence precedence() {
+        return Precedence.PARENTHESES;
+    }
+
+    @Override
+    public String label(Scope scope) {
+        return inner.label(scope);
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return inner.rowMapper(scope, label);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return inner.type();
+    }
+
+    public static <T> TypedExpression<T> wrapIfNecessary(TypedExpression<T> value) {
+        return value.precedence().isHigherThan(Precedence.TIMES_DIVIDE)
+            ? value
+            : new ParenthesisedArithmeticExpression<>(value);
     }
 }

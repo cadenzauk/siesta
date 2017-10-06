@@ -26,11 +26,10 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
-import com.cadenzauk.siesta.grammar.expression.ParenthesisedExpression;
+import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 
 public class ExpectingWhere<RT> extends ExpectingGroupBy<RT> {
     protected ExpectingWhere(SelectStatement<RT> statement) {
@@ -38,7 +37,7 @@ public class ExpectingWhere<RT> extends ExpectingGroupBy<RT> {
     }
 
     public <T> InWhereExpectingAnd<RT> where(BooleanExpression expression) {
-        return statement.setWhereClause(new ParenthesisedExpression(expression));
+        return statement.setWhereClause(expression);
     }
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(TypedExpression<T> lhs) {
