@@ -32,7 +32,6 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -58,8 +57,8 @@ class ExpectingSelectTest {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private static ObjectArrayArguments selectTestCase(BiFunction<ExpectingSelect<SalespersonRow>,Alias<SalespersonRow>,Select<?>> method, String expectedSql) {
-        return ObjectArrayArguments.create(method, expectedSql);
+    private static Arguments selectTestCase(BiFunction<ExpectingSelect<SalespersonRow>,Alias<SalespersonRow>,Select<?>> method, String expectedSql) {
+        return Arguments.of(method, expectedSql);
     }
 
     private static Stream<Arguments> argsForSelect() {
@@ -91,7 +90,7 @@ class ExpectingSelectTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForSelect")
+    @MethodSource("argsForSelect")
     void testSelect(BiFunction<ExpectingSelect<SalespersonRow>,Alias<SalespersonRow>,Select<?>> method, String expectedSql) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());

@@ -32,7 +32,6 @@ import com.cadenzauk.siesta.dialect.SqlServerDialect;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 
 import java.util.stream.Stream;
 
@@ -51,7 +50,7 @@ class DialectTest {
     }
 
     private static Arguments testCase(Dialect dialect, String sql) {
-        return ObjectArrayArguments.create(dialect, sql);
+        return Arguments.of(dialect, sql);
     }
 
     @SuppressWarnings("unused")
@@ -68,7 +67,7 @@ class DialectTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForFetchFirst")
+    @MethodSource("parametersForFetchFirst")
     void fetchFirst(Dialect dialect, String expectedSql) {
         String result = dialect.fetchFirst("select * from invoices", 10);
 
@@ -90,7 +89,7 @@ class DialectTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForSelectivity")
+    @MethodSource("parametersForSelectivity")
     void selectivityIntegrationTest(Dialect dialect, String expectSql) {
         Database database = Database.newBuilder()
             .defaultSchema("AP")
@@ -105,7 +104,7 @@ class DialectTest {
     }
 
     private static Arguments isolationLevelTest(Dialect dialect, IsolationLevel level, String expectSql) {
-        return ObjectArrayArguments.create(dialect, level, expectSql);
+        return Arguments.of(dialect, level, expectSql);
     }
 
     @SuppressWarnings("unused")
@@ -143,7 +142,7 @@ class DialectTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForIsolationLevel")
+    @MethodSource("parametersForIsolationLevel")
     void isolationLevelIntegrationTest(Dialect dialect, IsolationLevel level, String expectSql) {
         Database database = Database.newBuilder()
             .defaultSchema("AP")

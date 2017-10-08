@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.Mock;
 
 import java.sql.ResultSet;
@@ -67,8 +66,8 @@ class CastExpressionTest extends MockitoTest {
     @Mock
     private Database database;
 
-    private static <T> Arguments testCaseForSql(String type, Function<CastBuilder<String>,CastExpression<String,T>> castFunction) {
-        return ObjectArrayArguments.create(type, castFunction);
+    private static <T> Arguments testCaseForSql(String type, Function<CastBuilder<String>,TypedExpression<T>> castFunction) {
+        return Arguments.of(type, castFunction);
     }
 
     @SuppressWarnings("unused")
@@ -89,12 +88,12 @@ class CastExpressionTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForSql")
-    <T> void sql(String type, Function<CastBuilder<String>,CastExpression<String,T>> castFunction) {
+    @MethodSource("parametersForSql")
+    <T> void sql(String type, Function<CastBuilder<String>,TypedExpression<T>> castFunction) {
         when(expression.sql(scope)).thenReturn("input");
         when(scope.dialect()).thenReturn(new AnsiDialect());
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,T> sut = castFunction.apply(builder);
+        TypedExpression<T> sut = castFunction.apply(builder);
 
         String result = sut.sql(scope);
 
@@ -105,7 +104,7 @@ class CastExpressionTest extends MockitoTest {
     @Test
     void label() {
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,Integer> sut = builder.asInteger();
+        TypedExpression<Integer> sut = builder.asInteger();
         when(scope.newLabel()).thenReturn(345L);
 
         String result = sut.label(scope);
@@ -122,7 +121,7 @@ class CastExpressionTest extends MockitoTest {
         when(database.dialect()).thenReturn(dialect);
         when(dialect.type(DbTypeId.INTEGER)).thenReturn(new DefaultInteger());
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,Integer> sut = builder.asInteger();
+        TypedExpression<Integer> sut = builder.asInteger();
 
         RowMapper<Integer> result = sut.rowMapper(scope, "bob");
 
@@ -133,7 +132,7 @@ class CastExpressionTest extends MockitoTest {
     @Test
     void type() {
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,LocalDate> sut = builder.asDate();
+        TypedExpression<LocalDate> sut = builder.asDate();
 
         TypeToken<LocalDate> result = sut.type();
 
@@ -145,7 +144,7 @@ class CastExpressionTest extends MockitoTest {
     void args() {
         when(expression.args(scope)).thenReturn(Stream.of(1, 2));
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,LocalDate> sut = builder.asDate();
+        TypedExpression<LocalDate> sut = builder.asDate();
 
         Object[] result = sut.args(scope).toArray();
 
@@ -156,7 +155,7 @@ class CastExpressionTest extends MockitoTest {
     @Test
     void precedence() {
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,String> sut = builder.asVarchar(20);
+        TypedExpression<String> sut = builder.asVarchar(20);
 
         Precedence result = sut.precedence();
 
@@ -168,7 +167,7 @@ class CastExpressionTest extends MockitoTest {
     void toStringFunction() {
         when(expression.toString()).thenReturn("input");
         CastBuilder<String> builder = new CastBuilder<>(expression);
-        CastExpression<String,String> sut = builder.asVarchar(20);
+        TypedExpression<String> sut = builder.asVarchar(20);
 
         String result = sut.toString();
 

@@ -52,6 +52,11 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     }
 
     @Override
+    public String toString() {
+        return lhs.toString();
+    }
+
+    @Override
     public String sql(Scope scope) {
         return lhs.sql(scope);
     }

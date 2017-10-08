@@ -37,8 +37,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static java.time.Month.DECEMBER;
 import static java.time.Month.FEBRUARY;
 import static java.time.Month.JANUARY;
@@ -48,33 +48,31 @@ import static java.time.Month.OCTOBER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
 class ZonedDateTimeConverterTest {
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parameters() {
+    private static Stream<Arguments> parameters() {
         return Stream.of(
-            create("America/Anchorage", localDate(1, JANUARY, 1900)),
-            create("America/New_York", localDate(29, FEBRUARY, 2008)),
-            create("America/New_York", localDate(3, NOVEMBER, 2007)),
-            create("America/New_York", localDate(4, NOVEMBER, 2007)),
-            create("America/New_York", localDate(5, NOVEMBER, 2007)),
-            create("UTC", localDate(31, DECEMBER, 2010)),
-            create("UTC", localDate(1, JANUARY, 2011)),
-            create("UTC", localDate(12, JANUARY, 2014)),
-            create("UTC", localDate(31, DECEMBER, 9999)),
-            create("UTC", localDate(15, OCTOBER, 1582)),
-            create("Europe/London", localDate(25, MARCH, 2017)),
-            create("Europe/London", localDate(26, MARCH, 2017)),
-            create("Europe/London", localDate(27, MARCH, 2017)),
-            create("Europe/Berlin", localDate(15, JANUARY, 2001)),
-            create("Pacific/Apia", localDate(31, DECEMBER, 2100)),
-            create("Pacific/Apia", null)
+            Arguments.of("America/Anchorage", localDate(1, JANUARY, 1900)),
+            Arguments.of("America/New_York", localDate(29, FEBRUARY, 2008)),
+            Arguments.of("America/New_York", localDate(3, NOVEMBER, 2007)),
+            Arguments.of("America/New_York", localDate(4, NOVEMBER, 2007)),
+            Arguments.of("America/New_York", localDate(5, NOVEMBER, 2007)),
+            Arguments.of("UTC", localDate(31, DECEMBER, 2010)),
+            Arguments.of("UTC", localDate(1, JANUARY, 2011)),
+            Arguments.of("UTC", localDate(12, JANUARY, 2014)),
+            Arguments.of("UTC", localDate(31, DECEMBER, 9999)),
+            Arguments.of("UTC", localDate(15, OCTOBER, 1582)),
+            Arguments.of("Europe/London", localDate(25, MARCH, 2017)),
+            Arguments.of("Europe/London", localDate(26, MARCH, 2017)),
+            Arguments.of("Europe/London", localDate(27, MARCH, 2017)),
+            Arguments.of("Europe/Berlin", localDate(15, JANUARY, 2001)),
+            Arguments.of("Pacific/Apia", localDate(31, DECEMBER, 2100)),
+            Arguments.of("Pacific/Apia", null)
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parameters")
+    @MethodSource("parameters")
     void convertToDatabaseColumn(String timeZone, LocalDate local) {
         ZonedDateTime input = zonedDateTime(timeZone, local);
         Timestamp expected = timestamp(timeZone, local);
@@ -89,7 +87,7 @@ class ZonedDateTimeConverterTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parameters")
+    @MethodSource("parameters")
     void convertToEntityAttribute(String timeZone, LocalDate local) {
         Timestamp input = timestamp(timeZone, local);
         ZonedDateTime expected = zonedDateTime(timeZone, local);
@@ -103,8 +101,7 @@ class ZonedDateTimeConverterTest {
         }
     }
 
-    @SuppressWarnings("unused")
-    static Stream<String> timezones() {
+    private static Stream<String> timezones() {
         return Stream.of(
             "America/Anchorage",
             "America/New_York",
@@ -116,7 +113,7 @@ class ZonedDateTimeConverterTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timezones")
+    @MethodSource("timezones")
     void convertToDatabaseColumnPreGregorianShouldThrow(String timeZone) {
         ZonedDateTime input = ZonedDateTime.of(LocalDateUtil.START_OF_GREGORIAN_CALENDAR, LocalTime.MIN, ZoneId.of(timeZone)).minusNanos(1);
 
@@ -129,7 +126,7 @@ class ZonedDateTimeConverterTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timezones")
+    @MethodSource("timezones")
     void convertToDatabaseColumnGregorianShouldNotThrow(String timeZone) {
         ZonedDateTime input = ZonedDateTime.of(LocalDateUtil.START_OF_GREGORIAN_CALENDAR, LocalTime.MIN, ZoneId.of(timeZone));
 
@@ -143,7 +140,7 @@ class ZonedDateTimeConverterTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timezones")
+    @MethodSource("timezones")
     void convertToEntityAttributePreGregorianShouldThrow(String timeZone) {
         ZonedDateTime dateTime = ZonedDateTime.of(LocalDateUtil.START_OF_GREGORIAN_CALENDAR, LocalTime.MIN, ZoneId.of(timeZone)).minusNanos(1);
         Timestamp input = Timestamp.from(dateTime.toInstant());
@@ -157,7 +154,7 @@ class ZonedDateTimeConverterTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timezones")
+    @MethodSource("timezones")
     void convertToEntityAttributeGregorianShouldNotThrow(String timeZone) {
         ZonedDateTime dateTime = ZonedDateTime.of(LocalDateUtil.START_OF_GREGORIAN_CALENDAR, LocalTime.MIN, ZoneId.of(timeZone));
         Timestamp input = Timestamp.from(dateTime.toInstant());

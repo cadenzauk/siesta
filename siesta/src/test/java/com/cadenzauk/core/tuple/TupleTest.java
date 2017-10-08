@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 
 import java.util.List;
 import java.util.function.Function;
@@ -38,7 +37,7 @@ import static org.hamcrest.Matchers.not;
 
 class TupleTest {
     private static Arguments toStringTestCase(Tuple sut, String expected) {
-        return ObjectArrayArguments.create(sut, expected);
+        return Arguments.of(sut, expected);
     }
 
     @SuppressWarnings("unused")
@@ -82,7 +81,7 @@ class TupleTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "toStringArgs")
+    @MethodSource("toStringArgs")
     void toStringIsCorrect(Tuple sut, String expected) {
         String result = sut.toString();
 
@@ -91,7 +90,7 @@ class TupleTest {
 
 
     private static Arguments equalsTestCase(Tuple sut, Tuple rhs, boolean areEqual) {
-        return ObjectArrayArguments.create(sut, rhs, areEqual);
+        return Arguments.of(sut, rhs, areEqual);
     }
 
     @SuppressWarnings("unused")
@@ -187,7 +186,7 @@ class TupleTest {
 
     @SuppressWarnings("EqualsWithItself")
     @ParameterizedTest
-    @MethodSource(names = "parametersForEquals")
+    @MethodSource("parametersForEquals")
     void equalsIsCorrect(Tuple sut, Tuple rhs, boolean areEqual) {
         boolean result1 = sut.equals(sut);
         boolean result2 = sut.equals(rhs);
@@ -197,7 +196,7 @@ class TupleTest {
     }
 
     private static Arguments hashCodeTestCase(Tuple sut, Tuple equal, Tuple notEqual) {
-        return ObjectArrayArguments.create(sut, equal, notEqual);
+        return Arguments.of(sut, equal, notEqual);
     }
 
     @SuppressWarnings("unused")
@@ -267,14 +266,14 @@ class TupleTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "hashCodeArgs")
+    @MethodSource("hashCodeArgs")
     void hashCodeIsCorrect(Tuple sut, Tuple equal, Tuple notEqual) {
         assertThat(sut.hashCode(), is(equal.hashCode()));
         assertThat(sut.hashCode(), not(notEqual.hashCode()));
     }
 
     private static <T extends Tuple> Arguments itemTestCase(T sut, Function<T,Integer> getter, int expected) {
-        return ObjectArrayArguments.create(sut, getter, expected);
+        return Arguments.of(sut, getter, expected);
     }
 
     @SuppressWarnings("unused")
@@ -327,7 +326,7 @@ class TupleTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "itemArgs")
+    @MethodSource("itemArgs")
     <T extends Tuple> void item(T sut, Function<T,Integer> getter, int expected) {
         Integer actual = getter.apply(sut);
 
@@ -335,7 +334,7 @@ class TupleTest {
     }
 
     private static <T extends Tuple> Arguments mapTestCase(T sut, Function<T,List<Integer>> mapper, List<Integer> expected) {
-        return ObjectArrayArguments.create(sut, mapper, expected);
+        return Arguments.of(sut, mapper, expected);
     }
 
     @SuppressWarnings("unused")
@@ -353,7 +352,7 @@ class TupleTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "mapArgs")
+    @MethodSource("mapArgs")
     <T extends Tuple> void map(T sut, Function<T,List<Integer>> mapper, List<Integer> expected) {
         List<Integer> actual = mapper.apply(sut);
 

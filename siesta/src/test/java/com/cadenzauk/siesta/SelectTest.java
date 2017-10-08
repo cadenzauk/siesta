@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -194,7 +193,7 @@ class SelectTest extends MockitoTest {
     }
 
     private static Arguments testCaseForWhere(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
-        return ObjectArrayArguments.create(where, expected);
+        return Arguments.of(where, expected);
     }
 
     @SuppressWarnings("unused")
@@ -211,7 +210,7 @@ class SelectTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForWhere")
+    @MethodSource("parametersForWhere")
     void where(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
         MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
@@ -225,7 +224,7 @@ class SelectTest extends MockitoTest {
     }
 
     private static Arguments testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        return ObjectArrayArguments.create(orderBy, expected);
+        return Arguments.of(orderBy, expected);
     }
 
     @SuppressWarnings("unused")
@@ -260,7 +259,7 @@ class SelectTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForOrderByOnSelect")
+    @MethodSource("parametersForOrderByOnSelect")
     void orderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
         MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
@@ -275,7 +274,7 @@ class SelectTest extends MockitoTest {
 
 
     private static Arguments testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        return ObjectArrayArguments.create(orderBy, expected);
+        return Arguments.of(orderBy, expected);
     }
 
     @SuppressWarnings("unused")
@@ -310,7 +309,7 @@ class SelectTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForOrderByOnWhereClause")
+    @MethodSource("parametersForOrderByOnWhereClause")
     void orderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
         MockitoAnnotations.initMocks(this);
 

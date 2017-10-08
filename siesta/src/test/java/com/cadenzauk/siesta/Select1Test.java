@@ -29,7 +29,6 @@ import com.cadenzauk.siesta.grammar.select.ExpectingJoin2;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -58,7 +57,7 @@ class Select1Test extends MockitoTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments testCaseForJoin(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> f, String expected) {
-        return ObjectArrayArguments.create(f, expected);
+        return Arguments.of(f, expected);
     }
 
     private static Stream<Arguments> parametersForJoin() {
@@ -83,7 +82,7 @@ class Select1Test extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForJoin")
+    @MethodSource("parametersForJoin")
     void join(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
         MockitoAnnotations.initMocks(this);
 

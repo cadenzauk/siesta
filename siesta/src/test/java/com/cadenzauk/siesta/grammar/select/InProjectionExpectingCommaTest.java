@@ -32,7 +32,6 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -58,7 +57,7 @@ class InProjectionExpectingCommaTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments testCase1(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
-        return ObjectArrayArguments.create(method, expectedSql, expectedArgs);
+        return Arguments.of(method, expectedSql, expectedArgs);
     }
 
     private static Arguments testCase2(BiFunction<InProjectionExpectingComma2<?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
@@ -238,7 +237,7 @@ class InProjectionExpectingCommaTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForComma")
+    @MethodSource("argsForComma")
     void testComma(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());

@@ -32,7 +32,6 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -64,19 +63,19 @@ class BetweenBuilderTest {
     @SuppressWarnings("unused")
     private static Stream<Arguments> argsForAnd() {
         return Stream.of(
-            ObjectArrayArguments.create(testCase((b, s) -> b.and("Z"), "?", "Z")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and(s.column(SalespersonRow::firstName)), "s.FIRST_NAME")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and(SalespersonRow::firstName), "s.FIRST_NAME")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and(SalespersonRow::middleNames), "s.MIDDLE_NAMES")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and("s", SalespersonRow::firstName), "s.FIRST_NAME")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and("s", SalespersonRow::middleNames), "s.MIDDLE_NAMES")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and(s, SalespersonRow::firstName), "s.FIRST_NAME")),
-            ObjectArrayArguments.create(testCase((b, s) -> b.and(s, SalespersonRow::middleNames), "s.MIDDLE_NAMES"))
+            Arguments.of(testCase((b, s) -> b.and("Z"), "?", "Z")),
+            Arguments.of(testCase((b, s) -> b.and(s.column(SalespersonRow::firstName)), "s.FIRST_NAME")),
+            Arguments.of(testCase((b, s) -> b.and(SalespersonRow::firstName), "s.FIRST_NAME")),
+            Arguments.of(testCase((b, s) -> b.and(SalespersonRow::middleNames), "s.MIDDLE_NAMES")),
+            Arguments.of(testCase((b, s) -> b.and("s", SalespersonRow::firstName), "s.FIRST_NAME")),
+            Arguments.of(testCase((b, s) -> b.and("s", SalespersonRow::middleNames), "s.MIDDLE_NAMES")),
+            Arguments.of(testCase((b, s) -> b.and(s, SalespersonRow::firstName), "s.FIRST_NAME")),
+            Arguments.of(testCase((b, s) -> b.and(s, SalespersonRow::middleNames), "s.MIDDLE_NAMES"))
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForAnd")
+    @MethodSource("argsForAnd")
     void and(BiFunction<BetweenBuilder<String,InWhereExpectingAnd<String>>,Alias<SalespersonRow>,InWhereExpectingAnd<String>> method, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());

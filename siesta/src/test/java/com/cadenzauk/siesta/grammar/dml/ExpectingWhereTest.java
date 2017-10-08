@@ -30,7 +30,6 @@ import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -58,7 +57,7 @@ class ExpectingWhereTest extends MockitoTest {
     private ArgumentCaptor<Object[]> args;
 
     private static Arguments whereTestCase(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
-        return ObjectArrayArguments.create(whereClause, expectedSql, expectedArgs);
+        return Arguments.of(whereClause, expectedSql, expectedArgs);
     }
 
     @SuppressWarnings("unused")
@@ -156,7 +155,7 @@ class ExpectingWhereTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForWhere")
+    @MethodSource("parametersForWhere")
     void where(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder()

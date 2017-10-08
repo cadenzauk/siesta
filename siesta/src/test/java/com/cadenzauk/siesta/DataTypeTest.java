@@ -53,7 +53,6 @@ import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -68,23 +67,23 @@ class DataTypeTest extends MockitoTest {
     @SuppressWarnings("unused")
     static Stream<Arguments> parametersForJavaClass() {
         return Stream.of(
-            create(DataType.BIG_DECIMAL, BigDecimal.class),
-            create(DataType.BYTE, Byte.class),
-            create(DataType.BYTE_ARRAY, byte[].class),
-            create(DataType.DOUBLE, Double.class),
-            create(DataType.FLOAT, Float.class),
-            create(DataType.INTEGER, Integer.class),
-            create(DataType.LOCAL_DATE, LocalDate.class),
-            create(DataType.LOCAL_DATE_TIME, LocalDateTime.class),
-            create(DataType.LONG, Long.class),
-            create(DataType.SHORT, Short.class),
-            create(DataType.STRING, String.class),
-            create(DataType.ZONED_DATE_TIME, ZonedDateTime.class)
+            Arguments.of(DataType.BIG_DECIMAL, BigDecimal.class),
+            Arguments.of(DataType.BYTE, Byte.class),
+            Arguments.of(DataType.BYTE_ARRAY, byte[].class),
+            Arguments.of(DataType.DOUBLE, Double.class),
+            Arguments.of(DataType.FLOAT, Float.class),
+            Arguments.of(DataType.INTEGER, Integer.class),
+            Arguments.of(DataType.LOCAL_DATE, LocalDate.class),
+            Arguments.of(DataType.LOCAL_DATE_TIME, LocalDateTime.class),
+            Arguments.of(DataType.LONG, Long.class),
+            Arguments.of(DataType.SHORT, Short.class),
+            Arguments.of(DataType.STRING, String.class),
+            Arguments.of(DataType.ZONED_DATE_TIME, ZonedDateTime.class)
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForJavaClass")
+    @MethodSource("parametersForJavaClass")
     void javaClass(DataType<?> dataType, Class<?> expectedClass) {
         Class<?> actual = dataType.javaClass();
 
@@ -119,7 +118,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForToDatabase")
+    @MethodSource("parametersForToDatabase")
     <T> void toDatabase(DataType<T> dataType, T input, Object expected) {
         if (input != null) {
             when(db.dialect()).thenReturn(new AnsiDialect());
@@ -131,7 +130,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForToDatabase")
+    @MethodSource("parametersForToDatabase")
     <T> void toDatabaseOfOptional(DataType<T> dataType, T input, Object expected) {
         if (input != null) {
             when(db.dialect()).thenReturn(new AnsiDialect());
@@ -143,7 +142,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZones")
+    @MethodSource("timeZones")
     void toDatabaseLocalDate(String timeZone) {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDate input = RandomValues.randomLocalDate();
@@ -158,11 +157,11 @@ class DataTypeTest extends MockitoTest {
 
     @SuppressWarnings("unused")
     static Stream<Arguments> timeZonePairs() {
-        return timeZones().flatMap(tz1 -> timeZones().map(tz2 -> create(tz1, tz2)));
+        return timeZones().flatMap(tz1 -> timeZones().map(tz2 -> Arguments.of(tz1, tz2)));
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZones")
+    @MethodSource("timeZones")
     void toDatabaseLocalDateTime(String jvmTimeZone) {
         try (UncheckedAutoCloseable ignored = withTimeZone(jvmTimeZone)) {
             LocalDateTime input = RandomValues.randomLocalDateTime();
@@ -176,7 +175,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZonePairs")
+    @MethodSource("timeZonePairs")
     void toDatabaseZonedDateTime(String dbTimeZone, String jvmTimeZone) {
         ZoneId dbZone = ZoneId.of(dbTimeZone);
         ZoneId jvmZone = ZoneId.of(jvmTimeZone);
@@ -210,7 +209,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForGet")
+    @MethodSource("parametersForGet")
     <T> void get(DataType<T> sut, SqlBiConsumer<ResultSet,String> resultSetExtractor, Optional<ZoneId> dbTimeZone, T expected) throws SQLException {
         resultSetExtractor.accept(rs, "someColumn");
         when(db.dialect()).thenReturn(new AnsiDialect());
@@ -227,7 +226,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZones")
+    @MethodSource("timeZones")
     void getLocalDate(String timeZone) throws SQLException {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDate expected = randomLocalDate();
@@ -241,7 +240,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZones")
+    @MethodSource("timeZones")
     void getLocalDateTime(String timeZone) throws SQLException {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
@@ -255,7 +254,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "timeZones")
+    @MethodSource("timeZones")
     void getZonedDateTime(String timeZone) throws SQLException {
         ZonedDateTime expected = ZonedDateTime.of(randomLocalDateTime(), ZoneId.of("UTC"));
         Timestamp returnVal = Timestamp.from(expected.toInstant());
@@ -289,7 +288,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForLiteral")
+    @MethodSource("parametersForLiteral")
     <T> void literal(DataType<T> sut, T value, ZoneId dbTimeZone, String expected) {
         String result = sut.literal(Database.newBuilder().databaseTimeZone(dbTimeZone).build(), value);
 
@@ -297,7 +296,7 @@ class DataTypeTest extends MockitoTest {
     }
 
     private static <T> Arguments testCaseForToDatabase(DataType<T> dataType, T value) {
-        return create(dataType, value, value);
+        return Arguments.of(dataType, value, value);
     }
 
     private static <T> Arguments testCaseForGet(DataType<T> dataType, ResultSetGet<T> get, T value) {
@@ -309,15 +308,15 @@ class DataTypeTest extends MockitoTest {
     }
 
     private static <T> Arguments createTestCaseArgs(DataType<T> sut, SqlBiConsumer<ResultSet,String> resultSetConsumer, Optional<ZoneId> dbTimeZone, T expected) {
-        return create(sut, resultSetConsumer, dbTimeZone, expected);
+        return Arguments.of(sut, resultSetConsumer, dbTimeZone, expected);
     }
 
     private static <T> Arguments literalTestCase(DataType<T> sut, T value, String expected) {
-        return create(sut, value, ZoneId.systemDefault(), expected);
+        return Arguments.of(sut, value, ZoneId.systemDefault(), expected);
     }
 
     private static Arguments literalTestCase(DataType<ZonedDateTime> sut, ZonedDateTime value, ZoneId dbTimeZone, String expected) {
-        return create(sut, value, dbTimeZone, expected);
+        return Arguments.of(sut, value, dbTimeZone, expected);
     }
 
 }

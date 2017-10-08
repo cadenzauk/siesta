@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -136,7 +135,7 @@ class ExpressionBuilderTest extends MockitoTest {
     }
 
     private static <T> Arguments testCase(BiFunction<ExpressionBuilder<String,T>,Alias<SalespersonRow>,T> method, String expectedSql, Object... expectedArgs) {
-        return ObjectArrayArguments.create(method, expectedSql, expectedArgs);
+        return Arguments.of(method, expectedSql, expectedArgs);
     }
 
     @SuppressWarnings("unused")
@@ -238,7 +237,7 @@ class ExpressionBuilderTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForTestExpression")
+    @MethodSource("argsForTestExpression")
     void testExpression(BiFunction<ExpressionBuilder<String,InWhereExpectingAnd<String>>,Alias<SalespersonRow>,InWhereExpectingAnd<String>> method, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());

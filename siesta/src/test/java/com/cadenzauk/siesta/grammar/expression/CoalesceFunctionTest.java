@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.Mock;
 
 import java.util.function.Function;
@@ -131,7 +130,7 @@ class CoalesceFunctionTest extends MockitoTest {
     }
 
     private static Arguments coalesceTestCase(String name, Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
-        return ObjectArrayArguments.create(name, f, expected);
+        return Arguments.of(name, f, expected);
     }
 
     @SuppressWarnings("unused")
@@ -153,7 +152,7 @@ class CoalesceFunctionTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForCoalesce")
+    @MethodSource("parametersForCoalesce")
     void coalesceTest(String name, Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
             Database database = testDatabase(new AnsiDialect());
             Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");

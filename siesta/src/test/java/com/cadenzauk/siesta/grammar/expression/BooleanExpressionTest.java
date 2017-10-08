@@ -30,7 +30,6 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -54,7 +53,7 @@ class BooleanExpressionTest {
     private ArgumentCaptor<BooleanExpression> appendArg;
 
     private static <T> Arguments testCase(BiFunction<Alias<SalespersonRow>,BooleanExpression,T> method, String expectedSql) {
-        return ObjectArrayArguments.create(method, expectedSql);
+        return Arguments.of(method, expectedSql);
     }
 
     @SuppressWarnings("unused")
@@ -86,7 +85,7 @@ class BooleanExpressionTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForAnd")
+    @MethodSource("argsForAnd")
     void testAnd(BiFunction<Alias<SalespersonRow>,BooleanExpression, BooleanExpression> method, String expectedSql) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
@@ -101,7 +100,7 @@ class BooleanExpressionTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForOr")
+    @MethodSource("argsForOr")
     void testOr(BiFunction<Alias<SalespersonRow>,BooleanExpression, BooleanExpression> method, String expectedSql) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());

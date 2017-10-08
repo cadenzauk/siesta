@@ -44,33 +44,31 @@ import static java.time.Month.NOVEMBER;
 import static java.time.Month.OCTOBER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
 class LocalDateConverterTest {
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parameters() {
+    private static Stream<Arguments> parameters() {
         return Stream.of(
-            create("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),
-            create("America/New_York", localDate(29, FEBRUARY, 2008), date(29, FEBRUARY, 2008, "America/New_York")),
-            create("America/New_York", localDate(3, NOVEMBER, 2007), date(3, NOVEMBER, 2007, "America/New_York")),
-            create("America/New_York", localDate(4, NOVEMBER, 2007), date(4, NOVEMBER, 2007, "America/New_York")),
-            create("America/New_York", localDate(5, NOVEMBER, 2007), date(5, NOVEMBER, 2007, "America/New_York")),
-            create("UTC", localDate(31, DECEMBER, 2010), date(31, DECEMBER, 2010, "UTC")),
-            create("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
-            create("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
-            create("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
-            create("UTC", localDate(15, OCTOBER, 1582), date(15, OCTOBER, 1582, "UTC")),
-            create("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
-            create("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
-            create("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),
-            create("Europe/Berlin", localDate(15, JANUARY, 2001), date(15, JANUARY, 2001, "Europe/Berlin")),
-            create("Pacific/Apia", localDate(31, DECEMBER, 2100), date(31, DECEMBER, 2100, "Pacific/Apia")),
-            create("Pacific/Apia", null, null)
+            Arguments.of("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),
+            Arguments.of("America/New_York", localDate(29, FEBRUARY, 2008), date(29, FEBRUARY, 2008, "America/New_York")),
+            Arguments.of("America/New_York", localDate(3, NOVEMBER, 2007), date(3, NOVEMBER, 2007, "America/New_York")),
+            Arguments.of("America/New_York", localDate(4, NOVEMBER, 2007), date(4, NOVEMBER, 2007, "America/New_York")),
+            Arguments.of("America/New_York", localDate(5, NOVEMBER, 2007), date(5, NOVEMBER, 2007, "America/New_York")),
+            Arguments.of("UTC", localDate(31, DECEMBER, 2010), date(31, DECEMBER, 2010, "UTC")),
+            Arguments.of("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
+            Arguments.of("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
+            Arguments.of("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
+            Arguments.of("UTC", localDate(15, OCTOBER, 1582), date(15, OCTOBER, 1582, "UTC")),
+            Arguments.of("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
+            Arguments.of("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
+            Arguments.of("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),
+            Arguments.of("Europe/Berlin", localDate(15, JANUARY, 2001), date(15, JANUARY, 2001, "Europe/Berlin")),
+            Arguments.of("Pacific/Apia", localDate(31, DECEMBER, 2100), date(31, DECEMBER, 2100, "Pacific/Apia")),
+            Arguments.of("Pacific/Apia", null, null)
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parameters")
+    @MethodSource("parameters")
     void convertToDatabaseColumn(String timeZone, LocalDate input, Date expected) {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateConverter sut = new LocalDateConverter();
@@ -82,7 +80,7 @@ class LocalDateConverterTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parameters")
+    @MethodSource("parameters")
     void convertToEntityAttribute(String timeZone, LocalDate expected, Date input) {
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateConverter sut = new LocalDateConverter();

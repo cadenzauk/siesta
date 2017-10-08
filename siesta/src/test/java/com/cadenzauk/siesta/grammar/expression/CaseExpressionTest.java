@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -146,7 +145,7 @@ class CaseExpressionTest extends MockitoTest {
     }
 
     private static Arguments testCase(String expected, Function<Alias<WidgetRow>,CaseExpression<String>> f, Object... args) {
-        return ObjectArrayArguments.create(expected, f, args);
+        return Arguments.of(expected, f, args);
     }
 
     @SuppressWarnings("unused")
@@ -173,7 +172,7 @@ class CaseExpressionTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForInitialWhen")
+    @MethodSource("parametersForInitialWhen")
     void initialWhen(String expected, Function<Alias<WidgetRow>,CaseExpression<String>> f, Object[] expectedArgs) {
         Database database = testDatabase(new AnsiDialect());
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
@@ -189,7 +188,7 @@ class CaseExpressionTest extends MockitoTest {
     }
 
     private static Arguments testCase(String expected, BiFunction<CaseExpression<String>,Alias<WidgetRow>,TypedExpression<String>> f, Object... args) {
-        return ObjectArrayArguments.create(expected, f, args);
+        return Arguments.of(expected, f, args);
     }
 
     @SuppressWarnings("unused")
@@ -225,7 +224,7 @@ class CaseExpressionTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForSubsequentClauses")
+    @MethodSource("parametersForSubsequentClauses")
     void subsequentClauses(String expected, BiFunction<CaseExpression<String>,Alias<WidgetRow>,TypedExpression<String>> f, Object[] expectedArgs) {
         Database database = testDatabase(new AnsiDialect());
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");

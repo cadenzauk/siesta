@@ -30,85 +30,84 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.params.provider.ObjectArrayArguments.create;
 
 class StringUtilTest {
     private static Stream<Arguments> parametersForUppercaseFirst() {
         return Stream.of(
-            create(null, ""),
-            create("", ""),
-            create("a", "A"),
-            create("B", "B"),
-            create("abc", "Abc"),
-            create(" def", " def")
+            Arguments.of(null, ""),
+            Arguments.of("", ""),
+            Arguments.of("a", "A"),
+            Arguments.of("B", "B"),
+            Arguments.of("abc", "Abc"),
+            Arguments.of(" def", " def")
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForUppercaseFirst")
+    @MethodSource("parametersForUppercaseFirst")
     void uppercaseFirst(String input, String expected) {
         assertThat(StringUtil.uppercaseFirst(input), is(expected));
     }
 
     private static Stream<Arguments> parametersForCamelToUpper() {
         return Stream.of(
-            create(null, ""),
-            create("", ""),
-            create("a", "A"),
-            create("B", "B"),
-            create("abc", "ABC"),
-            create(" def", " DEF"),
-            create("aBC", "A_BC"),
-            create("camelCase", "CAMEL_CASE"),
-            create("camelCaseWithTLA", "CAMEL_CASE_WITH_TLA"),
-            create("camelCaseWithTLAInMiddle", "CAMEL_CASE_WITH_TLA_IN_MIDDLE"),
-            create("tlaAtStart", "TLA_AT_START"),
-            create("NotCamelCase", "NOT_CAMEL_CASE"),
-            create("TLANotCamelCase", "TLA_NOT_CAMEL_CASE")
+            Arguments.of(null, ""),
+            Arguments.of("", ""),
+            Arguments.of("a", "A"),
+            Arguments.of("B", "B"),
+            Arguments.of("abc", "ABC"),
+            Arguments.of(" def", " DEF"),
+            Arguments.of("aBC", "A_BC"),
+            Arguments.of("camelCase", "CAMEL_CASE"),
+            Arguments.of("camelCaseWithTLA", "CAMEL_CASE_WITH_TLA"),
+            Arguments.of("camelCaseWithTLAInMiddle", "CAMEL_CASE_WITH_TLA_IN_MIDDLE"),
+            Arguments.of("tlaAtStart", "TLA_AT_START"),
+            Arguments.of("NotCamelCase", "NOT_CAMEL_CASE"),
+            Arguments.of("TLANotCamelCase", "TLA_NOT_CAMEL_CASE")
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForCamelToUpper")
+    @MethodSource("parametersForCamelToUpper")
     void camelToUpper(String input, String expectedResult) {
         assertThat(StringUtil.camelToUpper(input), is(expectedResult));
     }
 
     private static Stream<Arguments> parametersForHex() {
         return Stream.of(
-            create(null, ""),
-            create(new byte[0], ""),
-            create(new byte[] { -128 }, "80"),
-            create(new byte[] { -1 }, "ff"),
-            create(new byte[] { 0 }, "00"),
-            create(new byte[] { 15 }, "0f"),
-            create(new byte[] { 127 }, "7f"),
-            create(new byte[] { 0, 127, 10 }, "007f0a"),
-            create(new byte[] { (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef }, "deadbeef")
+            Arguments.of(null, ""),
+            Arguments.of(new byte[0], ""),
+            Arguments.of(new byte[] { -128 }, "80"),
+            Arguments.of(new byte[] { -1 }, "ff"),
+            Arguments.of(new byte[] { 0 }, "00"),
+            Arguments.of(new byte[] { 15 }, "0f"),
+            Arguments.of(new byte[] { 127 }, "7f"),
+            Arguments.of(new byte[] { 0, 127, 10 }, "007f0a"),
+            Arguments.of(new byte[] { (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef }, "deadbeef")
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForHex")
+    @MethodSource("parametersForHex")
     void hex(byte[] input, String expectedResult) {
         assertThat(StringUtil.hex(input), is(expectedResult));
     }
 
     private static Stream<Arguments> parametersForOctal() {
         return Stream.of(
-            create(null, ""),
-            create(new byte[0], ""),
-            create(new byte[] { -128 }, "200"),
-            create(new byte[] { -1 }, "377"),
-            create(new byte[] { 0 }, "000"),
-            create(new byte[] { 15 }, "017"),
-            create(new byte[] { 127 }, "177"),
-            create(new byte[] { 0, 127, 10 }, "000177012")
+            Arguments.of(null, ""),
+            Arguments.of(new byte[0], ""),
+            Arguments.of(new byte[] { -128 }, "200"),
+            Arguments.of(new byte[] { -1 }, "377"),
+            Arguments.of(new byte[] { 0 }, "000"),
+            Arguments.of(new byte[] { 15 }, "017"),
+            Arguments.of(new byte[] { 127 }, "177"),
+            Arguments.of(new byte[] { 0, 127, 10 }, "000177012")
         );
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForOctal")
+    @MethodSource("parametersForOctal")
     void octal(byte[] input, String expectedResult) {
         assertThat(StringUtil.octal(input), is(expectedResult));
     }

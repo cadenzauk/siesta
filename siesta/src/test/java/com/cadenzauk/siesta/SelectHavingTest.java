@@ -26,14 +26,13 @@ import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
-import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.select.ExpectingHaving;
+import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -65,7 +64,7 @@ class SelectHavingTest extends MockitoTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments havingTest(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,Select<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
-        return ObjectArrayArguments.create(having, expectedSql, expectedArgs);
+        return Arguments.of(having, expectedSql, expectedArgs);
     }
 
     @SuppressWarnings("unused")
@@ -149,7 +148,7 @@ class SelectHavingTest extends MockitoTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForHaving")
+    @MethodSource("parametersForHaving")
     void having(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,Select<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = TestDatabase.testDatabase(new AnsiDialect());

@@ -31,7 +31,6 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -58,7 +57,7 @@ class ExpectingJoinTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments testCase1(BiFunction<ExpectingJoin1<SalespersonRow>,Alias<SalespersonRow>[],ExpectingSelect<?>> method, String expectedSql) {
-        return ObjectArrayArguments.create(method, expectedSql);
+        return Arguments.of(method, expectedSql);
     }
 
     private static Arguments testCase2(BiFunction<ExpectingJoin2<SalespersonRow,SalespersonRow>,Alias<SalespersonRow>[],ExpectingSelect<?>> method, String expectedSql) {
@@ -174,7 +173,7 @@ class ExpectingJoinTest {
     }
 
     @ParameterizedTest
-    @MethodSource(names = "argsForJoin")
+    @MethodSource("argsForJoin")
     void testJoin(BiFunction<ExpectingJoin1<SalespersonRow>,Alias<SalespersonRow>[],ExpectingSelect<?>> method, String expectedSql) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());

@@ -33,7 +33,6 @@ import com.cadenzauk.siesta.model.TestRow;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ObjectArrayArguments;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -59,7 +58,7 @@ abstract class FunctionTest extends MockitoTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     @ParameterizedTest
-    @MethodSource(names = "parametersForFunctionTest")
+    @MethodSource("parametersForFunctionTest")
     void functionTest(Function<Alias<TestRow>, TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
         MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
@@ -75,6 +74,6 @@ abstract class FunctionTest extends MockitoTest {
     }
 
     protected static Arguments testCase(Function<Alias<TestRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
-        return ObjectArrayArguments.create(sutSupplier, expectedSql, expectedArgs);
+        return Arguments.of(sutSupplier, expectedSql, expectedArgs);
     }
 }
