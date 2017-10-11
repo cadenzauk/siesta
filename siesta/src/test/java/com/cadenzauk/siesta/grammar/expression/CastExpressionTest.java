@@ -91,6 +91,7 @@ class CastExpressionTest extends MockitoTest {
     @MethodSource("parametersForSql")
     <T> void sql(String type, Function<CastBuilder<String>,TypedExpression<T>> castFunction) {
         when(expression.sql(scope)).thenReturn("input");
+        when(scope.database()).thenReturn(database);
         when(scope.dialect()).thenReturn(new AnsiDialect());
         CastBuilder<String> builder = new CastBuilder<>(expression);
         TypedExpression<T> sut = castFunction.apply(builder);

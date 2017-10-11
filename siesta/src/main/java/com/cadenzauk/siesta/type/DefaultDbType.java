@@ -49,7 +49,7 @@ public class DefaultDbType<T> implements DbType<T> {
     }
 
     @Override
-    public String sqlType() {
+    public String sqlType(Database database) {
         return sqlType;
     }
 

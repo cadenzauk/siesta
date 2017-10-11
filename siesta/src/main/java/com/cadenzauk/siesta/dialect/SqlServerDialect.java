@@ -25,13 +25,13 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultVarbinary;
-import com.cadenzauk.siesta.type.DefaultTinyint;
-import com.cadenzauk.siesta.type.DefaultTimestamp;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultDate;
 import com.cadenzauk.siesta.type.DefaultTime;
+import com.cadenzauk.siesta.type.DefaultTimestamp;
+import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
-import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -76,7 +76,7 @@ public class SqlServerDialect extends AnsiDialect {
             })
             .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
                 @Override
-                public String sqlType() {
+                public String sqlType(Database database) {
                     return "datetime2";
                 }
 
@@ -98,7 +98,7 @@ public class SqlServerDialect extends AnsiDialect {
             })
             .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp() {
                 @Override
-                public String sqlType() {
+                public String sqlType(Database database) {
                     return "datetime2";
                 }
 

@@ -39,7 +39,7 @@ public class CastBuilder<T> {
     }
 
     public ExpressionBuilder<String,BooleanExpression> asChar(int len) {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.CHAR, d -> d.sqlType(len)), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.CHAR, (d, db) -> d.sqlType(db, len)), Function.identity());
     }
 
     public ExpressionBuilder<Byte,BooleanExpression> asTinyInteger() {
@@ -67,7 +67,7 @@ public class CastBuilder<T> {
     }
 
     public ExpressionBuilder<LocalDateTime,BooleanExpression> asTimestamp(int prec) {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE_TIME, DbTypeId.TIMESTAMP, d -> d.sqlType(prec)), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE_TIME, DbTypeId.TIMESTAMP, (d, db) -> d.sqlType(db, prec)), Function.identity());
     }
 
     public ExpressionBuilder<Long,BooleanExpression> asBigInteger() {
@@ -83,6 +83,6 @@ public class CastBuilder<T> {
     }
 
     public ExpressionBuilder<String,BooleanExpression> asVarchar(int len) {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.VARCHAR, d -> d.sqlType(len)), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.VARCHAR, (d, db) -> d.sqlType(db, len)), Function.identity());
     }
 }

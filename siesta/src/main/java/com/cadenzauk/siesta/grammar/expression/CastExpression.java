@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
@@ -31,7 +32,7 @@ import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.google.common.reflect.TypeToken;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public class CastExpression<F, T> implements TypedExpression<T> {
@@ -39,9 +40,9 @@ public class CastExpression<F, T> implements TypedExpression<T> {
     private final TypedExpression<F> from;
     private final DataType<T> to;
     private final DbTypeId<T> toType;
-    private final Function<DbType,String> toSql;
+    private final BiFunction<DbType,Database,String> toSql;
 
-    public CastExpression(TypedExpression<F> from, DataType<T> to, DbTypeId<T> toType, Function<DbType, String> toSql) {
+    public CastExpression(TypedExpression<F> from, DataType<T> to, DbTypeId<T> toType, BiFunction<DbType,Database,String> toSql) {
         this.from = from;
         this.to = to;
         this.toType = toType;
@@ -65,7 +66,7 @@ public class CastExpression<F, T> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return String.format("cast(%s as %s)", from.sql(scope), toSql.apply(scope.dialect().type(toType)));
+        return String.format("cast(%s as %s)", from.sql(scope), toSql.apply(scope.dialect().type(toType), scope.database()));
     }
 
     @Override
@@ -80,6 +81,6 @@ public class CastExpression<F, T> implements TypedExpression<T> {
 
     @Override
     public String toString() {
-        return String.format("cast(%s as %s)", from, toSql.apply(new AnsiDialect().type(toType)));
+        return String.format("cast(%s as %s)", from, toSql.apply(new AnsiDialect().type(toType), Database.newBuilder().build()));
     }
 }

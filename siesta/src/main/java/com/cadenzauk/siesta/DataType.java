@@ -23,8 +23,8 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.util.TypeUtil;
-import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 public class DataType<T> {
     public static final DataType<BigDecimal> BIG_DECIMAL = new DataType<>(BigDecimal.class, DbTypeId.DECIMAL);
@@ -48,6 +49,7 @@ public class DataType<T> {
     public static final DataType<Long> LONG = new DataType<>(Long.class, DbTypeId.BIGINT);
     public static final DataType<Short> SHORT = new DataType<>(Short.class, DbTypeId.SMALLINT);
     public static final DataType<String> STRING = new DataType<>(String.class, DbTypeId.VARCHAR);
+    public static final DataType<UUID> UUID = new DataType<>(UUID.class, DbTypeId.UUID);
     public static final DataType<ZonedDateTime> ZONED_DATE_TIME = new DataType<>(ZonedDateTime.class, DbTypeId.UTC_TIMESTAMP);
 
     private final Class<T> javaClass;

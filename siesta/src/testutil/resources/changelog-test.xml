@@ -50,7 +50,9 @@
             <column name="DESCRIPTION" type="VARCHAR(200)"/>
             <column name="INSERTION_TS" type="TIMESTAMP"/>
         </createTable>
+    </changeSet>
 
+    <changeSet id="create part table" author="mark">
         <createTable tableName="PART" schemaName="SIESTA">
             <column name="PART_ID" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -63,7 +65,9 @@
             </column>
             <column name="PART_TYPE" type="VARCHAR(100)"/>
         </createTable>
+    </changeSet>
 
+    <changeSet id="create manufacturer table" author="mark">
         <createTable tableName="MANUFACTURER" schemaName="SIESTA">
             <column name="MANUFACTURER_ID" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -74,7 +78,9 @@
             <column name="CHECKED" type="DATE"/>
             <column name="INSERTION_TS" type="TIMESTAMP"/>
         </createTable>
+    </changeSet>
 
+    <changeSet id="create salesperson table" author="mark">
         <createTable tableName="SALESPERSON" schemaName="SIESTA">
             <column name="SALESPERSON_ID" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
@@ -89,9 +95,11 @@
             <column name="NUMBER_OF_SALES" type="INTEGER"/>
             <column name="COMMISSION" type="DECIMAL"/>
         </createTable>
+    </changeSet>
 
+    <changeSet id="create test_table table" author="mark">
         <createTable tableName="TEST_TABLE" schemaName="SIESTA">
-            <column name="GUID" type="CHAR(36)">
+            <column name="GUID" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="STRING_REQ" type="VARCHAR(40)"/>
@@ -109,7 +117,15 @@
             <column name="UTC_DATE_TIME_REQ" type="TIMESTAMP"/>
             <column name="UTC_DATE_TIME_OPT" type="TIMESTAMP"/>
         </createTable>
+        <modifySql dbms="db2">
+            <replace replace="BLOB(16)" with="CHAR(16) FOR BIT DATA"/>
+        </modifySql>
+        <modifySql dbms="firebird">
+            <replace replace="BLOB" with="CHAR(16) CHARACTER SET OCTETS"/>
+        </modifySql>
+    </changeSet>
 
+    <changeSet id="create lock_test table" author="mark">
         <createTable tableName="LOCK_TEST">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>

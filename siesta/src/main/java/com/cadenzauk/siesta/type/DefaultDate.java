@@ -47,7 +47,7 @@ public class DefaultDate implements DbType<LocalDate> {
     }
 
     @Override
-    public String sqlType() {
+    public String sqlType(Database database) {
         return "date";
     }
 

@@ -46,7 +46,7 @@ public class DefaultTimestamp implements DbType<LocalDateTime> {
     }
 
     @Override
-    public String sqlType() {
+    public String sqlType(Database database) {
         return "timestamp";
     }
 

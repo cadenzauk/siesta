@@ -50,8 +50,8 @@ public class EnumByName<T extends Enum<T>> implements DbType<T> {
     }
 
     @Override
-    public String sqlType() {
-        return "varchar(80)";
+    public String sqlType(Database database) {
+        return type(database).sqlType(database, 80);
     }
 
     @Override

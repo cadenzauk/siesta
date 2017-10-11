@@ -37,6 +37,6 @@ public class DefaultTinyint extends DefaultDbType<Byte> {
 
     @Override
     public String literal(Database database, Byte value) {
-        return String.format("cast(%d as %s)", value, sqlType());
+        return String.format("cast(%d as %s)", value, sqlType(database));
     }
 }

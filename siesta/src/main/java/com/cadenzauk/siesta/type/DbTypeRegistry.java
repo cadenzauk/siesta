@@ -45,6 +45,7 @@ public class DbTypeRegistry {
             .register(DbTypeId.SMALLINT, new DefaultSmallint())
             .register(DbTypeId.CHAR, new DefaultVarchar("char"))
             .register(DbTypeId.VARCHAR, new DefaultVarchar())
+            .register(DbTypeId.UUID, new DefaultUuid())
             .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp())
         ;
     }

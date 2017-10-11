@@ -61,7 +61,7 @@ public class DefaultTime implements DbType<LocalTime> {
     }
 
     @Override
-    public String sqlType() {
+    public String sqlType(Database database) {
         return "time";
     }
 }

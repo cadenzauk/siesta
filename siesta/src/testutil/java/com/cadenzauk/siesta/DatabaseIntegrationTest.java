@@ -899,7 +899,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
     public void roundTripNulls() {
         Database database = testDatabase(dataSource, dialect);
-        String guid = UUID.randomUUID().toString();
+        UUID guid = UUID.randomUUID();
         database.insert(TestRow.newBuilder()
             .guid(guid)
             .decimalOpt(null)
@@ -910,6 +910,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .localDateReq(null)
             .localDateTimeOpt(null)
             .localDateTimeReq(null)
+            .localTimeOpt(null)
+            .localTimeReq(null)
             .stringOpt(null)
             .stringReq(null)
             .utcDateTimeOpt(null)
@@ -929,6 +931,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result.localDateReq(), nullValue());
         assertThat(result.localDateTimeOpt(), is(Optional.empty()));
         assertThat(result.localDateTimeReq(), nullValue());
+        assertThat(result.localTimeOpt(), is(Optional.empty()));
+        assertThat(result.localTimeReq(), nullValue());
         assertThat(result.stringOpt(), is(Optional.empty()));
         assertThat(result.stringReq(), nullValue());
         assertThat(result.utcDateTimeOpt(), is(Optional.empty()));
@@ -965,7 +969,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
     public void dateAdd() {
         Database database = testDatabase(dataSource, dialect);
-        String guid = UUID.randomUUID().toString();
+        UUID guid = UUID.randomUUID();
         LocalDate localDate = RandomValues.randomLocalDate();
         database.insert(TestRow.newBuilder()
             .guid(guid)
@@ -983,7 +987,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
     public void dateDifference() {
         Database database = testDatabase(dataSource, dialect);
-        String guid = UUID.randomUUID().toString();
+        UUID guid = UUID.randomUUID();
         LocalDate localDate = RandomValues.randomLocalDate();
         database.insert(TestRow.newBuilder()
             .guid(guid)

@@ -32,14 +32,14 @@ public interface DbType<T> {
 
     T getColumnValue(Database database, ResultSet rs, int col) throws SQLException;
 
-    String sqlType();
+    String sqlType(Database database);
 
-    default String sqlType(int arg) {
-        return String.format("%s(%d)", sqlType(), arg);
+    default String sqlType(Database database, int arg) {
+        return String.format("%s(%d)", sqlType(database), arg);
     }
 
-    default String sqlType(int arg1, int arg2) {
-        return String.format("%s(%d,%d)", sqlType(), arg1, arg2);
+    default String sqlType(Database database, int arg1, int arg2) {
+        return String.format("%s(%d,%d)", sqlType(database), arg1, arg2);
     }
 
     default Object convertToDatabase(Database database, T value) {

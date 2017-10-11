@@ -48,6 +48,7 @@ public class DataTypeRegistry {
         register(DataType.LONG);
         register(DataType.SHORT);
         register(DataType.STRING);
+        register(DataType.UUID);
         register(DataType.ZONED_DATE_TIME);
     }
 

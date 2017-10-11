@@ -49,13 +49,13 @@ public class FirebirdDialect extends AnsiDialect {
             })
             .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
                 @Override
-                public String sqlType(int arg) {
-                    return sqlType();
+                public String sqlType(Database database, int arg) {
+                    return sqlType(database);
                 }
 
                 @Override
-                public String sqlType(int arg1, int arg2) {
-                    return sqlType();
+                public String sqlType(Database database, int arg1, int arg2) {
+                    return sqlType(database);
                 }
 
                 @Override
@@ -65,13 +65,13 @@ public class FirebirdDialect extends AnsiDialect {
             })
             .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp() {
                 @Override
-                public String sqlType(int arg) {
-                    return sqlType();
+                public String sqlType(Database database, int arg) {
+                    return sqlType(database);
                 }
 
                 @Override
-                public String sqlType(int arg1, int arg2) {
-                    return sqlType();
+                public String sqlType(Database database, int arg1, int arg2) {
+                    return sqlType(database);
                 }
 
                 @Override

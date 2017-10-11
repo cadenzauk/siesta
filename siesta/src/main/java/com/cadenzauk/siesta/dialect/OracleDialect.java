@@ -27,13 +27,13 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultBigint;
-import com.cadenzauk.siesta.type.DefaultTinyint;
-import com.cadenzauk.siesta.type.DefaultVarbinary;
-import com.cadenzauk.siesta.type.DefaultDate;
-import com.cadenzauk.siesta.type.DefaultTime;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultBigint;
+import com.cadenzauk.siesta.type.DefaultDate;
+import com.cadenzauk.siesta.type.DefaultTime;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
 import java.sql.ResultSet;
@@ -78,7 +78,7 @@ public class OracleDialect extends AnsiDialect {
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
             .register(DbTypeId.BIGINT, new DefaultBigint() {
                 @Override
-                public String sqlType() {
+                public String sqlType(Database database) {
                     return "number(19)";
                 }
             })
@@ -118,7 +118,7 @@ public class OracleDialect extends AnsiDialect {
                 }
 
                 @Override
-                public String sqlType() {
+                public String sqlType(Database database) {
                     return "interval day to second";
                 }
 
@@ -136,7 +136,7 @@ public class OracleDialect extends AnsiDialect {
             })
             .register(DbTypeId.VARCHAR, new DefaultVarchar() {
                 @Override
-                public String sqlType() {
+                public String sqlType(Database database) {
                     return "varchar2";
                 }
             });

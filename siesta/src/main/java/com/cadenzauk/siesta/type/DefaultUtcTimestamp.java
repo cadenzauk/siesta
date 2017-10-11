@@ -48,7 +48,7 @@ public class DefaultUtcTimestamp implements DbType<ZonedDateTime> {
     }
 
     @Override
-    public String sqlType() {
+    public String sqlType(Database database) {
         return "timestamp";
     }
 

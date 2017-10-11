@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 public class DbTypeId<T> {
     public final static DbTypeId<Byte> TINYINT = new DbTypeId<>("tinyint", Types.TINYINT, Byte.class);
@@ -48,6 +49,7 @@ public class DbTypeId<T> {
     public final static DbTypeId<LocalDate> DATE = new DbTypeId<>("date", Types.DATE, LocalDate.class);
     public final static DbTypeId<LocalTime> TIME = new DbTypeId<>("time", Types.TIME, LocalTime.class);
     public final static DbTypeId<LocalDateTime> TIMESTAMP = new DbTypeId<>("timestamp", Types.TIMESTAMP, LocalDateTime.class);
+    public final static DbTypeId<UUID> UUID = new DbTypeId<>("guid", Types.BINARY, UUID.class);
     public final static DbTypeId<ZonedDateTime> UTC_TIMESTAMP = new DbTypeId<>("utctimestamp", Types.TIMESTAMP, ZonedDateTime.class);
 
     public final static DbTypeId<String> CHAR = new DbTypeId<>("char", Types.CHAR, String.class);

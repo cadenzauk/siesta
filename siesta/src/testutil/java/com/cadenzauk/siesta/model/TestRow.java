@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @Table(name = "TEST_TABLE", schema = "SIESTA")
 public class TestRow {
-    private final String guid;
+    private final UUID guid;
 
     private final String stringReq;
     private final Optional<String> stringOpt;
@@ -73,7 +73,7 @@ public class TestRow {
         utcDateTimeOpt = builder.utcDateTimeOpt;
     }
 
-    public String guid() {
+    public UUID guid() {
         return guid;
     }
 
@@ -156,7 +156,7 @@ public class TestRow {
     }
 
     public static final class Builder {
-        private String guid;
+        private UUID guid;
         private String stringReq;
         private Optional<String> stringOpt;
         private Integer integerReq;
@@ -173,7 +173,7 @@ public class TestRow {
         private Optional<ZonedDateTime> utcDateTimeOpt;
 
         private Builder() {
-            this.guid = UUID.randomUUID().toString();
+            this.guid = UUID.randomUUID();
             this.stringReq = RandomStringUtils.randomAlphabetic(10, 20);
             this.stringOpt = Optional.empty();
             this.integerReq = RandomUtils.nextInt();
@@ -184,11 +184,13 @@ public class TestRow {
             this.localDateOpt = Optional.empty();
             this.localDateTimeReq = RandomValues.randomLocalDateTime();
             this.localDateTimeOpt = Optional.empty();
+            this.localTimeReq = RandomValues.randomLocalTime();
+            this.localTimeOpt = Optional.empty();
             this.utcDateTimeReq = RandomValues.randomZonedDateTime(ZoneId.of("UTC"));
             this.utcDateTimeOpt = Optional.empty();
         }
 
-        public Builder guid(String guid) {
+        public Builder guid(UUID guid) {
             this.guid = guid;
             return this;
         }
