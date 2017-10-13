@@ -60,8 +60,12 @@ public class Sequence<T> {
         return rs -> dataType.get(rs, label, database).orElse(null);
     }
 
+    public String name() {
+        return database.dialect().qualifiedName(catalog, schema, sequenceName);
+    }
+
     private T single(SqlExecutor sqlExecutor) {
-        return database.select(nextVal()).single(sqlExecutor);
+        return database.select(nextVal(), sequenceName).single(sqlExecutor);
     }
 
     public String sql() {

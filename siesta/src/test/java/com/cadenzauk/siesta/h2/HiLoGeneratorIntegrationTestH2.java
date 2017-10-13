@@ -20,16 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.function;
+package com.cadenzauk.siesta.h2;
 
-import java.util.Objects;
+import com.cadenzauk.siesta.TransactionIntegrationTest;
 
-@FunctionalInterface
-public interface ThrowingConsumer<T, E extends Throwable> {
-    void accept(T t) throws E;
-
-    default ThrowingConsumer<T, E> andThen(ThrowingConsumer<? super T, ? extends E> after) {
-        Objects.requireNonNull(after);
-        return (T t) -> { accept(t); after.accept(t); };
-    }
+public class HiLoGeneratorIntegrationTestH2 extends TransactionIntegrationTest {
 }

@@ -40,6 +40,7 @@ import java.sql.SQLException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 class SequenceTest extends MockitoTest {
@@ -71,7 +72,7 @@ class SequenceTest extends MockitoTest {
 
     @Test
     void single() {
-        when(database.select(Mockito.<SequenceExpression<Integer>>any())).thenReturn(select);
+        when(database.select(Mockito.<SequenceExpression<Integer>>any(), eq("TEST_SEQ"))).thenReturn(select);
         when(database.getDefaultSqlExecutor()).thenReturn(sqlExecutor);
         when(select.single(sqlExecutor)).thenReturn(501);
         Sequence<Integer> sut = createSut();

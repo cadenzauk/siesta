@@ -47,6 +47,9 @@ import java.util.stream.IntStream;
 @ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class IntegrationTest {
+    static {
+        System.setProperty("log4j.rootCategory", "WARN");
+    }
     @ClassRule
     public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 

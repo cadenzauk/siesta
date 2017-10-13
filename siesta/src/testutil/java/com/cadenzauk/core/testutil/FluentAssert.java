@@ -24,6 +24,7 @@ package com.cadenzauk.core.testutil;
 
 import com.cadenzauk.core.util.OptionalUtil;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -58,6 +59,11 @@ public class FluentAssert {
 
         public ThrowableMatcher<T> withMessage(Matcher<String> matcher) {
             assertThat(actual.getMessage(), matcher);
+            return this;
+        }
+
+        public ThrowableMatcher<T> withMessage(String message) {
+            assertThat(actual.getMessage(), Matchers.is(message));
             return this;
         }
 
