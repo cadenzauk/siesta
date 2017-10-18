@@ -23,21 +23,40 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultInteger;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
+import com.cadenzauk.siesta.type.DefaultVarchar;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Stream;
 
 public class FirebirdDialect extends AnsiDialect {
     public FirebirdDialect() {
         DateFunctionSpecs.registerExtract(functions());
         DateFunctionSpecs.registerDateAdd(functions());
+
+        functions()
+            .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("position") {
+                @Override
+                public String sql(String[] args) {
+                    return super.sql(args[1], args[0]);
+                }
+
+                @Override
+                public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+                    return super.args(scope, args[1], args[0]);
+                }
+            });
 
         types()
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
@@ -78,6 +97,12 @@ public class FirebirdDialect extends AnsiDialect {
                 public String literal(Database database, ZonedDateTime value) {
                     ZonedDateTime localDateTime = value.withZoneSameInstant(database.databaseTimeZone());
                     return String.format("TIMESTAMP '%s'", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS")));
+                }
+            })
+            .register(DbTypeId.VARCHAR, new DefaultVarchar() {
+                @Override
+                public String parameter(Database database, String value) {
+                    return String.format("cast(? as varchar(%d))", Integer.max(1, value.length()));
                 }
             });
     }

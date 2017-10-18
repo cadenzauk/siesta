@@ -26,11 +26,12 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.type.DefaultTinyint;
-import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +41,7 @@ import static com.cadenzauk.core.lang.StringUtil.octal;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
+import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.INSTR;
 
 public class PostgresDialect extends AnsiDialect {
     public PostgresDialect() {
@@ -62,6 +64,7 @@ public class PostgresDialect extends AnsiDialect {
             })
             .register(MINUTE_DIFF, argsSql -> String.format("extract(epoch from (date_trunc('minute', %1$s) - date_trunc('minute', %2$s))) / 60", argsSql[0], argsSql[1]))
             .register(SECOND_DIFF, argsSql -> String.format("extract(epoch from (%1$s - %2$s))", argsSql[0], argsSql[1]))
+            .register(INSTR, SimpleFunctionSpec.of("strpos"))
         ;
 
         types()

@@ -27,6 +27,8 @@ import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.core.tuple.Tuple4;
+import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -82,6 +84,7 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.secondDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
 import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.when;
+import static com.cadenzauk.siesta.grammar.expression.StringFunctions.instr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.cast;
@@ -93,8 +96,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @RunWith(JUnitParamsRunner.class)
 public abstract class DatabaseIntegrationTest extends IntegrationTest {
@@ -1059,5 +1062,20 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .single();
 
         assertThat(result, is(48));
+    }
+
+    @Test
+    public void instrFunction() {
+        Database database = testDatabase(dataSource, dialect);
+
+        Tuple3<Integer,Integer,Integer> result = database
+            .select(instr("ABCABC", "B"))
+            .comma(instr("ABC", "D"))
+            .comma(instr("DABC", "D"))
+            .single();
+
+        assertThat(result.item1(), is(2));
+        assertThat(result.item2(), is(0));
+        assertThat(result.item3(), is(1));
     }
 }

@@ -23,8 +23,11 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultDate;
 import com.cadenzauk.siesta.type.DefaultTime;
@@ -53,7 +56,19 @@ public class SqlServerDialect extends AnsiDialect {
         DateFunctionSpecs.registerDateAdd(functions());
         DateFunctionSpecs.registerDateDiff(functions());
 
-        functions().register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"));
+        functions()
+            .register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"))
+            .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("charindex") {
+                @Override
+                public String sql(String[] argsSql) {
+                    return super.sql(argsSql[1], argsSql[0]);
+                }
+
+                @Override
+                public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+                    return super.args(scope, args[1], args[0]);
+                }
+            });
 
         types()
             .register(DbTypeId.TINYINT, new DefaultTinyint() {

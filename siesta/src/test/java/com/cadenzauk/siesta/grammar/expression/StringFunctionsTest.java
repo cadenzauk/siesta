@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
+import static com.cadenzauk.siesta.grammar.expression.StringFunctions.instr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.length;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.substr;
@@ -128,7 +129,17 @@ class StringFunctionsTest extends FunctionTest {
             testCase(s -> substr("s", TestRow::stringOpt, 4, 2), "substr(s.STRING_OPT, ?, ?)", toArray(4, 2)),
             testCase(s -> substr(s, TestRow::stringReq, 3, 2), "substr(s.STRING_REQ, ?, ?)", toArray(3, 2)),
             testCase(s -> substr(s, TestRow::stringOpt, 4, 2), "substr(s.STRING_OPT, ?, ?)", toArray(4, 2)),
-            testCase(s -> substr(s.column(TestRow::stringOpt), value(5), value(3)), "substr(s.STRING_OPT, ?, ?)", toArray(5, 3))
+            testCase(s -> substr(s.column(TestRow::stringOpt), value(5), value(3)), "substr(s.STRING_OPT, ?, ?)", toArray(5, 3)),
+
+            testCase(s -> instr("123", "ABC"), "instr(?, ?)", toArray("123", "ABC")),
+            testCase(s -> instr(upper(TestRow::stringReq), "ABC"), "instr(upper(s.STRING_REQ), ?)", toArray("ABC")),
+            testCase(s -> instr(TestRow::stringReq, "DEF"), "instr(s.STRING_REQ, ?)", toArray("DEF")),
+            testCase(s -> instr(TestRow::stringOpt, "GHI"), "instr(s.STRING_OPT, ?)", toArray("GHI")),
+            testCase(s -> instr("s", TestRow::stringReq, "KLM"), "instr(s.STRING_REQ, ?)", toArray("KLM")),
+            testCase(s -> instr("s", TestRow::stringOpt, "NOP"), "instr(s.STRING_OPT, ?)", toArray("NOP")),
+            testCase(s -> instr(s, TestRow::stringReq, "QRS"), "instr(s.STRING_REQ, ?)", toArray("QRS")),
+            testCase(s -> instr(s, TestRow::stringOpt, "TUV"), "instr(s.STRING_OPT, ?)", toArray("TUV")),
+            testCase(s -> instr(s.column(TestRow::stringOpt), lower(value("WXY"))), "instr(s.STRING_OPT, lower(?))", toArray("WXY"))
         );
     }
 

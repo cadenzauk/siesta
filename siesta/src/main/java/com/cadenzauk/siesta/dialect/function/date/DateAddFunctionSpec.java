@@ -42,8 +42,7 @@ public class DateAddFunctionSpec implements FunctionSpec {
 
     @Override
     public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
-        return Stream.of(args[1], args[0])
-            .flatMap(a -> a.args(scope));
+        return Stream.of(args[1], args[0]).flatMap(a -> a.args(scope));
     }
 
     public static DateAddFunctionSpec of(String part) {

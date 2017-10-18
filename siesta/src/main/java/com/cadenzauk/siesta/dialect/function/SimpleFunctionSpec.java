@@ -25,12 +25,12 @@ package com.cadenzauk.siesta.dialect.function;
 public class SimpleFunctionSpec implements FunctionSpec {
     private final String name;
 
-    private SimpleFunctionSpec(String name) {
+    protected SimpleFunctionSpec(String name) {
         this.name = name;
     }
 
     @Override
-    public String sql(String[] argsSql) {
+    public String sql(String... argsSql) {
         return String.format("%s(%s)", name, String.join(", ", argsSql));
     }
 

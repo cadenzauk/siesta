@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.siesta.Alias;
 
+import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.INSTR;
 import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.LENGTH;
 import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.LOWER;
 import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.SUBSTR;
@@ -207,5 +208,43 @@ public final class StringFunctions extends UtilityClass {
 
     public static TypedExpression<String> substr(TypedExpression<String> str, TypedExpression<Integer> start, TypedExpression<Integer> len) {
         return SqlFunction.of(SUBSTR, String.class, str, start, len);
+    }
+
+    //--
+
+    public static TypedExpression<Integer> instr(String str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, ValueExpression.of(str), ValueExpression.of(substr));
+    }
+
+    public static TypedExpression<Integer> instr(TypedExpression<String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, str, ValueExpression.of(substr));
+    }
+
+    public static <R> TypedExpression<Integer> instr(Function1<R,String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, UnresolvedColumn.of(str), ValueExpression.of(substr));
+    }
+
+    public static <R> TypedExpression<Integer> instr(FunctionOptional1<R,String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, UnresolvedColumn.of(str), ValueExpression.of(substr));
+    }
+
+    public static <R> TypedExpression<Integer> instr(String alias, Function1<R,String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, UnresolvedColumn.of(alias, str), ValueExpression.of(substr));
+    }
+
+    public static <R> TypedExpression<Integer> instr(String alias, FunctionOptional1<R,String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, UnresolvedColumn.of(alias, str), ValueExpression.of(substr));
+    }
+
+    public static <R> TypedExpression<Integer> instr(Alias<R> alias, Function1<R,String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, ResolvedColumn.of(alias, str), ValueExpression.of(substr));
+    }
+
+    public static <R> TypedExpression<Integer> instr(Alias<R> alias, FunctionOptional1<R,String> str, String substr) {
+        return SqlFunction.of(INSTR, Integer.class, ResolvedColumn.of(alias, str), ValueExpression.of(substr));
+    }
+
+    public static TypedExpression<Integer> instr(TypedExpression<String> str, TypedExpression<String> substr) {
+        return SqlFunction.of(INSTR, Integer.class, str, substr);
     }
 }

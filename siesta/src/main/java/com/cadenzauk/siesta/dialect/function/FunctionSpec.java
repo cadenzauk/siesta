@@ -29,9 +29,9 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 public interface FunctionSpec {
-    String sql(String[] argsSql);
+    String sql(String... argsSql);
 
-    default Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
+    default Stream<Object> args(Scope scope, TypedExpression<?>... args) {
         return Arrays.stream(args).flatMap(a -> a.args(scope));
     }
 }

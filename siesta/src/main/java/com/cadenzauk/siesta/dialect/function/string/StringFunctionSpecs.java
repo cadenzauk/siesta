@@ -31,11 +31,13 @@ public class StringFunctionSpecs {
     public static final FunctionName LOWER = new FunctionName("lower");
     public static final FunctionName SUBSTR = new FunctionName("substr");
     public static final FunctionName LENGTH = new FunctionName("length");
+    public static final FunctionName INSTR = new FunctionName("instr");
 
     public static void registerDefaults(FunctionRegistry functions) {
         functions.register(UPPER, SimpleFunctionSpec.of("upper"));
         functions.register(LOWER, SimpleFunctionSpec.of("lower"));
         functions.register(SUBSTR, SimpleFunctionSpec.of("substr"));
         functions.register(LENGTH, SimpleFunctionSpec.of("length"));
+        functions.register(INSTR, SimpleFunctionSpec.of("instr"));
     }
 }
