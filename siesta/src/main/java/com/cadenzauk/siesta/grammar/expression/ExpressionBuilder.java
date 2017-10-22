@@ -441,40 +441,6 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     //---
 
-    public static <T> ExpressionBuilder<T,CaseExpression.InFirstWhenExpectingThen> when(T val) {
-        return ExpressionBuilder.of(ValueExpression.of(val), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T> ExpressionBuilder<T,CaseExpression.InFirstWhenExpectingThen> when(TypedExpression<T> expression) {
-        return ExpressionBuilder.of(expression, CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(Function1<T,R> method) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(method), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(FunctionOptional1<T,R> method) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(method), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(String alias, Function1<T,R> method) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(String alias, FunctionOptional1<T,R> method) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(Alias<T> alias, Function1<T,R> method) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(Alias<T> alias, FunctionOptional1<T,R> method) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
-    }
-
-    //---
-
     public ExpressionBuilder<T,N> selectivity(double v) {
         selectivity = Optional.of(v);
         return this;

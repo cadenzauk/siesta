@@ -20,28 +20,50 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.select;
+package com.cadenzauk.siesta.grammar.expression.olap;
 
-import com.cadenzauk.siesta.Order;
+import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
 
-public class Ordering<T> implements OrderingClause {
-    private final TypedExpression<T> expression;
-    private final Order order;
+public abstract class InOlapFunction<T> implements TypedExpression<T> {
+    protected final OlapFunction<T> function;
 
-    public Ordering(TypedExpression<T> expression, Order order) {
-        this.expression = expression;
-        this.order = order;
+    InOlapFunction(OlapFunction<T> function) {
+        this.function = function;
     }
 
+    @Override
+    public String label(Scope scope) {
+        return function.label(scope);
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return function.rowMapper(scope, label);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return function.type();
+    }
+
+    @Override
     public String sql(Scope scope) {
-        return expression.sql(scope) + " " + order.sql();
+        return function.sql(scope);
     }
 
+    @Override
     public Stream<Object> args(Scope scope) {
-        return expression.args(scope);
+        return function.args(scope);
+    }
+
+    @Override
+    public Precedence precedence() {
+        return function.precedence();
     }
 }

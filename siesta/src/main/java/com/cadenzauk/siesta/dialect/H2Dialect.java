@@ -67,4 +67,14 @@ public class H2Dialect extends AnsiDialect {
         return "set lock_timeout 1000";
     }
 
+    @Override
+    public boolean supportsPartitionByInOlap() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsOrderByInOlap() {
+        return false;
+    }
+
 }

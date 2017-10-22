@@ -25,10 +25,9 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
+import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.core.tuple.Tuple4;
-import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -36,6 +35,7 @@ import com.cadenzauk.siesta.grammar.expression.DateFunctions;
 import com.cadenzauk.siesta.grammar.expression.LiteralExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
+import com.cadenzauk.siesta.grammar.expression.olap.Olap;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
@@ -60,11 +60,14 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.LongStream;
 
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
 import static com.cadenzauk.core.RandomValues.randomLocalTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
 import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
+import static com.cadenzauk.siesta.Order.ASC;
+import static com.cadenzauk.siesta.Order.DESC;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
@@ -83,11 +86,12 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.secondDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
-import static com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.when;
+import static com.cadenzauk.siesta.grammar.expression.Case.when;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.instr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.cast;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
@@ -200,7 +204,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .join(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
             .select(WidgetRow.class)
             .where(ManufacturerRow::name).isEqualTo("Acclaimed Widgets")
-            .orderBy(WidgetRow::name, Order.DESC)
+            .orderBy(WidgetRow::name, DESC)
             .list();
 
         List<Tuple2<String,WidgetRow>> acclaimedWidgets2 = database
@@ -283,7 +287,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .select(WidgetRow::manufacturerId).comma(max(WidgetRow::name)).comma(min(WidgetRow::name))
             .where(WidgetRow::widgetId).isIn(aWidget1.widgetId(), aWidget2.widgetId(), aWidget3.widgetId())
             .groupBy(WidgetRow::manufacturerId)
-            .orderBy(WidgetRow::manufacturerId, Order.DESC).then(max(WidgetRow::name)).then(min(WidgetRow::name))
+            .orderBy(WidgetRow::manufacturerId, DESC).then(max(WidgetRow::name)).then(min(WidgetRow::name))
             .list();
 
         assertThat(result.get(0).item1(), is(manufacturer2));
@@ -531,7 +535,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
                     .select(SalespersonRow::salespersonId)
                     .where(SalespersonRow::surname).isNotEqualTo("Smith")
             )
-            .orderBy(SalespersonRow::firstName, Order.DESC)
+            .orderBy(SalespersonRow::firstName, DESC)
             .list();
 
         assertThat(smiths1, hasSize(2));
@@ -583,6 +587,98 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result.get(3), is("Doofer"));
     }
 
+    @Test
+    public void olapWithPartitionAndOrder() {
+        if (!dialect.supportsPartitionByInOlap() || !dialect.supportsOrderByInOlap()) {
+            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support PARTITION BY/ORDER BY in OLAP functions.");
+        }
+        Database database = testDatabase(dataSource, dialect);
+        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+
+        List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
+            .select(SalespersonRow::salespersonId)
+            .comma(Olap.rowNumber()
+                .partitionBy(SalespersonRow::salespersonId)
+                .orderBy(SalespersonRow::salespersonId, DESC).then(SalespersonRow::surname, ASC))
+            .comma(Olap.sum(SalespersonRow::salespersonId)
+                .partitionBy(SalespersonRow::salespersonId)
+                .orderBy(SalespersonRow::salespersonId, DESC))
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .orderBy(SalespersonRow::salespersonId)
+            .list();
+
+        assertThat(result, hasSize(5));
+        assertThat(result.get(0), is(Tuple.of(inserted.item1(), 1, inserted.item1())));
+        assertThat(result.get(4), is(Tuple.of(inserted.item2(), 1, inserted.item2())));
+    }
+
+    @Test
+    public void olapWithPartition() {
+        if (!dialect.supportsPartitionByInOlap()) {
+            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support PARTITION BY in OLAP functions.");
+        }
+
+        Database database = testDatabase(dataSource, dialect);
+        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+
+        TypedExpression<Integer> rowNumber =
+            dialect.requiresOrderByInRowNumber()
+                ? Olap.rowNumber().partitionBy(column(SalespersonRow::salespersonId)).orderBy(SalespersonRow::salespersonId, ASC)
+                : Olap.rowNumber().partitionBy(column(SalespersonRow::salespersonId));
+        List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
+            .select(SalespersonRow::salespersonId)
+            .comma(rowNumber)
+            .comma(Olap.sum(SalespersonRow::salespersonId).partitionBy(SalespersonRow::salespersonId).then(SalespersonRow::firstName))
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .orderBy(SalespersonRow::salespersonId)
+            .list();
+
+        assertThat(result, hasSize(5));
+        assertThat(result.get(0), is(Tuple.of(inserted.item1(), 1, inserted.item1())));
+        assertThat(result.get(4), is(Tuple.of(inserted.item2(), 1, inserted.item2())));
+    }
+
+    @Test
+    public void olapWithOrderBy() {
+        if (!dialect.supportsOrderByInOlap()) {
+            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support row_number() with ORDER BY.");
+        }
+        Database database = testDatabase(dataSource, dialect);
+        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+
+        List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
+            .select(SalespersonRow::salespersonId)
+            .comma(Olap.rowNumber().orderBy(SalespersonRow::salespersonId, DESC))
+            .comma(Olap.sum(SalespersonRow::salespersonId).orderBy(SalespersonRow::salespersonId, ASC))
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .orderBy(SalespersonRow::salespersonId)
+            .list();
+
+        assertThat(result, hasSize(5));
+        assertThat(result.get(0), is(Tuple.of(inserted.item1(), 5, inserted.item1())));
+        assertThat(result.get(4), is(Tuple.of(inserted.item2(), 1, LongStream.range(inserted.item1(), inserted.item2() + 1).reduce((x, y) -> x + y).orElse(0))));
+    }
+
+    @Test
+    public void olapWithoutPartitionOrOrder() {
+        if (dialect.requiresOrderByInRowNumber()) {
+            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support row_number() without ORDER BY.");
+        }
+        Database database = testDatabase(dataSource, dialect);
+        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+
+        List<Tuple2<Long,Integer>> result = database.from(SalespersonRow.class)
+            .select(SalespersonRow::salespersonId)
+            .comma(Olap.rowNumber())
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .orderBy(SalespersonRow::salespersonId)
+            .list();
+
+        assertThat(result, hasSize(5));
+        assertThat(result.get(0), is(Tuple.of(inserted.item1(), 1)));
+        assertThat(result.get(4), is(Tuple.of(inserted.item2(), 5)));
+    }
+
     @SuppressWarnings("unused")
     private Object[] parametersForLiteral() {
         return new Object[]{
@@ -593,7 +689,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             2.71f,
             LocalDate.of(2014, 9, 12),
             LocalDateTime.of(2017, 1, 2, 3, 4, 5, 6000000),
-            9223372036854775807L,
+            9_223_372_036_854_775_807L,
             (short) 32767,
             "Abc'def\"g hi",
         };
@@ -857,7 +953,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         CommonTableExpression<SalespersonRow> last2 = database.with("last2")
             .as(
                 database.from(first5, "f5")
-                    .orderBy(SalespersonRow::salespersonId, Order.DESC)
+                    .orderBy(SalespersonRow::salespersonId, DESC)
                     .fetchFirst(2)
             );
         List<SalespersonRow> lastTwo = database.from(last2, "l2").list();
@@ -872,7 +968,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     public Object[][] parametersForCastExpression() {
-        return new Object[][] {
+        return new Object[][]{
             castExpressionTestCase(cast(134).asChar(3), "134"),
             castExpressionTestCase(cast(126).asTinyInteger(), (byte) 126),
             castExpressionTestCase(cast(32767L).asSmallInteger(), (short) 32767),
@@ -1056,7 +1152,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
             .execute();
 
-        int result= database.from(SalespersonRow.class)
+        int result = database.from(SalespersonRow.class)
             .select(SalespersonRow::numberOfSales)
             .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
             .single();

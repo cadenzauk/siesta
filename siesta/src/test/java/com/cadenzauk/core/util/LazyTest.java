@@ -38,37 +38,87 @@ import static org.mockito.Mockito.when;
 
 class LazyTest {
     @Test
-    void getSuccess() {
+    void tryGetSuccess() {
         Lazy<String> sut = new Lazy<>(() -> "Hello World");
 
-        Try<String> result = sut.get();
+        Try<String> result = sut.tryGet();
 
         assertThat(result, is(Try.success("Hello World")));
     }
 
     @Test
-    void getFailure() {
+    void tryGetFailure() {
         Lazy<String> sut = new Lazy<>(() -> {
             throw new RuntimeException("Epic fail.");
         });
 
-        Try<String> result = sut.get();
+        Try<String> result = sut.tryGet();
 
         assertThat(result, is(Try.failure(new RuntimeException("Epic fail."))));
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    void getOnlyOnceIfSuccessful() {
+    void tryGetOnlyOnceIfSuccessful() {
         ThrowingSupplier<String,RuntimeException> supplier = Mockito.mock(ThrowingSupplier.class);
         when(supplier.get()).thenReturn("Listen very carefully, I shall say this only once.");
         Lazy<String> sut = new Lazy<>(supplier);
 
-        Try<String> result1 = sut.get();
-        Try<String> result2 = sut.get();
+        Try<String> result1 = sut.tryGet();
+        Try<String> result2 = sut.tryGet();
 
         assertThat(result1, is(Try.success("Listen very carefully, I shall say this only once.")));
         assertThat(result2, is(Try.success("Listen very carefully, I shall say this only once.")));
+        verify(supplier, times(1)).get();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void tryGetOnlyOnceIfFailed() {
+        ThrowingSupplier<String,RuntimeException> supplier = Mockito.mock(ThrowingSupplier.class);
+        when(supplier.get()).thenThrow(new IllegalArgumentException("Bad argument."));
+        Lazy<String> sut = new Lazy<>(supplier);
+
+        Try<String> result1 = sut.tryGet();
+        Try<String> result2 = sut.tryGet();
+
+        assertThat(result1, is(Try.failure(new IllegalArgumentException("Bad argument."))));
+        assertThat(result2, is(Try.failure(new IllegalArgumentException("Bad argument."))));
+        verify(supplier, times(1)).get();
+    }
+
+    @Test
+    void getSuccess() {
+        Lazy<String> sut = new Lazy<>(() -> "Hello World");
+
+        String result = sut.get();
+
+        assertThat(result, is("Hello World"));
+    }
+
+    @Test
+    void getFailure() {
+        Lazy<String> sut = new Lazy<>(() -> {
+            throw new RuntimeException("Oops!");
+        });
+
+        calling(sut::get)
+            .shouldThrow(RuntimeException.class)
+            .withMessage("Oops!");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void getOnceIfSuccessful() {
+        ThrowingSupplier<String,RuntimeException> supplier = Mockito.mock(ThrowingSupplier.class);
+        when(supplier.get()).thenReturn("Listen very carefully, I shall say this only once.");
+        Lazy<String> sut = new Lazy<>(supplier);
+
+        String result1 = sut.get();
+        String result2 = sut.get();
+
+        assertThat(result1, is("Listen very carefully, I shall say this only once."));
+        assertThat(result2, is("Listen very carefully, I shall say this only once."));
         verify(supplier, times(1)).get();
     }
 
@@ -79,60 +129,10 @@ class LazyTest {
         when(supplier.get()).thenThrow(new IllegalArgumentException("Bad argument."));
         Lazy<String> sut = new Lazy<>(supplier);
 
-        Try<String> result1 = sut.get();
-        Try<String> result2 = sut.get();
-
-        assertThat(result1, is(Try.failure(new IllegalArgumentException("Bad argument."))));
-        assertThat(result2, is(Try.failure(new IllegalArgumentException("Bad argument."))));
-        verify(supplier, times(1)).get();
-    }
-
-    @Test
-    void orElseThrowSuccess() {
-        Lazy<String> sut = new Lazy<>(() -> "Hello World");
-
-        String result = sut.orElseThrow();
-
-        assertThat(result, is("Hello World"));
-    }
-
-    @Test
-    void orElseThrowFailure() {
-        Lazy<String> sut = new Lazy<>(() -> {
-            throw new RuntimeException("Oops!");
-        });
-
-        calling(sut::orElseThrow)
-            .shouldThrow(RuntimeException.class)
-            .withMessage("Oops!");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void orElseThrowOnlyOnceIfSuccessful() {
-        ThrowingSupplier<String,RuntimeException> supplier = Mockito.mock(ThrowingSupplier.class);
-        when(supplier.get()).thenReturn("Listen very carefully, I shall say this only once.");
-        Lazy<String> sut = new Lazy<>(supplier);
-
-        String result1 = sut.orElseThrow();
-        String result2 = sut.orElseThrow();
-
-        assertThat(result1, is("Listen very carefully, I shall say this only once."));
-        assertThat(result2, is("Listen very carefully, I shall say this only once."));
-        verify(supplier, times(1)).get();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void orElseThrowOnlyOnceIfFailed() {
-        ThrowingSupplier<String,RuntimeException> supplier = Mockito.mock(ThrowingSupplier.class);
-        when(supplier.get()).thenThrow(new IllegalArgumentException("Bad argument."));
-        Lazy<String> sut = new Lazy<>(supplier);
-
-        calling(sut::orElseThrow)
+        calling(sut::get)
             .shouldThrow(IllegalArgumentException.class)
             .withMessage("Bad argument.");
-        calling(sut::orElseThrow)
+        calling(sut::get)
             .shouldThrow(IllegalArgumentException.class)
             .withMessage("Bad argument.");
 
@@ -152,7 +152,7 @@ class LazyTest {
     void isKnownWhenSuccess() {
         Lazy<String> sut = new Lazy<>(() -> "Good boy");
 
-        sut.get();
+        sut.tryGet();
 
         assertThat(sut.isKnown(), is(true));
         assertThat(sut.isKnownSuccess(), is(true));
@@ -165,7 +165,7 @@ class LazyTest {
             throw new ArithmeticException("Bad boy");
         });
 
-        sut.get();
+        sut.tryGet();
 
         assertThat(sut.isKnown(), is(true));
         assertThat(sut.isKnownSuccess(), is(false));
@@ -178,7 +178,7 @@ class LazyTest {
 
         Lazy<String> map = sut.map(s -> s + " World!");
 
-        assertThat(map.orElseThrow(), is("Hello World!"));
+        assertThat(map.get(), is("Hello World!"));
     }
 
     @Test
@@ -189,7 +189,7 @@ class LazyTest {
             throw new IllegalArgumentException("Too unfriendly.");
         });
 
-        calling(map::orElseThrow)
+        calling(map::get)
             .shouldThrow(IllegalArgumentException.class)
             .withMessage("Too unfriendly.");
     }
@@ -202,7 +202,7 @@ class LazyTest {
 
         Lazy<String> map = sut.map(s -> s + " World!");
 
-        calling(map::orElseThrow)
+        calling(map::get)
             .shouldThrow(UnsupportedOperationException.class)
             .withMessage("No greetings for you.");
     }
@@ -219,8 +219,8 @@ class LazyTest {
 
         verifyZeroInteractions(supplier, mapFunction);
 
-        Try<String> result1 = map.get();
-        Try<String> result2 = map.get();
+        Try<String> result1 = map.tryGet();
+        Try<String> result2 = map.tryGet();
 
         assertThat(result1, is(Try.success("I shall say this only once.")));
         assertThat(result2, is(Try.success("I shall say this only once.")));
@@ -240,8 +240,8 @@ class LazyTest {
 
         verifyZeroInteractions(supplier, mapFunction);
 
-        Try<String> result1 = map.get();
-        Try<String> result2 = map.get();
+        Try<String> result1 = map.tryGet();
+        Try<String> result2 = map.tryGet();
 
         assertThat(result1, is(Try.failure(new RuntimeException("Allo Allo"))));
         assertThat(result2, is(Try.failure(new RuntimeException("Allo Allo"))));
@@ -261,8 +261,8 @@ class LazyTest {
 
         verifyZeroInteractions(supplier, mapFunction);
 
-        Try<String> result1 = map.get();
-        Try<String> result2 = map.get();
+        Try<String> result1 = map.tryGet();
+        Try<String> result2 = map.tryGet();
 
         assertThat(result1, is(Try.success("I shall say this only once.")));
         assertThat(result2, is(Try.success("I shall say this only once.")));
@@ -282,8 +282,8 @@ class LazyTest {
 
         verifyZeroInteractions(supplier, mapFunction);
 
-        Try<String> result1 = map.get();
-        Try<String> result2 = map.get();
+        Try<String> result1 = map.tryGet();
+        Try<String> result2 = map.tryGet();
 
         assertThat(result1, is(Try.failure(new RuntimeException("Allo Allo"))));
         assertThat(result2, is(Try.failure(new RuntimeException("Allo Allo"))));

@@ -151,23 +151,23 @@ class CaseExpressionTest extends MockitoTest {
     @SuppressWarnings("unused")
     static Stream<Arguments> parametersForInitialWhen() {
         return Stream.of(
-            testCase("when ? = ? then 'BURT'", w -> ExpressionBuilder.when(2).isEqualTo(3).then("BURT"), 2, 3),
-            testCase("when 2 = ? then 'BURT'", w -> ExpressionBuilder.when(literal(2)).isEqualTo(3).then("BURT"), 3),
-            testCase("when w.NAME = ? then 'BURT'", w -> ExpressionBuilder.when(WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
-            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> ExpressionBuilder.when(WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
-            testCase("when w.NAME = ? then 'BURT'", w -> ExpressionBuilder.when("w", WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
-            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> ExpressionBuilder.when("w", WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
-            testCase("when w.NAME = ? then 'BURT'", w -> ExpressionBuilder.when(w, WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
-            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> ExpressionBuilder.when(w, WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when ? = ? then 'BURT'", w -> Case.when(2).isEqualTo(3).then("BURT"), 2, 3),
+            testCase("when 2 = ? then 'BURT'", w -> Case.when(literal(2)).isEqualTo(3).then("BURT"), 3),
+            testCase("when w.NAME = ? then 'BURT'", w -> Case.when(WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> Case.when(WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.NAME = ? then 'BURT'", w -> Case.when("w", WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> Case.when("w", WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.NAME = ? then 'BURT'", w -> Case.when(w, WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> Case.when(w, WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
 
-            testCase("when ? = ? then 'BAZ'", w -> ExpressionBuilder.when(2).isEqualTo(3).then("BAZ"), 2, 3),
-            testCase("when ? = ? then ?", w -> ExpressionBuilder.when(2).isEqualTo(3).then(value("BAZ")), 2, 3, "BAZ"),
-            testCase("when ? = ? then w.NAME", w -> ExpressionBuilder.when(2).isEqualTo(3).then(WidgetRow::name), 2, 3),
-            testCase("when ? = ? then w.DESCRIPTION", w -> ExpressionBuilder.when(2).isEqualTo(3).then(WidgetRow::description), 2, 3),
-            testCase("when ? = ? then w.NAME", w -> ExpressionBuilder.when(2).isEqualTo(3).then("w", WidgetRow::name), 2, 3),
-            testCase("when ? = ? then w.DESCRIPTION", w -> ExpressionBuilder.when(2).isEqualTo(3).then("w", WidgetRow::description), 2, 3),
-            testCase("when ? = ? then w.NAME", w -> ExpressionBuilder.when(2).isEqualTo(3).then(w, WidgetRow::name), 2, 3),
-            testCase("when ? = ? then w.DESCRIPTION", w -> ExpressionBuilder.when(2).isEqualTo(3).then(w, WidgetRow::description), 2, 3)
+            testCase("when ? = ? then 'BAZ'", w -> Case.when(2).isEqualTo(3).then("BAZ"), 2, 3),
+            testCase("when ? = ? then ?", w -> Case.when(2).isEqualTo(3).then(value("BAZ")), 2, 3, "BAZ"),
+            testCase("when ? = ? then w.NAME", w -> Case.when(2).isEqualTo(3).then(WidgetRow::name), 2, 3),
+            testCase("when ? = ? then w.DESCRIPTION", w -> Case.when(2).isEqualTo(3).then(WidgetRow::description), 2, 3),
+            testCase("when ? = ? then w.NAME", w -> Case.when(2).isEqualTo(3).then("w", WidgetRow::name), 2, 3),
+            testCase("when ? = ? then w.DESCRIPTION", w -> Case.when(2).isEqualTo(3).then("w", WidgetRow::description), 2, 3),
+            testCase("when ? = ? then w.NAME", w -> Case.when(2).isEqualTo(3).then(w, WidgetRow::name), 2, 3),
+            testCase("when ? = ? then w.DESCRIPTION", w -> Case.when(2).isEqualTo(3).then(w, WidgetRow::description), 2, 3)
         );
     }
 
@@ -192,7 +192,7 @@ class CaseExpressionTest extends MockitoTest {
     }
 
     @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForSubsequentClauses() {
+    private static Stream<Arguments> parametersForSubsequentClauses() {
         return Stream.of(
             testCase("else 'FRED'", (c, w) -> c.orElse("FRED")),
             testCase("else ?", (c, w) -> c.orElse(value("JOE")), "JOE"),
@@ -230,7 +230,7 @@ class CaseExpressionTest extends MockitoTest {
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
 
         database.from(w)
-            .select(f.apply(ExpressionBuilder.when(literal(1)).isEqualTo(literal(2)).then("UNLIKELY"), w), "name")
+            .select(f.apply(Case.when(literal(1)).isEqualTo(literal(2)).then("UNLIKELY"), w), "name")
             .list(transaction);
 
         verify(transaction).query(sql.capture(), args.capture(), any());

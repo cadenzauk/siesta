@@ -24,6 +24,10 @@ package com.cadenzauk.core.util;
 
 import com.cadenzauk.core.function.ThrowingFunction;
 import com.cadenzauk.core.function.ThrowingSupplier;
+import com.cadenzauk.core.stream.StreamUtil;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class Lazy<T> {
     private final Object lock = new Object();
@@ -34,7 +38,7 @@ public class Lazy<T> {
         this.supplier = supplier;
     }
 
-    public Try<T> get() {
+    public Try<T> tryGet() {
         Try<T> result = value;
         if (result == null) {
             synchronized (lock) {
@@ -47,8 +51,20 @@ public class Lazy<T> {
         return result;
     }
 
-    public T orElseThrow() {
-        return get().orElseThrow();
+    public T get() {
+        return tryGet().orElseThrow();
+    }
+
+    public Optional<T> optional() {
+        synchronized (lock) {
+            return Optional.ofNullable(value).flatMap(Try::toOptional);
+        }
+    }
+
+    public Stream<T> stream() {
+        synchronized (lock) {
+            return StreamUtil.of(Optional.ofNullable(value)).flatMap(Try::stream);
+        }
     }
 
     public boolean isKnown() {
@@ -70,10 +86,10 @@ public class Lazy<T> {
     }
 
     public <U, E extends Exception> Lazy<U> map(ThrowingFunction<? super T, ? extends U, E> function) {
-        return new Lazy<>(() -> get().map(function).orElseThrow());
+        return new Lazy<>(() -> tryGet().map(function).orElseThrow());
     }
 
     public <U, E extends Exception> Lazy<U> flatMap(ThrowingFunction<? super T, Lazy<U>, E> function) {
-        return new Lazy<>(() -> get().map(function).orElseThrow().orElseThrow());
+        return new Lazy<>(() -> tryGet().map(function).orElseThrow().get());
     }
 }

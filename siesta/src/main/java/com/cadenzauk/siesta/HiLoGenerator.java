@@ -55,7 +55,7 @@ public class HiLoGenerator {
         offset = builder.offset;
         loSize = builder.loSize;
         threshold = builder.threshold;
-        executor = builder.executor.orElseGet(COMMON_POOL::orElseThrow);
+        executor = builder.executor.orElseGet(COMMON_POOL::get);
 
         initialize();
     }

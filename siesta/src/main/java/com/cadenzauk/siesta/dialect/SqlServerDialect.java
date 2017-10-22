@@ -158,12 +158,16 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public String setLockTimeout(long time, TimeUnit unit) {
         return String.format("set lock_timeout %d", unit.toMillis(time));
-        //return "set LOCK_TIMEOUT 100";
     }
 
     @Override
     public String resetLockTimeout() {
         return "set lock_timeout -1";
+    }
+
+    @Override
+    public boolean requiresOrderByInRowNumber() {
+        return true;
     }
 
     @Override

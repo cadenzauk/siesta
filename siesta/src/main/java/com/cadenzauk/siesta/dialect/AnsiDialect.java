@@ -137,6 +137,21 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public boolean supportsPartitionByInOlap() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsOrderByInOlap() {
+        return true;
+    }
+
+    @Override
+    public boolean requiresOrderByInRowNumber() {
+        return false;
+    }
+
+    @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
         return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
     }

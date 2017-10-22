@@ -147,4 +147,9 @@ public class OracleDialect extends AnsiDialect {
         return String.format("select * from (%s) where rownum <= %d", sql, n);
     }
 
+    @Override
+    public boolean requiresOrderByInRowNumber() {
+        return true;
+    }
+
 }

@@ -109,7 +109,7 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
         return new UnresolvedColumn<>(alias, method);
     }
 
-    public static <T, R> TypedExpression<T> of(String alias, FunctionOptional1<R,T> getter) {
+    public static <T, R> UnresolvedColumn<T,R> of(String alias, FunctionOptional1<R,T> getter) {
         MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(alias, method);
     }
