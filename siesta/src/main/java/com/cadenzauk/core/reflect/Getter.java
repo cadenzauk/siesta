@@ -26,6 +26,7 @@ import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
 import com.cadenzauk.core.util.UtilityClass;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,9 +48,14 @@ public final class Getter extends UtilityClass {
 
     @NotNull
     public static <T, V> Function<T,Optional<V>> forField(Class<T> targetClass, Class<V> argType, Field field) {
-        return findGetter(targetClass, argType, field)
-            .map(m -> fromMethod(targetClass, argType, m))
-            .orElseGet(() -> fromField(targetClass, argType, field));
+        return forField(TypeToken.of(targetClass), argType, field);
+    }
+
+    @NotNull
+    public static <T, V> Function<T,Optional<V>> forField(TypeToken<T> targetType, Class<V> argType, Field field) {
+        return findGetter(targetType, argType, field)
+            .map(m -> fromMethod(targetType, argType, m))
+            .orElseGet(() -> fromField(targetType, argType, field));
     }
 
     public static boolean isGetter(Method method, Field forField) {
@@ -57,10 +63,10 @@ public final class Getter extends UtilityClass {
     }
 
     @NotNull
-    private static <T> Optional<Method> findGetter(Class<T> targetClass, Class<?> argType, Field field) {
+    private static <T> Optional<Method> findGetter(TypeToken<T> targetClass, Class<?> argType, Field field) {
         return getMethods()
             .map(f -> f.apply(field.getName()))
-            .flatMap(name -> ClassUtil.declaredMethods(targetClass)
+            .flatMap(name -> ClassUtil.declaredMethods(targetClass.getRawType())
                 .filter(method -> method.getName().equals(name))
                 .filter(method -> method.getParameterCount() == 0)
                 .filter(method -> argType.isAssignableFrom(method.getReturnType()) || method.getReturnType() == Optional.class))
@@ -74,7 +80,7 @@ public final class Getter extends UtilityClass {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    private static <T, V> Function<T,Optional<V>> fromMethod(Class<T> targetClass, Class<V> argType, Method method) {
+    private static <T, V> Function<T,Optional<V>> fromMethod(TypeToken<T> targetClass, Class<V> argType, Method method) {
         if (argType.isAssignableFrom(method.getReturnType())) {
             return t -> Optional.ofNullable(boxedType(argType).cast(MethodUtil.invoke(method, t)));
         }
@@ -89,7 +95,7 @@ public final class Getter extends UtilityClass {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    private static <T, V> Function<T,Optional<V>> fromField(Class<T> targetClass, Class<V> argType, Field field) {
+    private static <T, V> Function<T,Optional<V>> fromField(TypeToken<T> targetClass, Class<V> argType, Field field) {
         if (argType.isAssignableFrom(field.getType())) {
             return t -> Optional.ofNullable(boxedType(argType).cast(FieldUtil.get(field, t)));
         }

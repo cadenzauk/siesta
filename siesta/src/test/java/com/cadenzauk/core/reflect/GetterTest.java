@@ -66,7 +66,7 @@ class GetterTest {
         calling(() -> Getter.forField(GetterTestClass.class, Byte.class, getDeclaredField(GetterTestClass.class, "fieldWithNoGetter")))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Cannot convert private java.lang.String com.cadenzauk.core.reflect.GetterTest$GetterTestClass.fieldWithNoGetter " +
-                "into a Function<class com.cadenzauk.core.reflect.GetterTest$GetterTestClass,Optional<class java.lang.Byte>>."));
+                "into a Function<com.cadenzauk.core.reflect.GetterTest$GetterTestClass,Optional<class java.lang.Byte>>."));
     }
 
     @Test
@@ -166,7 +166,7 @@ class GetterTest {
         calling(() -> Getter.forField(GetterTestClass.class, Byte.class, getDeclaredField(GetterTestClass.class, "optionalFieldWithGetPrefixedGetter")))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Cannot convert java.util.Optional com.cadenzauk.core.reflect.GetterTest$GetterTestClass.getOptionalFieldWithGetPrefixedGetter() " +
-                "into a Function<class com.cadenzauk.core.reflect.GetterTest$GetterTestClass,Optional<class java.lang.Byte>>."));
+                "into a Function<com.cadenzauk.core.reflect.GetterTest$GetterTestClass,Optional<class java.lang.Byte>>."));
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

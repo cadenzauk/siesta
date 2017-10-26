@@ -38,19 +38,19 @@ import java.util.function.Function;
 import static com.cadenzauk.core.reflect.util.FieldUtil.genericTypeArgument;
 
 public class FieldInfo<C, F> {
-    private final Class<C> declaringClass;
+    private final TypeToken<C> declaringClass;
     private final Field field;
     private final Class<F> effectiveType;
     private final Function<C,Optional<F>> optionalGetter;
 
-    private FieldInfo(Class<C> declaringClass, Field field, Class<F> effectiveType) {
-        Objects.requireNonNull(declaringClass, "declaringClass");
+    private FieldInfo(TypeToken<C> declaringType, Field field, Class<F> effectiveType) {
+        Objects.requireNonNull(declaringType, "declaringType");
         Objects.requireNonNull(field, "field");
         Objects.requireNonNull(effectiveType, "effectiveType");
-        this.declaringClass = declaringClass;
+        this.declaringClass = declaringType;
         this.field = field;
         this.effectiveType = effectiveType;
-        this.optionalGetter = Getter.forField(declaringClass, effectiveType, field);
+        this.optionalGetter = Getter.forField(declaringType, effectiveType, field);
     }
 
     @Override
@@ -59,11 +59,12 @@ public class FieldInfo<C, F> {
     }
 
     public TypeToken<C> declaringType() {
-        return TypeToken.of(declaringClass);
+        return declaringClass;
     }
 
+    @SuppressWarnings("unchecked")
     public Class<C> declaringClass() {
-        return declaringClass;
+        return (Class<C>) declaringClass.getRawType();
     }
 
     public Field field() {
@@ -100,7 +101,21 @@ public class FieldInfo<C, F> {
         return of(declaringClass, field, field.getType());
     }
 
+    @SuppressWarnings("unchecked")
+    public static <R> FieldInfo<R,?> of(TypeToken<R> declaringClass, Field field) {
+        if (field.getType() == Optional.class) {
+            return genericTypeArgument(field, 0)
+                .map(cls -> of(declaringClass, field, cls))
+                .orElseThrow(() -> new IllegalArgumentException("Unable to determine the type of Optional field " + field.getName() + " in " + declaringClass));
+        }
+        return of(declaringClass, field, field.getType());
+    }
+
     public static <R, T> FieldInfo<R,T> of(Class<R> rowClass, Field field, Class<T> fieldType) {
+        return new FieldInfo<>(TypeToken.of(rowClass), field, fieldType);
+    }
+
+    public static <R, T> FieldInfo<R,T> of(TypeToken<R> rowClass, Field field, Class<T> fieldType) {
         return new FieldInfo<>(rowClass, field, fieldType);
     }
 

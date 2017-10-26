@@ -64,10 +64,6 @@ public class DataType<T> {
         return javaClass;
     }
 
-    public DbTypeId<T> dbTypeId() {
-        return dbTypeId;
-    }
-
     public Object toDatabase(Database database, Optional<T> value) {
         return value
             .map(v -> dbType(database).convertToDatabase(database, v))
@@ -104,8 +100,7 @@ public class DataType<T> {
         return dbType(database).parameter(database, value);
     }
 
-    public DbType<T> dbType(Database database) {
+    private DbType<T> dbType(Database database) {
         return database.dialect().type(dbTypeId);
     }
-
 }
