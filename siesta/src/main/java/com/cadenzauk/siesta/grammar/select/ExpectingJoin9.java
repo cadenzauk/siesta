@@ -22,8 +22,8 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.tuple.Tuple9;
 import com.cadenzauk.core.tuple.Tuple10;
+import com.cadenzauk.core.tuple.Tuple9;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;

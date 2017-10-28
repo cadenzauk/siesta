@@ -23,9 +23,12 @@
 package com.cadenzauk.siesta.h2;
 
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import com.cadenzauk.siesta.model.ManufacturerRow;
+import com.cadenzauk.siesta.model.MoneyAmount;
+import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.Test;
 
@@ -33,9 +36,11 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 public class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
     @Test
@@ -79,5 +84,33 @@ public class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
         assertThat(result2.item2(), is(3));
         assertThat(result3.item1(), is(manufacturerId));
         assertThat(result3.item2(), is(3));
+    }
+
+    @Test
+    public void embeddedThatIsAllNullsComesBackEmpty() {
+        Database database = testDatabase(dataSource);
+        long partId = newId();
+        database.insert(PartRow.newBuilder()
+            .partId(partId)
+            .description("ABC")
+            .widgetId(3L)
+            .purchasePrice(null)
+            .retailPrice(Optional.empty())
+            .build());
+
+        Tuple5<PartRow,MoneyAmount,MoneyAmount,String,String> result = database.from(PartRow.class)
+            .select(PartRow.class)
+            .comma(PartRow::purchasePrice, "pp")
+            .comma(PartRow::retailPrice, "rp")
+            .comma(column(PartRow::purchasePrice).dot(MoneyAmount::currency), "pc")
+            .comma(column(PartRow::retailPrice).dot(MoneyAmount::currency), "rc")
+            .where(PartRow::partId).isEqualTo(partId)
+            .single();
+
+        assertThat(result.item1().purchasePrice(), nullValue());
+        assertThat(result.item1().retailPrice(), is(Optional.empty()));
+        assertThat(result.item2(), nullValue());
+        assertThat(result.item3(), nullValue());
+        assertThat(result.item4(), nullValue());
     }
 }

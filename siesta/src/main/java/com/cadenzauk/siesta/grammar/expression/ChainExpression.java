@@ -22,24 +22,48 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
 
-public class NullExpression<T> implements TypedExpression<T> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("null_");
-    private final TypeToken<T> typeToken;
+public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
+    private final ColumnExpression<P,R> lhs;
+    private final MethodInfo<P,T> field;
 
-    public NullExpression(TypeToken<T> typeToken) {
-        this.typeToken = typeToken;
+    public ChainExpression(ColumnExpression<P,R> lhs, MethodInfo<P,T> field) {
+        this.lhs = lhs;
+        this.field = field;
+    }
+
+    @Override
+    public String label(Scope scope) {
+        return String.format("%s_%s", lhs.label(scope), scope.database().columnNameFor(field));
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Scope scope, String label) {
+        return rs -> scope.database().getDataTypeOf(field).get(rs, label, scope.database()).orElse(null);
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return TypeToken.of(field.effectiveType());
+    }
+
+    @Override
+    public String sqlWithLabel(Scope scope, String label) {
+        Alias<R> alias = resolve(scope);
+        return String.format("%s as %s", alias.inSelectClauseSql(columnName(scope)), label);
     }
 
     @Override
     public String sql(Scope scope) {
-        return "null";
+        Alias<R> alias = resolve(scope);
+        return alias.inSelectClauseSql(columnName(scope));
     }
 
     @Override
@@ -49,21 +73,16 @@ public class NullExpression<T> implements TypedExpression<T> {
 
     @Override
     public Precedence precedence() {
-        return Precedence.UNARY;
+        return Precedence.COLUMN;
     }
 
     @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
+    public String columnName(Scope scope) {
+        return scope.database().namingStrategy().embeddedName(lhs.columnName(scope), scope.database().columnNameFor(field));
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> null;
-    }
-
-    @Override
-    public TypeToken<T> type() {
-        return typeToken;
+    public Alias<R> resolve(Scope scope) {
+        return lhs.resolve(scope);
     }
 }

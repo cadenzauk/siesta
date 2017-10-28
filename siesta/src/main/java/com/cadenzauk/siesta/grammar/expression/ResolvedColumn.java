@@ -25,15 +25,15 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
 
-public class ResolvedColumn<T,R> implements TypedExpression<T> {
+public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
     private final Alias<R> alias;
     private final Column<T,R> column;
     private final TypeToken<T> type;
@@ -67,12 +67,27 @@ public class ResolvedColumn<T,R> implements TypedExpression<T> {
 
     @Override
     public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> column.dataType().get(rs, label, scope.database()).orElse(null);
+        return column.rowMapper(scope.database(), label);
     }
 
     @Override
     public TypeToken<T> type() {
         return type;
+    }
+
+    @Override
+    public String sqlWithLabel(Scope scope, String label) {
+        return column.sqlWithLabel(alias, label);
+    }
+
+    @Override
+    public String columnName(Scope scope) {
+        return column.name();
+    }
+
+    @Override
+    public Alias<R> resolve(Scope scope) {
+        return alias;
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, Function1<R,T> getterReference) {

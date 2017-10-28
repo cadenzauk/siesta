@@ -20,50 +20,26 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.siesta.model;
 
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
+import javax.persistence.Embeddable;
+import java.math.BigDecimal;
 
-import java.util.stream.Stream;
+@Embeddable
+public class MoneyAmount {
+    private final BigDecimal amount;
+    private final String currency;
 
-public class NullExpression<T> implements TypedExpression<T> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("null_");
-    private final TypeToken<T> typeToken;
-
-    public NullExpression(TypeToken<T> typeToken) {
-        this.typeToken = typeToken;
+    public MoneyAmount(BigDecimal amount, String currency) {
+        this.amount = amount;
+        this.currency = currency;
     }
 
-    @Override
-    public String sql(Scope scope) {
-        return "null";
+    public BigDecimal amount() {
+        return amount;
     }
 
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> null;
-    }
-
-    @Override
-    public TypeToken<T> type() {
-        return typeToken;
+    public String currency() {
+        return currency;
     }
 }

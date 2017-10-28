@@ -26,6 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
+import com.cadenzauk.siesta.grammar.expression.ColumnExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
@@ -44,28 +45,28 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
         return ExpressionBuilder.of(lhs, this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(Function1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(FunctionOptional1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(String alias, Function1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(String alias, FunctionOptional1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(Alias<R> alias, Function1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::andWhere);
     }
 
     public InWhereExpectingAnd<RT> or(BooleanExpression expression) {
@@ -76,28 +77,28 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
         return ExpressionBuilder.of(lhs, this::orWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(Function1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(FunctionOptional1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(String alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::orWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(String alias, Function1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::orWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(String alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::orWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(String alias, FunctionOptional1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::orWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(Alias<R> alias, Function1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::orWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(Alias<R> alias, Function1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::orWhere);
     }
 
-    public <T, R> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(Alias<R> alias, FunctionOptional1<R,T> lhs) {
-        return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::orWhere);
+    public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(Alias<R> alias, FunctionOptional1<R,T> lhs) {
+        return ColumnExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::orWhere);
     }
 
     private InWhereExpectingAnd<RT> andWhere(BooleanExpression newClause) {

@@ -113,7 +113,6 @@ class TypedExpressionTest extends MockitoTest {
 
     private static Stream<Arguments> parametersForColumn() {
         return Stream.of(
-            testCase(a -> TypedExpression.column(TypedExpression.value(1)), "?", 1),
             testCase(a -> TypedExpression.column(TestTable::mandatoryInt), "t.MANDATORY_INT"),
             testCase(a -> TypedExpression.column(TestTable::optionalInt), "t.OPTIONAL_INT"),
             testCase(a -> TypedExpression.column("t", TestTable::mandatoryInt), "t.MANDATORY_INT"),

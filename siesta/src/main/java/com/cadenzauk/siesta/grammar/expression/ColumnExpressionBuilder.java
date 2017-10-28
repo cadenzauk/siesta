@@ -22,48 +22,30 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
 
-import java.util.stream.Stream;
+import java.util.function.Function;
 
-public class NullExpression<T> implements TypedExpression<T> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("null_");
-    private final TypeToken<T> typeToken;
+public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
+    private final ColumnExpression<T,R> lhs;
 
-    public NullExpression(TypeToken<T> typeToken) {
-        this.typeToken = typeToken;
+    private ColumnExpressionBuilder(ColumnExpression<T,R> lhs, Function<BooleanExpression,N> onComplete) {
+        super(lhs, onComplete);
+        this.lhs = lhs;
     }
 
     @Override
-    public String sql(Scope scope) {
-        return "null";
+    public String sqlWithLabel(Scope scope, String label) {
+        return lhs.sqlWithLabel(scope, label);
     }
 
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
+    public <C> ColumnExpressionBuilder<C,R,N> dot(Function1<T,C> field) {
+        return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
     }
 
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> null;
-    }
-
-    @Override
-    public TypeToken<T> type() {
-        return typeToken;
+    public static <T, R, N> ColumnExpressionBuilder<T,R,N> of(ColumnExpression<T,R> column, Function<BooleanExpression,N> onComplete) {
+        return new ColumnExpressionBuilder<>(column, onComplete);
     }
 }

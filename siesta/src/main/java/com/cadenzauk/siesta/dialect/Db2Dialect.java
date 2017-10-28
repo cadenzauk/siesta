@@ -26,9 +26,9 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
-import com.cadenzauk.siesta.type.DbTypeId;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;

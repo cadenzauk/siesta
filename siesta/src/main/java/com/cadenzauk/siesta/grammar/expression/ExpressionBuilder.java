@@ -46,7 +46,7 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     private final Function<BooleanExpression,N> onComplete;
     private Optional<Double> selectivity = Optional.empty();
 
-    private ExpressionBuilder(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
+    protected ExpressionBuilder(TypedExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
     }
@@ -444,6 +444,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     public ExpressionBuilder<T,N> selectivity(double v) {
         selectivity = Optional.of(v);
         return this;
+    }
+
+    protected Function<BooleanExpression,N> onComplete() {
+        return onComplete;
     }
 
     private N complete(Condition<T> rhs) {

@@ -96,4 +96,8 @@ public class DbTypeId<T> {
             .append(javaClass)
             .toHashCode();
     }
+
+    public static <T> DbTypeId<T> embedded(Class<T> javaClass) {
+        return new DbTypeId<>(javaClass.getCanonicalName(), Types.JAVA_OBJECT, javaClass);
+    }
 }

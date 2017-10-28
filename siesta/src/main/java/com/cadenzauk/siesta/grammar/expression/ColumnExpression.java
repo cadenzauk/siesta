@@ -22,48 +22,11 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.LabelGenerator;
-import com.google.common.reflect.TypeToken;
 
-import java.util.stream.Stream;
+public interface ColumnExpression<T,R> extends TypedExpression<T> {
+    String columnName(Scope scope);
 
-public class NullExpression<T> implements TypedExpression<T> {
-    private final LabelGenerator labelGenerator = new LabelGenerator("null_");
-    private final TypeToken<T> typeToken;
-
-    public NullExpression(TypeToken<T> typeToken) {
-        this.typeToken = typeToken;
-    }
-
-    @Override
-    public String sql(Scope scope) {
-        return "null";
-    }
-
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return Stream.empty();
-    }
-
-    @Override
-    public Precedence precedence() {
-        return Precedence.UNARY;
-    }
-
-    @Override
-    public String label(Scope scope) {
-        return labelGenerator.label(scope);
-    }
-
-    @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> null;
-    }
-
-    @Override
-    public TypeToken<T> type() {
-        return typeToken;
-    }
+    Alias<R> resolve(Scope scope);
 }

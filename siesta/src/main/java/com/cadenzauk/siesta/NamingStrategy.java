@@ -25,4 +25,5 @@ package com.cadenzauk.siesta;
 public interface NamingStrategy {
     String tableName(String rowClass);
     String columnName(String fieldName);
+    String embeddedName(String parentFieldColumnName, String childFieldColumnName);
 }

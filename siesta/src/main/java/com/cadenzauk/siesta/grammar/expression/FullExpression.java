@@ -22,7 +22,8 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.siesta.*;
+import com.cadenzauk.siesta.Condition;
+import com.cadenzauk.siesta.Scope;
 
 import java.util.stream.Stream;
 

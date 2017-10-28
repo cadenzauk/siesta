@@ -43,8 +43,7 @@ public class AliasColumns<R> implements Projection {
         return alias
             .table()
             .columns()
-            .map(Column::name)
-            .map(c -> String.format("%s as %s", alias.inSelectClauseSql(c), alias.inSelectClauseLabel(c)))
+            .map(c -> c.sqlWithLabel(alias, alias.inSelectClauseLabel(c.name())))
             .collect(joining(", "));
     }
 

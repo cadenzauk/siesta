@@ -45,6 +45,7 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,8 +71,8 @@ class SelectHavingTest extends MockitoTest {
     @SuppressWarnings("unused")
     static Stream<Arguments> parametersForHaving() {
         return Stream.of(
-            havingTest((w, sel) -> sel.having(column(count()).isGreaterThan(countDistinct(WidgetRow::name))),
-                "having count(*) > count(distinct w.NAME)",
+            havingTest((w, sel) -> sel.having(count().plus(literal(1))).isGreaterThan(countDistinct(WidgetRow::name)),
+                "having count(*) + 1 > count(distinct w.NAME)",
                 toArray()),
             havingTest((w, sel) -> sel.having(count()).isGreaterThan(countDistinct(WidgetRow::name)),
                 "having count(*) > count(distinct w.NAME)",

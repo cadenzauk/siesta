@@ -25,8 +25,8 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
@@ -34,7 +34,7 @@ import com.google.common.reflect.TypeToken;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class UnresolvedColumn<T,R> implements TypedExpression<T> {
+public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
     private final Optional<String> alias;
     private final MethodInfo<R,T> getterMethod;
 
@@ -50,9 +50,19 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return resolve(scope).inSelectClauseSql(columnName(scope));
+        Column<T,R> column = scope.database().column(getterMethod);
+        Alias<R> resolvedAlias = resolve(scope);
+        return column.sql(resolvedAlias);
     }
 
+    @Override
+    public String sqlWithLabel(Scope scope, String label) {
+        Column<T,R> column = scope.database().column(getterMethod);
+        Alias<R> resolvedAlias = resolve(scope);
+        return column.sqlWithLabel(resolvedAlias, label);
+    }
+
+    @Override
     public String columnName(Scope scope) {
         Column<T,R> column = scope.database().column(getterMethod);
         return column.name();
@@ -87,7 +97,8 @@ public class UnresolvedColumn<T,R> implements TypedExpression<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private Alias<R> resolve(Scope scope) {
+    @Override
+    public Alias<R> resolve(Scope scope) {
         Class<R> rowClass = getterMethod.declaringClass();
         return this.alias
             .map(a -> scope.findAlias(rowClass, a))

@@ -22,8 +22,8 @@
 
 package com.cadenzauk.core.reflect.util;
 
-import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.UtilityClass;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;

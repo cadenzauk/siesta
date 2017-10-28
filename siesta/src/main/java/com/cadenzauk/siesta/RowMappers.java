@@ -24,14 +24,6 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple;
-import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.core.tuple.Tuple4;
-import com.cadenzauk.core.tuple.Tuple5;
-import com.cadenzauk.core.tuple.Tuple6;
-import com.cadenzauk.core.tuple.Tuple7;
-import com.cadenzauk.core.tuple.Tuple8;
-import com.cadenzauk.core.tuple.Tuple9;
 import com.cadenzauk.core.tuple.Tuple10;
 import com.cadenzauk.core.tuple.Tuple11;
 import com.cadenzauk.core.tuple.Tuple12;
@@ -42,7 +34,15 @@ import com.cadenzauk.core.tuple.Tuple16;
 import com.cadenzauk.core.tuple.Tuple17;
 import com.cadenzauk.core.tuple.Tuple18;
 import com.cadenzauk.core.tuple.Tuple19;
+import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple20;
+import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.core.tuple.Tuple4;
+import com.cadenzauk.core.tuple.Tuple5;
+import com.cadenzauk.core.tuple.Tuple6;
+import com.cadenzauk.core.tuple.Tuple7;
+import com.cadenzauk.core.tuple.Tuple8;
+import com.cadenzauk.core.tuple.Tuple9;
 
 public class RowMappers {
     public static <T1, T2> RowMapper<Tuple2<T1,T2>> of(RowMapper<T1> mapper1, RowMapper<T2> mapper2) {

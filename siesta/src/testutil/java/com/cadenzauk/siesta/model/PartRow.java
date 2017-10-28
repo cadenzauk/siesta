@@ -22,9 +22,11 @@
 
 package com.cadenzauk.siesta.model;
 
+import javax.persistence.Embedded;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
+import java.util.Optional;
 
 @MappedSuperclass
 @Table(name = "PART", schema = "SIESTA")
@@ -33,11 +35,17 @@ public class PartRow {
     private final long partId;
     private final long widgetId;
     private final String description;
+    @Embedded
+    private final MoneyAmount purchasePrice;
+    @Embedded
+    private final Optional<MoneyAmount> retailPrice;
 
     PartRow(Builder builder) {
         partId = builder.partId;
         widgetId = builder.widgetId;
         description = builder.description;
+        purchasePrice = builder.purchasePrice;
+        retailPrice = builder.retailPrice;
     }
 
     public long partId() {
@@ -52,6 +60,14 @@ public class PartRow {
         return description;
     }
 
+    public MoneyAmount purchasePrice() {
+        return purchasePrice;
+    }
+
+    public Optional<MoneyAmount> retailPrice() {
+        return retailPrice;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -60,6 +76,8 @@ public class PartRow {
         private long partId;
         private long widgetId;
         private String description;
+        private MoneyAmount purchasePrice;
+        private Optional<MoneyAmount> retailPrice;
 
         Builder() {
         }
@@ -76,6 +94,16 @@ public class PartRow {
 
         public Builder description(String val) {
             description = val;
+            return this;
+        }
+
+        public Builder purchasePrice(MoneyAmount val) {
+            purchasePrice = val;
+            return this;
+        }
+
+        public Builder retailPrice(Optional<MoneyAmount> val) {
+            retailPrice = val;
             return this;
         }
 

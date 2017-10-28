@@ -35,4 +35,9 @@ public class UppercaseUnderscores implements NamingStrategy {
     public String columnName(String fieldName) {
         return StringUtil.camelToUpper(fieldName);
     }
+
+    @Override
+    public String embeddedName(String parentFieldColumnName, String childFieldColumnName) {
+        return parentFieldColumnName + "_" + childFieldColumnName;
+    }
 }

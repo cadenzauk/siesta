@@ -23,7 +23,7 @@
 package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.DataType;
+import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 
 import java.util.Optional;
@@ -33,15 +33,19 @@ import java.util.stream.Stream;
 public interface Column<T, R> {
     String name();
 
-    DataType<T> dataType();
+    int count();
+
+    String sql();
+
+    String sql(Alias<R> alias);
+
+    String sqlWithLabel(Alias<R> alias, String label);
 
     RowMapper<T> rowMapper(Database database, String label);
 
-    Class<R> rowClass();
-
-    <U> Stream<Column<U,R>> as(DataType<U> requiredDataType);
-
-    boolean primaryKey();
+    <U> Stream<Column<U,R>> as(Class<U> requiredDataType);
 
     Function<R,Optional<T>> getter();
+
+    Stream<Object> toDatabase(Database database, Optional<T> v);
 }

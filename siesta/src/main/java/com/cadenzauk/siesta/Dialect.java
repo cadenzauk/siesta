@@ -24,8 +24,8 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
-import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

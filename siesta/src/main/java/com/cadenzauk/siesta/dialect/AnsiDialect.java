@@ -31,8 +31,8 @@ import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
-import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbTypeRegistry;
 import org.apache.commons.lang3.StringUtils;
 
