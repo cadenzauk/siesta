@@ -129,7 +129,7 @@ public class InProjectionExpectingComma8<T1, T2, T3, T4, T5, T6, T7, T8> extends
             statement.from(),
             RowMappers.add9th(
                 statement.rowMapper(),
-                col.rowMapper(scope(), label.orElseGet(() -> col.label(scope())))),
+                col.rowMapper(scope(), label)),
             Projection.of(statement.projection(), Projection.of(col, label)));
         return new ExpectingWhere<>(select);
     }

@@ -56,7 +56,7 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
     }
 
     @Override
-    public String sqlWithLabel(Scope scope, String label) {
+    public String sqlWithLabel(Scope scope, Optional<String> label) {
         Column<T,R> column = scope.database().column(getterMethod);
         Alias<R> resolvedAlias = resolve(scope);
         return column.sqlWithLabel(resolvedAlias, label);
@@ -65,7 +65,7 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
     @Override
     public String columnName(Scope scope) {
         Column<T,R> column = scope.database().column(getterMethod);
-        return column.name();
+        return column.columnName();
     }
 
     @Override
@@ -81,19 +81,20 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
     @Override
     public String label(Scope scope) {
         Column<T,R> column = scope.database().column(getterMethod);
-        return resolve(scope).inSelectClauseLabel(column.name());
+        return resolve(scope).inSelectClauseLabel(column.columnName());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
         Column<T,R> column = scope.database().column(getterMethod);
-        return column.rowMapper(scope.database(), label);
+        Alias<R> resolvedAlias = resolve(scope);
+        return column.rowMapper(resolvedAlias, label);
     }
 
     @Override
     public TypeToken<T> type() {
-        return TypeToken.of(getterMethod.effectiveType());
+        return TypeToken.of(getterMethod.effectiveClass());
     }
 
     @SuppressWarnings("unchecked")
@@ -103,6 +104,12 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
         return this.alias
             .map(a -> scope.findAlias(rowClass, a))
             .orElseGet(() -> scope.findAlias(rowClass));
+    }
+
+    @Override
+    public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        Column<T,R> column = scope.database().column(getterMethod);
+        return column.findColumn(type, propertyName);
     }
 
     public static <T, R> UnresolvedColumn<T,R> of(Function1<R,T> getter) {

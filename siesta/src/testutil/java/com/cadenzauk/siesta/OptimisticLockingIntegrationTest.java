@@ -39,7 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
-    private static Logger LOG = LoggerFactory.getLogger(OptimisticLockingIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OptimisticLockingIntegrationTest.class);
 
     @Test
     public void optimisticLockingUpdateWithTimeout1() throws InterruptedException {

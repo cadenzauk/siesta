@@ -30,6 +30,13 @@ import java.util.Arrays;
 import static java.util.stream.Collectors.joining;
 
 public final class StringUtil extends UtilityClass {
+    public static String lowercaseFirst(String s) {
+        if (StringUtils.isEmpty(s)) {
+            return "";
+        }
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
     public static String uppercaseFirst(String s) {
         if (StringUtils.isEmpty(s)) {
             return "";

@@ -28,12 +28,13 @@ import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
 public class ArithmeticExpressionChain<T> implements TypedExpression<T> {
-    private TypedExpression<T> first;
+    private final TypedExpression<T> first;
     private final List<Term<T>> terms = new ArrayList<>();
 
     public ArithmeticExpressionChain(TypedExpression<T> first) {
@@ -63,7 +64,7 @@ public class ArithmeticExpressionChain<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
         return first.rowMapper(scope, label);
     }
 

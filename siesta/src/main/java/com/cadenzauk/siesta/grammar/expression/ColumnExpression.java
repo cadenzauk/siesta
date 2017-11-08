@@ -24,9 +24,15 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.catalog.Column;
+import com.google.common.reflect.TypeToken;
+
+import java.util.Optional;
 
 public interface ColumnExpression<T,R> extends TypedExpression<T> {
     String columnName(Scope scope);
 
     Alias<R> resolve(Scope scope);
+
+    <V> Optional<Column<V, T>> findColumn(Scope scope, TypeToken<V> type, String propertyName);
 }

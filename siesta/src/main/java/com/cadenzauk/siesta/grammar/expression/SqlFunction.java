@@ -32,6 +32,7 @@ import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -64,8 +65,8 @@ public class SqlFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rowMapperFactory.apply(scope, label);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return rowMapperFactory.apply(scope, label.orElseGet(() -> label(scope)));
     }
 
     @Override

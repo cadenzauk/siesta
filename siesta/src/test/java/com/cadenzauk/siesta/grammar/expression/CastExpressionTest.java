@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -124,7 +125,7 @@ class CastExpressionTest extends MockitoTest {
         CastBuilder<String> builder = new CastBuilder<>(expression);
         TypedExpression<Integer> sut = builder.asInteger();
 
-        RowMapper<Integer> result = sut.rowMapper(scope, "bob");
+        RowMapper<Integer> result = sut.rowMapper(scope, Optional.of("bob"));
 
         assertThat(result.mapRow(resultSet), is(44));
         verifyNoMoreInteractions(expression, scope, dialect, database, resultSet);

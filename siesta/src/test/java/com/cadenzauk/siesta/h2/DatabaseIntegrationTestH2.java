@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.h2;
 
+import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.siesta.Database;
@@ -30,6 +31,7 @@ import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.WidgetRow;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -112,5 +114,37 @@ public class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
         assertThat(result.item2(), nullValue());
         assertThat(result.item3(), nullValue());
         assertThat(result.item4(), nullValue());
+        assertThat(result.item5(), nullValue());
+    }
+
+    @Test
+    public void embeddedInsertedAndReadBack() {
+        Database database = testDatabase(dataSource);
+        long partId = newId();
+        MoneyAmount purchasePrice = new MoneyAmount(RandomValues.randomBigDecimal(10, 2), "USD");
+        MoneyAmount retailPrice = new MoneyAmount(RandomValues.randomBigDecimal(10, 2), "NZD");
+        database.insert(PartRow.newBuilder()
+            .partId(partId)
+            .description("ABC")
+            .widgetId(3L)
+            .purchasePrice(purchasePrice)
+            .retailPrice(Optional.of(retailPrice))
+            .build());
+
+        Tuple5<PartRow,MoneyAmount,MoneyAmount,String,String> result = database.from(PartRow.class)
+            .select(PartRow.class)
+            .comma(PartRow::purchasePrice, "pp")
+            .comma(PartRow::retailPrice, "rp")
+            .comma(column(PartRow::purchasePrice).dot(MoneyAmount::currency), "pc")
+            .comma(column(PartRow::retailPrice).dot(MoneyAmount::currency), "rc")
+            .where(PartRow::partId).isEqualTo(partId)
+            .single();
+
+        assertThat(result.item1().purchasePrice(), is(purchasePrice));
+        assertThat(result.item1().retailPrice(), is(Optional.of(retailPrice)));
+        assertThat(result.item2(), is(purchasePrice));
+        assertThat(result.item3(), is(retailPrice));
+        assertThat(result.item4(), is("USD"));
+        assertThat(result.item5(), is("NZD"));
     }
 }

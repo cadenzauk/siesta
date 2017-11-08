@@ -84,7 +84,7 @@ class MethodInfoTest {
         assertThat(result.method(), notNullValue());
         assertThat(result.method(), equalTo(ClassUtil.getDeclaredMethod(MethodInfoTestClass.class, "string")));
         assertThat(result.actualType(), equalTo(String.class));
-        assertThat(result.effectiveType(), equalTo(String.class));
+        assertThat(result.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -95,7 +95,7 @@ class MethodInfoTest {
         assertThat(result.method(), notNullValue());
         assertThat(result.method(), equalTo(ClassUtil.getDeclaredMethod(MethodInfoTestClass.class, "optionalInteger")));
         assertThat(result.actualType(), equalTo(Optional.class));
-        assertThat(result.effectiveType(), equalTo(Integer.class));
+        assertThat(result.effectiveClass(), equalTo(Integer.class));
     }
 
     @SuppressWarnings("unused")

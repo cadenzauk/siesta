@@ -143,8 +143,8 @@ class TypedExpressionTest extends MockitoTest {
     }
 
     private static class TestTable {
-        private int mandatoryInt;
-        private Optional<Integer> optionalInt;
+        private final int mandatoryInt;
+        private final Optional<Integer> optionalInt;
 
         public TestTable(int mandatoryInt, Optional<Integer> optionalInt) {
             this.mandatoryInt = mandatoryInt;

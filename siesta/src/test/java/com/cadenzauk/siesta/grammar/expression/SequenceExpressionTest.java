@@ -32,6 +32,7 @@ import org.mockito.Mock;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -73,7 +74,7 @@ class SequenceExpressionTest extends MockitoTest {
         when(intSequence.rowMapper("fred")).thenReturn(rowMapper);
         SequenceExpression<Integer> sut = new SequenceExpression<>(intSequence);
 
-        RowMapper<Integer> result = sut.rowMapper(scope, "fred");
+        RowMapper<Integer> result = sut.rowMapper(scope, Optional.of("fred"));
 
         assertThat(result, sameInstance(rowMapper));
     }

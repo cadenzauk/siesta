@@ -23,11 +23,8 @@
 package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.reflect.Factory;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
@@ -36,36 +33,18 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
-import com.cadenzauk.siesta.catalog.TableColumn.ResultSetValue;
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Embedded;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.core.reflect.util.ClassUtil.hasAnnotation;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class Table<R> {
     private static final Logger LOG = LoggerFactory.getLogger(Table.class);
@@ -74,7 +53,7 @@ public class Table<R> {
     private final String catalog;
     private final String schema;
     private final String tableName;
-    private final Impl<?> impl;
+    private final ColumnMapping<R,?> columnMapping;
 
     private <B> Table(Builder<R,B> builder) {
         database = builder.database;
@@ -82,7 +61,7 @@ public class Table<R> {
         catalog = builder.catalog;
         schema = builder.schema;
         tableName = builder.tableName;
-        impl = new Impl<>(builder.newBuilder, builder.buildRow, builder.columns);
+        columnMapping = new ColumnMapping<>(builder);
     }
 
     public TypeToken<R> rowType() {
@@ -102,19 +81,19 @@ public class Table<R> {
     }
 
     public Stream<Column<?,R>> columns() {
-        return impl.columns.stream().map(Function.identity());
+        return columnMapping.columns().map(Function.identity());
     }
 
     public Stream<Object> toDatabase(Optional<R> r) {
-        return impl.toDatabase(r);
+        return columnMapping.toDatabase(r);
     }
 
-    public RowMapper<R> rowMapper(String s) {
-        return impl.rowMapper(Optional.of(s));
+    public RowMapper<R> rowMapper(Alias<?> alias) {
+        return columnMapping.rowMapper(alias);
     }
 
-    public DynamicRowMapper<R> dynamicRowMapper(String s) {
-        return impl.dynamicRowMapper(Optional.of(s));
+    public DynamicRowMapper<R> dynamicRowMapper(Alias<?> alias) {
+        return columnMapping.dynamicRowMapper(alias);
     }
 
     public String qualifiedName() {
@@ -127,160 +106,84 @@ public class Table<R> {
 
     public int insert(SqlExecutor sqlExecutor, R[] rows) {
         if (database().dialect().supportsMultiInsert()) {
-            return impl.insert(sqlExecutor, rows);
+            return performInsert(sqlExecutor, rows);
         } else {
             return Arrays.stream(rows)
-                .mapToInt(r -> impl.insert(sqlExecutor, r))
+                .mapToInt(r -> performInsert(sqlExecutor, r))
                 .sum();
         }
     }
 
     public int insert(Transaction transaction, R[] rows) {
         if (database().dialect().supportsMultiInsert()) {
-            return impl.insert(transaction, rows);
+            return performInsert(transaction, rows);
         } else {
             return Arrays.stream(rows)
-                .mapToInt(r -> impl.insert(transaction, r))
+                .mapToInt(r -> performInsert(transaction, r))
                 .sum();
         }
     }
 
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
-        String columnName = database.columnNameFor(methodInfo);
-        return findColumn(methodInfo.effectiveType(), columnName)
-            .orElseThrow(() -> new IllegalArgumentException("No such column as " + columnName + " in " + qualifiedName()));
+        String propertyName = methodInfo.propertyName();
+        return findColumn(methodInfo.effectiveType(), propertyName)
+            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + qualifiedName()));
     }
 
-    private <T> Optional<Column<T,R>> findColumn(Class<T> dataType, String columnName) {
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    private final int performInsert(SqlExecutor sqlExecutor, R... rows) {
+        if (rows.length == 0) {
+            return 0;
+        }
+        String sql = sql(rows);
+        Object[] args = columnMapping.args(rows);
+        return sqlExecutor.update(sql, args);
+    }
+
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    private final int performInsert(Transaction transaction, R... rows) {
+        if (rows.length == 0) {
+            return 0;
+        }
+        String sql = sql(rows);
+        Object[] args = columnMapping.args(rows);
+        return transaction.update(sql, args);
+    }
+
+    private String sql(R[] rows) {
+        String sql = String.format("insert into %s (%s) values %s",
+            qualifiedName(),
+            columns().map(Column::sql).collect(joining(", ")),
+            IntStream.range(0, rows.length)
+                .mapToObj(i -> "(" + IntStream.range(0, columns().mapToInt(Column::count).sum()).mapToObj(j -> "?").collect(joining(", ")) + ")")
+                .collect(joining(", ")));
+        LOG.debug(sql);
+        return sql;
+    }
+
+    private <T> Optional<Column<T,R>> findColumn(TypeToken<T> dataType, String propertyName) {
         return columnsOfType(dataType)
-            .filter(c -> StringUtils.equals(c.name(), columnName))
+            .filter(c -> StringUtils.equals(c.propertyName(), propertyName))
             .findFirst();
     }
 
-    private <T> Stream<Column<T,R>> columnsOfType(Class<T> dataType) {
+    private <T> Stream<Column<T,R>> columnsOfType(TypeToken<T> dataType) {
         return columns().flatMap(c -> c.as(dataType));
     }
 
-    private class Impl<B> {
-        private final Supplier<B> newBuilder;
-        private final Function<B,R> buildRow;
-        private final List<TableColumn<Object,R,B>> columns;
-
-        Impl(Supplier<B> newBuilder, Function<B,R> buildRow, List<TableColumn<Object,R,B>> columns) {
-            this.newBuilder = newBuilder;
-            this.buildRow = buildRow;
-            this.columns = ImmutableList.copyOf(columns);
-        }
-
-        @SuppressWarnings("unchecked")
-        @SafeVarargs
-        final int insert(SqlExecutor sqlExecutor, R... rows) {
-            if (rows.length == 0) {
-                return 0;
-            }
-            String sql = sql(rows);
-            Object[] args = args(rows);
-            return sqlExecutor.update(sql, args);
-        }
-
-        @SuppressWarnings("unchecked")
-        @SafeVarargs
-        final int insert(Transaction transaction, R... rows) {
-            if (rows.length == 0) {
-                return 0;
-            }
-            String sql = sql(rows);
-            Object[] args = args(rows);
-            return transaction.update(sql, args);
-        }
-
-        private Object[] args(R[] rows) {
-            return Arrays.stream(rows)
-                .map(Optional::ofNullable)
-                .flatMap(this::toDatabase)
-                .toArray();
-        }
-
-        private Stream<Object> toDatabase(Optional<R> row) {
-            return columns
-                .stream()
-                .flatMap(c -> c.toDatabase(database, row.flatMap(r -> c.getter().apply(r))));
-        }
-
-        private String sql(R[] rows) {
-            int nCols = columns.size();
-            String sql = String.format("insert into %s (%s) values %s",
-                qualifiedName(),
-                columns.stream().map(Column::sql).collect(joining(", ")),
-                IntStream.range(0, rows.length)
-                    .mapToObj(i -> "(" + IntStream.range(0, columns.stream().mapToInt(Column::count).sum()).mapToObj(j -> "?").collect(joining(", ")) + ")")
-                    .collect(joining(", ")));
-            LOG.debug(sql);
-            return sql;
-        }
-
-        public RowMapper<R> rowMapper() {
-            return rowMapper(Optional.empty());
-        }
-
-        public RowMapper<R> rowMapper(Optional<String> prefix) {
-            return rs -> {
-                List<ResultSetValue<B>> values = columns.stream()
-                    .map(c -> c.extract(database, rs, prefix.orElse(tableName + "_") + c.name()))
-                    .collect(toList());
-                return values.stream().noneMatch(ResultSetValue::isPresent)
-                    ? null
-                    : build(values);
-            };
-        }
-
-        private R build(List<ResultSetValue<B>> values) {
-            B builder = newBuilder.get();
-            values.forEach(v -> v.apply(builder));
-            return buildRow.apply(builder);
-        }
-
-        public DynamicRowMapper<R> dynamicRowMapper(Optional<String> prefix) {
-            return new DynamicRowMapper<R>() {
-                private final Set<String> labels = new HashSet<>();
-                private final String labelPrefix = prefix.orElse(tableName + "_");
-
-                @Override
-                public void add(String targetColumn) {
-                    labels.add(targetColumn);
-                }
-
-                @Override
-                public R mapRow(ResultSet rs) {
-                    List<ResultSetValue<B>> values = columns.stream()
-                        .filter(c -> labels.contains(c.label(labelPrefix)))
-                        .map(c -> c.extract(database, rs, prefix.orElse(tableName + "_") + c.name()))
-                        .collect(toList());
-                    return values.stream().noneMatch(ResultSetValue::isPresent)
-                        ? null
-                        : build(values);
-                }
-            };
-        }
-    }
-
-    public static final class Builder<R, B> {
+    public static final class Builder<R, B> extends ColumnMapping.Builder<R, B, Builder<R, B>> {
         private final Database database;
         private final TypeToken<R> rowType;
-        private final TypeToken<B> builderType;
-        private final Function<B,R> buildRow;
-        private final Set<String> excludedFields = new HashSet<>();
-        private final List<TableColumn<Object,R,B>> columns = new ArrayList<>();
         private String catalog;
         private String schema;
         private String tableName;
-        private Supplier<B> newBuilder;
 
         public Builder(Database database, TypeToken<R> rowType, TypeToken<B> builderType, Function<B,R> buildRow) {
+            super(database, rowType, builderType, buildRow);
             this.database = database;
             this.rowType = rowType;
-            this.builderType = builderType;
-            this.buildRow = buildRow;
 
             Optional<javax.persistence.Table> tableAnnotation = ClassUtil.superclasses(rowType.getRawType())
                 .map(cls -> ClassUtil.annotation(cls, javax.persistence.Table.class))
@@ -301,40 +204,8 @@ public class Table<R> {
         }
 
         public Table<R> build() {
-            if (newBuilder == null) {
-                this.newBuilder = Factory.forType(builderType);
-            }
-            mappedClasses(rowType.getRawType())
-                .flatMap(cls -> Arrays.stream(cls.getDeclaredFields()))
-                .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                .filter(f -> !FieldUtil.hasAnnotation(Transient.class, f))
-                .filter(f -> !excludedFields.contains(f.getName()))
-                .forEach(this::addField);
+            finish();
             return new Table<>(this);
-        }
-
-        @SuppressWarnings("unchecked")
-        private void addField(Field field) {
-            if (Collection.class.isAssignableFrom(field.getType())) {
-                // TODO! add collection support
-                return;
-            }
-            if (FieldUtil.hasAnnotation(Embedded.class, field)) {
-                columns.add(EmbeddedColumn.fromField(database, rowType, builderType, field));
-            } else {
-                columns.add(PrimitiveColumn.fromField(database, rowType, builderType, field));
-            }
-        }
-
-        private Stream<Class<?>> mappedClasses(Class<?> startingWith) {
-            return Stream.concat(
-                ClassUtil.superclass(startingWith)
-                    .filter(cls -> hasAnnotation(cls, MappedSuperclass.class)
-                        || hasAnnotation(cls, javax.persistence.Table.class)
-                        || hasAnnotation(cls, javax.persistence.Embeddable.class))
-                    .map(this::mappedClasses)
-                    .orElseGet(Stream::empty),
-                Stream.of(startingWith));
         }
 
         public Builder<R,B> catalog(String val) {
@@ -360,42 +231,5 @@ public class Table<R> {
                 .tableName(tableName);
         }
 
-        public <T> Builder<R,B> column(Function1<R,T> getter, BiConsumer<B,T> setter) {
-            return mandatory(getter, setter, Optional.empty());
-        }
-
-        public <T> Builder<R,B> column(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter) {
-            return optional(getter, setter, Optional.empty());
-        }
-
-        public <T> Builder<R,B> column(Function1<R,T> getter, BiConsumer<B,T> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
-            return mandatory(getter, setter, Optional.of(init));
-        }
-
-        public <T> Builder<R,B> column(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
-            return optional(getter, setter, Optional.of(init));
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T> Builder<R,B> mandatory(Function1<R,T> getter, BiConsumer<B,T> setter, Optional<Consumer<PrimitiveColumn.Builder<T,R,B>>> init) {
-            MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
-            String name = getterInfo.method().getName();
-            excludedFields.add(name);
-            PrimitiveColumn.Builder<T,R,B> columnBuilder = PrimitiveColumn.mandatory(name, database.getDataTypeOf(getterInfo), getter, setter);
-            init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add((TableColumn<Object,R,B>) columnBuilder.build());
-            return this;
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T> Builder<R,B> optional(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Optional<Consumer<PrimitiveColumn.Builder<T,R,B>>> init) {
-            MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
-            String name = getterInfo.method().getName();
-            excludedFields.add(name);
-            PrimitiveColumn.Builder<T,R,B> columnBuilder = PrimitiveColumn.optional(name, database.getDataTypeOf(getterInfo), getter, setter);
-            init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add((TableColumn<Object,R,B>) columnBuilder.build());
-            return this;
-        }
     }
 }

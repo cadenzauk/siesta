@@ -178,7 +178,7 @@ public class Database {
     public <R, T> String columnNameFor(MethodInfo<R,T> getterMethod) {
         return nameFromMethodAnnotation(getterMethod)
             .orElseGet(() -> nameFromFieldAnnotation(getterMethod)
-                .orElseGet(() -> namingStrategy().columnName(getterMethod.method().getName())));
+                .orElseGet(() -> namingStrategy().columnName(getterMethod.propertyName())));
     }
 
     public <R, T> String columnNameFor(FieldInfo<R,T> fieldInfo) {
@@ -208,11 +208,11 @@ public class Database {
     }
 
     public <T, R> Optional<DataType<T>> dataTypeOf(MethodInfo<R,T> getterInfo) {
-        return dataTypeRegistry.dataTypeOf(getterInfo.effectiveType());
+        return dataTypeRegistry.dataTypeOf(getterInfo.effectiveClass());
     }
 
     public <T, R> Optional<DataType<T>> dataTypeOf(FieldInfo<R,T> fieldInfo) {
-        return dataTypeRegistry.dataTypeOf(fieldInfo.effectiveType());
+        return dataTypeRegistry.dataTypeOf(fieldInfo.effectiveClass());
     }
 
     private <R, T> Optional<String> nameFromMethodAnnotation(FieldInfo<R,T> fieldInfo) {
@@ -258,8 +258,8 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> void insert(R... rows) {
-        insert(getDefaultSqlExecutor(), rows);
+    public <R> int insert(R... rows) {
+        return insert(getDefaultSqlExecutor(), rows);
     }
 
     @SuppressWarnings("unchecked")
@@ -393,6 +393,11 @@ public class Database {
 
         public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
             tables.add(database -> database.table(TypeToken.of(rowClass), init));
+            return this;
+        }
+
+        public <R, B> Builder table(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+            tables.add(database -> database.table(rowType, init));
             return this;
         }
 

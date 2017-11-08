@@ -29,17 +29,18 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface TypedExpression<T> extends Expression {
     String label(Scope scope);
 
-    RowMapper<T> rowMapper(Scope scope, String label);
+    RowMapper<T> rowMapper(Scope scope, Optional<String> label);
 
     TypeToken<T> type();
 
-    default String sqlWithLabel(Scope scope, String label) {
-        return sql(scope) + " as " + label;
+    default String sqlWithLabel(Scope scope, Optional<String> label) {
+        return sql(scope) + " as " + label.orElseGet(() -> label(scope));
     }
 
     default TypedExpression<T> plus(T value) {

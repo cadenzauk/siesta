@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class InOlapFunction<T> implements TypedExpression<T> {
@@ -43,8 +44,8 @@ public abstract class InOlapFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return function.rowMapper(scope, label);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return function.rowMapper(scope, label.orElseGet(() -> label(scope)));
     }
 
     @Override

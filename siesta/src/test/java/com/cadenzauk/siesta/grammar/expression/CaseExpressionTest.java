@@ -39,6 +39,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -136,9 +137,9 @@ class CaseExpressionTest extends MockitoTest {
     @Test
     void rowMapper() {
         CaseExpression<String> sut = new CaseExpression<>(condition, expression1);
-        when(expression1.rowMapper(scope, "test_case")).thenReturn(rowMapper);
+        when(expression1.rowMapper(scope, Optional.of("test_case"))).thenReturn(rowMapper);
 
-        RowMapper<String> result = sut.rowMapper(scope, "test_case");
+        RowMapper<String> result = sut.rowMapper(scope, Optional.of("test_case"));
 
         assertThat(result, sameInstance(rowMapper));
         verifyNoMoreInteractions(condition, expression1, scope);

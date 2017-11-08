@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CountDistinctFunction<T> implements TypedExpression<Integer> {
@@ -57,8 +58,8 @@ public class CountDistinctFunction<T> implements TypedExpression<Integer> {
     }
 
     @Override
-    public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> DataType.INTEGER.get(rs, label, scope.database()).orElse(null);
+    public RowMapper<Integer> rowMapper(Scope scope, Optional<String> label) {
+        return rs -> DataType.INTEGER.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

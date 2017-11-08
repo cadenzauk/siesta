@@ -32,6 +32,7 @@ import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -55,8 +56,8 @@ public class CastExpression<F, T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> to.get(rs, label, scope.database()).orElse(null);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return rs -> to.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

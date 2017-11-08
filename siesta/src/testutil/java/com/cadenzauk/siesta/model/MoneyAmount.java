@@ -22,17 +22,44 @@
 
 package com.cadenzauk.siesta.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 
 @Embeddable
 public class MoneyAmount {
     private final BigDecimal amount;
+    @Column(name = "CCY")
     private final String currency;
 
     public MoneyAmount(BigDecimal amount, String currency) {
         this.amount = amount;
         this.currency = currency;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MoneyAmount that = (MoneyAmount) o;
+
+        return new EqualsBuilder()
+            .append(amount, that.amount)
+            .append(currency, that.currency)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(amount)
+            .append(currency)
+            .toHashCode();
     }
 
     public BigDecimal amount() {

@@ -35,6 +35,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -120,12 +121,12 @@ class CoalesceFunctionTest extends MockitoTest {
     @Test
     void rowMapper() {
         CoalesceFunction<String> sut = coalesce(expression1).orElse(expression2);
-        when(expression1.rowMapper(scope, "custom_label")).thenReturn(rowMapper);
+        when(expression1.rowMapper(scope, Optional.of("custom_label"))).thenReturn(rowMapper);
 
-        RowMapper<String> result = sut.rowMapper(scope, "custom_label");
+        RowMapper<String> result = sut.rowMapper(scope, Optional.of("custom_label"));
 
         assertThat(result, sameInstance(rowMapper));
-        verify(expression1).rowMapper(scope, "custom_label");
+        verify(expression1).rowMapper(scope, Optional.of("custom_label"));
         verifyNoMoreInteractions(expression1, expression2);
     }
 

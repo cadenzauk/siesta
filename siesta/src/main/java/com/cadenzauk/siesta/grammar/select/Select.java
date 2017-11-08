@@ -143,9 +143,9 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     @Override
-    public RowMapper<RT> rowMapper(Scope scope, String label) {
+    public RowMapper<RT> rowMapper(Scope scope, Optional<String> label) {
         final DataType<RT> dataType = scope.database().getDataTypeOf(type());
-        return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+        return rs -> dataType.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

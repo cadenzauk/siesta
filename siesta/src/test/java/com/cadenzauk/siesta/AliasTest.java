@@ -99,7 +99,7 @@ class AliasTest extends MockitoTest {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
-        when(widgetDescription.name()).thenReturn("D");
+        when(widgetDescription.columnName()).thenReturn("D");
 
         TypedExpression<Long> col = sut.column(WidgetRow::widgetId);
 
@@ -113,7 +113,7 @@ class AliasTest extends MockitoTest {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
-        when(widgetRowId.name()).thenReturn("ROW_ID");
+        when(widgetRowId.columnName()).thenReturn("ROW_ID");
 
         TypedExpression<String> col = sut.column(WidgetRow::description);
 
@@ -137,12 +137,12 @@ class AliasTest extends MockitoTest {
     @Test
     void rowMapperDelegatesToTable()  {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "barney");
-        when(widgetTable.rowMapper("barney_")).thenReturn(rowMapper);
+        when(widgetTable.rowMapper(sut)).thenReturn(rowMapper);
 
         RowMapper<WidgetRow> result = sut.rowMapper();
 
         assertThat(result, sameInstance(rowMapper));
-        verify(widgetTable).rowMapper("barney_");
+        verify(widgetTable).rowMapper(sut);
         verifyNoMoreInteractions(widgetTable);
     }
 

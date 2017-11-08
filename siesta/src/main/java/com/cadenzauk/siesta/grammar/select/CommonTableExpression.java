@@ -48,7 +48,7 @@ public class CommonTableExpression<RT> {
         Scope actualScope = scope.plus(select.scope());
         return String.format("%s(%s) as %s",
             name,
-            table.columns().map(Column::name).collect(joining(", ")),
+            table.columns().map(Column::columnName).collect(joining(", ")),
             select.sql(actualScope));
     }
 

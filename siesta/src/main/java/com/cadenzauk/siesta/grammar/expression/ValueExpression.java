@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ValueExpression<T> implements TypedExpression<T> {
@@ -66,9 +67,9 @@ public class ValueExpression<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
         DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+        return rs -> dataType.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @SuppressWarnings("unchecked")

@@ -85,10 +85,9 @@ public class Update<U> extends ExecutableStatement {
         apply(Assignment::dividedBy, value);
     }
 
-    private <T> SetExpressionBuilder<U,T> apply(BiConsumer<Assignment<T>,TypedExpression<T>> fun, TypedExpression<T> value) {
+    private <T> void apply(BiConsumer<Assignment<T>,TypedExpression<T>> fun, TypedExpression<T> value) {
         OptionalUtil.as(new TypeToken<Assignment<T>>() {}, Iterables.getLast(sets))
             .ifPresent(v -> fun.accept(v, ParenthesisedArithmeticExpression.wrapIfNecessary(value)));
-        return new SetExpressionBuilder<>(this);
     }
 
     private InSetExpectingWhere<U> setClause() {

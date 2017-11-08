@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -66,8 +67,8 @@ public class CoalesceFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return terms.get(0).rowMapper(scope, label);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return terms.get(0).rowMapper(scope, Optional.of(label.orElseGet(() -> label(scope))));
     }
 
     @Override

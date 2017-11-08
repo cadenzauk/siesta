@@ -77,7 +77,7 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
         return lhs.rowMapper(scope, label);
     }
 

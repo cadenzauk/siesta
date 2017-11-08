@@ -25,27 +25,36 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public interface Column<T, R> {
-    String name();
+    String propertyName();
+
+    String columnName();
 
     int count();
 
     String sql();
 
-    String sql(Alias<R> alias);
+    String sql(Alias<?> alias);
 
-    String sqlWithLabel(Alias<R> alias, String label);
+    String sqlWithLabel(Alias<?> alias, Optional<String> label);
 
-    RowMapper<T> rowMapper(Database database, String label);
+    RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label);
 
-    <U> Stream<Column<U,R>> as(Class<U> requiredDataType);
+    <U> Stream<Column<U,R>> as(TypeToken<U> requiredDataType);
 
     Function<R,Optional<T>> getter();
 
     Stream<Object> toDatabase(Database database, Optional<T> v);
+
+    default Stream<Object> rowToDatabase(Database database, Optional<R> row) {
+        return toDatabase(database, row.flatMap(r -> getter().apply(r)));
+    }
+
+    <V> Optional<Column<V,T>> findColumn(TypeToken<V> type, String propertyName);
 }

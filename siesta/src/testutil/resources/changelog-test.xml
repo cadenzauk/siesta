@@ -65,9 +65,9 @@
             </column>
             <column name="PART_TYPE" type="VARCHAR(100)"/>
             <column name="PURCHASE_PRICE_AMOUNT" type="DECIMAL(15,2)"/>
-            <column name="PURCHASE_PRICE_CURRENCY" type="CHAR(3)"/>
+            <column name="PURCHASE_PRICE_CCY" type="CHAR(3)"/>
             <column name="RETAIL_PRICE_AMOUNT" type="DECIMAL(15,2)"/>
-            <column name="RETAIL_PRICE_CURRENCY" type="CHAR(3)"/>
+            <column name="RETAIL_PRICE_CCY" type="CHAR(3)"/>
         </createTable>
     </changeSet>
 

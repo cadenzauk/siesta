@@ -22,6 +22,7 @@
 
 package com.cadenzauk.core.reflect;
 
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.TypeUtil;
@@ -33,7 +34,6 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static com.cadenzauk.core.reflect.util.FieldUtil.genericTypeArgument;
 
@@ -41,7 +41,7 @@ public class FieldInfo<C, F> {
     private final TypeToken<C> declaringClass;
     private final Field field;
     private final Class<F> effectiveType;
-    private final Function<C,Optional<F>> optionalGetter;
+    private final FunctionOptional1<C,F> optionalGetter;
 
     private FieldInfo(TypeToken<C> declaringType, Field field, Class<F> effectiveType) {
         Objects.requireNonNull(declaringType, "declaringType");
@@ -79,12 +79,20 @@ public class FieldInfo<C, F> {
         return field.getType();
     }
 
-    public Class<F> effectiveType() {
+    public Class<F> effectiveClass() {
         return effectiveType;
     }
 
-    public Function<C, Optional<F>> optionalGetter() {
+    public TypeToken<F> effectiveType() {
+        return TypeToken.of(effectiveType);
+    }
+
+    public FunctionOptional1<C, F> optionalGetter() {
         return optionalGetter;
+    }
+
+    public <A extends Annotation> boolean hasAnnotation(Class<A> annotation) {
+        return FieldUtil.hasAnnotation(annotation, field);
     }
 
     public <A extends Annotation> Optional<A> annotation(Class<A> annotation) {
@@ -131,7 +139,7 @@ public class FieldInfo<C, F> {
             .filter(f -> getter.actualType().isAssignableFrom(f.getType()))
             .filter(f -> Getter.isGetter(getter.method(), f))
             .findAny()
-            .map(f -> of(getter.declaringClass(), f, getter.effectiveType()));
+            .map(f -> of(getter.declaringClass(), f, getter.effectiveClass()));
     }
 
     private static boolean isCompatibleWith(Field field, Class<?> targetType) {

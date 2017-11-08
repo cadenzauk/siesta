@@ -129,7 +129,7 @@ public class InProjectionExpectingComma2<T1, T2> extends ExpectingWhere<Tuple2<T
             statement.from(),
             RowMappers.add3rd(
                 statement.rowMapper(),
-                col.rowMapper(scope(), label.orElseGet(() -> col.label(scope())))),
+                col.rowMapper(scope(), label)),
             Projection.of(statement.projection(), Projection.of(col, label)));
         return new InProjectionExpectingComma3<>(select);
     }

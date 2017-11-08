@@ -129,7 +129,7 @@ public class InProjectionExpectingComma3<T1, T2, T3> extends ExpectingWhere<Tupl
             statement.from(),
             RowMappers.add4th(
                 statement.rowMapper(),
-                col.rowMapper(scope(), label.orElseGet(() -> col.label(scope())))),
+                col.rowMapper(scope(), label)),
             Projection.of(statement.projection(), Projection.of(col, label)));
         return new InProjectionExpectingComma4<>(select);
     }

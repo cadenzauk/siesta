@@ -26,8 +26,10 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
@@ -41,23 +43,24 @@ public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
 
     @Override
     public String label(Scope scope) {
-        return String.format("%s_%s", lhs.label(scope), scope.database().columnNameFor(field));
+        Alias<R> alias = resolve(scope);
+        return alias.inSelectClauseLabel(column(scope).columnName());
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return rs -> scope.database().getDataTypeOf(field).get(rs, label, scope.database()).orElse(null);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return rs -> scope.database().getDataTypeOf(field).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override
     public TypeToken<T> type() {
-        return TypeToken.of(field.effectiveType());
+        return TypeToken.of(field.effectiveClass());
     }
 
     @Override
-    public String sqlWithLabel(Scope scope, String label) {
+    public String sqlWithLabel(Scope scope, Optional<String> label) {
         Alias<R> alias = resolve(scope);
-        return String.format("%s as %s", alias.inSelectClauseSql(columnName(scope)), label);
+        return String.format("%s as %s", alias.inSelectClauseSql(columnName(scope)), label.orElseGet(() -> label(scope)));
     }
 
     @Override
@@ -78,11 +81,23 @@ public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
 
     @Override
     public String columnName(Scope scope) {
-        return scope.database().namingStrategy().embeddedName(lhs.columnName(scope), scope.database().columnNameFor(field));
+        Column<T,P> column = column(scope);
+        return column.columnName();
+    }
+
+    private Column<T,P> column(Scope scope) {
+        return lhs.findColumn(scope, field.effectiveType(), field.propertyName())
+            .orElseThrow(IllegalArgumentException::new);
     }
 
     @Override
     public Alias<R> resolve(Scope scope) {
         return lhs.resolve(scope);
+    }
+
+    @Override
+    public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        Column<T,P> parent = column(scope);
+        return parent.findColumn(type, propertyName);
     }
 }

@@ -40,7 +40,7 @@ public class ExpressionProjection<T> implements Projection {
 
     @Override
     public String sql(Scope scope) {
-        return expression.sqlWithLabel(scope, label(scope));
+        return expression.sqlWithLabel(scope, label);
     }
 
     @Override

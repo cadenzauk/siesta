@@ -22,6 +22,9 @@
 
 package com.cadenzauk.siesta.model;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -35,9 +38,7 @@ public class PartRow {
     private final long partId;
     private final long widgetId;
     private final String description;
-    @Embedded
     private final MoneyAmount purchasePrice;
-    @Embedded
     private final Optional<MoneyAmount> retailPrice;
 
     PartRow(Builder builder) {

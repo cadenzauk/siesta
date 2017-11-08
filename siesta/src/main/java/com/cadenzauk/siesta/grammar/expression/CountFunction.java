@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CountFunction implements TypedExpression<Integer> {
@@ -53,8 +54,8 @@ public class CountFunction implements TypedExpression<Integer> {
     }
 
     @Override
-    public RowMapper<Integer> rowMapper(Scope scope, String label) {
-        return rs -> scope.database().getDataTypeOf(Integer.class).get(rs, label, scope.database()).orElse(null);
+    public RowMapper<Integer> rowMapper(Scope scope, Optional<String> label) {
+        return rs -> scope.database().getDataTypeOf(Integer.class).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

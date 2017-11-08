@@ -31,6 +31,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
@@ -42,12 +43,12 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
     private ResolvedColumn(Alias<R> alias, MethodInfo<R,T> method) {
         this.alias = alias;
         this.column = alias.column(method);
-        this.type = TypeToken.of(method.effectiveType());
+        this.type = TypeToken.of(method.effectiveClass());
     }
 
     @Override
     public String sql(Scope scope) {
-        return alias.inSelectClauseSql(column.name());
+        return alias.inSelectClauseSql(column.columnName());
     }
 
     @Override
@@ -62,12 +63,12 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
 
     @Override
     public String label(Scope scope) {
-        return alias.inSelectClauseLabel(column.name());
+        return alias.inSelectClauseLabel(column.columnName());
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return column.rowMapper(scope.database(), label);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return column.rowMapper(alias, label);
     }
 
     @Override
@@ -76,18 +77,23 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
     }
 
     @Override
-    public String sqlWithLabel(Scope scope, String label) {
+    public String sqlWithLabel(Scope scope, Optional<String> label) {
         return column.sqlWithLabel(alias, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        return column.name();
+        return column.columnName();
     }
 
     @Override
     public Alias<R> resolve(Scope scope) {
         return alias;
+    }
+
+    @Override
+    public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        return column.findColumn(type, propertyName);
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, Function1<R,T> getterReference) {

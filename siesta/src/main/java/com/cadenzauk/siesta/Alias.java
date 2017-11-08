@@ -120,11 +120,11 @@ public class Alias<R> {
     }
 
     public RowMapper<R> rowMapper() {
-        return table.rowMapper(columnLabelPrefix() + "_");
+        return table.rowMapper(this);
     }
 
     public DynamicRowMapper<R> dynamicRowMapper() {
-        return table.dynamicRowMapper(columnLabelPrefix() + "_");
+        return table.dynamicRowMapper(this);
     }
 
     @SuppressWarnings("unchecked")

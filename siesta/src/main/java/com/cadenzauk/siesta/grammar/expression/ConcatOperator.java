@@ -29,6 +29,7 @@ import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ConcatOperator  implements TypedExpression<String> {
@@ -60,8 +61,8 @@ public class ConcatOperator  implements TypedExpression<String> {
     }
 
     @Override
-    public RowMapper<String> rowMapper(Scope scope, String label) {
-        return Scope.makeMapper(String.class).apply(scope, label);
+    public RowMapper<String> rowMapper(Scope scope, Optional<String> label) {
+        return Scope.makeMapper(String.class).apply(scope, label.orElseGet(() -> label(scope)));
     }
 
     @Override

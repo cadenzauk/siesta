@@ -26,6 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Scope;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
@@ -37,7 +38,7 @@ public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
     }
 
     @Override
-    public String sqlWithLabel(Scope scope, String label) {
+    public String sqlWithLabel(Scope scope, Optional<String> label) {
         return lhs.sqlWithLabel(scope, label);
     }
 

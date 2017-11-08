@@ -26,6 +26,7 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ParenthesisedArithmeticExpression<T> implements TypedExpression<T> {
@@ -56,7 +57,7 @@ public class ParenthesisedArithmeticExpression<T> implements TypedExpression<T> 
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
         return inner.rowMapper(scope, label);
     }
 

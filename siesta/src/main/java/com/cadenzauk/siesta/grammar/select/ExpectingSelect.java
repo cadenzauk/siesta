@@ -140,7 +140,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         SelectStatement<T> select = new SelectStatement<>(scope(),
             column.type(),
             statement.from(),
-            column.rowMapper(scope(), label.orElseGet(() -> column.label(scope()))),
+            column.rowMapper(scope(), label),
             Projection.of(column, label));
         return new InProjectionExpectingComma1<>(select);
     }

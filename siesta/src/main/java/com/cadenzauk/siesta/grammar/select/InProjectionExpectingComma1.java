@@ -126,7 +126,7 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
             statement.from(),
             RowMappers.of(
                 statement.rowMapper(),
-                col.rowMapper(scope(), label.orElseGet(() -> col.label(scope())))),
+                col.rowMapper(scope(), label)),
             Projection.of(statement.projection(), Projection.of(col, label)));
         return new InProjectionExpectingComma2<>(select);
     }

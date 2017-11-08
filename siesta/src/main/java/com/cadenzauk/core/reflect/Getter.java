@@ -22,6 +22,8 @@
 
 package com.cadenzauk.core.reflect;
 
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
@@ -35,6 +37,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.uppercaseFirst;
@@ -45,6 +48,10 @@ public final class Getter extends UtilityClass {
     private static final Function<String,String> X = Function.identity();
     private static final Function<String,String> GET_X = s -> "get" + uppercaseFirst(s);
     private static final Function<String,String> IS_X = s -> "is" + uppercaseFirst(s);
+    private static final Pattern GET_X_PATTERN = Pattern.compile("^get[A-Z].*");
+    private static final Pattern IS_X_PATTERN = Pattern.compile("^is[A-Z].*");
+    private static final Pattern X_PATTERN = Pattern.compile(".*");
+
 
     @NotNull
     public static <T, V> Function<T,Optional<V>> forField(Class<T> targetClass, Class<V> argType, Field field) {
@@ -52,7 +59,7 @@ public final class Getter extends UtilityClass {
     }
 
     @NotNull
-    public static <T, V> Function<T,Optional<V>> forField(TypeToken<T> targetType, Class<V> argType, Field field) {
+    public static <T, V> FunctionOptional1<T,V> forField(TypeToken<T> targetType, Class<V> argType, Field field) {
         return findGetter(targetType, argType, field)
             .map(m -> fromMethod(targetType, argType, m))
             .orElseGet(() -> fromField(targetType, argType, field));
@@ -60,6 +67,20 @@ public final class Getter extends UtilityClass {
 
     public static boolean isGetter(Method method, Field forField) {
         return getMethods().anyMatch(g -> StringUtils.equals(g.apply(forField.getName()), method.getName()));
+    }
+
+    public static Stream<String> possibleFieldNames(String name) {
+        return Stream.of(
+            possibleGetter(name, GET_X_PATTERN, s -> StringUtil.lowercaseFirst(s.substring(3))),
+            possibleGetter(name, IS_X_PATTERN, s -> StringUtil.lowercaseFirst(s.substring(2))),
+            possibleGetter(name, X_PATTERN, Function.identity())
+        ).flatMap(Function.identity());
+    }
+
+    private static Stream<String> possibleGetter(String candidate, Pattern pattern, Function<String,String> translation) {
+        return pattern.matcher(candidate).matches()
+            ? Stream.of(translation.apply(candidate))
+            : Stream.empty();
     }
 
     @NotNull
@@ -80,7 +101,7 @@ public final class Getter extends UtilityClass {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    private static <T, V> Function<T,Optional<V>> fromMethod(TypeToken<T> targetClass, Class<V> argType, Method method) {
+    private static <T, V> FunctionOptional1<T,V> fromMethod(TypeToken<T> targetClass, Class<V> argType, Method method) {
         if (argType.isAssignableFrom(method.getReturnType())) {
             return t -> Optional.ofNullable(boxedType(argType).cast(MethodUtil.invoke(method, t)));
         }
@@ -95,7 +116,7 @@ public final class Getter extends UtilityClass {
 
     @SuppressWarnings("unchecked")
     @NotNull
-    private static <T, V> Function<T,Optional<V>> fromField(TypeToken<T> targetClass, Class<V> argType, Field field) {
+    private static <T, V> FunctionOptional1<T,V> fromField(TypeToken<T> targetClass, Class<V> argType, Field field) {
         if (argType.isAssignableFrom(field.getType())) {
             return t -> Optional.ofNullable(boxedType(argType).cast(FieldUtil.get(field, t)));
         }

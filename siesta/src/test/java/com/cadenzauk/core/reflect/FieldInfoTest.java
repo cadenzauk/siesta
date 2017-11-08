@@ -100,7 +100,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.field(), sameInstance(field));
         assertThat(fieldInfo.fieldType(), equalTo(Optional.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -113,7 +113,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.field(), sameInstance(field));
         assertThat(fieldInfo.fieldType(), equalTo(String.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -126,7 +126,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.field(), sameInstance(field));
         assertThat(fieldInfo.fieldType(), equalTo(Optional.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -139,7 +139,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.field(), sameInstance(field));
         assertThat(fieldInfo.fieldType(), equalTo(String.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -149,7 +149,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.fieldType(), equalTo(Optional.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -159,7 +159,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.fieldType(), equalTo(String.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -177,7 +177,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.fieldType(), equalTo(Optional.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test
@@ -188,7 +188,7 @@ class FieldInfoTest {
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.fieldType(), equalTo(String.class));
-        assertThat(fieldInfo.effectiveType(), equalTo(String.class));
+        assertThat(fieldInfo.effectiveClass(), equalTo(String.class));
     }
 
     @Test

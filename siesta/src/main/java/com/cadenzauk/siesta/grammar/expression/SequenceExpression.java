@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Sequence;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class SequenceExpression<T> implements TypedExpression<T> {
@@ -44,8 +45,8 @@ public class SequenceExpression<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, String label) {
-        return sequence.rowMapper(label);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return sequence.rowMapper(label.orElseGet(() -> label(scope)));
     }
 
     @Override

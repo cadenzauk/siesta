@@ -46,12 +46,12 @@ public class PooledDataSource implements DataSource, AutoCloseable {
     private final ConnectionPoolDataSource poolDataSource;
     private final Optional<String> initString;
 
-    public PooledDataSource(ConnectionPoolDataSource poolDataSource) throws SQLException {
+    public PooledDataSource(ConnectionPoolDataSource poolDataSource) {
         this.poolDataSource = poolDataSource;
         initString = Optional.empty();
     }
 
-    public PooledDataSource(ConnectionPoolDataSource poolDataSource, String initial) throws SQLException {
+    public PooledDataSource(ConnectionPoolDataSource poolDataSource, String initial) {
         this.poolDataSource = poolDataSource;
         initString = Optional.ofNullable(initial).filter(StringUtils::isNotBlank);
     }

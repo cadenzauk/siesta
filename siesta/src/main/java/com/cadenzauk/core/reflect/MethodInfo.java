@@ -24,7 +24,9 @@ package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.annotation.Annotation;
@@ -64,8 +66,27 @@ public class MethodInfo<C, R> {
         return actualType;
     }
 
-    public Class<R> effectiveType() {
+    public Class<R> effectiveClass() {
         return effectiveType;
+    }
+
+    public TypeToken<R> effectiveType() {
+        return TypeToken.of(effectiveType);
+    }
+
+    public Optional<FieldInfo<C, ?>> field() {
+        return Getter.possibleFieldNames(method.getName())
+            .map(name -> ClassUtil.findField(declaringType.getRawType(), name))
+            .flatMap(StreamUtil::of)
+            .filter(f -> actualType.isAssignableFrom(f.getType()))
+            .findFirst()
+            .map(field -> FieldInfo.of(declaringType, field, actualType));
+    }
+
+    public String propertyName() {
+        return field()
+            .map(FieldInfo::name)
+            .orElseThrow(() -> new IllegalArgumentException("Cannot find field for getter " + this));
     }
 
     public <A extends Annotation> Optional<A> annotation(Class<A> annotationClass) {
@@ -77,7 +98,7 @@ public class MethodInfo<C, R> {
             .filter(m -> m.getReturnType() == fieldInfo.fieldType())
             .filter(m -> Getter.isGetter(m, fieldInfo.field()))
             .findAny()
-            .map(m -> new MethodInfo<>(TypeToken.of(fieldInfo.declaringClass()), m, fieldInfo.fieldType(), fieldInfo.effectiveType()));
+            .map(m -> new MethodInfo<>(TypeToken.of(fieldInfo.declaringClass()), m, fieldInfo.fieldType(), fieldInfo.effectiveClass()));
     }
 
     @SuppressWarnings("unchecked")

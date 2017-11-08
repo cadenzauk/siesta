@@ -35,6 +35,7 @@ import org.mockito.Mockito;
 
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
+import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -52,16 +53,25 @@ public class EmbeddedTest extends MockitoTest {
 
     @Test
     void embeddedInWhereClause() {
-        Database database = testDatabase(new AnsiDialect());
+        Database database = Database.newBuilder()
+            .defaultSchema("SIESTA")
+            .table(PartRow.class, t -> t
+                .embedded(MoneyAmount.class, PartRow::purchasePrice, pp -> pp
+                    .columnPrefix("PURCH_PRICE")
+                    .column(MoneyAmount::amount, "PURCHASE_PRICE_AMT"))
+                .embedded(MoneyAmount.class, PartRow::retailPrice, rp -> rp
+                    .column(MoneyAmount::amount, "RETAIL_PRICE_AMT")))
+            .build();
 
         database.from(PartRow.class)
-            .select(Aggregates.count())
+            .select(Aggregates.countDistinct(column(PartRow::purchasePrice).dot(MoneyAmount::amount)))
             .where(PartRow::purchasePrice).dot(MoneyAmount::currency).isEqualTo("USD")
             .or(PartRow::retailPrice).dot(MoneyAmount::currency).isEqualTo("NZD")
             .optional(sqlExecutor);
 
         Mockito.verify(sqlExecutor).query(sql.capture(), args.capture(), any());
-        assertThat(sql.getValue(), is("select count(*) as count_1 from SIESTA.PART PART where PART.PURCHASE_PRICE_CURRENCY = ? or PART.RETAIL_PRICE_CURRENCY = ?"));
+        assertThat(sql.getValue(), is("select count(distinct PART.PURCHASE_PRICE_AMT) as count_PART_PURCHASE_PRICE_AMT " +
+            "from SIESTA.PART PART where PART.PURCH_PRICE_CCY = ? or PART.RETAIL_PRICE_CCY = ?"));
         assertThat(args.getValue(), is(toArray("USD", "NZD")));
     }
 
@@ -79,12 +89,12 @@ public class EmbeddedTest extends MockitoTest {
 
         Mockito.verify(sqlExecutor).query(sql.capture(), args.capture(), any());
         assertThat(sql.getValue(), is(
-            "select PART.PURCHASE_PRICE_AMOUNT as pp_AMOUNT, " +
-                "PART.PURCHASE_PRICE_CURRENCY as pp_CURRENCY, " +
-                "PART.RETAIL_PRICE_AMOUNT as rp_AMOUNT, " +
-                "PART.RETAIL_PRICE_CURRENCY as rp_CURRENCY, " +
-                "PART.PURCHASE_PRICE_CURRENCY as pc, " +
-                "PART.RETAIL_PRICE_CURRENCY as rc " +
+            "select PART.PURCHASE_PRICE_AMOUNT as pp_PURCHASE_PRICE_AMOUNT, " +
+                "PART.PURCHASE_PRICE_CCY as pp_PURCHASE_PRICE_CCY, " +
+                "PART.RETAIL_PRICE_AMOUNT as rp_RETAIL_PRICE_AMOUNT, " +
+                "PART.RETAIL_PRICE_CCY as rp_RETAIL_PRICE_CCY, " +
+                "PART.PURCHASE_PRICE_CCY as pc, " +
+                "PART.RETAIL_PRICE_CCY as rc " +
                 "from SIESTA.PART PART " +
                 "where PART.PART_ID = ?"));
         assertThat(args.getValue(), is(toArray(4L)));

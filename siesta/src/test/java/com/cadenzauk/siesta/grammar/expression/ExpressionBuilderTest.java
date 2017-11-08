@@ -41,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -124,13 +125,13 @@ class ExpressionBuilderTest extends MockitoTest {
 
     @Test
     void rowMapper() {
-        when(expression1.rowMapper(scope, "label")).thenReturn(rowMapper);
+        when(expression1.rowMapper(scope, Optional.of("label"))).thenReturn(rowMapper);
         ExpressionBuilder<String,BooleanExpression> sut = ExpressionBuilder.of(expression1, e -> e);
 
-        RowMapper<String> result = sut.rowMapper(scope, "label");
+        RowMapper<String> result = sut.rowMapper(scope, Optional.of("label"));
 
         assertThat(result, sameInstance(rowMapper));
-        verify(expression1).rowMapper(scope, "label");
+        verify(expression1).rowMapper(scope, Optional.of("label"));
         verifyNoMoreInteractions(expression1, scope);
     }
 
