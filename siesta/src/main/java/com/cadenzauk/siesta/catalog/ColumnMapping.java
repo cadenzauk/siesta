@@ -31,13 +31,17 @@ import com.cadenzauk.core.reflect.Setter;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
@@ -49,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -58,6 +63,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.reflect.util.ClassUtil.hasAnnotation;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 public class ColumnMapping<R, B> {
@@ -73,10 +79,6 @@ public class ColumnMapping<R, B> {
         newRowBuilder = builder.newBuilder;
         buildRow = builder.buildRow;
         columns = builder.columns;
-    }
-
-    Database database() {
-        return database;
     }
 
     TypeToken<R> rowType() {
@@ -158,6 +160,7 @@ public class ColumnMapping<R, B> {
         private final List<TableColumn<?,R,B>> columns = new ArrayList<>();
         private Optional<String> childPrefix = Optional.empty();
         private Supplier<B> newBuilder = null;
+        private Map<String,List<AttributeOverride>> overrides = ImmutableMap.of();
 
         protected Builder(Database database, TypeToken<R> rowType, TypeToken<B> builderType, Function<B,R> buildRow) {
             this.database = database;
@@ -239,29 +242,57 @@ public class ColumnMapping<R, B> {
             return optional(getter, setter, Optional.of(init));
         }
 
-        public <T> S embedded(Class<T> klass, Function1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
+        public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, Function1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
             BiConsumer<B,T> setter = setter(getter);
             return embedded(getter, setter, Optional.of(init));
         }
 
-        public <T> S embedded(Class<T> klass, FunctionOptional1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
+        public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, FunctionOptional1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
             BiConsumer<B,Optional<T>> setter = setter(getter);
             return embedded(getter, setter, Optional.of(init));
         }
 
-        protected  <T> void setColumnName(PrimitiveColumn.Builder<T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
-            String columnName = database.columnNameFor(getterInfo);
-            columnBuilder.columnName(childPrefix
-                .map(p -> database.namingStrategy().embeddedName(p, columnName))
-                .orElse(columnName));
+        S overrides(Map<String,List<AttributeOverride>> overrides) {
+            this.overrides = ImmutableMap.copyOf(overrides);
+            return self();
         }
 
-        protected  <T> void setColumnName(EmbeddedColumn.Builder<T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
-            String columnName = database.columnNameFor(getterInfo);
-            columnBuilder.columnPrefix(childPrefix
-                .map(p -> database.namingStrategy().embeddedName(p, columnName))
-                .orElse(columnName));
+        private Optional<String> overrideColumnName(String propertyName) {
+            return Optional.ofNullable(overrides.get(propertyName))
+                .flatMap(o -> o.stream()
+                    .findFirst()
+                    .map(AttributeOverride::column)
+                    .map(javax.persistence.Column::name));
         }
+
+        private <T> String determineColumnNameFor(MethodInfo<R,T> getterInfo) {
+            return overrideColumnName(getterInfo.propertyName())
+                .orElseGet(() -> {
+                    String columnName = database.columnNameFor(getterInfo);
+                    return childPrefix
+                        .map(p -> database.namingStrategy().embeddedName(p, columnName))
+                        .orElse(columnName);
+                });
+        }
+
+        private <T> String determineColumnNameFor(FieldInfo<R,T> fieldInfo) {
+            return overrideColumnName(fieldInfo.name())
+                .orElseGet(() -> {
+                    String columnName = database.columnNameFor(fieldInfo);
+                    return childPrefix
+                        .map(p -> database.namingStrategy().embeddedName(p, columnName))
+                        .orElse(columnName);
+                });
+        }
+
+        private <T> void setColumnName(PrimitiveColumn.Builder<T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
+            columnBuilder.columnName(determineColumnNameFor(getterInfo));
+        }
+
+        private <T> void setColumnName(EmbeddedColumn.Builder<T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
+            columnBuilder.columnName(determineColumnNameFor(getterInfo));
+        }
+
         private <T> BiConsumer<B,T> setter(Function1<R,T> getter) {
             BiConsumer<B,Optional<T>> setter = setter(MethodInfo.of(getter));
             return (b, v) -> setter.accept(b, Optional.ofNullable(v));
@@ -325,30 +356,40 @@ public class ColumnMapping<R, B> {
         private <T> void addPrimitive(FieldInfo<R,T> fieldInfo) {
             DataType<T> dataType = database
                 .dataTypeOf(fieldInfo).orElseThrow(() -> new IllegalArgumentException("Unable to determine the data type for " + fieldInfo));
+
             Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
                 .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
+
             PrimitiveColumn.Builder<T,R,B> columnBuilder = PrimitiveColumn.optional(
                 database,
                 fieldInfo.name(),
                 dataType,
                 fieldInfo.optionalGetter(),
-                Setter.forField(builderType, fieldInfo.effectiveClass(), builderField)
-            );
-            String columnName = database.columnNameFor(fieldInfo);
-            columnBuilder.columnName(childPrefix
-                .map(p -> database.namingStrategy().embeddedName(p, columnName))
-                .orElse(columnName));
+                Setter.forField(builderType, fieldInfo.effectiveClass(), builderField))
+                .columnName(determineColumnNameFor(fieldInfo));
+
             columns.add(columnBuilder.build());
         }
 
         private <T> void addEmbedded(FieldInfo<R,T> fieldInfo) {
+            Map<String,List<AttributeOverride>> overrides = Stream.concat(
+                StreamUtil.of(fieldInfo.annotation(AttributeOverride.class)),
+                StreamUtil.of(fieldInfo.annotation(AttributeOverrides.class))
+                    .flatMap(a -> Arrays.stream(a.value())))
+                .collect(groupingBy(AttributeOverride::name));
+
             Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
                 .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
-            EmbeddedColumn.Builder<T,R,B> columnBuilder = EmbeddedColumn.optional(database, fieldInfo.name(), fieldInfo.effectiveType(), fieldInfo.optionalGetter(), Setter.forField(builderType, fieldInfo.effectiveClass(), builderField));
-            String columnName = database.columnNameFor(fieldInfo);
-            columnBuilder.columnPrefix(childPrefix
-                .map(p -> database.namingStrategy().embeddedName(p, columnName))
-                .orElse(columnName));
+
+            EmbeddedColumn.Builder<T,R,B> columnBuilder = EmbeddedColumn.optional(
+                database,
+                fieldInfo.name(),
+                fieldInfo.effectiveType(),
+                fieldInfo.optionalGetter(),
+                Setter.forField(builderType, fieldInfo.effectiveClass(), builderField))
+                .overrides(overrides)
+                .columnName(determineColumnNameFor(fieldInfo));
+
             columns.add(columnBuilder.build());
         }
     }

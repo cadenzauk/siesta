@@ -162,12 +162,12 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
             this.propertyName = propertyName;
             this.getter = getter;
             this.setter = setter;
-            columnPrefix(database.namingStrategy().columnName(propertyName));
+            columnName(database.namingStrategy().columnName(propertyName));
         }
 
-        public Builder<T,R,B> columnPrefix(String columnName) {
+        public Builder<T,R,B> columnName(String columnName) {
             this.columnName = columnName;
-            super.childPrefix(Optional.of(columnName));
+            childPrefix(Optional.of(columnName));
             return this;
         }
 
@@ -175,6 +175,5 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
             finish();
             return new EmbeddedColumn<>(this);
         }
-
     }
 }

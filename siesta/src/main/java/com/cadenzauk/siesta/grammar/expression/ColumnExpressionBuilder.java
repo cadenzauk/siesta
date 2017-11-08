@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Scope;
 
@@ -43,6 +44,10 @@ public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
     }
 
     public <C> ColumnExpressionBuilder<C,R,N> dot(Function1<T,C> field) {
+        return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
+    }
+
+    public <C> ColumnExpressionBuilder<C,R,N> dot(FunctionOptional1<T,C> field) {
         return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
     }
 

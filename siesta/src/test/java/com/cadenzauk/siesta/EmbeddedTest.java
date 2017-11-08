@@ -33,15 +33,21 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Table;
+import java.util.Optional;
+
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 
-public class EmbeddedTest extends MockitoTest {
+class EmbeddedTest extends MockitoTest {
     @Mock
     private SqlExecutor sqlExecutor;
 
@@ -57,7 +63,7 @@ public class EmbeddedTest extends MockitoTest {
             .defaultSchema("SIESTA")
             .table(PartRow.class, t -> t
                 .embedded(MoneyAmount.class, PartRow::purchasePrice, pp -> pp
-                    .columnPrefix("PURCH_PRICE")
+                    .columnName("PURCH_PRICE")
                     .column(MoneyAmount::amount, "PURCHASE_PRICE_AMT"))
                 .embedded(MoneyAmount.class, PartRow::retailPrice, rp -> rp
                     .column(MoneyAmount::amount, "RETAIL_PRICE_AMT")))
@@ -98,5 +104,59 @@ public class EmbeddedTest extends MockitoTest {
                 "from SIESTA.PART PART " +
                 "where PART.PART_ID = ?"));
         assertThat(args.getValue(), is(toArray(4L)));
+    }
+
+    @Test
+    void embeddedOverride() {
+        Database database = Database.newBuilder().dialect(new AnsiDialect()).build();
+
+        database.from(CustomerWithOverride.class)
+            .select(CustomerWithOverride::address)
+            .comma(column(CustomerWithOverride::address).dot(Address::line1), "l1")
+            .comma(column(CustomerWithOverride::address).dot(Address::line2), "l2")
+            .list(sqlExecutor);
+
+        Mockito.verify(sqlExecutor).query(sql.capture(), args.capture(), any());
+        assertThat(sql.getValue(), is("select " +
+            "CUSTOMER.ADDRESS_LINE1 as CUSTOMER_ADDRESS_LINE1, " +
+            "CUSTOMER.ADDR_LINE_2 as CUSTOMER_ADDR_LINE_2, " +
+            "CUSTOMER.ADDRESS_LINE1 as l1, " +
+            "CUSTOMER.ADDR_LINE_2 as l2 " +
+            "from CUSTOMER CUSTOMER"));
+    }
+
+    @Embeddable
+    private static class Address {
+        private final String line1;
+        private final Optional<String> line2;
+
+        public Address(String line1, Optional<String> line2) {
+            this.line1 = line1;
+            this.line2 = line2;
+        }
+
+        public String line1() {
+            return line1;
+        }
+
+        public Optional<String> line2() {
+            return line2;
+        }
+    }
+
+    @Table(name = "CUSTOMER")
+    private static class CustomerWithOverride {
+        @AttributeOverrides({
+            @AttributeOverride(name = "line2", column = @Column(name = "ADDR_LINE_2"))
+        })
+        private final Address address;
+
+        private CustomerWithOverride(Address address) {
+            this.address = address;
+        }
+
+        public Address address() {
+            return address;
+        }
     }
 }

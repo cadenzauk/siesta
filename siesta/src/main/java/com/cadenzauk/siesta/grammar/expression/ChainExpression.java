@@ -87,7 +87,7 @@ public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
 
     private Column<T,P> column(Scope scope) {
         return lhs.findColumn(scope, field.effectiveType(), field.propertyName())
-            .orElseThrow(IllegalArgumentException::new);
+            .orElseThrow(() -> new IllegalArgumentException("Unable to find field " + field.propertyName() + " in " + field.effectiveType()));
     }
 
     @Override
