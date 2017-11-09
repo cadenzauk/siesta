@@ -28,6 +28,11 @@ import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IntegrationTest;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
+import com.cadenzauk.siesta.model.ManufacturerId;
+import com.cadenzauk.siesta.model.WidgetId;
+import com.cadenzauk.siesta.model.WidgetRowWithTypeSafeId;
+import com.cadenzauk.siesta.type.DbTypeId;
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -39,6 +44,7 @@ import java.util.Optional;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -198,5 +204,30 @@ public class SiestaExample extends IntegrationTest {
             .single();
 
         System.out.println(today);
+    }
+
+    @Test
+    public void typeSafeIdExample() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
+            .adapter(WidgetId.class, DbTypeId.BIGINT, WidgetId::id, WidgetId::new)
+            .adapter(ManufacturerId.class, DbTypeId.BIGINT, ManufacturerId::id, ManufacturerId::new)
+            .build();
+
+        WidgetId widgetId = new WidgetId(newId());
+        ManufacturerId manufacturerId = new ManufacturerId(newId());
+        WidgetRowWithTypeSafeId widget = WidgetRowWithTypeSafeId.newBuilder()
+            .widgetId(widgetId)
+            .manufacturerId(manufacturerId)
+            .name("Safety Gadget")
+            .build();
+        database.insert(widget);
+
+        WidgetRowWithTypeSafeId result = database.from(WidgetRowWithTypeSafeId.class)
+            .where(WidgetRowWithTypeSafeId::widgetId).isEqualTo(widgetId)
+            .or(WidgetRowWithTypeSafeId::manufacturerId).isEqualTo(literal(manufacturerId))
+            .single();
+
+        MatcherAssert.assertThat(result.name(), is("Safety Gadget"));
     }
 }

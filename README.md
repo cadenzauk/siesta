@@ -105,16 +105,7 @@ List<Widget> sprockets = database.from(Widget.class)
     .list(sqlExecutor);
 
 ```
-As we said, SIESTA is Typesafe, so the compiler and IDE will protect you from some mistakes.  We don't use strings to refer to 
-columns; we use typed method references.  This won't compile because `widgetId` is long so you can't compare it to a string. 
-
-```java
-Optional<Widget> oops = database.from(Widget.class)
-    .where(Widget::widgetId).isEqualTo("Sprocket")  // Compile error
-    .optional(sqlExecutor);
-```
-
-Of course you can do joins and projections:
+You can also do joins and projections:
 
 ```java
 List<Tuple2<String,String>> makersOfGizmos = database.from(Widget.class, "w")
@@ -125,7 +116,57 @@ List<Tuple2<String,String>> makersOfGizmos = database.from(Widget.class, "w")
     .list(sqlExecutor);
 ```
 
-One difference you'll have noticed from SQL syntax is that we do projection via `select` *after* the `from` and `join` clauses.
+One slight difference you'll have noticed from SQL syntax is that we do projection via `select` *after* the `from` and `join` clauses.
+Apart from that, the syntax follows SQL pretty closely so it should be easy to write and understand.
+
+### Type Safety
+
+As we said, SIESTA is Typesafe, so the compiler and IDE will protect you from some mistakes.  We don't use strings to refer to 
+columns; we use typed method references.  The following won't compile because `widgetId` is of type long so you can't compare it 
+to a string. 
+
+
+```java
+Optional<Widget> oops = database.from(Widget.class)
+    .where(Widget::widgetId).isEqualTo("Sprocket")  // Compile error
+    .optional(sqlExecutor);
+```
+
+If you like you can go a step further and use typesafe classes instead of primitives.  For example, suppose we ID for a
+Widget was a WidgetId class that wrapped a long.  We can tell SIESTA how to convert a WidgetId to and from the database with
+a simple one liner in the database builder:
+
+```java
+Database database = Database.newBuilder()
+    .adapter(WidgetId.class, DbTypeId.BIGINT, WidgetId::id, WidgetId::new)
+    ...
+    .build();
+```
+
+Now we can use a WidgetId directly.  The following code would compile because both WidgetRow::widgetId and our widgetId 
+parameter are the same type:  
+
+```java
+Optional<Widget> findWidget(WidgetId widgetId) {
+    return database.from(WidgetRowWithTypeSafeId.class)
+        .where(WidgetRow::widgetId).isEqualTo(widgetId)
+        .optional();
+}
+```
+
+But if we got our query wrong, we'd get a compile error:
+
+```java
+Optional<Widget> findWidget(WidgetId widgetId) {
+    return database.from(WidgetRowWithTypeSafeId.class)
+        .where(WidgetRow::manufacturerId).isEqualTo(widgetId)
+        .optional();
+Error:(227, 60) java: no suitable method found for isEqualTo(com.cadenzauk.siesta.model.WidgetId)
+    method com.cadenzauk.siesta.grammar.expression.ExpressionBuilder.isEqualTo(com.cadenzauk.siesta.model.ManufacturerId) is not applicable
+      (argument mismatch; com.cadenzauk.siesta.model.WidgetId cannot be converted to com.cadenzauk.siesta.model.ManufacturerId)
+      ...
+}
+```
 
 ### Complex Queries
 
@@ -230,12 +271,9 @@ try (CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable()) {
 }
 ```
 
-Note that Spring's `JdbcTemplate` doesn't handle scrollable result sets and large query results very well, so the `JdbcTemplateSqlExecutor`
-isn't a good choice for streams - the implementation of `stream()` is just `list().stream()`.
- 
-On the other hand, SIESTA's raw [`JdbcSqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/siesta/jdbc/JdbcSqlExecutor.java)
-does implement `stream()` based on a spliterator that scrolls through the result set so by using this you can write code that
-handles very large query.
+SIESTA's [`JdbcSqlExecutor`](https://github.com/cadenzauk/siesta/blob/master/siesta/src/main/java/com/cadenzauk/siesta/jdbc/JdbcSqlExecutor.java)
+implements `stream()` based on a spliterator that scrolls through the result set so by using this you can write code that
+handles very large queries.
 
 Of course you should do as much work to filter and project in the database rather than shipping all the unneeded results to the client
 and then filtering the stream.

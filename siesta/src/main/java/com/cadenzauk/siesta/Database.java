@@ -44,6 +44,7 @@ import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import com.cadenzauk.siesta.type.DbType;
+import com.cadenzauk.siesta.type.DbTypeAdapter;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.EnumByName;
 import com.google.common.reflect.TypeToken;
@@ -385,6 +386,10 @@ public class Database {
             customizations.add(dialect -> dialect.registerType(dbTypeId, dbType));
             dataTypes.add(reg -> reg.register(new DataType<>(javaClass, dbTypeId)));
             return this;
+        }
+
+        public <T, D> Builder adapter(Class<T> javaClass, DbTypeId<D> dbTypeId, Function<T,D> toDb, Function<D,T> fromDb) {
+            return type(javaClass, DbTypeId.of(javaClass), new DbTypeAdapter<>(dbTypeId, toDb, fromDb));
         }
 
         public <T extends Enum<T>> Builder enumByName(Class<T> javaClass) {

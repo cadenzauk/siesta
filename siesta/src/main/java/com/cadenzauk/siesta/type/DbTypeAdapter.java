@@ -26,48 +26,52 @@ import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Function;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+public class DbTypeAdapter<T, D> implements DbType<T> {
+    private final DbTypeId<D> databaseType;
+    private final Function<T,D> toDatabase;
+    private final Function<D,T> fromDatabase;
 
-public class EnumByName<T extends Enum<T>> implements DbType<T> {
-    private final Class<T> enumClass;
-
-    public EnumByName(Class<T> enumClass) {
-        this.enumClass = enumClass;
+    public DbTypeAdapter(DbTypeId<D> databaseType, Function<T,D> toDatabase, Function<D,T> fromDatabase) {
+        this.databaseType = databaseType;
+        this.toDatabase = toDatabase;
+        this.fromDatabase = fromDatabase;
     }
 
     @Override
     public T getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
-        String name = type(database).getColumnValue(database, rs, col);
-        return isBlank(name) ? null : Enum.valueOf(enumClass, name);
+        D columnValue = type(database).getColumnValue(database, rs, col);
+        return columnValue == null ? null : fromDatabase.apply(columnValue);
     }
 
     @Override
     public T getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
-        String name = type(database).getColumnValue(database, rs, col);
-        return isBlank(name) ? null : Enum.valueOf(enumClass, name);
+        D columnValue = type(database).getColumnValue(database, rs, col);
+        return columnValue == null ? null : fromDatabase.apply(columnValue);
     }
 
     @Override
     public String sqlType(Database database) {
-        return type(database).sqlType(database, 80);
+        return type(database).sqlType(database);
     }
 
     @Override
     public Object convertToDatabase(Database database, T value) {
-        return type(database).convertToDatabase(database, value.name());
+        return type(database).convertToDatabase(database, value == null ? null : toDatabase.apply(value));
     }
 
     @Override
     public String literal(Database database, T value) {
-        return type(database).literal(database, value.name());
+        return type(database).literal(database, value == null ? null : toDatabase.apply(value));
     }
 
-    private DbType<String> type(Database database) {
-        return database.dialect().type(DbTypeId.VARCHAR);
+    @Override
+    public String parameter(Database database, T value) {
+        return type(database).parameter(database, value == null ? null : toDatabase.apply(value));
     }
 
-    public static <T extends Enum<T>> DbTypeId<T> id(Class<T> javaClass) {
-        return DbTypeId.of(javaClass);
+    private DbType<D> type(Database database) {
+        return database.dialect().type(databaseType);
     }
 }

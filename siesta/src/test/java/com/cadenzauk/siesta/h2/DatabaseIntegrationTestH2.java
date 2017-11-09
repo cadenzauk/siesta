@@ -31,7 +31,6 @@ import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.WidgetRow;
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 
 import java.util.Optional;
