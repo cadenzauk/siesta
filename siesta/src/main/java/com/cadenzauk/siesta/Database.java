@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -84,7 +85,7 @@ public class Database {
 
         builder.customizations.forEach(c -> c.accept(dialect));
         builder.dataTypes.forEach(d -> d.accept(dataTypeRegistry));
-        builder.tables.forEach(t -> t.accept(this));
+        builder.tables.forEach((k,v) -> v.apply(this));
     }
 
     public String defaultCatalog() {
@@ -342,7 +343,7 @@ public class Database {
         private ZoneId databaseTimeZone = ZoneId.systemDefault();
         private final List<Consumer<Dialect>> customizations = new ArrayList<>();
         private final List<Consumer<DataTypeRegistry>> dataTypes = new ArrayList<>();
-        private final List<Consumer<Database>> tables = new ArrayList<>();
+        private final Map<TypeToken<?>,TableInitializer<?,?>> tables = new HashMap<>();
 
         private Builder() {
         }
@@ -396,13 +397,18 @@ public class Database {
             return type(javaClass, EnumByName.id(javaClass), new EnumByName<>(javaClass));
         }
 
-        public <R, B> Builder table(Class<R> rowClass, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
-            tables.add(database -> database.table(TypeToken.of(rowClass), init));
-            return this;
+        public <R, B> Builder table(Class<R> rowClass, Consumer<Table.Builder<R,?>> init) {
+            return table(TypeToken.of(rowClass), init);
         }
 
-        public <R, B> Builder table(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
-            tables.add(database -> database.table(rowType, init));
+        @SuppressWarnings("unchecked")
+        public <R> Builder table(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
+            TableInitializer<?,?> existing = tables.get(rowType);
+            TableInitializer<?,?> tableInitializer =
+                existing == null
+                    ? TableInitializer.of(rowType, init)
+                    : ((TableInitializer<R,?>)existing).concat(init);
+            tables.put(rowType, tableInitializer);
             return this;
         }
 
@@ -418,6 +424,33 @@ public class Database {
 
         public Database build() {
             return new Database(this);
+        }
+    }
+
+    private static class TableInitializer<R, B> {
+        private final TypeToken<R> rowType;
+        private final Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer;
+
+        public TableInitializer(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer) {
+            this.rowType = rowType;
+            this.initializer = initializer;
+        }
+
+        public Table<R> apply(Database database) {
+            return database.table(rowType, initializer);
+        }
+
+        public TableInitializer<R, B> concat(Consumer<Table.Builder<R,?>> next) {
+            Function<Table.Builder<R,R>,Table.Builder<R,B>> newInitializer = b -> {
+                Table.Builder<R,B> builder = initializer.apply(b);
+                next.accept(builder);
+                return builder;
+            };
+            return new TableInitializer<>(rowType, newInitializer);
+        }
+
+        public static <R> TableInitializer<R,?> of(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
+            return new TableInitializer<>(rowType, Function.identity()).concat(init);
         }
     }
 }

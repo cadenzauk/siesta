@@ -42,6 +42,7 @@ import java.util.Optional;
 
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
+import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -59,7 +60,7 @@ class EmbeddedTest extends MockitoTest {
 
     @Test
     void embeddedInWhereClause() {
-        Database database = Database.newBuilder()
+        Database database = testDatabaseBuilder()
             .defaultSchema("SIESTA")
             .table(PartRow.class, t -> t
                 .embedded(MoneyAmount.class, PartRow::purchasePrice, pp -> pp
