@@ -27,6 +27,7 @@ import com.cadenzauk.core.reflect.Factory;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -101,6 +102,20 @@ class ClassUtilTest {
         Optional<Class<?>> result = ClassUtil.forName("com.dodgy.nothing.to.see.here.Bob");
 
         assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void forArrayOfPrimitive() {
+        Optional<Class<?>> result = ClassUtil.forArrayOf(Double.TYPE);
+
+        assertThat(result, is(Optional.of(double[].class)));
+    }
+
+    @Test
+    void forArrayOfGeneric() {
+        Optional<Class<?>> result = ClassUtil.forArrayOf(List.class);
+
+        assertThat(result, is(Optional.of(List[].class)));
     }
 
     @Test

@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.jdbc;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.ConnectionUtil;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.Transaction;
 
 import java.sql.Connection;
@@ -44,7 +45,7 @@ public class JdbcTransaction implements Transaction {
         try {
             connection.setAutoCommit(false);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeSqlException(e);
         }
     }
 
@@ -70,7 +71,7 @@ public class JdbcTransaction implements Transaction {
 
     @Override
     public <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return sqlExecutor.stream(connection, sql, args, rowMapper, new CompositeAutoCloseable());
+        return autoCloseable.add(sqlExecutor.stream(connection, sql, args, rowMapper, new CompositeAutoCloseable()));
     }
 
     @Override

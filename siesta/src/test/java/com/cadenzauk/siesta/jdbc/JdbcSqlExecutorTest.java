@@ -123,6 +123,30 @@ class JdbcSqlExecutorTest extends MockitoTest {
     }
 
     @Test
+    void streamClosedIfComplete() throws SQLException {
+        CompositeAutoCloseable closeable = new CompositeAutoCloseable();
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(rowMapper.mapRow(resultSet)).thenReturn("Fred").thenReturn("Barney").thenThrow(new AssertionError("Unexpected call to row mapper"));
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource, 100);
+        String sql = "select name from foo where bar = ?";
+
+        List<String> result = sut.stream(connection, sql, toArray("Bob"), rowMapper, closeable)
+            .collect(Collectors.toList());
+
+        verify(connection).prepareStatement(sql);
+        verify(preparedStatement).executeQuery();
+        verify(preparedStatement).setObject(1, "Bob");
+        verify(preparedStatement).setFetchSize(100);
+        verify(preparedStatement).close();
+        verify(resultSet, times(3)).next();
+        verify(resultSet).close();
+        verify(rowMapper, times(2)).mapRow(resultSet);
+        verifyNoMoreInteractions(connection, preparedStatement, resultSet, rowMapper);
+        assertThat(result, contains("Fred", "Barney"));
+    }
+
+    @Test
     void streamWhenMapperThrows() throws SQLException {
         CompositeAutoCloseable closeable = new CompositeAutoCloseable();
         when(preparedStatement.executeQuery()).thenReturn(resultSet);

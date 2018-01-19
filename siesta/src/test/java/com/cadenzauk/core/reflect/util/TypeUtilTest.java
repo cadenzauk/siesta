@@ -71,6 +71,34 @@ class TypeUtilTest {
         assertThat(result, equalTo(expected));
     }
 
+    private static Stream<Arguments> parametersForPrimitiveComponentType() {
+        return Stream.of(
+            Arguments.of(long[].class, Long.TYPE),
+            Arguments.of(int[].class, Integer.TYPE),
+            Arguments.of(short[].class, Short.TYPE),
+            Arguments.of(byte[].class, Byte.TYPE),
+            Arguments.of(double[].class, Double.TYPE),
+            Arguments.of(float[].class, Float.TYPE),
+            Arguments.of(char[].class, Character.TYPE),
+            Arguments.of(boolean[].class, Boolean.TYPE)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForPrimitiveComponentType")
+    void primitiveComponentType(Class<?> array, Class<?> expected) {
+        Type result = TypeUtil.primitiveComponentType(array);
+
+        assertThat(result, equalTo(expected));
+    }
+
+    @Test
+    void primitiveComponentOfNonPrimitiveThrows() {
+        calling(() -> TypeUtil.primitiveComponentType(Byte[].class))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Byte[] is not a primative array.");
+    }
+
     @SuppressWarnings("unused")
     private Map<Long,Character> longCharacterMap;
     @SuppressWarnings("unused")

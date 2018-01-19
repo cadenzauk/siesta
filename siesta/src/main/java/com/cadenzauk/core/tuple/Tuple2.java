@@ -25,10 +25,11 @@ package com.cadenzauk.core.tuple;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class Tuple2<T1, T2> implements Tuple {
+public class Tuple2<T1, T2> implements Tuple, Map.Entry<T1, T2> {
     private final T1 item1;
     private final T2 item2;
 
@@ -64,6 +65,21 @@ public class Tuple2<T1, T2> implements Tuple {
             .toHashCode();
     }
 
+    @Override
+    public T1 getKey() {
+        return item1;
+    }
+
+    @Override
+    public T2 getValue() {
+        return item2;
+    }
+
+    @Override
+    public T2 setValue(T2 value) {
+        throw new UnsupportedOperationException();
+    }
+
     public T1 item1() {
         return item1;
     }
@@ -72,7 +88,7 @@ public class Tuple2<T1, T2> implements Tuple {
         return item2;
     }
 
-    public <T> T map(BiFunction<T1, T2, T> function) {
+    public <T> T map(BiFunction<? super T1, ? super T2, ? extends T> function) {
         return function.apply(item1, item2);
     }
 

@@ -26,6 +26,7 @@ import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.util.IterableUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.IsolationLevel;
@@ -39,7 +40,6 @@ import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -150,6 +150,16 @@ class SelectStatement<RT> {
         return transaction.query(sql, args, rowMapper());
     }
 
+    CompletableFuture<List<RT>> listAsync(SqlExecutor sqlExecutor) {
+        try (Transaction transaction = sqlExecutor.beginTransaction()) {
+            try {
+                return listAsync(transaction);
+            } finally {
+                transaction.commit();
+            }
+        }
+    }
+
     CompletableFuture<List<RT>> listAsync(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
@@ -165,30 +175,50 @@ class SelectStatement<RT> {
         return OptionalUtil.ofOnly(list(transaction));
     }
 
-    Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable autoCloseable) {
+    CompletableFuture<Optional<RT>> optionalAsync(SqlExecutor sqlExecutor) {
+        return listAsync(sqlExecutor).thenApply(OptionalUtil::ofOnly);
+    }
+
+    CompletableFuture<Optional<RT>> optionalAsync(Transaction transaction) {
+        return listAsync(transaction).thenApply(OptionalUtil::ofOnly);
+    }
+
+    Stream<RT> stream(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return autoCloseable.add(sqlExecutor.stream(sql, args, rowMapper()));
+        return sqlExecutor.stream(sql, args, rowMapper());
+    }
+
+    Stream<RT> stream(Transaction transaction) {
+        Object[] args = args(scope).toArray();
+        String sql = sql();
+        LOG.debug(sql);
+        return transaction.stream(sql, args, rowMapper());
+    }
+
+    Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable autoCloseable) {
+        return autoCloseable.add(stream(sqlExecutor));
     }
 
     Stream<RT> stream(Transaction transaction, CompositeAutoCloseable autoCloseable) {
-        Object[] args = args(scope).toArray();
-        String sql = sql();
-        LOG.debug(sql);
-        return autoCloseable.add(transaction.stream(sql, args, rowMapper()));
+        return autoCloseable.add(stream(transaction));
     }
 
     RT single(SqlExecutor sqlExecutor) {
-        return Iterables.getOnlyElement(list(sqlExecutor));
+        return IterableUtil.single(list(sqlExecutor));
     }
 
     RT single(Transaction transaction) {
-        return Iterables.getOnlyElement(list(transaction));
+        return IterableUtil.single(list(transaction));
+    }
+
+    CompletableFuture<RT> singleAsync(SqlExecutor sqlExecutor) {
+        return listAsync(sqlExecutor).thenApply(IterableUtil::single);
     }
 
     CompletableFuture<RT> singleAsync(Transaction transaction) {
-        return listAsync(transaction).thenApply(Iterables::getOnlyElement);
+        return listAsync(transaction).thenApply(IterableUtil::single);
     }
 
     From from() {
@@ -311,7 +341,7 @@ class SelectStatement<RT> {
             : " order by " + orderByClauses.stream().map(ordering -> ordering.sql(actualScope)).collect(joining(", "));
     }
 
-    private String sqlImpl(Scope outerScope) {
+    String sqlImpl(Scope outerScope) {
         Scope innerScope = outerScope.plus(scope);
         String sql = String.format("%sselect %s%s%s%s%s%s%s",
             commonTableExpressionSql(outerScope),

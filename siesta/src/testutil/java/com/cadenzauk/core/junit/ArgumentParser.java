@@ -20,40 +20,15 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.core.junit;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Spliterators;
-import java.util.function.Consumer;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class ResultSetSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
-    private final ResultSet resultSet;
-    private final RowMapper<T> rowMapper;
-    private final Runnable atEnd;
-
-    public ResultSetSpliterator(ResultSet resultSet, RowMapper<T> rowMapper) {
-        this(resultSet, rowMapper, () -> {});
-    }
-
-    public ResultSetSpliterator(ResultSet resultSet, RowMapper<T> rowMapper, Runnable atEnd) {
-        super(Long.MAX_VALUE, 0);
-        this.resultSet = resultSet;
-        this.rowMapper = rowMapper;
-        this.atEnd = atEnd;
-    }
-
-    @Override
-    public boolean tryAdvance(Consumer<? super T> action) {
-        try {
-            if (!resultSet.next()) {
-                atEnd.run();
-                return false;
-            }
-            action.accept(rowMapper.mapRow(resultSet));
-            return true;
-        } catch (SQLException e) {
-            throw new RuntimeSqlException(e);
-        }
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface ArgumentParser {
+    Class<?> value();
 }

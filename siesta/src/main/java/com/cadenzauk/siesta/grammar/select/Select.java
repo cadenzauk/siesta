@@ -63,6 +63,18 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return statement.list(transaction);
     }
 
+    public CompletableFuture<List<RT>> listAsync() {
+        return listAsync(defaultSqlExecutor());
+    }
+
+    public CompletableFuture<List<RT>> listAsync(SqlExecutor sqlExecutor) {
+        return statement.listAsync(sqlExecutor);
+    }
+
+    public CompletableFuture<List<RT>> listAsync(Transaction transaction) {
+        return statement.listAsync(transaction);
+    }
+
     public Optional<RT> optional() {
         return optional(defaultSqlExecutor());
     }
@@ -75,12 +87,32 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return statement.optional(transaction);
     }
 
+    public CompletableFuture<Optional<RT>> optionalAsync() {
+        return optionalAsync(defaultSqlExecutor());
+    }
+
+    public CompletableFuture<Optional<RT>> optionalAsync(SqlExecutor sqlExecutor) {
+        return statement.optionalAsync(sqlExecutor);
+    }
+
+    public CompletableFuture<Optional<RT>> optionalAsync(Transaction transaction) {
+        return statement.optionalAsync(transaction);
+    }
+
+    public Stream<RT> stream() {
+        return statement.stream(defaultSqlExecutor());
+    }
+
     public Stream<RT> stream(CompositeAutoCloseable compositeAutoCloseable) {
-        return stream(defaultSqlExecutor(), compositeAutoCloseable);
+        return statement.stream(defaultSqlExecutor(), compositeAutoCloseable);
     }
 
     public Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable compositeAutoCloseable) {
         return statement.stream(sqlExecutor, compositeAutoCloseable);
+    }
+
+    public Stream<RT> stream(Transaction transaction) {
+        return statement.stream(transaction);
     }
 
     public Stream<RT> stream(Transaction transaction, CompositeAutoCloseable compositeAutoCloseable) {
@@ -97,6 +129,14 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     public RT single(Transaction transaction) {
         return statement.single(transaction);
+    }
+
+    public CompletableFuture<RT> singleAsync() {
+        return singleAsync(defaultSqlExecutor());
+    }
+
+    public CompletableFuture<RT> singleAsync(SqlExecutor sqlExecutor) {
+        return statement.singleAsync(sqlExecutor);
     }
 
     public CompletableFuture<RT> singleAsync(Transaction transaction) {

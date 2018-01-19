@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.jdbc;
 
+import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.tuple.Pair;
@@ -42,7 +43,7 @@ public class JdbcDataTypeRegistry {
         try {
             getSetter(o).setParameter(ps, parameterIndex, o);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeSqlException(e);
         }
     }
 

@@ -23,6 +23,7 @@
 package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.core.util.UtilityClass;
 
 import java.lang.annotation.Annotation;
@@ -50,6 +51,12 @@ public final class ClassUtil extends UtilityClass {
         } catch (ClassNotFoundException e) {
             return Optional.empty();
         }
+    }
+
+    public static Optional<Class<?>> forArrayOf(Class<?> componentClass) {
+        return OptionalUtil.orGet(
+            TypeUtil.findPrimitiveArrayType(componentClass),
+            () -> forName("[L" + componentClass.getCanonicalName() + ";"));
     }
 
     public static Method getDeclaredMethod(Class<?> aClass, String name, Class<?>... parameterTypes) {

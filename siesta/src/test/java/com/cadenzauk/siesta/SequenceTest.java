@@ -65,7 +65,7 @@ class SequenceTest extends MockitoTest {
         when(dialect.nextFromSequence("TOM", "MYSCHEMA", "TEST_SEQ")).thenReturn("select next value from TEST_SEQ");
         Sequence<Integer> sut = createSut();
 
-        SequenceExpression result = sut.nextVal();
+        SequenceExpression<Integer> result = sut.nextVal();
 
         assertThat(result.sql(new Scope(database)), is("select next value from TEST_SEQ"));
     }

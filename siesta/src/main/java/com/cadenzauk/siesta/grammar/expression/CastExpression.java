@@ -41,9 +41,9 @@ public class CastExpression<F, T> implements TypedExpression<T> {
     private final TypedExpression<F> from;
     private final DataType<T> to;
     private final DbTypeId<T> toType;
-    private final BiFunction<DbType,Database,String> toSql;
+    private final BiFunction<DbType<T>,Database,String> toSql;
 
-    public CastExpression(TypedExpression<F> from, DataType<T> to, DbTypeId<T> toType, BiFunction<DbType,Database,String> toSql) {
+    public CastExpression(TypedExpression<F> from, DataType<T> to, DbTypeId<T> toType, BiFunction<DbType<T>,Database,String> toSql) {
         this.from = from;
         this.to = to;
         this.toType = toType;

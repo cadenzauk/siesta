@@ -242,6 +242,16 @@ public class ColumnMapping<R, B> {
             return optional(getter, setter, Optional.of(init));
         }
 
+        public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, Function1<R,T> getter) {
+            BiConsumer<B,T> setter = setter(getter);
+            return embedded(getter, setter, Optional.empty());
+        }
+
+        public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, FunctionOptional1<R,T> getter) {
+            BiConsumer<B,Optional<T>> setter = setter(getter);
+            return embedded(getter, setter, Optional.empty());
+        }
+
         public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, Function1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
             BiConsumer<B,T> setter = setter(getter);
             return embedded(getter, setter, Optional.of(init));

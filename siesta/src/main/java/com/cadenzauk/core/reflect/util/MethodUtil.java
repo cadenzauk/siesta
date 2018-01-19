@@ -30,11 +30,14 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import org.objenesis.ObjenesisHelper;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class MethodUtil extends UtilityClass {
     public static Object invoke(Method method, Object target, Object... args) {
@@ -66,6 +69,11 @@ public final class MethodUtil extends UtilityClass {
         return result.get();
     }
 
+    public static <A extends Annotation> Stream<A> annotations(Class<A> annotationClass, Method method) {
+        A[] annotationsByType = method.getAnnotationsByType(annotationClass);
+        return Arrays.stream(annotationsByType);
+    }
+
     public static <T, V> Method fromReference(Function1<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
             .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
@@ -81,4 +89,5 @@ public final class MethodUtil extends UtilityClass {
                 .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
+
 }

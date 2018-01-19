@@ -62,6 +62,8 @@ dependencies {
 
     testutilRuntime group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
     testutilRuntime group: 'com.mattbertolini', name: 'liquibase-slf4j', version: '2.0.0'
+
+    testCompile 'co.unruly:java-8-matchers:1.5'
 }
 
 task testutilJar(type: Jar) {

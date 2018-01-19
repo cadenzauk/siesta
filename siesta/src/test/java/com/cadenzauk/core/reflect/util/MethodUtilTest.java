@@ -22,15 +22,19 @@
 
 package com.cadenzauk.core.reflect.util;
 
+import com.cadenzauk.core.junit.TestCase;
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import javax.persistence.Column;
+import javax.persistence.Transient;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.IllegalFormatCodePointException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.CoreMatchers.is;
@@ -124,6 +128,33 @@ class MethodUtilTest {
         assertThat(method.getDeclaringClass().getCanonicalName(), is(TestClass.class.getCanonicalName()));
     }
 
+    @Test
+    void annotationsPresent() {
+        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+
+        Stream<Transient> annotations = MethodUtil.annotations(Transient.class, method);
+
+        assertThat(annotations.count(), is(1L));
+    }
+
+    @Test
+    void annotationsNotPresent() {
+        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+
+        Stream<Column> annotations = MethodUtil.annotations(Column.class, method);
+
+        assertThat(annotations.count(), is(0L));
+    }
+
+    @Test
+    void annotationsMultiple() {
+        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+
+        Stream<TestCase> annotations = MethodUtil.annotations(TestCase.class, method);
+
+        assertThat(annotations.count(), is(3L));
+    }
+
     @SuppressWarnings("unused")
     private static class TestClass {
         TestClass(int ignored) {
@@ -134,8 +165,12 @@ class MethodUtilTest {
         }
 
         @SuppressWarnings("SameReturnValue")
+        @Transient
+        @TestCase
+        @TestCase
+        @TestCase
         Optional<String> method2() {
-            return null;
+            return Optional.of("Something");
         }
     }
 

@@ -20,40 +20,32 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.core.util;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Spliterators;
-import java.util.function.Consumer;
+import com.cadenzauk.core.stream.StreamUtil;
 
-public class ResultSetSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
-    private final ResultSet resultSet;
-    private final RowMapper<T> rowMapper;
-    private final Runnable atEnd;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.stream.StreamSupport;
 
-    public ResultSetSpliterator(ResultSet resultSet, RowMapper<T> rowMapper) {
-        this(resultSet, rowMapper, () -> {});
-    }
+import static java.util.stream.Collectors.joining;
 
-    public ResultSetSpliterator(ResultSet resultSet, RowMapper<T> rowMapper, Runnable atEnd) {
-        super(Long.MAX_VALUE, 0);
-        this.resultSet = resultSet;
-        this.rowMapper = rowMapper;
-        this.atEnd = atEnd;
-    }
-
-    @Override
-    public boolean tryAdvance(Consumer<? super T> action) {
-        try {
-            if (!resultSet.next()) {
-                atEnd.run();
-                return false;
-            }
-            action.accept(rowMapper.mapRow(resultSet));
-            return true;
-        } catch (SQLException e) {
-            throw new RuntimeSqlException(e);
+public final class IterableUtil extends UtilityClass {
+    public static <T> T single(Iterable<T> iterable) {
+        Objects.requireNonNull(iterable);
+        Iterator<T> iterator = iterable.iterator();
+        if (!iterator.hasNext()) {
+            throw new NoSuchElementException("Expected a single element but was empty.");
         }
+        T result = iterator.next();
+        if (iterator.hasNext()) {
+            String values = StreamUtil.mapWithIndex(
+                StreamSupport.stream(iterable.spliterator(), false).limit(4),
+                (v, i) -> i == 3 ? "..." : v.toString())
+                .collect(joining(", "));
+            throw new IllegalArgumentException(String.format("Expected a single element but was <%s>.", values));
+        }
+        return result;
     }
 }

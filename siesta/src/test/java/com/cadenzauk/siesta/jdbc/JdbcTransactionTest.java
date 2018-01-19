@@ -51,6 +51,9 @@ class JdbcTransactionTest extends MockitoTest {
     @Mock
     private Connection connection;
 
+    @Mock
+    private Stream<String> stream;
+
     @Test
     void connection() throws SQLException {
         when(sqlExecutor.connect()).thenReturn(connection);
@@ -112,7 +115,6 @@ class JdbcTransactionTest extends MockitoTest {
         String sql = RandomStringUtils.randomAlphabetic(20, 30);
         Object[] args = new Object[0];
         RowMapper<String> rowMapper = s -> "Hello";
-        Stream<String> stream = Stream.of("Hello");
         when(sqlExecutor.stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any())).thenReturn(stream);
 
         Stream<String> result = sut.stream(sql, args, rowMapper);
@@ -120,6 +122,27 @@ class JdbcTransactionTest extends MockitoTest {
         assertThat(result, sameInstance(stream));
         verify(connection).setAutoCommit(false);
         verify(sqlExecutor).stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any());
+        verifyNoMoreInteractions(sqlExecutor, connection);
+    }
+
+    @Test
+    void streamClosedOnTransactionClose() throws SQLException {
+        when(sqlExecutor.connect()).thenReturn(connection);
+        JdbcTransaction sut = new JdbcTransaction(sqlExecutor);
+        String sql = RandomStringUtils.randomAlphabetic(20, 30);
+        Object[] args = new Object[0];
+        RowMapper<String> rowMapper = s -> "Hello";
+        when(sqlExecutor.stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any())).thenReturn(stream);
+
+        Stream<String> result = sut.stream(sql, args, rowMapper);
+        sut.close();
+
+        assertThat(result, sameInstance(stream));
+        verify(connection).setAutoCommit(false);
+        verify(connection).rollback();
+        verify(connection).close();
+        verify(sqlExecutor).stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any());
+        verify(stream).close();
         verifyNoMoreInteractions(sqlExecutor, connection);
     }
 

@@ -22,13 +22,58 @@
 
 package com.cadenzauk.core.stream;
 
+import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.UtilityClass;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class StreamUtil extends UtilityClass {
     public static <T> Stream<T> of(Optional<T> opt) {
         return opt.map(Stream::of).orElseGet(Stream::empty);
+    }
+
+    public static <T> Stream<Tuple2<T, Long>> zipWithIndex(Stream<? extends T> stream) {
+        Iterator<Tuple2<T,Long>> iterator = new Iterator<Tuple2<T,Long>>() {
+            private final Iterator<? extends T> streamIterator = stream.iterator();
+            private long index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return streamIterator.hasNext();
+            }
+
+            @Override
+            public Tuple2<T,Long> next() {
+                return Tuple.of(streamIterator.next(), index++);
+            }
+        };
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED | Spliterator.IMMUTABLE), false);
+    }
+
+    public static <T, R> Stream<R> mapWithIndex(Stream<T> input, BiFunction<? super T, Long, ? extends R> mapping) {
+        return zipWithIndex(input).map(tuple -> tuple.map(mapping));
+    }
+
+    public static byte[] toByteArray(IntStream stream) {
+        return stream.collect(ByteArrayOutputStream::new, (baos, i) -> baos.write(toByte(i)),
+            (baos1, baos2) -> baos1.write(baos2.toByteArray(), 0, baos2.size()))
+            .toByteArray();
+    }
+
+    private static byte toByte(int i) {
+        if (i < Byte.MIN_VALUE || i > 255) {
+            throw new IllegalArgumentException("Cannot convert " + i + " to a byte.");
+        }
+        return (byte) i;
     }
 }

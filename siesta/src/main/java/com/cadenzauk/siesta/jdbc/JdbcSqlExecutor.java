@@ -111,7 +111,7 @@ public class JdbcSqlExecutor implements SqlExecutor {
             preparedStatement.setFetchSize(fetchSize);
             ResultSet resultSet = closeable.add(preparedStatement.executeQuery());
             return StreamSupport
-                .stream(new ResultSetSpliterator<>(resultSet, rowMapper), false)
+                .stream(new ResultSetSpliterator<>(resultSet, rowMapper, closeable::close), false)
                 .onClose(closeable::close);
         } catch (RuntimeException e) {
             closeable.close();

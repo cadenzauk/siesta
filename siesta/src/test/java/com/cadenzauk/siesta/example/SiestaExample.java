@@ -210,6 +210,8 @@ public class SiestaExample extends IntegrationTest {
     public void typeSafeIdExample() {
         Database database = Database.newBuilder()
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
+            .table(Widget.class, t -> t
+                .column(Widget::description, "WIDGET_DESC"))
             .adapter(WidgetId.class, DbTypeId.BIGINT, WidgetId::id, WidgetId::new)
             .adapter(ManufacturerId.class, DbTypeId.BIGINT, ManufacturerId::id, ManufacturerId::new)
             .build();

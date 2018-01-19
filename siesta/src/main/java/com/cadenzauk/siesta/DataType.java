@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.util.TypeUtil;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 
@@ -79,7 +80,7 @@ public class DataType<T> {
             T value = dbType(database).getColumnValue(database, rs, colName);
             return value == null || rs.wasNull() ? Optional.empty() : Optional.of(value);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeSqlException(e);
         }
     }
 
@@ -88,7 +89,7 @@ public class DataType<T> {
             T value = dbType(database).getColumnValue(database, rs, colNo);
             return value == null || rs.wasNull() ? Optional.empty() : Optional.of(value);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeSqlException(e);
         }
     }
 
