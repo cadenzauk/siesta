@@ -22,6 +22,12 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
@@ -105,6 +111,16 @@ public class FirebirdDialect extends AnsiDialect {
                     return String.format("cast(? as varchar(%d))", Integer.max(1, value.length()));
                 }
             });
+
+        exceptions()
+            .register("07006", InvalidValueException::new)
+            .register("22001", InvalidValueException::new)
+            .register("23000", 335544347, IllegalNullException::new)
+            .register("23000", 335544665, DuplicateKeyException::new)
+            .register("23000", 335544466, ReferentialIntegrityException::new)
+            .register("40001", 335544336, LockingException::new)
+            .register("42.+", SqlSyntaxException::new)
+        ;
     }
 
     @Override

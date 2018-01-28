@@ -22,6 +22,12 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
@@ -140,6 +146,19 @@ public class OracleDialect extends AnsiDialect {
                     return "varchar2";
                 }
             });
+
+        exceptions()
+            .register("22019", SqlSyntaxException::new)
+            .register("22003", InvalidValueException::new)
+            .register("23000", 1, DuplicateKeyException::new)
+            .register("23000", 1400, IllegalNullException::new)
+            .register("23000", 2291, ReferentialIntegrityException::new)
+            .register("23000", 2292, ReferentialIntegrityException::new)
+            .register("42.+", SqlSyntaxException::new)
+            .register("61000", 60, LockingException::new)
+            .register("72000", 1407, IllegalNullException::new)
+            .register("72000", 12899, InvalidValueException::new)
+        ;
     }
 
     @Override

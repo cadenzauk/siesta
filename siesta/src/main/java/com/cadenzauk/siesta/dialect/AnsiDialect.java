@@ -22,6 +22,9 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.SqlExceptionConstructor;
+import com.cadenzauk.core.sql.exception.SqlExceptionTranslator;
+import com.cadenzauk.core.sql.exception.SqlStateExceptionTranslator;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
@@ -45,6 +48,7 @@ import static java.util.stream.Collectors.joining;
 public class AnsiDialect implements Dialect {
     private final FunctionRegistry functions = new FunctionRegistry();
     private final DbTypeRegistry types = new DbTypeRegistry();
+    private final SqlStateExceptionTranslator exceptionTranslator = new SqlStateExceptionTranslator();
 
     public AnsiDialect() {
         AggregateFunctionSpecs.registerDefaults(functions);
@@ -94,6 +98,26 @@ public class AnsiDialect implements Dialect {
     @Override
     public <T> DbType<T> type(DbTypeId<T> javaClass) {
         return types.get(javaClass);
+    }
+
+    @Override
+    public SqlExceptionTranslator exceptionTranslator() {
+        return exceptionTranslator;
+    }
+
+    @Override
+    public void exception(String sqlState, SqlExceptionConstructor constructor) {
+        exceptionTranslator.register(sqlState, constructor);
+    }
+
+    @Override
+    public void exception(int errorCode, SqlExceptionConstructor constructor) {
+        exceptionTranslator.register(errorCode, constructor);
+    }
+
+    @Override
+    public void exception(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
+        exceptionTranslator.register(sqlState, errorCode, constructor);
     }
 
     @Override
@@ -162,5 +186,9 @@ public class AnsiDialect implements Dialect {
 
     protected FunctionRegistry functions() {
         return functions;
+    }
+
+    protected SqlStateExceptionTranslator exceptions() {
+        return exceptionTranslator;
     }
 }

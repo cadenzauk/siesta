@@ -138,7 +138,7 @@ public class Table<R> {
         }
         String sql = sql(rows);
         Object[] args = columnMapping.args(rows);
-        return sqlExecutor.update(sql, args);
+        return database.execute(sql, () -> sqlExecutor.update(sql, args));
     }
 
     @SuppressWarnings("unchecked")
@@ -149,7 +149,7 @@ public class Table<R> {
         }
         String sql = sql(rows);
         Object[] args = columnMapping.args(rows);
-        return transaction.update(sql, args);
+        return database.execute(sql, () -> transaction.update(sql, args));
     }
 
     private String sql(R[] rows) {

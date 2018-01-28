@@ -27,4 +27,7 @@ import java.util.function.Function;
 
 @FunctionalInterface
 public interface Function1<T,U> extends Function<T,U>, Serializable {
+    static <T,U> Function1<T,U> of(Function1<T,U> function) {
+        return function;
+    }
 }

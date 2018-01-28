@@ -28,6 +28,7 @@ import com.cadenzauk.core.sql.DataSourceUtil;
 import com.cadenzauk.core.sql.PreparedStatementUtil;
 import com.cadenzauk.core.sql.ResultSetSpliterator;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.dialect.AutoDetectDialect;
@@ -36,6 +37,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -116,6 +118,9 @@ public class JdbcSqlExecutor implements SqlExecutor {
         } catch (RuntimeException e) {
             closeable.close();
             throw e;
+        } catch (SQLException e) {
+            closeable.close();
+            throw new RuntimeSqlException(e);
         } catch (Exception e) {
             closeable.close();
             throw new RuntimeException(e);

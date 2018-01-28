@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,14 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.oracle;
+package com.cadenzauk.core.sql.exception;
 
-import com.cadenzauk.siesta.OptimisticLockingIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 
-@ContextConfiguration(classes = OracleConfig.class)
-public class OptimisticLockingIntegrationTestOracle extends OptimisticLockingIntegrationTest {
+import java.sql.SQLException;
+
+public class InvalidValueException extends RuntimeSqlException {
+    public InvalidValueException(String sql, SQLException cause) {
+        super(String.format("Incorrect data value for data type while executing '%s'.", sql), cause);
+    }
 }

@@ -27,7 +27,6 @@ import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.UtilityClass;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -38,6 +37,10 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public final class StreamUtil extends UtilityClass {
+    public static <T> Stream<T> ofNullable(T value) {
+        return value == null ? Stream.empty() : Stream.of(value);
+    }
+
     public static <T> Stream<T> of(Optional<T> opt) {
         return opt.map(Stream::of).orElseGet(Stream::empty);
     }

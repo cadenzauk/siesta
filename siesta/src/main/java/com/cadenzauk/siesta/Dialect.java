@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.sql.exception.SqlExceptionConstructor;
+import com.cadenzauk.core.sql.exception.SqlExceptionTranslator;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.type.DbType;
@@ -39,6 +41,14 @@ public interface Dialect {
     <T> void registerType(DbTypeId<T> dbTypeId, DbType<T> type);
 
     <T> DbType<T> type(DbTypeId<T> type);
+
+    SqlExceptionTranslator exceptionTranslator();
+
+    void exception(String sqlState, SqlExceptionConstructor constructor);
+
+    void exception(int errorCode, SqlExceptionConstructor constructor);
+
+    void exception(String sqlState, int errorCode, SqlExceptionConstructor constructor);
 
     String selectivity(double s);
 

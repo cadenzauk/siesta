@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,13 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.postgres;
+package com.cadenzauk.core.sql.exception;
 
-import com.cadenzauk.siesta.OptimisticLockingIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 
-@ContextConfiguration(classes = PostgresConfig.class)
-public class OptimisticLockingIntegrationTestPostgres extends OptimisticLockingIntegrationTest {
+import java.sql.SQLException;
+
+@FunctionalInterface
+public interface SqlExceptionConstructor {
+    RuntimeSqlException construct(String statement, SQLException cause);
 }

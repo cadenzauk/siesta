@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,21 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.sqlserver;
+package com.cadenzauk.core.sql.exception;
 
-import com.cadenzauk.siesta.OptimisticLockingIntegrationTest;
-import org.springframework.test.context.ContextConfiguration;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 
-@ContextConfiguration(classes = SqlServerConfig.class)
-public class OptimisticLockingIntegrationTestSqlServer extends OptimisticLockingIntegrationTest {
+import java.sql.SQLException;
+
+public class SqlSyntaxException extends RuntimeSqlException {
+    private final String sql;
+
+    public SqlSyntaxException(String sql, SQLException cause) {
+        super(cause);
+        this.sql = sql;
+    }
+
+    public String sql() {
+        return sql;
+    }
 }

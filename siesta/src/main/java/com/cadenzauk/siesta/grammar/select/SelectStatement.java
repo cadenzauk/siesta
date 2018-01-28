@@ -140,14 +140,14 @@ class SelectStatement<RT> {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return sqlExecutor.query(sql, args, rowMapper());
+        return scope.database().execute(sql, () ->sqlExecutor.query(sql, args, rowMapper()));
     }
 
     List<RT> list(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return transaction.query(sql, args, rowMapper());
+        return scope.database().execute(sql, () -> transaction.query(sql, args, rowMapper()));
     }
 
     CompletableFuture<List<RT>> listAsync(SqlExecutor sqlExecutor) {
@@ -164,7 +164,8 @@ class SelectStatement<RT> {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return transaction.queryAsync(sql, args, rowMapper());
+        return transaction.queryAsync(sql, args, rowMapper())
+            .exceptionally(e -> scope.database().translateException(sql, e));
     }
 
     Optional<RT> optional(SqlExecutor sqlExecutor) {

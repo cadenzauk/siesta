@@ -22,6 +22,12 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
@@ -56,6 +62,45 @@ public class Db2Dialect extends AnsiDialect {
                     return String.format("HEXTORAW('%s')", hex(value));
                 }
             });
+
+        exceptions()
+            .register("07006", SqlSyntaxException::new)
+            .register("42[67]..", SqlSyntaxException::new)
+
+            // -407 23502       Assignment of a NULL value to a NOT NULL column name is not allowed.
+            .register("23502", IllegalNullException::new)
+
+            // -530 23503       The insert or update value of the FOREIGN KEY constraint-name is not equal to any value of the parent key of the parent table.
+            // -531 23001,23504 The parent key in a parent row of relationship constraint-name cannot be updated.
+            // -532 23504       A parent row cannot be deleted because the relationship constraint-name restricts the deletion.
+            // -543 23511       A row in a parent table cannot be deleted because the check constraint constraint-name restricts the deletion.
+            // -544 23512       The check constraint constraint-name cannot be added because the table contains a row that violates the constraint.
+            // -545 23513       The requested operation is not allowed because a row does not satisfy the check constraint constraint-name.
+            .register("23001", ReferentialIntegrityException::new)
+            .register("2350[34]", ReferentialIntegrityException::new)
+            .register("2351[123]", ReferentialIntegrityException::new)
+
+            // -803 23505       One or more values in the INSERT statement, UPDATE statement, or foreign key update caused by a DELETE statement are not valid
+            //                  because the primary key, unique constraint or unique index identified by index-id constrains table table-name from having
+            //                  duplicate values for the index key.
+            // -603 23515       A unique index cannot be created because the table contains data that would result in duplicate index entries.
+            .register("235[01]5", DuplicateKeyException::new)
+
+            // -171 5UA0J,5UA05,5UA06,5UA07,5UA08,5UA09,2201G,2201T,2201V,10608,22003,22014,22016,22546,42815
+            //                  The statement was not processed because the data type, length or value of the argument for the parameter in position n of routine
+            //                  routine-name is incorrect. Parameter name: parameter-name.
+            // -302 22001/22003 The value of a host variable in the EXECUTE or OPEN statement is out of range for its corresponding use.
+            .register("5UA0[J56789]", InvalidValueException::new)
+            .register("2201[TV46]", InvalidValueException::new)
+            .register("10608", InvalidValueException::new)
+            .register("2200[13]", InvalidValueException::new)
+            .register("22546", InvalidValueException::new)
+            .register("42815", InvalidValueException::new)
+
+            .register("40001", LockingException::new)
+            .register("57011", LockingException::new)
+            .register("57033", LockingException::new)
+        ;
     }
 
     @Override

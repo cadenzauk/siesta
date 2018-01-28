@@ -20,29 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.siesta.h2;
 
-import java.sql.SQLException;
+import com.cadenzauk.siesta.LockingIntegrationTest;
 
-public class RuntimeSqlException extends RuntimeException {
-    public RuntimeSqlException(SQLException cause) {
-        super(cause.getMessage(), cause);
-    }
-
-    public RuntimeSqlException(String message, SQLException cause) {
-        super(message, cause);
-    }
-
-    @Override
-    public synchronized SQLException getCause() {
-        return (SQLException) super.getCause();
-    }
-
-    public String sqlState() {
-        return getCause().getSQLState();
-    }
-
-    public int errorCode() {
-        return getCause().getErrorCode();
-    }
+public class LockingIntegrationTestH2 extends LockingIntegrationTest {
 }

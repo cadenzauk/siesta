@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.db2;
+package com.cadenzauk.siesta.postgres;
 
-import com.cadenzauk.siesta.OptimisticLockingIntegrationTest;
+import com.cadenzauk.siesta.LockingIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = Db2Config.class)
-public class OptimisticLockingIntegrationTestDb2 extends OptimisticLockingIntegrationTest {
+@ContextConfiguration(classes = PostgresConfig.class)
+public class LockingIntegrationTestPostgres extends LockingIntegrationTest {
 }

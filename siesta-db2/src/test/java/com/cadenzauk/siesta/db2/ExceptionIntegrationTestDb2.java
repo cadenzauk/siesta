@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +20,12 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.h2;
+package com.cadenzauk.siesta.db2;
 
-import com.cadenzauk.siesta.OptimisticLockingIntegrationTest;
+import com.cadenzauk.siesta.DatabaseIntegrationTest;
+import com.cadenzauk.siesta.ExceptionIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-public class OptimisticLockingIntegrationTestH2 extends OptimisticLockingIntegrationTest {
+@ContextConfiguration(classes = Db2Config.class)
+public class ExceptionIntegrationTestDb2 extends ExceptionIntegrationTest {
 }

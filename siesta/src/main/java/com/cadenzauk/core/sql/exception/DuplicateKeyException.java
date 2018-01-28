@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,29 +20,14 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.core.sql.exception;
+
+import com.cadenzauk.core.sql.RuntimeSqlException;
 
 import java.sql.SQLException;
 
-public class RuntimeSqlException extends RuntimeException {
-    public RuntimeSqlException(SQLException cause) {
-        super(cause.getMessage(), cause);
-    }
-
-    public RuntimeSqlException(String message, SQLException cause) {
-        super(message, cause);
-    }
-
-    @Override
-    public synchronized SQLException getCause() {
-        return (SQLException) super.getCause();
-    }
-
-    public String sqlState() {
-        return getCause().getSQLState();
-    }
-
-    public int errorCode() {
-        return getCause().getErrorCode();
+public class DuplicateKeyException extends RuntimeSqlException {
+    public DuplicateKeyException(String sql, SQLException cause) {
+        super(String.format("Unique constraint violated while executing '%s'.", sql), cause);
     }
 }

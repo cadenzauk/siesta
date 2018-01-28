@@ -142,5 +142,20 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="create sales_area table" author="mark">
+        <createTable tableName="SALES_AREA" schemaName="SIESTA">
+            <column name="SALES_AREA_ID" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="SALES_AREA_NAME" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SALESPERSON_ID" type="BIGINT">
+                <constraints foreignKeyName="FK_SALES_AREA_SALESPERSON" referencedTableName="SALESPERSON" referencedColumnNames="SALESPERSON_ID"/>
+            </column>
+            <column name="SALES_COUNT" type="SMALLINT"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
 

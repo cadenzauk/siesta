@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,29 +20,9 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.siesta.h2;
 
-import java.sql.SQLException;
+import com.cadenzauk.siesta.ExceptionIntegrationTest;
 
-public class RuntimeSqlException extends RuntimeException {
-    public RuntimeSqlException(SQLException cause) {
-        super(cause.getMessage(), cause);
-    }
-
-    public RuntimeSqlException(String message, SQLException cause) {
-        super(message, cause);
-    }
-
-    @Override
-    public synchronized SQLException getCause() {
-        return (SQLException) super.getCause();
-    }
-
-    public String sqlState() {
-        return getCause().getSQLState();
-    }
-
-    public int errorCode() {
-        return getCause().getErrorCode();
-    }
+public class ExceptionIntegrationTestH2 extends ExceptionIntegrationTest {
 }

@@ -46,14 +46,14 @@ public abstract class ExecutableStatement {
         Object[] args = args(scope).toArray();
         String sql = sql(scope);
         LOG.debug(sql);
-        return sqlExecutor.update(sql, args);
+        return scope.database().execute(sql, () -> sqlExecutor.update(sql, args));
     }
 
     int execute(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql(scope);
         LOG.debug(sql);
-        return transaction.update(sql, args);
+        return scope.database().execute(sql, () -> transaction.update(sql, args));
     }
 
     Database database() {

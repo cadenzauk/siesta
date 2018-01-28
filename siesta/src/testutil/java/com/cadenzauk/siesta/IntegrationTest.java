@@ -92,6 +92,7 @@ public abstract class IntegrationTest {
         public DataSource dataSource() {
             EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
             return builder
+                .setName("SIESTA;LOCK_TIMEOUT=100")
                 .setType(EmbeddedDatabaseType.H2)
                 .addScript("classpath:/create-test-schema.ddl")
                 .build();
@@ -109,7 +110,7 @@ public abstract class IntegrationTest {
 
         @Bean
         public Dialect dialect() {
-            return new H2Dialect();
+            return new H2Dialect(100);
         }
     }
 }

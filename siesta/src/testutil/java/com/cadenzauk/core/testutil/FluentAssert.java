@@ -57,6 +57,11 @@ public class FluentAssert {
             this.actual = actual;
         }
 
+        public ThrowableMatcher<T> with(Matcher<T> matcher) {
+            assertThat(actual, matcher);
+            return this;
+        }
+
         public ThrowableMatcher<T> withMessage(Matcher<String> matcher) {
             assertThat(actual.getMessage(), matcher);
             return this;

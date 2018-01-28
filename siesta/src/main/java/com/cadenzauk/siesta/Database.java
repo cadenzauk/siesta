@@ -27,6 +27,9 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.reflect.FieldInfo;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RuntimeSqlException;
+import com.cadenzauk.core.sql.exception.SqlExceptionConstructor;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
@@ -61,6 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Database {
     private static final Logger LOG = LoggerFactory.getLogger(Database.class);
@@ -85,7 +89,7 @@ public class Database {
 
         builder.customizations.forEach(c -> c.accept(dialect));
         builder.dataTypes.forEach(d -> d.accept(dataTypeRegistry));
-        builder.tables.forEach((k,v) -> v.apply(this));
+        builder.tables.forEach((k, v) -> v.apply(this));
     }
 
     public String defaultCatalog() {
@@ -129,22 +133,22 @@ public class Database {
     public UncheckedAutoCloseable withLockTimeout(SqlExecutor executor, long time, TimeUnit unit) {
         String sql = dialect.setLockTimeout(time, unit);
         LOG.debug(sql);
-        executor.update(sql);
+        execute(sql, () -> executor.update(sql));
         return () -> {
             String resetSql = dialect.resetLockTimeout();
             LOG.debug(resetSql);
-            executor.update(resetSql);
+            execute(resetSql, () -> executor.update(resetSql));
         };
     }
 
     public UncheckedAutoCloseable withLockTimeout(Transaction transaction, long time, TimeUnit unit) {
         String sql = dialect.setLockTimeout(time, unit);
         LOG.debug(sql);
-        transaction.execute(sql, new Object[0]);
+        execute(sql, () -> transaction.execute(sql, new Object[0]));
         return () -> {
             String resetSql = dialect.resetLockTimeout();
             LOG.debug(resetSql);
-            transaction.execute(resetSql, new Object[0]);
+            execute(sql, () -> transaction.execute(resetSql, new Object[0]));
         };
     }
 
@@ -167,6 +171,22 @@ public class Database {
 
     public ZoneId databaseTimeZone() {
         return databaseTimeZone;
+    }
+
+    public <T> T execute(String sql, Supplier<T> statement) {
+        try {
+            return statement.get();
+        } catch (RuntimeSqlException exception) {
+            throw dialect.exceptionTranslator().translate(sql, exception.getCause());
+        }
+    }
+
+    public <T> T translateException(String sql, Throwable throwable) {
+        OptionalUtil.as(RuntimeSqlException.class, throwable)
+            .ifPresent(e -> {
+                throw dialect.exceptionTranslator().translate(sql, e.getCause());
+            });
+        throw new RuntimeException(String.format("Error while executing '%s'.", sql), throwable);
     }
 
     @SuppressWarnings("unchecked")
@@ -401,13 +421,28 @@ public class Database {
             return table(TypeToken.of(rowClass), init);
         }
 
+        public Builder exeption(String sqlState, SqlExceptionConstructor constructor) {
+            customizations.add(dialect -> dialect.exception(sqlState, constructor));
+            return this;
+        }
+
+        public Builder exeption(int errorCode, SqlExceptionConstructor constructor) {
+            customizations.add(dialect -> dialect.exception(errorCode, constructor));
+            return this;
+        }
+
+        public Builder exeption(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
+            customizations.add(dialect -> dialect.exception(sqlState, errorCode, constructor));
+            return this;
+        }
+
         @SuppressWarnings("unchecked")
         public <R> Builder table(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
             TableInitializer<?,?> existing = tables.get(rowType);
             TableInitializer<?,?> tableInitializer =
                 existing == null
                     ? TableInitializer.of(rowType, init)
-                    : ((TableInitializer<R,?>)existing).concat(init);
+                    : ((TableInitializer<R,?>) existing).concat(init);
             tables.put(rowType, tableInitializer);
             return this;
         }
@@ -440,7 +475,7 @@ public class Database {
             return database.table(rowType, initializer);
         }
 
-        public TableInitializer<R, B> concat(Consumer<Table.Builder<R,?>> next) {
+        public TableInitializer<R,B> concat(Consumer<Table.Builder<R,?>> next) {
             Function<Table.Builder<R,R>,Table.Builder<R,B>> newInitializer = b -> {
                 Table.Builder<R,B> builder = initializer.apply(b);
                 next.accept(builder);

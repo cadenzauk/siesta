@@ -22,6 +22,12 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
@@ -128,6 +134,17 @@ public class SqlServerDialect extends AnsiDialect {
                     return "cast(? as datetime2)";
                 }
             });
+
+        exceptions()
+            .register("22001", InvalidValueException::new)
+            .register("23000", 515, IllegalNullException::new)
+            .register("23000", 547, ReferentialIntegrityException::new)
+            .register("23000", 2627, DuplicateKeyException::new)
+            .register("40001", 1205, LockingException::new)
+            .register("S0001", SqlSyntaxException::new)
+            .register("S0002", 8115, InvalidValueException::new)
+            .register(1222, LockingException::new)
+        ;
     }
 
     @Override

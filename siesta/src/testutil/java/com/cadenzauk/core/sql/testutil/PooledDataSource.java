@@ -57,12 +57,12 @@ public class PooledDataSource implements DataSource, AutoCloseable {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return init(new PoolConnection(allocateConnection(), this::release));
     }
 
     @Override
-    public Connection getConnection(String username, String password) throws SQLException {
+    public Connection getConnection(String username, String password) {
         throw new NotImplementedException("Not yet implemented.");
     }
 
@@ -80,7 +80,7 @@ public class PooledDataSource implements DataSource, AutoCloseable {
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    public boolean isWrapperFor(Class<?> iface) {
         return iface.isInstance(this);
     }
 

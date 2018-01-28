@@ -38,11 +38,11 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
-    private static final Logger LOG = LoggerFactory.getLogger(OptimisticLockingIntegrationTest.class);
+public abstract class LockingIntegrationTest extends IntegrationTest {
+    private static final Logger LOG = LoggerFactory.getLogger(LockingIntegrationTest.class);
 
     @Test
-    public void optimisticLockingUpdateWithTimeout1() throws InterruptedException {
+    public void updateWithTimeout1() {
         if (!dialect.supportsLockTimeout()) {
             throw new AssumptionViolatedException("Dialect does not support lock timeouts");
         }
@@ -68,7 +68,7 @@ public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void optimisticLockingUpdateWithTimeout2() throws InterruptedException {
+    public void updateWithTimeout2() {
         if (!dialect.supportsLockTimeout()) {
             throw new AssumptionViolatedException("Dialect does not support lock timeouts");
         }
@@ -94,7 +94,7 @@ public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void optimisticLockingUpdateWithTimeout3() throws InterruptedException {
+    public void updateWithTimeout3() {
         if (!dialect.supportsLockTimeout()) {
             throw new AssumptionViolatedException("Dialect does not support lock timeouts");
         }
@@ -120,7 +120,7 @@ public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void optimisticLockingUpdateWithoutTimeout() throws InterruptedException {
+    public void updateWithoutTimeout() throws InterruptedException {
         long id = newId();
         Database database = TestDatabase.testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
@@ -145,7 +145,7 @@ public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void optimisticLockingInsertsWithoutTimeout() throws InterruptedException {
+    public void insertsWithoutTimeout() throws InterruptedException {
         long id = newId();
         Database database = TestDatabase.testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
@@ -169,7 +169,7 @@ public abstract class OptimisticLockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void optimisticLockingInsertsWithTimeout() throws InterruptedException {
+    public void insertsWithTimeout() {
         if (!dialect.supportsLockTimeout()) {
             throw new AssumptionViolatedException("Dialect does not support lock timeouts");
         }
