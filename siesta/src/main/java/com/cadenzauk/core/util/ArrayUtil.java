@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,26 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression.condition;
+package com.cadenzauk.core.util;
 
-import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.lang.reflect.Array;
+import java.util.function.IntFunction;
 
-public class LikeCondition<T> implements Condition<T> {
-    private final String operator;
-    private final TypedExpression<T> value;
-    private final Optional<String> escape;
-
-    public LikeCondition(String operator, TypedExpression<T> value, Optional<String> escape) {
-        this.operator = operator;
-        this.value = value;
-        this.escape = escape.map(e -> String.format(" escape '%s'", e));
+public final class ArrayUtil extends UtilityClass {
+    @SuppressWarnings("unchecked")
+    public static <T> T[] newArray(Class<T> elementType, int size) {
+        return (T[]) Array.newInstance(elementType, size);
     }
 
-    @Override
-    public String sql(Scope scope) {
-        return operator + " " + value.sql(scope)+ escape.orElse("");
+    @SuppressWarnings("unchecked")
+    public static <T> T[] newArray(TypeToken<T> elementType, int size) {
+        return (T[]) Array.newInstance(elementType.getRawType(), size);
     }
 
-    @Override
-    public Stream<Object> args(Scope scope) {
-        return value.args(scope);
+    @SuppressWarnings("unchecked")
+    public static <T> IntFunction<T[]> generator(Class<? super T> elementClass) {
+        return size -> (T[])ArrayUtil.newArray(elementClass, size);
     }
 }

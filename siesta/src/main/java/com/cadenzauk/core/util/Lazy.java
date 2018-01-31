@@ -63,7 +63,7 @@ public class Lazy<T> {
 
     public Stream<T> stream() {
         synchronized (lock) {
-            return StreamUtil.of(Optional.ofNullable(value)).flatMap(Try::stream);
+            return StreamUtil.ofNullable(value).flatMap(Try::stream);
         }
     }
 

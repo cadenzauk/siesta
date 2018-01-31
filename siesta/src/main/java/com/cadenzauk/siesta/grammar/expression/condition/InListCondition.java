@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression.condition;
 import com.cadenzauk.siesta.Condition;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -34,9 +35,9 @@ import static java.util.stream.Collectors.joining;
 
 public class InListCondition<T> implements Condition<T> {
     private final String operator;
-    private final T[] values;
+    private final TypedExpression<T>[] values;
 
-    public InListCondition(String operator, T[] values) {
+    public InListCondition(String operator, TypedExpression<T>[] values) {
         this.operator = operator;
         this.values = values;
     }
@@ -44,15 +45,12 @@ public class InListCondition<T> implements Condition<T> {
     @Override
     public String sql(Scope scope) {
         return operator + " (" + Arrays.stream(values)
-            .map(x -> "?")
+            .map(x -> x.sql(scope))
             .collect(joining(", ")) + ")";
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        DataType<T> dataType = scope.database().getDataTypeOf(values[0]);
-        return Arrays.stream(values)
-            .map(Optional::of)
-            .map(val -> dataType.toDatabase(scope.database(), val));
+        return Arrays.stream(values).flatMap(x -> x.args(scope));
     }
 }

@@ -37,9 +37,12 @@ import com.cadenzauk.siesta.grammar.expression.condition.OperatorExpressionCondi
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static com.cadenzauk.core.util.ArrayUtil.generator;
 
 public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     private final TypedExpression<T> lhs;
@@ -287,11 +290,21 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     //--- IS [NOT] IN
     @SafeVarargs
     public final N isIn(T... values) {
+        return isOpIn("in", Arrays.stream(values).map(ValueExpression::of).toArray(generator(TypedExpression.class)));
+    }
+
+    @SafeVarargs
+    public final N isIn(TypedExpression<T>... values) {
         return isOpIn("in", values);
     }
 
     @SafeVarargs
     public final N isNotIn(T... values) {
+        return isOpIn("not in", Arrays.stream(values).map(ValueExpression::of).toArray(generator(TypedExpression.class)));
+    }
+
+    @SafeVarargs
+    public final N isNotIn(TypedExpression<T>... values) {
         return isOpIn("not in", values);
     }
 
@@ -303,7 +316,7 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return isOpIn("not in", select);
     }
 
-    private N isOpIn(String operator, T[] values) {
+    private N isOpIn(String operator, TypedExpression<T>[] values) {
         if (values.length == 0) {
             throw new IllegalArgumentException("At least one value is required for an IN expression.");
         }
@@ -325,18 +338,34 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     //--- [NOT] LIKE
     public N isLike(T value) {
-        return complete(new LikeCondition<>("like", value, Optional.empty()));
+        return complete(new LikeCondition<>("like", ValueExpression.of(value), Optional.empty()));
     }
 
     public N isLike(T value, String escape) {
+        return complete(new LikeCondition<>("like", ValueExpression.of(value), OptionalUtil.ofBlankable(escape)));
+    }
+
+    public N isLike(TypedExpression<T> value) {
+        return complete(new LikeCondition<>("like", value, Optional.empty()));
+    }
+
+    public N isLike(TypedExpression<T> value, String escape) {
         return complete(new LikeCondition<>("like", value, OptionalUtil.ofBlankable(escape)));
     }
 
     public N isNotLike(T value) {
-        return complete(new LikeCondition<>("not like", value, Optional.empty()));
+        return complete(new LikeCondition<>("not like", ValueExpression.of(value), Optional.empty()));
     }
 
     public N isNotLike(T value, String escape) {
+        return complete(new LikeCondition<>("not like", ValueExpression.of(value), OptionalUtil.ofBlankable(escape)));
+    }
+
+    public N isNotLike(TypedExpression<T> value) {
+        return complete(new LikeCondition<>("not like", value, Optional.empty()));
+    }
+
+    public N isNotLike(TypedExpression<T> value, String escape) {
         return complete(new LikeCondition<>("not like", value, OptionalUtil.ofBlankable(escape)));
     }
 

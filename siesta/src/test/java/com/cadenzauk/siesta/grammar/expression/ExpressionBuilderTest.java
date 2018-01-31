@@ -46,6 +46,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
@@ -143,7 +145,7 @@ class ExpressionBuilderTest extends MockitoTest {
     private static Stream<Arguments> argsForTestExpression() {
         return Stream.of(
             testCase((e, s) -> e.isEqualTo("A"), "= ?", "A"),
-            testCase((e, s) -> e.isEqualTo(TypedExpression.value("A")), "= ?", "A"),
+            testCase((e, s) -> e.isEqualTo(value("A")), "= ?", "A"),
             testCase((e, s) -> e.isEqualTo(SalespersonRow::surname), "= s.SURNAME"),
             testCase((e, s) -> e.isEqualTo(SalespersonRow::middleNames), "= s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isEqualTo("s", SalespersonRow::surname), "= s.SURNAME"),
@@ -152,7 +154,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isEqualTo(s, SalespersonRow::middleNames), "= s.MIDDLE_NAMES"),
 
             testCase((e, s) -> e.isNotEqualTo("A"), "<> ?", "A"),
-            testCase((e, s) -> e.isNotEqualTo(TypedExpression.value("A")), "<> ?", "A"),
+            testCase((e, s) -> e.isNotEqualTo(value("A")), "<> ?", "A"),
             testCase((e, s) -> e.isNotEqualTo(SalespersonRow::surname), "<> s.SURNAME"),
             testCase((e, s) -> e.isNotEqualTo(SalespersonRow::middleNames), "<> s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isNotEqualTo("s", SalespersonRow::surname), "<> s.SURNAME"),
@@ -161,7 +163,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isNotEqualTo(s, SalespersonRow::middleNames), "<> s.MIDDLE_NAMES"),
 
             testCase((e, s) -> e.isGreaterThan("A"), "> ?", "A"),
-            testCase((e, s) -> e.isGreaterThan(TypedExpression.value("A")), "> ?", "A"),
+            testCase((e, s) -> e.isGreaterThan(value("A")), "> ?", "A"),
             testCase((e, s) -> e.isGreaterThan(SalespersonRow::surname), "> s.SURNAME"),
             testCase((e, s) -> e.isGreaterThan(SalespersonRow::middleNames), "> s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isGreaterThan("s", SalespersonRow::surname), "> s.SURNAME"),
@@ -170,7 +172,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isGreaterThan(s, SalespersonRow::middleNames), "> s.MIDDLE_NAMES"),
 
             testCase((e, s) -> e.isLessThan("A"), "< ?", "A"),
-            testCase((e, s) -> e.isLessThan(TypedExpression.value("A")), "< ?", "A"),
+            testCase((e, s) -> e.isLessThan(value("A")), "< ?", "A"),
             testCase((e, s) -> e.isLessThan(SalespersonRow::surname), "< s.SURNAME"),
             testCase((e, s) -> e.isLessThan(SalespersonRow::middleNames), "< s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isLessThan("s", SalespersonRow::surname), "< s.SURNAME"),
@@ -179,7 +181,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isLessThan(s, SalespersonRow::middleNames), "< s.MIDDLE_NAMES"),
 
             testCase((e, s) -> e.isGreaterThanOrEqualTo("A"), ">= ?", "A"),
-            testCase((e, s) -> e.isGreaterThanOrEqualTo(TypedExpression.value("A")), ">= ?", "A"),
+            testCase((e, s) -> e.isGreaterThanOrEqualTo(value("A")), ">= ?", "A"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo(SalespersonRow::surname), ">= s.SURNAME"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo(SalespersonRow::middleNames), ">= s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo("s", SalespersonRow::surname), ">= s.SURNAME"),
@@ -188,7 +190,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isGreaterThanOrEqualTo(s, SalespersonRow::middleNames), ">= s.MIDDLE_NAMES"),
 
             testCase((e, s) -> e.isLessThanOrEqualTo("A"), "<= ?", "A"),
-            testCase((e, s) -> e.isLessThanOrEqualTo(TypedExpression.value("A")), "<= ?", "A"),
+            testCase((e, s) -> e.isLessThanOrEqualTo(value("A")), "<= ?", "A"),
             testCase((e, s) -> e.isLessThanOrEqualTo(SalespersonRow::surname), "<= s.SURNAME"),
             testCase((e, s) -> e.isLessThanOrEqualTo(SalespersonRow::middleNames), "<= s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isLessThanOrEqualTo("s", SalespersonRow::surname), "<= s.SURNAME"),
@@ -198,18 +200,24 @@ class ExpressionBuilderTest extends MockitoTest {
 
             testCase((e, s) -> e.isIn("A", "B", "C"), "in (?, ?, ?)", "A", "B", "C"),
             testCase((e, s) -> e.isNotIn("D", "E"), "not in (?, ?)", "D", "E"),
+            testCase((e, s) -> e.isIn(literal("A"), value("B"), literal("C")), "in ('A', ?, 'C')", "B"),
+            testCase((e, s) -> e.isNotIn(value("D"), literal("E")), "not in (?, 'E')", "D"),
 
             testCase((e, s) -> e.isNull(), "is null"),
             testCase((e, s) -> e.isNotNull(), "is not null"),
 
             testCase((e, s) -> e.isLike("A"), "like ?", "A"),
             testCase((e, s) -> e.isNotLike("A"), "not like ?", "A"),
+            testCase((e, s) -> e.isLike(literal("A")), "like 'A'"),
+            testCase((e, s) -> e.isNotLike(literal("A")), "not like 'A'"),
 
             testCase((e, s) -> e.isLike("A", "@"), "like ? escape '@'", "A"),
             testCase((e, s) -> e.isNotLike("A", "@"), "not like ? escape '@'", "A"),
+            testCase((e, s) -> e.isLike(literal("A"), "@"), "like 'A' escape '@'"),
+            testCase((e, s) -> e.isNotLike(literal("A"), "@"), "not like 'A' escape '@'"),
 
             testCase((e, s) -> e.isBetween("A").and("Z"), "between ? and ?", "A", "Z"),
-            testCase((e, s) -> e.isBetween(TypedExpression.value("A")).and("Z"), "between ? and ?", "A", "Z"),
+            testCase((e, s) -> e.isBetween(value("A")).and("Z"), "between ? and ?", "A", "Z"),
             testCase((e, s) -> e.isBetween(SalespersonRow::surname).and("Z"), "between s.SURNAME and ?", "Z"),
             testCase((e, s) -> e.isBetween(SalespersonRow::middleNames).and("Z"), "between s.MIDDLE_NAMES and ?", "Z"),
             testCase((e, s) -> e.isBetween("s", SalespersonRow::surname).and("Z"), "between s.SURNAME and ?", "Z"),
@@ -218,7 +226,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isBetween(s, SalespersonRow::middleNames).and("Z"), "between s.MIDDLE_NAMES and ?", "Z"),
 
             testCase((e, s) -> e.isNotBetween("A").and("Z"), "not between ? and ?", "A", "Z"),
-            testCase((e, s) -> e.isNotBetween(TypedExpression.value("A")).and("Z"), "not between ? and ?", "A", "Z"),
+            testCase((e, s) -> e.isNotBetween(value("A")).and("Z"), "not between ? and ?", "A", "Z"),
             testCase((e, s) -> e.isNotBetween(SalespersonRow::surname).and("Z"), "not between s.SURNAME and ?", "Z"),
             testCase((e, s) -> e.isNotBetween(SalespersonRow::middleNames).and("Z"), "not between s.MIDDLE_NAMES and ?", "Z"),
             testCase((e, s) -> e.isNotBetween("s", SalespersonRow::surname).and("Z"), "not between s.SURNAME and ?", "Z"),
@@ -227,7 +235,7 @@ class ExpressionBuilderTest extends MockitoTest {
             testCase((e, s) -> e.isNotBetween(s, SalespersonRow::middleNames).and("Z"), "not between s.MIDDLE_NAMES and ?", "Z"),
 
             testCase((e, s) -> e.concat("A").isEqualTo("AA"), "|| ? = ?", "A", "AA"),
-            testCase((e, s) -> e.concat(TypedExpression.value("A")).isEqualTo("AA"), "|| ? = ?", "A", "AA"),
+            testCase((e, s) -> e.concat(value("A")).isEqualTo("AA"), "|| ? = ?", "A", "AA"),
             testCase((e, s) -> e.concat(SalespersonRow::surname).isEqualTo("AA"), "|| s.SURNAME = ?", "AA"),
             testCase((e, s) -> e.concat(SalespersonRow::middleNames).isEqualTo("AA"), "|| s.MIDDLE_NAMES = ?", "AA"),
             testCase((e, s) -> e.concat("s", SalespersonRow::surname).isEqualTo("AA"), "|| s.SURNAME = ?", "AA"),
@@ -261,7 +269,7 @@ class ExpressionBuilderTest extends MockitoTest {
             .where(SalespersonRow::firstName);
 
         //noinspection Convert2MethodRef
-        calling(() -> select.isIn())
+        calling(() -> select.isIn(new String[0]))
             .shouldThrow(IllegalArgumentException.class);
     }
 
@@ -272,7 +280,7 @@ class ExpressionBuilderTest extends MockitoTest {
             .where(SalespersonRow::firstName);
 
         //noinspection Convert2MethodRef
-        calling(() -> select.isNotIn())
+        calling(() -> select.isNotIn(new String[0]))
             .shouldThrow(IllegalArgumentException.class);
     }
 }
