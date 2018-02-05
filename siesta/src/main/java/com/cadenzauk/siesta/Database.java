@@ -51,6 +51,7 @@ import com.cadenzauk.siesta.type.DbTypeAdapter;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.EnumByName;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,7 +245,8 @@ public class Database {
 
     private <R, T> Optional<String> nameFromMethodAnnotation(MethodInfo<R,T> getterMethod) {
         return getterMethod.annotation(javax.persistence.Column.class)
-            .map(javax.persistence.Column::name);
+            .map(javax.persistence.Column::name)
+            .filter(StringUtils::isNotBlank);
     }
 
     private <R, T> Optional<String> nameFromFieldAnnotation(MethodInfo<R,T> getterMethod) {
@@ -254,7 +256,8 @@ public class Database {
 
     private <R, T> Optional<String> nameFromFieldAnnotation(FieldInfo<R,T> f) {
         return f.annotation(javax.persistence.Column.class)
-            .map(javax.persistence.Column::name);
+            .map(javax.persistence.Column::name)
+            .filter(StringUtils::isNotBlank);
     }
 
     public <T, R> Column<T,R> column(Function1<R,T> getter) {

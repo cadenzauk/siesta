@@ -66,8 +66,8 @@ public class SqlServerDialect extends AnsiDialect {
             .register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"))
             .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("charindex") {
                 @Override
-                public String sql(String[] argsSql) {
-                    return super.sql(argsSql[1], argsSql[0]);
+                public String sql(Scope scope, String[] argsSql) {
+                    return super.sql(scope, argsSql[1], argsSql[0]);
                 }
 
                 @Override

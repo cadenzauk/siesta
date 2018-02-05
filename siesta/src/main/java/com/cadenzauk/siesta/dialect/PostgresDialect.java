@@ -54,10 +54,10 @@ public class PostgresDialect extends AnsiDialect {
         DateFunctionSpecs.registerExtract(functions());
         DateFunctionSpecs.registerPlusNumber(functions());
         functions()
-            .register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"))
+            .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, ArgumentlessFunctionSpec.of("localtimestamp"))
             .register(HOUR_DIFF, new FunctionSpec() {
                 @Override
-                public String sql(String[] argsSql) {
+                public String sql(Scope scope, String[] argsSql) {
                     return String.format("date_part('day', %1$s - %2$s) * 24 + date_part('hour', %1$s - %2$s)", argsSql[0], argsSql[1]);
                 }
 
@@ -68,8 +68,8 @@ public class PostgresDialect extends AnsiDialect {
                         Arrays.stream(args)).flatMap(a -> a.args(scope));
                 }
             })
-            .register(MINUTE_DIFF, argsSql -> String.format("extract(epoch from (date_trunc('minute', %1$s) - date_trunc('minute', %2$s))) / 60", argsSql[0], argsSql[1]))
-            .register(SECOND_DIFF, argsSql -> String.format("extract(epoch from (%1$s - %2$s))", argsSql[0], argsSql[1]))
+            .register(MINUTE_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('minute', %1$s) - date_trunc('minute', %2$s))) / 60", argsSql[0], argsSql[1]))
+            .register(SECOND_DIFF, (s, argsSql) -> String.format("extract(epoch from (%1$s - %2$s))", argsSql[0], argsSql[1]))
             .register(INSTR, SimpleFunctionSpec.of("strpos"))
         ;
 

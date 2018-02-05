@@ -36,7 +36,7 @@ public class DateAddFunctionSpec implements FunctionSpec {
     }
 
     @Override
-    public String sql(String[] argsSql) {
+    public String sql(Scope scope, String[] argsSql) {
         return String.format("dateadd(%s, %s, %s)", part, argsSql[1], argsSql[0]);
     }
 

@@ -31,6 +31,7 @@ import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultTinyint;
@@ -49,9 +50,9 @@ public class Db2Dialect extends AnsiDialect {
     public Db2Dialect() {
         DateFunctionSpecs.registerPlusUnits(functions());
         functions()
-            .register(HOUR_DIFF, a -> "TIMESTAMPDIFF(8, char(trunc(" + a[0] + ", 'HH24') - trunc(" + a[1] + ", 'HH24')))")
-            .register(MINUTE_DIFF, a -> "TIMESTAMPDIFF(4, char(trunc(" + a[0] + ", 'MI') - trunc(" + a[1] + ", 'MI')))")
-            .register(SECOND_DIFF, a -> "TIMESTAMPDIFF(2, char(trunc(" + a[0] + ", 'SS') - trunc(" + a[1] + ", 'SS')))")
+            .register(HOUR_DIFF, (s, a) -> "TIMESTAMPDIFF(8, char(trunc(" + a[0] + ", 'HH24') - trunc(" + a[1] + ", 'HH24')))")
+            .register(MINUTE_DIFF, (s, a)-> "TIMESTAMPDIFF(4, char(trunc(" + a[0] + ", 'MI') - trunc(" + a[1] + ", 'MI')))")
+            .register(SECOND_DIFF, (s, a) -> "TIMESTAMPDIFF(2, char(trunc(" + a[0] + ", 'SS') - trunc(" + a[1] + ", 'SS')))")
         ;
 
         types()

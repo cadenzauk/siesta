@@ -43,6 +43,7 @@ public class AutoDetectDialect {
     private static final List<Tuple2<Predicate<String>,Supplier<Dialect>>> DIALECTS = ImmutableList.of(
         Tuple.of(Pattern.compile("^DB2/.*").asPredicate(), Db2Dialect::new),
         Tuple.of(Pattern.compile("^H2.*").asPredicate(), H2Dialect::new),
+        Tuple.of(Pattern.compile("^HSQL.*").asPredicate(), HSqlDialect::new),
         Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), FirebirdDialect::new),
         Tuple.of(Pattern.compile("^Oracle.*").asPredicate(), OracleDialect::new),
         Tuple.of(Pattern.compile("^PostgreSQL.*").asPredicate(), PostgresDialect::new),

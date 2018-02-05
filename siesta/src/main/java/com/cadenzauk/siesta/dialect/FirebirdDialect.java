@@ -54,8 +54,8 @@ public class FirebirdDialect extends AnsiDialect {
         functions()
             .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("position") {
                 @Override
-                public String sql(String[] args) {
-                    return super.sql(args[1], args[0]);
+                public String sql(Scope scope, String[] args) {
+                    return super.sql(scope, args[1], args[0]);
                 }
 
                 @Override

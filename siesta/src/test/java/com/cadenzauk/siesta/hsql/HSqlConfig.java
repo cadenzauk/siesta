@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect.function;
+package com.cadenzauk.siesta.hsql;
 
-import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.HSqlDialect;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-public class ArgumentlessFunctionSpec implements FunctionSpec {
-    private final String name;
+import javax.sql.DataSource;
 
-    private ArgumentlessFunctionSpec(String name) {
-        this.name = name;
+@Configuration
+public class HSqlConfig {
+    @Bean
+    public DataSource dataSource() {
+        EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+        return builder
+            .setName("SIESTA;hsqldb.tx=MVCC")
+            .setType(EmbeddedDatabaseType.HSQL)
+            .addScript("classpath:/create-test-schema.ddl")
+            .build();
     }
 
-    @Override
-    public String sql(Scope scope, String[] argsSql) {
-        return name;
-    }
-
-    public static ArgumentlessFunctionSpec of(String name) {
-        return new ArgumentlessFunctionSpec(name);
+    @Bean
+    public Dialect dialect() {
+        return new HSqlDialect();
     }
 }

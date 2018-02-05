@@ -63,9 +63,10 @@ public class OracleDialect extends AnsiDialect {
         DateFunctionSpecs.registerPlusNumToDsInterval(functions());
         functions()
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"))
+            .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, ArgumentlessFunctionSpec.of("localtimestamp"))
             .register(HOUR_DIFF, new FunctionSpec() {
                 @Override
-                public String sql(String[] a) {
+                public String sql(Scope scope, String[] a) {
                     return String.format("extract(day from (%1$s - %2$s)) * 24 + extract(hour from (%1$s - %2$s))", a[0], a[1]);
                 }
 
@@ -76,8 +77,8 @@ public class OracleDialect extends AnsiDialect {
                         Arrays.stream(args)).flatMap(a -> a.args(scope));
                 }
             })
-            .register(MINUTE_DIFF, a -> String.format("round((trunc(cast(%1$s as date), 'MI') - trunc(cast(%2$s as date), 'MI')) * 1440)", a[0], a[1]))
-            .register(SECOND_DIFF, a -> String.format("round((cast(%1$s as date) - cast(%2$s as date)) * 86400)", a[0], a[1]))
+            .register(MINUTE_DIFF, (s, a) -> String.format("round((trunc(cast(%1$s as date), 'MI') - trunc(cast(%2$s as date), 'MI')) * 1440)", a[0], a[1]))
+            .register(SECOND_DIFF, (s, a) -> String.format("round((cast(%1$s as date) - cast(%2$s as date)) * 86400)", a[0], a[1]))
         ;
 
         types()

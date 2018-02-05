@@ -36,7 +36,7 @@ public class DateDiffFunctionSpec implements FunctionSpec {
     }
 
     @Override
-    public String sql(String[] argsSql) {
+    public String sql(Scope scope, String[] argsSql) {
         return String.format("datediff(%s, %s, %s)", part, argsSql[1], argsSql[0]);
     }
 

@@ -32,7 +32,7 @@
         <createSequence sequenceName="widget_seq"/>
     </changeSet>
 
-    <changeSet id="create int sequence for others" author="mark" dbms="oracle,db2,h2,postgresql,mssql">
+    <changeSet id="create int sequence for others" author="mark" dbms="oracle,db2,h2,postgresql,mssql,hsqldb">
         <createSequence sequenceName="widget_seq" startValue="1"/>
     </changeSet>
 

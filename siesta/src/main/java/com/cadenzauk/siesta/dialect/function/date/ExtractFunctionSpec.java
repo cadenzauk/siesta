@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.dialect.function.date;
 
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 
 public class ExtractFunctionSpec implements FunctionSpec {
@@ -32,7 +33,7 @@ public class ExtractFunctionSpec implements FunctionSpec {
     }
 
     @Override
-    public String sql(String[] argsSql) {
+    public String sql(Scope scope, String[] argsSql) {
         return String.format("extract(%s from %s)", part, argsSql[0]);
     }
 

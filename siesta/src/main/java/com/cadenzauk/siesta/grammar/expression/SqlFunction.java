@@ -54,7 +54,7 @@ public class SqlFunction<T> implements TypedExpression<T> {
     @Override
     public String sql(Scope scope) {
         String[] argsSql = Arrays.stream(args).map(a -> a.sql(scope)).toArray(String[]::new);
-        return scope.dialect().function(functionName).sql(argsSql);
+        return scope.dialect().function(functionName).sql(scope, argsSql);
     }
 
     @Override

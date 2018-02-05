@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect.function;
+package com.cadenzauk.siesta.hsql;
 
-import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.DatabaseIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-public class ArgumentlessFunctionSpec implements FunctionSpec {
-    private final String name;
-
-    private ArgumentlessFunctionSpec(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String sql(Scope scope, String[] argsSql) {
-        return name;
-    }
-
-    public static ArgumentlessFunctionSpec of(String name) {
-        return new ArgumentlessFunctionSpec(name);
-    }
+@ContextConfiguration(classes = HSqlConfig.class)
+public class DatabaseIntegrationTestHSql extends DatabaseIntegrationTest {
 }

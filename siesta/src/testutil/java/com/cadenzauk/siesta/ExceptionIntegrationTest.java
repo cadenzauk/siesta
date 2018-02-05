@@ -152,7 +152,8 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
             .delete(SalespersonRow.class)
             .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
             .execute())
-            .shouldThrow(ReferentialIntegrityException.class)
+            .shouldThrow(RuntimeSqlException.class)
+            .with(subclass(ReferentialIntegrityException.class))
             .withMessage(startsWith("Foreign key constraint violated while executing 'delete "));
     }
 

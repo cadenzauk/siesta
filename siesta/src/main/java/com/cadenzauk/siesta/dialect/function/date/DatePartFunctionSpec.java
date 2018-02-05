@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.dialect.function.date;
 
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 
 public class DatePartFunctionSpec implements FunctionSpec {
@@ -32,7 +33,7 @@ public class DatePartFunctionSpec implements FunctionSpec {
     }
 
     @Override
-    public String sql(String[] argsSql) {
+    public String sql(Scope scope, String[] argsSql) {
         return String.format("datepart(%s, %s)", part, argsSql[0]);
     }
 

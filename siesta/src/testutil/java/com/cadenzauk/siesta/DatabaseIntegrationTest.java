@@ -519,7 +519,12 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .firstName("Bruce")
             .surname("Smith")
             .build();
-        database.insert(fred, bruce);
+        SalespersonRow trevor = SalespersonRow.newBuilder()
+            .salespersonId(newId())
+            .firstName("Trevor")
+            .surname("Dagg")
+            .build();
+        database.insert(fred, bruce, trevor);
 
         List<SalespersonRow> smiths1 = database.from(SalespersonRow.class)
             .where(SalespersonRow::salespersonId).isIn(
@@ -1165,9 +1170,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
 
         Tuple3<Integer,Integer,Integer> result = database
-            .select(instr("ABCABC", "B"))
-            .comma(instr("ABC", "D"))
-            .comma(instr("DABC", "D"))
+            .select(instr(literal("ABCABC"), literal("B")))
+            .comma(instr(literal("ABC"), literal("D")))
+            .comma(instr(literal("DABC"), literal("D")))
             .single();
 
         assertThat(result.item1(), is(2));

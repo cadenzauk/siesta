@@ -57,7 +57,7 @@ class LocalDateConverterTest {
             Arguments.of("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
             Arguments.of("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
             Arguments.of("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
-            Arguments.of("UTC", localDate(15, OCTOBER, 1582), date(15, OCTOBER, 1582, "UTC")),
+            Arguments.of("UTC", localDate(16, OCTOBER, 1582), date(16, OCTOBER, 1582, "UTC")),
             Arguments.of("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
             Arguments.of("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
             Arguments.of("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),

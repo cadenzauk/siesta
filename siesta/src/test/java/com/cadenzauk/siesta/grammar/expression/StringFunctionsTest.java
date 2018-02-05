@@ -70,7 +70,7 @@ class StringFunctionsTest extends FunctionTest {
         when(expression2.sql(scope)).thenReturn("sql2");
         when(scope.dialect()).thenReturn(dialect);
         when(dialect.function(StringFunctionSpecs.SUBSTR)).thenReturn(substrFunction);
-        when(substrFunction.sql(toArray("sql1", "sql2"))).thenReturn("substring(sql2, sql1)");
+        when(substrFunction.sql(scope, toArray("sql1", "sql2"))).thenReturn("substring(sql2, sql1)");
         TypedExpression<String> sut = substr(expression1, expression2);
 
         String result = sut.sql(scope);

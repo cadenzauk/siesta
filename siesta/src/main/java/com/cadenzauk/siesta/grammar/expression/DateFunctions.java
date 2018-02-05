@@ -52,7 +52,7 @@ public final class DateFunctions extends UtilityClass {
 
     //--
     public static TypedExpression<ZonedDateTime> currentTimestamp() {
-        return SqlFunction.of(DateFunctionSpecs.CURRENT_TIMESTAMP, ZonedDateTime.class, new TypedExpression<?>[0]);
+        return SqlFunction.of(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, ZonedDateTime.class, new TypedExpression<?>[0]);
     }
 
     //--

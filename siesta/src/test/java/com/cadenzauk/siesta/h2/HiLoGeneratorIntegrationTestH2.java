@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.h2;
 
-import com.cadenzauk.siesta.TransactionIntegrationTest;
+import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 
-public class HiLoGeneratorIntegrationTestH2 extends TransactionIntegrationTest {
+public class HiLoGeneratorIntegrationTestH2 extends HiLoGeneratorIntegrationTest {
 }

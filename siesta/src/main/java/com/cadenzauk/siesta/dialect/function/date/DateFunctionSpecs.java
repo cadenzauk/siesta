@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.dialect.function.date;
 
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
@@ -30,6 +31,7 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 public class DateFunctionSpecs {
     public static final FunctionName CURRENT_DATE = new FunctionName("current_date");
     public static final FunctionName CURRENT_TIMESTAMP = new FunctionName("current_timestamp");
+    public static final FunctionName CURRENT_TIMESTAMP_UTC = new FunctionName("current_timestamp_utc");
     public static final FunctionName YEAR = new FunctionName("year");
     public static final FunctionName MONTH = new FunctionName("month");
     public static final FunctionName DAY = new FunctionName("day");
@@ -46,6 +48,7 @@ public class DateFunctionSpecs {
     public static void registerDefaults(FunctionRegistry functions) {
         functions.register(CURRENT_DATE, ArgumentlessFunctionSpec.of("current_date"));
         functions.register(CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("current_timestamp"));
+        functions.register(CURRENT_TIMESTAMP_UTC, ArgumentlessFunctionSpec.of("current_timestamp"));
 
         functions.register(YEAR, SimpleFunctionSpec.of("year"));
         functions.register(MONTH, SimpleFunctionSpec.of("month"));
@@ -56,7 +59,7 @@ public class DateFunctionSpecs {
 
         registerDateAdd(functions);
 
-        functions.register(DAY_DIFF, a -> a[0] + " - " + a[1]);
+        functions.register(DAY_DIFF, (s, a) -> a[0] + " - " + a[1]);
         functions.register(HOUR_DIFF, new DateDiffFunctionSpec("hour"));
         functions.register(MINUTE_DIFF, new DateDiffFunctionSpec("minute"));
         functions.register(SECOND_DIFF, new DateDiffFunctionSpec("second"));
@@ -82,15 +85,15 @@ public class DateFunctionSpecs {
     }
 
     public static void registerPlusUnits(FunctionRegistry functions) {
-        functions.register(ADD_DAYS, argsSql -> argsSql[0] + " + " + argsSql[1] + " days");
+        functions.register(ADD_DAYS, (scope, argsSql) -> argsSql[0] + " + " + argsSql[1] + " days");
     }
 
     public static void registerPlusNumber(FunctionRegistry functions) {
-        functions.register(ADD_DAYS, argsSql -> argsSql[0] + " + " + argsSql[1]);
+        functions.register(ADD_DAYS, (scope, argsSql) -> argsSql[0] + " + " + argsSql[1]);
     }
 
     public static void registerPlusNumToDsInterval(FunctionRegistry functions) {
-        functions.register(ADD_DAYS, argsSql -> argsSql[0] + " + NUMTODSINTERVAL(" + argsSql[1] + ", 'day')");
+        functions.register(ADD_DAYS, (scope, argsSql) -> argsSql[0] + " + NUMTODSINTERVAL(" + argsSql[1] + ", 'day')");
     }
 
     public static void registerDateDiff(FunctionRegistry functions) {

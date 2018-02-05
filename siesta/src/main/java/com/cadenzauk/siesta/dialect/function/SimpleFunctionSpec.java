@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.dialect.function;
 
+import com.cadenzauk.siesta.Scope;
+
 public class SimpleFunctionSpec implements FunctionSpec {
     private final String name;
 
@@ -30,7 +32,7 @@ public class SimpleFunctionSpec implements FunctionSpec {
     }
 
     @Override
-    public String sql(String... argsSql) {
+    public String sql(Scope scope, String... argsSql) {
         return String.format("%s(%s)", name, String.join(", ", argsSql));
     }
 
