@@ -23,6 +23,8 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.RandomValues;
+import com.cadenzauk.core.junit.TestCase;
+import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple;
@@ -45,11 +47,11 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.AssumptionViolatedException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
 import static com.cadenzauk.core.RandomValues.randomLocalTime;
@@ -102,11 +105,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@RunWith(JUnitParamsRunner.class)
 public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
-    public void selectFromDatabaseOneTable() {
+    void selectFromDatabaseOneTable() {
         Database database = testDatabase(dataSource, dialect);
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(newId())
@@ -124,7 +128,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void selectFromDatabaseTwoTables() {
+    void selectFromDatabaseTwoTables() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturerId = newId();
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
@@ -154,7 +158,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void update() {
+    void update() {
         Database database = testDatabase(dataSource, dialect);
         WidgetRow aWidget = WidgetRow.newBuilder()
             .widgetId(newId())
@@ -179,7 +183,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void selectRow() {
+    void selectRow() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturerId = newId();
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
@@ -228,7 +232,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void selectIntoView() {
+    void selectIntoView() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturerId = newId();
         ManufacturerRow aManufacturer = ManufacturerRow.newBuilder()
@@ -262,7 +266,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void groupBy() {
+    void groupBy() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturer1 = newId();
         long manufacturer2 = newId();
@@ -299,7 +303,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void countAndCountDistinct() {
+    void countAndCountDistinct() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturer1 = newId();
         long manufacturer2 = newId();
@@ -336,7 +340,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void coalesceFunc() {
+    void coalesceFunc() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturer1 = newId();
         long manufacturer2 = newId();
@@ -382,7 +386,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void leftJoinOfMissingIsNull() {
+    void leftJoinOfMissingIsNull() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturer1 = newId();
         long manufacturer2 = newId();
@@ -416,7 +420,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void delete() {
+    void delete() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturer1 = newId();
         long manufacturer2 = newId();
@@ -438,7 +442,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void concatTest() {
+    void concatTest() {
         Database database = testDatabase(dataSource, dialect);
         SalespersonRow george = SalespersonRow.newBuilder()
             .salespersonId(newId())
@@ -455,9 +459,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(name, is("GEORGE JETSON1"));
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void currentDateTest(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void currentDateTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             LocalDate before = LocalDate.now(database.databaseTimeZone());
@@ -472,9 +482,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void currentTimestampLocalTest(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void currentTimestampLocalTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             LocalDateTime before = LocalDateTime.now(database.databaseTimeZone()).minusSeconds(10);
@@ -489,9 +505,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void currentTimestampTest(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void currentTimestampTest(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             ZonedDateTime before = ZonedDateTime.now(ZoneId.of("UTC")).minusSeconds(10);
@@ -507,7 +529,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void selectIn() {
+    void selectIn() {
         Database database = testDatabase(dataSource, dialect);
         SalespersonRow fred = SalespersonRow.newBuilder()
             .salespersonId(newId())
@@ -552,7 +574,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void caseExpression() {
+    void caseExpression() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturerId = newId();
         WidgetRow doohicky = WidgetRow.newBuilder()
@@ -593,10 +615,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void olapWithPartitionAndOrder() {
-        if (!dialect.supportsPartitionByInOlap() || !dialect.supportsOrderByInOlap()) {
-            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support PARTITION BY/ORDER BY in OLAP functions.");
-        }
+    void olapWithPartitionAndOrder() {
+        assumeTrue(dialect.supportsPartitionByInOlap() && dialect.supportsOrderByInOlap(), dialect.getClass().getSimpleName() + " does not support PARTITION BY/ORDER BY in OLAP functions.");
         Database database = testDatabase(dataSource, dialect);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
 
@@ -618,10 +638,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void olapWithPartition() {
-        if (!dialect.supportsPartitionByInOlap()) {
-            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support PARTITION BY in OLAP functions.");
-        }
+    void olapWithPartition() {
+        assumeTrue(dialect.supportsPartitionByInOlap(), dialect.getClass().getSimpleName() + " does not support PARTITION BY in OLAP functions.");
 
         Database database = testDatabase(dataSource, dialect);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
@@ -644,10 +662,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void olapWithOrderBy() {
-        if (!dialect.supportsOrderByInOlap()) {
-            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support row_number() with ORDER BY.");
-        }
+    void olapWithOrderBy() {
+        assumeTrue(dialect.supportsOrderByInOlap(), dialect.getClass().getSimpleName() + " does not support row_number() with ORDER BY.");
         Database database = testDatabase(dataSource, dialect);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
 
@@ -665,10 +681,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void olapWithoutPartitionOrOrder() {
-        if (dialect.requiresOrderByInRowNumber()) {
-            throw new AssumptionViolatedException(dialect.getClass().getSimpleName() + " does not support row_number() without ORDER BY.");
-        }
+    void olapWithoutPartitionOrOrder() {
+        assumeFalse(dialect.requiresOrderByInRowNumber(), dialect.getClass().getSimpleName() + " does not support row_number() without ORDER BY.");
         Database database = testDatabase(dataSource, dialect);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
 
@@ -685,24 +699,24 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @SuppressWarnings("unused")
-    private Object[] parametersForLiteral() {
-        return new Object[]{
-            new BigDecimal("5001.12"),
-            (byte) 0xff,
-            new byte[]{(byte) 0xff, 0x1, 0x7f},
-            3.1415,
-            2.71f,
-            LocalDate.of(2014, 9, 12),
-            LocalDateTime.of(2017, 1, 2, 3, 4, 5, 6000000),
-            9_223_372_036_854_775_807L,
-            (short) 32767,
-            "Abc'def\"g hi",
-        };
+    private static Stream<Arguments> parametersForLiteral() {
+        return Stream.of(
+            Arguments.of(new BigDecimal("5001.12")),
+            Arguments.of((byte) 0xff),
+            Arguments.of((Object) new byte[] {(byte) 0xff, 0x1, 0x7f}),
+            Arguments.of(3.1415),
+            Arguments.of(2.71f),
+            Arguments.of(LocalDate.of(2014, 9, 12)),
+            Arguments.of(LocalDateTime.of(2017, 1, 2, 3, 4, 5, 6000000)),
+            Arguments.of(9_223_372_036_854_775_807L),
+            Arguments.of((short) 32767),
+            Arguments.of("Abc'def\"g hi")
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForLiteral")
-    public <T> void literalTest(T value) {
+    @ParameterizedTest
+    @MethodSource("parametersForLiteral")
+    <T> void literalTest(T value) {
         Database database = testDatabase(dataSource, dialect);
 
         T result = database.select(literal(value)).single();
@@ -710,20 +724,19 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result, is(value));
     }
 
-    @SuppressWarnings("unused")
-    private Object[][] parametersForZonedDateTimeLiteral() {
-        return new Object[][]{
-            {"UTC", ZonedDateTime.of(2001, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))},
-            {"Europe/Berlin", ZonedDateTime.of(2002, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))},
-            {"UTC", ZonedDateTime.of(2003, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))},
-            {"America/New_York", ZonedDateTime.of(2004, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))},
-            {"America/Anchorage", ZonedDateTime.of(2005, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))}
-        };
+    private static Stream<Arguments> parametersForZonedDateTimeLiteral() {
+        return Stream.of(
+            Arguments.of("UTC", ZonedDateTime.of(2001, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))),
+            Arguments.of("Europe/Berlin", ZonedDateTime.of(2002, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))),
+            Arguments.of("UTC", ZonedDateTime.of(2003, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))),
+            Arguments.of("America/New_York", ZonedDateTime.of(2004, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))),
+            Arguments.of("America/Anchorage", ZonedDateTime.of(2005, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage")))
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForZonedDateTimeLiteral")
-    public void zonedDateTimeLiteral(String timeZone, ZonedDateTime value) {
+    @ParameterizedTest
+    @MethodSource("parametersForZonedDateTimeLiteral")
+    void zonedDateTimeLiteral(String timeZone, ZonedDateTime value) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             ZonedDateTime expected = value.withZoneSameInstant(ZoneId.of("UTC"));
@@ -735,18 +748,18 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @SuppressWarnings("unused")
-    private Object[][] parametersForLocalDateTimeLiteral() {
-        return new Object[][]{
-            {"UTC", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)},
-            {"Europe/Paris", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)},
-            {"Pacific/Chatham", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)}
-        };
+    private static Stream<Arguments> parametersForLocalDateTimeLiteral() {
+        return Stream.of(
+            Arguments.of("UTC", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)),
+            Arguments.of("Europe/Paris", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)),
+            Arguments.of("Pacific/Chatham", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000))
+        );
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-    @Test
-    @Parameters(method = "parametersForLocalDateTimeLiteral")
-    public void localDateTimeLiteral(String timeZone, LocalDateTime value) {
+    @ParameterizedTest
+    @MethodSource("parametersForLocalDateTimeLiteral")
+    void localDateTimeLiteral(String timeZone, LocalDateTime value) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = value;
@@ -757,19 +770,18 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
-    @SuppressWarnings("unused")
-    private Object[][] parametersForLocalTimeLiteral() {
-        return new Object[][]{
-            {"UTC", LocalTime.of(5, 4, 3)},
-            {"Europe/Paris", LocalTime.of(5, 4, 3)},
-            {"Pacific/Chatham", LocalTime.of(5, 4, 3)}
-        };
+    private static Stream<Arguments> parametersForLocalTimeLiteral() {
+        return Stream.of(
+            Arguments.of("UTC", LocalTime.of(5, 4, 3)),
+            Arguments.of("Europe/Paris", LocalTime.of(5, 4, 3)),
+            Arguments.of("Pacific/Chatham", LocalTime.of(5, 4, 3))
+        );
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
-    @Test
-    @Parameters(method = "parametersForLocalTimeLiteral")
-    public void localTimeiteral(String timeZone, LocalTime value) {
+    @ParameterizedTest
+    @MethodSource("parametersForLocalTimeLiteral")
+    void localTimeiteral(String timeZone, LocalTime value) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalTime expected = value;
@@ -780,9 +792,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void canRoundTripLocalDateTimes(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void canRoundTripLocalDateTimes(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalDateTime expected = randomLocalDateTime();
@@ -799,9 +817,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Brazilia", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void canRoundTripLocalTimes(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void canRoundTripLocalTimes(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             LocalTime expected = randomLocalTime();
@@ -818,9 +842,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void canRoundTripZonedDateTimes(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void canRoundTripZonedDateTimes(String timeZone) {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = withTimeZone(timeZone)) {
             ZonedDateTime expected = randomZonedDateTime(ZoneId.of("UTC"));
@@ -838,7 +868,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void localDatePartFuncs() {
+    void localDatePartFuncs() {
         LocalDate date = RandomValues.randomLocalDate();
         Database database = testDatabase(dataSource, dialect);
 
@@ -854,7 +884,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void localDateTimePartFuncs() {
+    void localDateTimePartFuncs() {
         LocalDateTime dateTime = RandomValues.randomLocalDateTime();
         Database database = testDatabase(dataSource, dialect);
 
@@ -875,9 +905,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result.item6(), is(dateTime.getSecond()));
     }
 
-    @Test
-    @Parameters(value = {"America/Anchorage", "America/Sao_Paulo", "UTC", "Europe/London", "Africa/Johannesburg", "Pacific/Chatham"})
-    public void zonedDateTimePartFuncs(String timeZone) {
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"America/Anchorage"})
+    @TestCase({"America/Sao_Paulo"})
+    @TestCase({"UTC"})
+    @TestCase({"Europe/London"})
+    @TestCase({"Africa/Johannesburg"})
+    @TestCase({"Pacific/Chatham"})
+    void zonedDateTimePartFuncs(String timeZone) {
         Database database = testDatabaseBuilder(dialect)
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .databaseTimeZone(ZoneId.of(timeZone))
@@ -904,7 +940,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void unionTest() {
+    void unionTest() {
         Database database = testDatabase(dataSource, dialect);
 
         List<Integer> result = database.select(literal(3))
@@ -924,7 +960,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void fetchFirst() {
+    void fetchFirst() {
         Database database = testDatabase(dataSource);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
 
@@ -941,10 +977,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void commonTableExpression() {
-        if (dialect instanceof H2Dialect) {
-            throw new AssumptionViolatedException("H2 is buggy");
-        }
+    void commonTableExpression() {
+        assumeFalse(dialect instanceof H2Dialect, "H2 is buggy");
         Database database = testDatabase(dataSource, dialect);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
 
@@ -968,12 +1002,12 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(lastTwo.get(1).salespersonId(), is(inserted.item1() + 3));
     }
 
-    public <T> Object[] castExpressionTestCase(TypedExpression<T> castExpr, T expectedResult) {
-        return new Object[]{castExpr, expectedResult};
+    private static <T> Arguments castExpressionTestCase(TypedExpression<T> castExpr, T expectedResult) {
+        return Arguments.of(castExpr, expectedResult);
     }
 
-    public Object[][] parametersForCastExpression() {
-        return new Object[][]{
+    private static Stream<Arguments> parametersForCastExpression() {
+        return Stream.of(
             castExpressionTestCase(cast(134).asChar(3), "134"),
             castExpressionTestCase(cast(126).asTinyInteger(), (byte) 126),
             castExpressionTestCase(cast(32767L).asSmallInteger(), (short) 32767),
@@ -985,13 +1019,13 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             castExpressionTestCase(cast(literal(LocalDate.of(2017, 1, 3))).asTimestamp(6), LocalDateTime.of(2017, 1, 3, 0, 0, 0)),
             castExpressionTestCase(cast(LocalDate.of(2017, 1, 3)).asVarchar(20), "2017-01-03"),
             castExpressionTestCase(cast(literal(1234)).asDoublePrecision(), 1234.0),
-            castExpressionTestCase(cast(literal(1234)).asReal(), 1234.0f),
-        };
+            castExpressionTestCase(cast(literal(1234)).asReal(), 1234.0f)
+        );
     }
 
-    @Test
-    @Parameters
-    public <T> void castExpression(TypedExpression<T> castExpr, T expectedResult) {
+    @ParameterizedTest
+    @MethodSource("parametersForCastExpression")
+    <T> void castExpression(TypedExpression<T> castExpr, T expectedResult) {
         Database database = testDatabase(dataSource, dialect);
 
         T result = database.select(castExpr).single();
@@ -1001,7 +1035,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
     @SuppressWarnings("OptionalAssignedToNull")
     @Test
-    public void roundTripNulls() {
+    void roundTripNulls() {
         Database database = testDatabase(dataSource, dialect);
         UUID guid = UUID.randomUUID();
         database.insert(TestRow.newBuilder()
@@ -1044,7 +1078,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void sequence() {
+    void sequence() {
         Database database = testDatabase(dataSource, dialect);
         Sequence<Integer> widgetSeq = database.sequence("widget_seq");
         long salespersonId = newId();
@@ -1071,7 +1105,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void dateAdd() {
+    void dateAdd() {
         Database database = testDatabase(dataSource, dialect);
         UUID guid = UUID.randomUUID();
         LocalDate localDate = RandomValues.randomLocalDate();
@@ -1089,7 +1123,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void dateDifference() {
+    void dateDifference() {
         Database database = testDatabase(dataSource, dialect);
         UUID guid = UUID.randomUUID();
         LocalDate localDate = RandomValues.randomLocalDate();
@@ -1116,7 +1150,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void enumType() {
+    void enumType() {
         Database database = testDatabaseBuilder(dialect)
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource, 0))
             .enumByName(PartType.class)
@@ -1136,7 +1170,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void defaultDialect() {
+    void defaultDialect() {
         Database database = testDatabase(dataSource);
 
         assertThat(database.dialect(), instanceOf(dialect.getClass()));
@@ -1144,7 +1178,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
 
     @Test
-    public void updateWithExpression() {
+    void updateWithExpression() {
         Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow = aRandomSalesperson();
         database.insert(salespersonRow);
@@ -1166,7 +1200,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void instrFunction() {
+    void instrFunction() {
         Database database = testDatabase(dataSource, dialect);
 
         Tuple3<Integer,Integer,Integer> result = database

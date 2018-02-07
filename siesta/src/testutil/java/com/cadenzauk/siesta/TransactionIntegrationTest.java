@@ -23,8 +23,7 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.model.SalespersonRow;
-import org.junit.AssumptionViolatedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
@@ -32,10 +31,11 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public abstract class TransactionIntegrationTest extends IntegrationTest {
     @Test
-    public void whenCommittedThenInserted() {
+    void whenCommittedThenInserted() {
         Database database = testDatabase(dataSource, dialect);
 
         SalespersonRow salesperson = aRandomSalesperson();
@@ -52,7 +52,7 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void whenRollingBackNothingInserted() {
+    void whenRollingBackNothingInserted() {
         Database database = testDatabase(dataSource, dialect);
 
         SalespersonRow salesperson = aRandomSalesperson();
@@ -69,7 +69,7 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void whenUncommittedThenNotVisible() {
+    void whenUncommittedThenNotVisible() {
         Database database = testDatabase(dataSource, dialect);
 
         SalespersonRow salesperson = aRandomSalesperson();
@@ -88,10 +88,8 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void whenUncommittedThenVisibleWithUr() {
-        if (!dialect.supportsIsolationLevelInQuery()) {
-            throw new AssumptionViolatedException("Database doesn't support isolation levels in query");
-        }
+    void whenUncommittedThenVisibleWithUr() {
+        assumeTrue(dialect.supportsIsolationLevelInQuery(), "Database doesn't support isolation levels in query.");
         Database database = testDatabase(dataSource, dialect);
 
         SalespersonRow salesperson = aRandomSalesperson();
@@ -110,7 +108,7 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void whenUncommittedThenVisibleWithinTransaction() {
+    void whenUncommittedThenVisibleWithinTransaction() {
         Database database = testDatabase(dataSource, dialect);
 
         SalespersonRow salesperson = aRandomSalesperson();

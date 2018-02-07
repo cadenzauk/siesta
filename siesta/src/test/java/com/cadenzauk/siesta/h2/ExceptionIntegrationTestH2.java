@@ -24,5 +24,5 @@ package com.cadenzauk.siesta.h2;
 
 import com.cadenzauk.siesta.ExceptionIntegrationTest;
 
-public class ExceptionIntegrationTestH2 extends ExceptionIntegrationTest {
+class ExceptionIntegrationTestH2 extends ExceptionIntegrationTest {
 }

@@ -24,5 +24,5 @@ package com.cadenzauk.siesta.h2;
 
 import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 
-public class AutoDetectDialectIntegrationTestH2 extends AutoDetectDialectIntegrationTest {
+class AutoDetectDialectIntegrationTestH2 extends AutoDetectDialectIntegrationTest {
 }

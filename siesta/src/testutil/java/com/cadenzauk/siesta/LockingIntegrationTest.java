@@ -26,8 +26,7 @@ import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.model.LockTestRow;
 import com.cadenzauk.siesta.model.TestDatabase;
-import org.junit.AssumptionViolatedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +36,14 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public abstract class LockingIntegrationTest extends IntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(LockingIntegrationTest.class);
 
     @Test
-    public void updateWithTimeout1() {
-        if (!dialect.supportsLockTimeout()) {
-            throw new AssumptionViolatedException("Dialect does not support lock timeouts");
-        }
-
+    void updateWithTimeout1() {
+        assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
         long id = newId();
         Database database = TestDatabase.testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
@@ -68,11 +65,8 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void updateWithTimeout2() {
-        if (!dialect.supportsLockTimeout()) {
-            throw new AssumptionViolatedException("Dialect does not support lock timeouts");
-        }
-
+    void updateWithTimeout2() {
+        assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
         Database database = TestDatabase.testDatabase(dataSource);
         long id = newId();
         Synchronization thread1 = new Synchronization();
@@ -94,11 +88,8 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void updateWithTimeout3() {
-        if (!dialect.supportsLockTimeout()) {
-            throw new AssumptionViolatedException("Dialect does not support lock timeouts");
-        }
-
+    void updateWithTimeout3() {
+        assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
         Database database = TestDatabase.testDatabase(dataSource);
         long id = newId();
         Synchronization thread1 = new Synchronization();
@@ -120,7 +111,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void updateWithoutTimeout() throws InterruptedException {
+    void updateWithoutTimeout() throws InterruptedException {
         long id = newId();
         Database database = TestDatabase.testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
@@ -145,7 +136,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void insertsWithoutTimeout() throws InterruptedException {
+    void insertsWithoutTimeout() throws InterruptedException {
         long id = newId();
         Database database = TestDatabase.testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
@@ -169,10 +160,8 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void insertsWithTimeout() {
-        if (!dialect.supportsLockTimeout()) {
-            throw new AssumptionViolatedException("Dialect does not support lock timeouts");
-        }
+    void insertsWithTimeout() {
+        assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
         long id = newId();
         Database database = TestDatabase.testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();

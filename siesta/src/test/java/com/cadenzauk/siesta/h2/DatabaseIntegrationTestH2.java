@@ -31,7 +31,7 @@ import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.WidgetRow;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -43,9 +43,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-public class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
     @Test
-    public void selectSubquery() {
+    void selectSubquery() {
         Database database = testDatabase(dataSource);
         long manufacturerId = newId();
         ManufacturerRow manufacturer = ManufacturerRow.newBuilder()
@@ -88,7 +88,7 @@ public class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
     }
 
     @Test
-    public void embeddedThatIsAllNullsComesBackEmpty() {
+    void embeddedThatIsAllNullsComesBackEmpty() {
         Database database = testDatabase(dataSource);
         long partId = newId();
         database.insert(PartRow.newBuilder()
@@ -117,7 +117,7 @@ public class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
     }
 
     @Test
-    public void embeddedInsertedAndReadBack() {
+    void embeddedInsertedAndReadBack() {
         Database database = testDatabase(dataSource);
         long partId = newId();
         MoneyAmount purchasePrice = new MoneyAmount(RandomValues.randomBigDecimal(10, 2), "USD");

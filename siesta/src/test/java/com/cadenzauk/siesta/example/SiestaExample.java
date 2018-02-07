@@ -33,7 +33,7 @@ import com.cadenzauk.siesta.model.WidgetId;
 import com.cadenzauk.siesta.model.WidgetRowWithTypeSafeId;
 import com.cadenzauk.siesta.type.DbTypeId;
 import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -49,9 +49,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class SiestaExample extends IntegrationTest {
+class SiestaExample extends IntegrationTest {
     @Test
-    public void insertOneRowAndReadItBack() {
+    void insertOneRowAndReadItBack() {
         Database database = Database.newBuilder()
             .defaultSchema("SIESTA")
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
@@ -75,7 +75,7 @@ public class SiestaExample extends IntegrationTest {
     }
 
     @Test
-    public void insertSomeGizmosAndReadThemBack() {
+    void insertSomeGizmosAndReadThemBack() {
         Database database = Database.newBuilder()
             .defaultSchema("SIESTA")
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
@@ -124,7 +124,7 @@ public class SiestaExample extends IntegrationTest {
     }
 
     @Test
-    public void selectIntoObject() {
+    void selectIntoObject() {
         Database database = Database.newBuilder()
             .defaultSchema("SIESTA")
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
@@ -193,7 +193,7 @@ public class SiestaExample extends IntegrationTest {
     }
 
     @Test
-    public void currentDateTest() {
+    void currentDateTest() {
         Database database = Database.newBuilder()
             .defaultSchema("TEST")
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
@@ -207,7 +207,7 @@ public class SiestaExample extends IntegrationTest {
     }
 
     @Test
-    public void typeSafeIdExample() {
+    void typeSafeIdExample() {
         Database database = Database.newBuilder()
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .table(Widget.class, t -> t

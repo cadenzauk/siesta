@@ -24,5 +24,5 @@ package com.cadenzauk.siesta.h2;
 
 import com.cadenzauk.siesta.TransactionIntegrationTest;
 
-public class TransactionIntegrationTestH2 extends TransactionIntegrationTest {
+class TransactionIntegrationTestH2 extends TransactionIntegrationTest {
 }

@@ -24,5 +24,5 @@ package com.cadenzauk.siesta.h2;
 
 import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 
-public class HiLoGeneratorIntegrationTestH2 extends HiLoGeneratorIntegrationTest {
+class HiLoGeneratorIntegrationTestH2 extends HiLoGeneratorIntegrationTest {
 }

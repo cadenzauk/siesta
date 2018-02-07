@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class HiLoGeneratorIntegrationTest extends IntegrationTest {
     private final static Logger LOG = LoggerFactory.getLogger(HiLoGenerator.class);
 
     @Test
-    public void hiLoGenerationLoad() {
+    void hiLoGenerationLoad() {
         Database database = testDatabase(dataSource);
         Sequence<Long> widgetSeq = database.sequence(Long.class, "widget_seq");
         HiLoGenerator sut = HiLoGenerator.newBuilder(widgetSeq)

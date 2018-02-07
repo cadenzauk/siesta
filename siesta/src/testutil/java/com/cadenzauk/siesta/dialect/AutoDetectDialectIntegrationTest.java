@@ -25,13 +25,13 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IntegrationTest;
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public abstract class AutoDetectDialectIntegrationTest extends IntegrationTest {
     @Test
-    public void detectedCorrectly() {
+    void detectedCorrectly() {
         Dialect result = AutoDetectDialect.from(dataSource);
 
         assertThat(result, Matchers.instanceOf(dialect.getClass()));

@@ -57,7 +57,6 @@ dependencies {
     testutilCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
     testutilCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
     testutilCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
-    testutilCompile group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.0'
 
     testutilRuntime group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
     testutilRuntime group: 'com.mattbertolini', name: 'liquibase-slf4j', version: '2.0.0'

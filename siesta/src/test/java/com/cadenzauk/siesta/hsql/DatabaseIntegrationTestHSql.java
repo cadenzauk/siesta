@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = HSqlConfig.class)
-public class DatabaseIntegrationTestHSql extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestHSql extends DatabaseIntegrationTest {
 }

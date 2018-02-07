@@ -30,12 +30,14 @@ import liquibase.integration.spring.SpringLiquibase;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
@@ -46,15 +48,11 @@ import java.util.stream.IntStream;
 
 @ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ExtendWith(SpringExtension.class)
 public abstract class IntegrationTest {
     static {
         System.setProperty("log4j.rootCategory", "WARN");
     }
-    @ClassRule
-    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
-
-    @Rule
-    public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
     private static final AtomicLong ids = new AtomicLong();
 

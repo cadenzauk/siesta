@@ -42,9 +42,14 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Optional;
 
 public class HSqlDialect extends AnsiDialect {
+    private static final DateTimeFormatter OFFSET_FORMATTER = new DateTimeFormatterBuilder()
+        .appendOffset("+HH:MM", "+00:00")
+        .toFormatter();
+
     public HSqlDialect() {
         DateFunctionSpecs.registerDateAdd(functions());
         functions()
@@ -125,7 +130,7 @@ public class HSqlDialect extends AnsiDialect {
     }
 
     private static String currentTimestamp(Scope scope) {
-        String offset = ZonedDateTime.now(scope.database().databaseTimeZone()).format(DateTimeFormatter.ISO_TIME).substring(12);
+        String offset = ZonedDateTime.now(scope.database().databaseTimeZone()).format(OFFSET_FORMATTER);
         return String.format("current_timestamp at time zone interval '%s' hour to minute", offset);
     }
 }

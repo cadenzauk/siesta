@@ -55,6 +55,7 @@ public class PostgresDialect extends AnsiDialect {
         DateFunctionSpecs.registerPlusNumber(functions());
         functions()
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, ArgumentlessFunctionSpec.of("localtimestamp"))
+            .register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"))
             .register(HOUR_DIFF, new FunctionSpec() {
                 @Override
                 public String sql(Scope scope, String[] argsSql) {
