@@ -36,10 +36,16 @@ import java.util.function.Function;
 public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
     private final SelectStatement<RT> statement;
     private final Function<SelectStatement<RT>,J> newJoinClause;
+    private boolean validate = true;
 
     protected InJoinExpectingOn(SelectStatement<RT> statement, Function<SelectStatement<RT>,J> newJoinClause) {
         this.statement = statement;
         this.newJoinClause = newJoinClause;
+    }
+
+    public InJoinExpectingOn<J,RT> validate(boolean validate) {
+        this.validate = validate;
+        return this;
     }
 
     public <T> ExpressionBuilder<T,J> on(TypedExpression<T> lhs) {
@@ -72,7 +78,7 @@ public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
 
     @SuppressWarnings("unchecked")
     private J setOnClause(BooleanExpression e) {
-        statement.from().on(e);
+        statement.from().on(e, validate);
         return newJoinClause.apply(statement);
     }
 }

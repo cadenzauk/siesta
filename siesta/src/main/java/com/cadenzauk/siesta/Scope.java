@@ -27,7 +27,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
@@ -100,6 +102,29 @@ public class Scope {
         return outer
             .map(Scope::newLabel)
             .orElseGet(labelCounter::incrementAndGet);
+    }
+
+    public Scope tracker(Alias<?> lookingFor, AtomicBoolean result) {
+        return new Scope(this, ImmutableList.of()) {
+
+            @Override
+            public <R> Alias<R> findAlias(Class<R> requiredRowClass, String requiredAlias) {
+                Alias<R> found = super.findAlias(requiredRowClass, requiredAlias);
+                if (Objects.equals(lookingFor, found)) {
+                    result.set(true);
+                }
+                return found;
+            }
+
+            @Override
+            public <R> Alias<R> findAlias(Class<R> requiredRowClass) {
+                Alias<R> found = super.findAlias(requiredRowClass);
+                if (Objects.equals(lookingFor, found)) {
+                    result.set(true);
+                }
+                return found;
+            }
+        };
     }
 
     public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {

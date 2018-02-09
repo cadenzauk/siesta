@@ -99,6 +99,7 @@ class AliasTest extends MockitoTest {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         when(widgetDescription.columnName()).thenReturn("D");
 
         TypedExpression<Long> col = sut.column(WidgetRow::widgetId);
@@ -113,6 +114,7 @@ class AliasTest extends MockitoTest {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
         when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
+        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         when(widgetRowId.columnName()).thenReturn("ROW_ID");
 
         TypedExpression<String> col = sut.column(WidgetRow::description);

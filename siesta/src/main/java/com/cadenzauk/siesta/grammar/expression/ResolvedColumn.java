@@ -48,6 +48,7 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
 
     @Override
     public String sql(Scope scope) {
+        scope.findAlias(alias.type().getRawType(), alias.aliasName().orElse(""));
         return alias.inSelectClauseSql(column.columnName());
     }
 

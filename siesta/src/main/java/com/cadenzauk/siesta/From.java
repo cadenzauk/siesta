@@ -22,9 +22,13 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
+import com.cadenzauk.siesta.grammar.InvalidJoinException;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
+import com.google.common.collect.ImmutableList;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public abstract class From {
@@ -32,11 +36,13 @@ public abstract class From {
 
     public abstract Stream<Object> args(Scope scope);
 
-    public abstract void on(BooleanExpression expression);
+    public abstract void on(BooleanExpression expression, boolean validate);
 
     public abstract void appendAnd(BooleanExpression expression);
 
     public abstract void appendOr(BooleanExpression expression);
+
+    public abstract void validate(boolean validate);
 
     private static class FromAlias extends From {
         private final Alias<?> alias;
@@ -58,7 +64,7 @@ public abstract class From {
         }
 
         @Override
-        public void on(BooleanExpression expression) {
+        public void on(BooleanExpression expression, boolean validate) {
         }
 
         @Override
@@ -68,6 +74,10 @@ public abstract class From {
         @Override
         public void appendOr(BooleanExpression expression) {
         }
+
+        @Override
+        public void validate(boolean validate) {
+        }
     }
 
     private static class FromJoin extends From {
@@ -75,6 +85,7 @@ public abstract class From {
         private final JoinType join;
         private final Alias<?> next;
         private final BooleanExpressionChain onClause = new BooleanExpressionChain();
+        private boolean validate;
 
         FromJoin(From lhs, JoinType join, Alias<?> next) {
             this.lhs = lhs;
@@ -84,11 +95,16 @@ public abstract class From {
 
         @Override
         public String sql(Scope scope) {
-            return String.format("%s %s %s on %s",
+            AtomicBoolean used = new AtomicBoolean(false);
+            String sql = String.format("%s %s %s on %s",
                 lhs.sql(scope),
                 join.sql(),
                 next.inWhereClause(),
-                onClause.sql(scope));
+                onClause.sql(scope.tracker(next, used)));
+            if (validate && !used.get()) {
+                throw new InvalidJoinException(next);
+            }
+            return sql;
         }
 
         @Override
@@ -97,7 +113,8 @@ public abstract class From {
         }
 
         @Override
-        public void on(BooleanExpression expression) {
+        public void on(BooleanExpression expression, boolean validate) {
+            this.validate = validate;
             onClause.start(expression);
         }
 
@@ -109,6 +126,11 @@ public abstract class From {
         @Override
         public void appendOr(BooleanExpression expression) {
             onClause.appendOr(expression);
+        }
+
+        @Override
+        public void validate(boolean validate) {
+            this.validate = validate;
         }
     }
 

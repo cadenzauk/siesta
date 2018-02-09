@@ -78,7 +78,7 @@ public class Alias<R> {
         return table.rowType().getRawType() == Dual.class;
     }
 
-    protected String inWhereClause() {
+    public String inWhereClause() {
         if (isDual()) {
             return table.database().dialect().dual();
         }
