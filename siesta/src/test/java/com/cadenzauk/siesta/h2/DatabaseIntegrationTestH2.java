@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
+import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
 
@@ -145,5 +146,46 @@ class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
         assertThat(result.item3(), is(retailPrice));
         assertThat(result.item4(), is("USD"));
         assertThat(result.item5(), is("NZD"));
+    }
+
+    @Test
+    void ormUpdate() {
+        Database database = testDatabase(dataSource);
+        SalespersonRow salespersonRow = aRandomSalesperson();
+        SalespersonRow updated = SalespersonRow.newBuilder(salespersonRow)
+            .numberOfSales(salespersonRow.numberOfSales() + 10)
+            .build();
+        database.insert(salespersonRow);
+
+        database.update(updated);
+
+        Integer valueInDatabase = database.from(SalespersonRow.class)
+            .select(SalespersonRow::numberOfSales)
+            .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
+            .single();
+
+        assertThat(valueInDatabase, is(updated.numberOfSales()));
+    }
+
+    @Test
+    void ormDelete() {
+        Database database = testDatabase(dataSource);
+        SalespersonRow salespersonRow = aRandomSalesperson();
+        database.insert(salespersonRow);
+
+        int count = countOf(database, salespersonRow);
+        assertThat(count, is(1));
+
+        database.delete(salespersonRow);
+
+        count = countOf(database, salespersonRow);
+        assertThat(count, is(0));
+    }
+
+    private Integer countOf(Database database, SalespersonRow salespersonRow) {
+        return database.from(SalespersonRow.class)
+            .select(count())
+            .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow.salespersonId())
+            .single();
     }
 }

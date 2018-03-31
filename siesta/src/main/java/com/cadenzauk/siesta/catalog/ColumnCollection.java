@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,25 +20,41 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.catalog;
 
+import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.Alias;
+import com.google.common.reflect.TypeToken;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-public interface SqlExecutor {
-    Dialect dialect();
+public interface ColumnCollection<R> {
+    TypeToken<R> rowType();
 
-    Transaction beginTransaction();
+    Stream<Column<?,R>> columns();
 
-    <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
+    <T> Column<T,R> column(MethodInfo<R,T> methodInfo);
 
-    <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper);
+    <T> ColumnCollection<T> embedded(MethodInfo<R,T> methodInfo);
 
-    int update(String sql, Object[] args);
+    RowMapper<R> rowMapper(Alias<?> alias);
 
-    default int update(String sql) {
-        return update(sql, new Object[0]);
+    default <T> Column<T,R> column(FunctionOptional1<R, T> getter) {
+        return column(MethodInfo.of(getter));
+    }
+
+    default  <T> Column<T,R> column(Function1<R,T> getter) {
+        return column(MethodInfo.of(getter));
+    }
+
+    default <T> ColumnCollection<T> embedded(Function1<R, T> getter) {
+        return embedded(MethodInfo.of(getter));
+    }
+
+    default <T> ColumnCollection<T> embedded(FunctionOptional1<R, T> getter) {
+        return embedded(MethodInfo.of(getter));
     }
 }

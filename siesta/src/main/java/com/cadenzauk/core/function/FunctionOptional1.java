@@ -27,4 +27,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface FunctionOptional1<T,U> extends Function<T,Optional<U>>, Serializable {
+    static <T,U> FunctionOptional1<T,U> of(FunctionOptional1<T,U> function) {
+        return function;
+    }
 }

@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
@@ -38,18 +39,25 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements TableColumn<T,R,B> {
+public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, ColumnCollection<T> {
     private final String propertyName;
     private final String columnName;
+    private final boolean identifier;
+    private final boolean insertable;
+    private final boolean updatable;
     private final Function<R,Optional<T>> getter;
-    private final BiConsumer<B,Optional<T>> setter;
+    private final BiConsumer<RB,Optional<T>> setter;
+    private final ColumnMapping<T,TB> columnMapping;
 
-    private EmbeddedColumn(Builder<T,R,B> builder) {
-        super(builder);
+    private EmbeddedColumn(Builder<T,TB,R,RB> builder) {
         propertyName = builder.propertyName;
+        identifier = builder.identifier;
+        insertable = builder.insertable;
+        updatable = builder.updatable;
         columnName = builder.columnName;
         getter = builder.getter;
         setter = builder.setter;
+        columnMapping = new ColumnMapping<>(builder);
     }
 
     @Override
@@ -60,6 +68,21 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
     @Override
     public String columnName() {
         return columnName;
+    }
+
+    @Override
+    public boolean identifier() {
+        return false;
+    }
+
+    @Override
+    public boolean insertable() {
+        return insertable;
+    }
+
+    @Override
+    public boolean updatable() {
+        return updatable && !identifier;
     }
 
     @Override
@@ -88,7 +111,79 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
             .collect(joining(", "));
     }
 
-    private String label(Alias<?> alias, Optional<String> label, TableColumn<?,T,T> c) {
+    @Override
+    public Stream<String> idSql(Alias<?> alias) {
+        return identifier
+            ? columns().map(c -> String.format("%s = ?", alias.inSelectClauseSql(c.columnName())))
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<Object> idArgs(Database database, R row) {
+        return identifier
+            ? columns().flatMap(c -> c.insertArgs(database, getter.apply(row)))
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> insertColumnSql() {
+        return insertable
+            ? columns().flatMap(Column::insertColumnSql)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> insertArgsSql() {
+        return insertable
+            ? columns().flatMap(Column::insertArgsSql)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<Object> insertArgs(Database database, Optional<R> row) {
+        return insertable
+            ? columns().flatMap(c -> c.insertArgs(database, row.flatMap(getter)))
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> updateSql() {
+        return updatable
+            ? columns().flatMap(Column::updateSql)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<Object> updateArgs(Database database, R row) {
+        return Stream.empty();
+    }
+
+    @Override
+    public TypeToken<T> rowType() {
+        return columnMapping.rowType();
+    }
+
+    @Override
+    public Stream<Column<?,T>> columns() {
+        return columnMapping.columns();
+    }
+
+    @Override
+    public <T1> Column<T1,T> column(MethodInfo<T,T1> methodInfo) {
+        return columnMapping.column(methodInfo);
+    }
+
+    @Override
+    public <T1> ColumnCollection<T1> embedded(MethodInfo<T,T1> methodInfo) {
+        return columnMapping.embedded(methodInfo);
+    }
+
+    @Override
+    public RowMapper<T> rowMapper(Alias<?> alias) {
+        return columnMapping.rowMapper(alias);
+    }
+
+    private String label(Alias<?> alias, Optional<String> label, Column<?,T> c) {
         NamingStrategy naming = alias.table().database().namingStrategy();
         return label.map(l -> naming.embeddedName(l, c.columnName()))
             .orElseGet(() -> alias.inSelectClauseLabel(c.columnName()));
@@ -96,7 +191,7 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
 
     @Override
     public RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label) {
-        return super.rowMapper(alias);
+        return columnMapping.rowMapper(alias);
     }
 
     @SuppressWarnings("unchecked")
@@ -114,25 +209,25 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
 
     @Override
     public <V> Optional<Column<V,T>> findColumn(TypeToken<V> type, String propertyName) {
-        return super.findColumn(type, propertyName);
+        return columnMapping.findColumn(type, propertyName);
     }
 
     @Override
     public Stream<Object> toDatabase(Database database, Optional<T> v) {
-        return toDatabase(v);
+        return columns().flatMap(c -> c.rowToDatabase(database, v));
     }
 
     @Override
-    public ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, Optional<String> label) {
+    public ResultSetValue<RB> extract(Alias<?> alias, ResultSet rs, Optional<String> label) {
         Optional<T> value = Optional.ofNullable(rowMapper(alias, label).mapRow(rs));
-        return new ResultSetValue<B>() {
+        return new ResultSetValue<RB>() {
             @Override
             public boolean isPresent() {
                 return value.isPresent();
             }
 
             @Override
-            public void apply(B builder) {
+            public void apply(RB builder) {
                 setter.accept(builder, value);
             }
         };
@@ -143,35 +238,62 @@ public class EmbeddedColumn<T, R, B> extends ColumnMapping<T,T> implements Table
         return prefix + columnName;
     }
 
-    static <T, R, B> Builder<T,R,B> mandatory(Database database, String name, TypeToken<T> rowType, Function1<R,T> getter, BiConsumer<B,T> setter) {
-        return new Builder<>(database, name, rowType, r -> Optional.ofNullable(getter.apply(r)), (b, v) -> setter.accept(b, v.orElse(null)));
+    static <T, R, B> Builder<T,T,R,B> mandatory(Database database, String name, TypeToken<T> rowType, Function1<R,T> getter, BiConsumer<B,T> setter) {
+        return new Builder<>(database, name, rowType, rowType, r -> Optional.ofNullable(getter.apply(r)), (b, v) -> setter.accept(b, v.orElse(null)), Function.identity());
     }
 
-    static <T, R, B> Builder<T,R,B> optional(Database database, String name, TypeToken<T> rowType, FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter) {
-        return new Builder<>(database, name, rowType, getter, setter);
+    static <T, R, B> Builder<T,T,R,B> optional(Database database, String name, TypeToken<T> rowType, FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter) {
+        return new Builder<>(database, name, rowType, rowType, getter, setter, Function.identity());
     }
 
-    public static final class Builder<T, R, B> extends ColumnMapping.Builder<T,T,Builder<T,R,B>> {
+    public static final class Builder<T, TB, R, RB> extends ColumnMapping.Builder<T,TB,Builder<T,TB,R,RB>> {
         private final String propertyName;
         private final Function<R,Optional<T>> getter;
-        private final BiConsumer<B,Optional<T>> setter;
+        private final BiConsumer<RB,Optional<T>> setter;
+        private boolean identifier = false;
+        private boolean insertable = true;
+        private boolean updatable = true;
         private String columnName;
 
-        private Builder(Database database, String propertyName, TypeToken<T> rowType, Function<R,Optional<T>> getter, BiConsumer<B,Optional<T>> setter) {
-            super(database, rowType, rowType, Function.identity());
+        private Builder(Database database, String propertyName, TypeToken<T> rowType, TypeToken<TB> builderType, Function<R,Optional<T>> getter, BiConsumer<RB,Optional<T>> setter, Function<TB,T> buildRow) {
+            super(database, rowType, builderType, buildRow);
             this.propertyName = propertyName;
             this.getter = getter;
             this.setter = setter;
             columnName(database.namingStrategy().columnName(propertyName));
         }
 
-        public Builder<T,R,B> columnName(String columnName) {
+        public <BB> Builder<T,BB,R,RB> builder(Function1<BB,T> buildRow) {
+            MethodInfo<BB,T> buildMethod = MethodInfo.of(buildRow);
+            return new Builder<>(database, propertyName, rowType, buildMethod.declaringType(), getter, setter, buildRow)
+                .identifier(identifier)
+                .insertable(insertable)
+                .updatable(updatable)
+                .columnName(columnName);
+        }
+
+        public Builder<T,TB,R,RB> identifier(boolean val) {
+            this.identifier = val;
+            return this;
+        }
+
+        public Builder<T,TB,R,RB> insertable(boolean val) {
+            this.insertable = val;
+            return this;
+        }
+
+        public Builder<T,TB,R,RB> updatable(boolean val) {
+            this.updatable = val;
+            return this;
+        }
+
+        public Builder<T,TB,R,RB> columnName(String columnName) {
             this.columnName = columnName;
             childPrefix(Optional.of(columnName));
             return this;
         }
 
-        public EmbeddedColumn<T,R,B> build() {
+        public EmbeddedColumn<T,TB,R,RB> build() {
             finish();
             return new EmbeddedColumn<>(this);
         }

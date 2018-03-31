@@ -25,6 +25,7 @@ package com.cadenzauk.core.stream;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
@@ -39,6 +40,10 @@ import java.util.stream.StreamSupport;
 public final class StreamUtil extends UtilityClass {
     public static <T> Stream<T> ofNullable(T value) {
         return value == null ? Stream.empty() : Stream.of(value);
+    }
+
+    public static <T extends CharSequence> Stream<T> ofBlankable(T value) {
+        return StringUtils.isBlank(value) ? Stream.empty() : Stream.of(value);
     }
 
     public static <T> Stream<T> of(Optional<T> opt) {

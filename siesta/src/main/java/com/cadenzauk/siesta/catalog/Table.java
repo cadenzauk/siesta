@@ -27,26 +27,23 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.stream.StreamUtil;
-import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class Table<R> {
+public class Table<R> implements ColumnCollection<R> {
     private static final Logger LOG = LoggerFactory.getLogger(Table.class);
     private final Database database;
     private final TypeToken<R> rowType;
@@ -64,10 +61,6 @@ public class Table<R> {
         columnMapping = new ColumnMapping<>(builder);
     }
 
-    public TypeToken<R> rowType() {
-        return rowType;
-    }
-
     public Database database() {
         return database;
     }
@@ -80,14 +73,27 @@ public class Table<R> {
         return tableName;
     }
 
+    @Override
+    public TypeToken<R> rowType() {
+        return rowType;
+    }
+
+    @Override
     public Stream<Column<?,R>> columns() {
-        return columnMapping.columns().map(Function.identity());
+        return columnMapping.columns();
     }
 
-    public Stream<Object> toDatabase(Optional<R> r) {
-        return columnMapping.toDatabase(r);
+    @Override
+    public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
+        return columnMapping.column(methodInfo);
     }
 
+    @Override
+    public <T> ColumnCollection<T> embedded(MethodInfo<R,T> methodInfo) {
+        return columnMapping.embedded(methodInfo);
+    }
+
+    @Override
     public RowMapper<R> rowMapper(Alias<?> alias) {
         return columnMapping.rowMapper(alias);
     }
@@ -97,7 +103,7 @@ public class Table<R> {
     }
 
     public String qualifiedName() {
-        return database.dialect().qualifiedName(catalog, schema, tableName());
+        return database.dialect().qualifiedName(catalog, schema, tableName);
     }
 
     public Alias<R> as(String alias) {
@@ -124,10 +130,40 @@ public class Table<R> {
         }
     }
 
-    public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
-        String propertyName = methodInfo.propertyName();
-        return findColumn(methodInfo.effectiveType(), propertyName)
-            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + qualifiedName()));
+    public int update(SqlExecutor sqlExecutor, R row) {
+        if (row == null) {
+            return 0;
+        }
+        String sql = updateSql();
+        Object[] args = columnMapping.updateArgs(row);
+        return database.execute(sql, () -> sqlExecutor.update(sql, args));
+    }
+
+    public int update(Transaction transaction, R row) {
+        if (row == null) {
+            return 0;
+        }
+        String sql = updateSql();
+        Object[] args = columnMapping.updateArgs(row);
+        return database.execute(sql, () -> transaction.update(sql, args));
+    }
+
+    public int delete(SqlExecutor sqlExecutor, R row) {
+        if (row == null) {
+            return 0;
+        }
+        String sql = deleteSql();
+        Object[] args = columnMapping.deleteArgs(row);
+        return database.execute(sql, () -> sqlExecutor.update(sql, args));
+    }
+
+    public int delete(Transaction transaction, R row) {
+        if (row == null) {
+            return 0;
+        }
+        String sql = deleteSql();
+        Object[] args = columnMapping.deleteArgs(row);
+        return database.execute(sql, () -> transaction.update(sql, args));
     }
 
     @SuppressWarnings("unchecked")
@@ -136,8 +172,8 @@ public class Table<R> {
         if (rows.length == 0) {
             return 0;
         }
-        String sql = sql(rows);
-        Object[] args = columnMapping.args(rows);
+        String sql = insertSql(rows);
+        Object[] args = columnMapping.insertArgs(rows);
         return database.execute(sql, () -> sqlExecutor.update(sql, args));
     }
 
@@ -147,30 +183,39 @@ public class Table<R> {
         if (rows.length == 0) {
             return 0;
         }
-        String sql = sql(rows);
-        Object[] args = columnMapping.args(rows);
+        String sql = insertSql(rows);
+        Object[] args = columnMapping.insertArgs(rows);
         return database.execute(sql, () -> transaction.update(sql, args));
     }
 
-    private String sql(R[] rows) {
+    private String insertSql(R[] rows) {
         String sql = String.format("insert into %s (%s) values %s",
             qualifiedName(),
-            columns().map(Column::sql).collect(joining(", ")),
+            columns().flatMap(Column::insertColumnSql).collect(joining(", ")),
             IntStream.range(0, rows.length)
-                .mapToObj(i -> "(" + IntStream.range(0, columns().mapToInt(Column::count).sum()).mapToObj(j -> "?").collect(joining(", ")) + ")")
+                .mapToObj(i -> "(" + columns().flatMap(Column::insertArgsSql).collect(joining(", ")) + ")")
                 .collect(joining(", ")));
         LOG.debug(sql);
         return sql;
     }
 
-    private <T> Optional<Column<T,R>> findColumn(TypeToken<T> dataType, String propertyName) {
-        return columnsOfType(dataType)
-            .filter(c -> StringUtils.equals(c.propertyName(), propertyName))
-            .findFirst();
+    private String updateSql() {
+        Alias<R> alias = Alias.of(this);
+        String sql = String.format("update %s set %s where %s",
+            qualifiedName(),
+            columns().flatMap(Column::updateSql).collect(joining(", ")),
+            columns().flatMap(c -> c.idSql(alias)).collect(joining(" and ")));
+        LOG.debug(sql);
+        return sql;
     }
 
-    private <T> Stream<Column<T,R>> columnsOfType(TypeToken<T> dataType) {
-        return columns().flatMap(c -> c.as(dataType));
+    private String deleteSql() {
+        Alias<R> alias = Alias.of(this);
+        String sql = String.format("delete from %s where %s",
+            qualifiedName(),
+            columns().flatMap(c -> c.idSql(alias)).collect(joining(" and ")));
+        LOG.debug(sql);
+        return sql;
     }
 
     public static final class Builder<R, B> extends ColumnMapping.Builder<R, B, Builder<R, B>> {
@@ -185,21 +230,20 @@ public class Table<R> {
             this.database = database;
             this.rowType = rowType;
 
-            Optional<javax.persistence.Table> tableAnnotation = ClassUtil.superclasses(rowType.getRawType())
-                .map(cls -> ClassUtil.annotation(cls, javax.persistence.Table.class))
-                .flatMap(StreamUtil::of)
-                .findFirst();
-            this.catalog = tableAnnotation
+            this.catalog = tableAnnotations(rowType)
                 .map(javax.persistence.Table::catalog)
-                .flatMap(OptionalUtil::ofBlankable)
+                .flatMap(StreamUtil::ofBlankable)
+                .findFirst()
                 .orElse(database.defaultCatalog());
-            this.schema = tableAnnotation
+            this.schema = tableAnnotations(rowType)
                 .map(javax.persistence.Table::schema)
-                .flatMap(OptionalUtil::ofBlankable)
+                .flatMap(StreamUtil::ofBlankable)
+                .findFirst()
                 .orElse(database.defaultSchema());
-            this.tableName = tableAnnotation
+            this.tableName = tableAnnotations(rowType)
                 .map(javax.persistence.Table::name)
-                .flatMap(OptionalUtil::ofBlankable)
+                .flatMap(StreamUtil::ofBlankable)
+                .findFirst()
                 .orElseGet(() -> database.namingStrategy().tableName(rowType.getRawType().getSimpleName()));
         }
 
@@ -231,5 +275,10 @@ public class Table<R> {
                 .tableName(tableName);
         }
 
+        private static <R> Stream<javax.persistence.Table> tableAnnotations(TypeToken<R> rowType) {
+            return ClassUtil.superclasses(rowType.getRawType())
+                .map(cls -> ClassUtil.annotation(cls, javax.persistence.Table.class))
+                .flatMap(StreamUtil::of);
+        }
     }
 }

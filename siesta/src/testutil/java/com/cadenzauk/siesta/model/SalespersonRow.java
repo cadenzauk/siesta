@@ -22,12 +22,14 @@
 
 package com.cadenzauk.siesta.model;
 
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Optional;
 
 @Table(name = "SALESPERSON", schema = "SIESTA")
 public class SalespersonRow {
+    @Id
     private final long salespersonId;
     private final String firstName;
     private final Optional<String> middleNames;
@@ -70,6 +72,17 @@ public class SalespersonRow {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static Builder newBuilder(SalespersonRow copy) {
+        Builder builder = new Builder();
+        builder.salespersonId = copy.salespersonId();
+        builder.firstName = copy.firstName();
+        builder.middleNames = copy.middleNames();
+        builder.surname = copy.surname();
+        builder.numberOfSales = copy.numberOfSales();
+        builder.commission = copy.commission();
+        return builder;
     }
 
     public static final class Builder {

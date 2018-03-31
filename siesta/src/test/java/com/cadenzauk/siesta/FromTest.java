@@ -46,7 +46,6 @@ class FromTest {
 
             .shouldThrow(InvalidJoinException.class)
             .withMessage(is("Joined table 'SIESTA.MANUFACTURER m' is not referenced in the ON clause."));
-
     }
 
     @Test

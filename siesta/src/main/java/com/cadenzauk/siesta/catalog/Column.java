@@ -36,6 +36,12 @@ public interface Column<T, R> {
 
     String columnName();
 
+    boolean identifier();
+
+    boolean insertable();
+
+    boolean updatable();
+
     int count();
 
     String sql();
@@ -43,6 +49,20 @@ public interface Column<T, R> {
     String sql(Alias<?> alias);
 
     String sqlWithLabel(Alias<?> alias, Optional<String> label);
+
+    Stream<String> idSql(Alias<?> alias);
+
+    Stream<Object> idArgs(Database database, R row);
+
+    Stream<String> insertColumnSql();
+
+    Stream<String> insertArgsSql();
+
+    Stream<Object> insertArgs(Database database, Optional<R> row);
+
+    Stream<String> updateSql();
+
+    Stream<Object> updateArgs(Database database, R row);
 
     RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label);
 

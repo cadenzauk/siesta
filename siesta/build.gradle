@@ -63,7 +63,7 @@ dependencies {
 
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.196'
     testCompile group: 'org.hsqldb', name: 'hsqldb', version:'[2,)'
-    testCompile 'co.unruly:java-8-matchers:1.5'
+    testCompile group: 'co.unruly', name: 'java-8-matchers', version: '1.5'
 }
 
 task testutilJar(type: Jar) {

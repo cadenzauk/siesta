@@ -22,7 +22,9 @@
 
 package com.cadenzauk.siesta.model;
 
+import javax.persistence.Column;
 import javax.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @Table(name = "SALES_AREA")
@@ -31,6 +33,8 @@ public class SalesAreaRow {
     private final String salesAreaName;
     private Optional<Long> salespersonId;
     private Optional<Long> salesCount;
+    @Column(insertable = false, updatable = false)
+    private Optional<ZonedDateTime> insertTime;
 
     protected SalesAreaRow(Builder builder) {
         salesAreaId = builder.salesAreaId;

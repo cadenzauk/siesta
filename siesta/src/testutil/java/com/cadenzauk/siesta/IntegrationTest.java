@@ -72,7 +72,7 @@ public abstract class IntegrationTest {
         return Tuple.of(lowerBound + 1, upperBound);
     }
 
-    protected SalespersonRow aRandomSalesperson() {
+    public static SalespersonRow aRandomSalesperson() {
         return SalespersonRow.newBuilder()
             .salespersonId(newId())
             .firstName(RandomStringUtils.randomAlphabetic(3, 12))

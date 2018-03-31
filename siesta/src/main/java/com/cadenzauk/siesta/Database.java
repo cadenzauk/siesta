@@ -162,14 +162,6 @@ public class Database {
         return table(rowType, Function.identity());
     }
 
-    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what) {
-        return from(Dual.class).select(what);
-    }
-
-    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what, String label) {
-        return from(Dual.class).select(what, label);
-    }
-
     public ZoneId databaseTimeZone() {
         return databaseTimeZone;
     }
@@ -282,6 +274,38 @@ public class Database {
         return getDefaultSqlExecutor().beginTransaction();
     }
 
+    public CommonTableExpressionBuilder with(String name) {
+        return new CommonTableExpressionBuilder(this, name);
+    }
+
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what) {
+        return from(Dual.class).select(what);
+    }
+
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> what, String label) {
+        return from(Dual.class).select(what, label);
+    }
+
+    public <R> ExpectingJoin1<R> from(Class<R> rowClass) {
+        return Select.from(this, table(rowClass));
+    }
+
+    public <R> ExpectingJoin1<R> from(Alias<R> alias) {
+        return Select.from(this, alias);
+    }
+
+    public <R> ExpectingJoin1<R> from(CommonTableExpression<R> cte, String aliasName) {
+        return Select.from(this, cte, aliasName);
+    }
+
+    public <R> ExpectingJoin1<R> from(CommonTableExpression<R> cte) {
+        return Select.from(this, cte);
+    }
+
+    public <R> ExpectingJoin1<R> from(Class<R> rowClass, String alias) {
+        return Select.from(this, table(rowClass).as(alias));
+    }
+
     @SuppressWarnings("unchecked")
     public <R> int insert(R... rows) {
         return insert(getDefaultSqlExecutor(), rows);
@@ -305,30 +329,6 @@ public class Database {
         return table(rowClass).insert(transaction, rows);
     }
 
-    public CommonTableExpressionBuilder with(String name) {
-        return new CommonTableExpressionBuilder(this, name);
-    }
-
-    public <R> ExpectingJoin1<R> from(Class<R> rowClass) {
-        return Select.from(this, table(rowClass));
-    }
-
-    public <R> ExpectingJoin1<R> from(Alias<R> alias) {
-        return Select.from(this, alias);
-    }
-
-    public <R> ExpectingJoin1<R> from(CommonTableExpression<R> cte, String aliasName) {
-        return Select.from(this, cte, aliasName);
-    }
-
-    public <R> ExpectingJoin1<R> from(CommonTableExpression<R> cte) {
-        return Select.from(this, cte);
-    }
-
-    public <R> ExpectingJoin1<R> from(Class<R> rowClass, String alias) {
-        return Select.from(this, table(rowClass).as(alias));
-    }
-
     public <U> InSetExpectingWhere<U> update(Alias<U> alias) {
         return Update.update(this, alias);
     }
@@ -341,6 +341,22 @@ public class Database {
         return Update.update(this, table(rowClass).as(alias));
     }
 
+    public <R> int update(R row) {
+        return update(getDefaultSqlExecutor(), row);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int update(SqlExecutor sqlExecutor, R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        return table(rowClass).update(sqlExecutor, row);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int update(Transaction transaction, R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        return table(rowClass).update(transaction, row);
+    }
+
     public <D> ExpectingWhere delete(Alias<D> alias) {
         return Delete.delete(this, alias);
     }
@@ -351,6 +367,22 @@ public class Database {
 
     public <D> ExpectingWhere delete(Class<D> rowClass, String alias) {
         return Delete.delete(this, table(rowClass).as(alias));
+    }
+
+    public <R> int delete(R row) {
+        return delete(getDefaultSqlExecutor(), row);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int delete(SqlExecutor sqlExecutor, R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        return table(rowClass).delete(sqlExecutor, row);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int delete(Transaction transaction, R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        return table(rowClass).delete(transaction, row);
     }
 
     public static Builder newBuilder() {

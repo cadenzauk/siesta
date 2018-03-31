@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.Lazy;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.annotation.Annotation;
@@ -41,6 +42,7 @@ public class MethodInfo<C, R> {
     private final Method method;
     private final Class<?> actualType;
     private final Class<R> effectiveType;
+    private final Lazy<Optional<FieldInfo<C,?>>> field = new Lazy<>(this::findField);
 
     private MethodInfo(TypeToken<C> declaringType, Method method, Class<?> actualType, Class<R> effectiveType) {
         this.declaringType = declaringType;
@@ -75,12 +77,7 @@ public class MethodInfo<C, R> {
     }
 
     public Optional<FieldInfo<C, ?>> field() {
-        return Getter.possibleFieldNames(method.getName())
-            .map(name -> ClassUtil.findField(declaringType.getRawType(), name))
-            .flatMap(StreamUtil::of)
-            .filter(f -> actualType.isAssignableFrom(f.getType()))
-            .findFirst()
-            .map(field -> FieldInfo.of(declaringType, field, actualType));
+        return field.get();
     }
 
     public String propertyName() {
@@ -91,6 +88,15 @@ public class MethodInfo<C, R> {
 
     public <A extends Annotation> Optional<A> annotation(Class<A> annotationClass) {
         return Optional.ofNullable(method.getAnnotation(annotationClass));
+    }
+
+    private Optional<FieldInfo<C, ?>> findField() {
+        return Getter.possibleFieldNames(method.getName())
+            .map(name -> ClassUtil.findField(declaringType.getRawType(), name))
+            .flatMap(StreamUtil::of)
+            .filter(f -> actualType.isAssignableFrom(f.getType()))
+            .findFirst()
+            .map(field -> FieldInfo.of(declaringType, field, actualType));
     }
 
     public static <R, T> Optional<MethodInfo<R,T>> findGetterForField(FieldInfo<R,T> fieldInfo) {

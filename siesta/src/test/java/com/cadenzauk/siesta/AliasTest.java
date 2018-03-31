@@ -34,6 +34,7 @@ import com.google.common.reflect.TypeToken;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.List;
 
@@ -98,7 +99,7 @@ class AliasTest extends MockitoTest {
     void col()  {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
-        when(widgetTable.<String>column(any())).thenReturn(widgetDescription);
+        when(widgetTable.column(Mockito.<MethodInfo<WidgetRow,String>>any())).thenReturn(widgetDescription);
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         when(widgetDescription.columnName()).thenReturn("D");
 
@@ -113,7 +114,7 @@ class AliasTest extends MockitoTest {
     void colOptional()  {
         Alias<WidgetRow> sut = Alias.of(widgetTable, "fred");
         Scope scope = mock(Scope.class);
-        when(widgetTable.<Long>column(any())).thenReturn(widgetRowId);
+        when(widgetTable.column(Mockito.<MethodInfo<WidgetRow,Long>>any())).thenReturn(widgetRowId);
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         when(widgetRowId.columnName()).thenReturn("ROW_ID");
 

@@ -22,9 +22,6 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.reflect.FieldInfo;
-import com.cadenzauk.core.reflect.Setter;
-import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
@@ -32,7 +29,6 @@ import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.google.common.reflect.TypeToken;
 
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -43,6 +39,9 @@ import java.util.stream.Stream;
 public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     private final String propertyName;
     private final String columnName;
+    private final boolean identifier;
+    private final boolean insertable;
+    private final boolean updatable;
     private final DataType<T> dataType;
     private final Function<R,Optional<T>> getter;
     private final BiConsumer<B,Optional<T>> setter;
@@ -50,6 +49,9 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     private PrimitiveColumn(Builder<T,R,B> builder) {
         propertyName = builder.propertyName;
         columnName = builder.columnName;
+        identifier = builder.identifier;
+        insertable = builder.insertable;
+        updatable = builder.updatable;
         dataType = builder.dataType;
         getter = builder.getter;
         setter = builder.setter;
@@ -81,6 +83,21 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
+    public boolean identifier() {
+        return identifier;
+    }
+
+    @Override
+    public boolean insertable() {
+        return insertable;
+    }
+
+    @Override
+    public boolean updatable() {
+        return updatable && !identifier;
+    }
+
+    @Override
     public int count() {
         return 1;
     }
@@ -101,6 +118,55 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
+    public Stream<String> idSql(Alias<?> alias) {
+        return identifier
+            ? Stream.of(sql(alias) + " = ?")
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<Object> idArgs(Database database, R row) {
+        return identifier
+            ? rowToDatabase(database, Optional.of(row))
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> insertColumnSql() {
+        return insertable
+            ? Stream.of(sql())
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> insertArgsSql() {
+        return insertable
+            ? Stream.of("?")
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<Object> insertArgs(Database database, Optional<R> row) {
+        return insertable
+            ? rowToDatabase(database, row)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> updateSql() {
+        return updatable && ! identifier
+            ? Stream.of(sql() + " = ?")
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<Object> updateArgs(Database database, R row) {
+        return updatable && ! identifier
+            ? rowToDatabase(database, Optional.of(row))
+            : Stream.empty();
+    }
+
+    @Override
     public RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label) {
         return rs -> dataType.get(rs, label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.table().database()).orElse(null);
     }
@@ -108,7 +174,9 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     @SuppressWarnings("unchecked")
     @Override
     public <U> Stream<Column<U,R>> as(TypeToken<U> requiredDataType) {
-        return TypeUtil.boxedType(requiredDataType.getRawType()).isAssignableFrom(TypeUtil.boxedType(dataType.javaClass()))
+        Class<? super U> requiredBoxed = TypeUtil.boxedType(requiredDataType.getRawType());
+        Class<T> boxedDatatype = TypeUtil.boxedType(dataType.javaClass());
+        return requiredBoxed.isAssignableFrom(boxedDatatype)
             ? Stream.of((Column<U,R>) this)
             : Stream.empty();
     }
@@ -134,21 +202,6 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
         return prefix + columnName;
     }
 
-    public static <T, R, B> PrimitiveColumn<T,R,B> fromField(Database database, TypeToken<B> builderType, FieldInfo<R,T> fieldInfo) {
-        DataType<T> dataType = database
-            .dataTypeOf(fieldInfo).orElseThrow(() -> new IllegalArgumentException("Unable to determine the data type for " + fieldInfo));
-        Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
-            .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
-        String columnName = database.columnNameFor(fieldInfo);
-        return optional(
-            database,
-            fieldInfo.name(),
-            dataType,
-            fieldInfo.optionalGetter(),
-            Setter.forField(builderType, fieldInfo.effectiveClass(), builderField)
-        ).columnName(columnName).build();
-    }
-
     static <T, R, B> Builder<T,R,B> mandatory(Database database, String fieldName, DataType<T> dataType, Function<R,T> getter, BiConsumer<B,T> setter) {
         return new Builder<>(database, fieldName, dataType, row -> Optional.ofNullable(getter.apply(row)), (b, v) -> setter.accept(b, v.orElseThrow(NoSuchElementException::new)));
     }
@@ -160,6 +213,9 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     public static final class Builder<T, R, B> {
         private final String propertyName;
         private String columnName;
+        private boolean identifier = false;
+        private boolean insertable = true;
+        private boolean updatable = true;
         private final DataType<T> dataType;
         private final Function<R,Optional<T>> getter;
         private final BiConsumer<B,Optional<T>> setter;
@@ -174,6 +230,21 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
 
         public Builder<T,R,B> columnName(String val) {
             columnName = val;
+            return this;
+        }
+
+        public Builder<T,R,B> identifier(boolean val) {
+            identifier = val;
+            return this;
+        }
+
+        public Builder<T,R,B> insertable(boolean val) {
+            insertable = val;
+            return this;
+        }
+
+        public Builder<T,R,B> updatable(boolean val) {
+            updatable = val;
             return this;
         }
 

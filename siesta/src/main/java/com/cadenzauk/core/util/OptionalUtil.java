@@ -58,7 +58,7 @@ public final class OptionalUtil extends UtilityClass {
         }
     }
 
-    public static Optional<String> ofBlankable(String s) {
+    public static <T extends CharSequence> Optional<T> ofBlankable(T s) {
         return StringUtils.isBlank(s) ? Optional.empty() : Optional.of(s);
     }
 

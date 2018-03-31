@@ -32,6 +32,7 @@ import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
@@ -44,6 +45,8 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.lang.reflect.Field;
@@ -66,7 +69,7 @@ import static com.cadenzauk.core.reflect.util.ClassUtil.hasAnnotation;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
-public class ColumnMapping<R, B> {
+public class ColumnMapping<R, B> implements ColumnCollection<R> {
     private final Database database;
     private final TypeToken<R> rowType;
     private final Supplier<B> newRowBuilder;
@@ -81,15 +84,32 @@ public class ColumnMapping<R, B> {
         columns = builder.columns;
     }
 
-    TypeToken<R> rowType() {
+    @Override
+    public TypeToken<R> rowType() {
         return rowType;
     }
 
-    Stream<TableColumn<?,R,B>> columns() {
-        return columns.stream();
+    @Override
+    public Stream<Column<?,R>> columns() {
+        return columns.stream().map(Function.identity());
     }
 
-    RowMapper<R> rowMapper(Alias<?> alias) {
+    @Override
+    public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
+        String propertyName = methodInfo.propertyName();
+        return findColumn(methodInfo.effectiveType(), propertyName)
+            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + methodInfo.declaringClass()));
+    }
+
+    @Override
+    public <T> ColumnCollection<T> embedded(MethodInfo<R,T> methodInfo) {
+        String propertyName = methodInfo.propertyName();
+        return OptionalUtil.as(new TypeToken<ColumnCollection<T>>() {}, column(methodInfo))
+            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + methodInfo.declaringClass()));
+    }
+
+    @Override
+    public RowMapper<R> rowMapper(Alias<?> alias) {
         return rs -> {
             List<TableColumn.ResultSetValue<B>> values = columns.stream()
                 .map(c -> c.extract(alias, rs, Optional.empty()))
@@ -122,17 +142,25 @@ public class ColumnMapping<R, B> {
         };
     }
 
-    Object[] args(R[] rows) {
+    Object[] insertArgs(R[] rows) {
         return Arrays.stream(rows)
             .map(Optional::ofNullable)
-            .flatMap(this::toDatabase)
+            .flatMap(r -> columns().flatMap(c -> c.insertArgs(database, r)))
             .toArray();
     }
 
-    Stream<Object> toDatabase(Optional<R> row) {
-        return columns
-            .stream()
-            .flatMap(c -> c.rowToDatabase(database, row));
+    Object[] updateArgs(R row) {
+        return StreamUtil.ofNullable(row)
+            .flatMap(r -> Stream.concat(
+                columns().flatMap(c -> c.updateArgs(database, r)),
+                columns().flatMap(c -> c.idArgs(database, r))))
+            .toArray();
+    }
+
+    Object[] deleteArgs(R row) {
+        return StreamUtil.ofNullable(row)
+            .flatMap(r -> columns().flatMap(c -> c.idArgs(database, r)))
+            .toArray();
     }
 
     <T> Optional<Column<T,R>> findColumn(TypeToken<T> type, String propertyName) {
@@ -153,8 +181,8 @@ public class ColumnMapping<R, B> {
 
     public static class Builder<R, B, S extends Builder<R,B,S>> {
         private final Set<String> excludedFields = new HashSet<>();
-        private final Database database;
-        private final TypeToken<R> rowType;
+        protected final Database database;
+        protected final TypeToken<R> rowType;
         private final TypeToken<B> builderType;
         private final Function<B,R> buildRow;
         private final List<TableColumn<?,R,B>> columns = new ArrayList<>();
@@ -198,7 +226,9 @@ public class ColumnMapping<R, B> {
         @SuppressWarnings("unchecked")
         private void addField(Field field) {
             FieldInfo<R,Object> fieldInfo = (FieldInfo<R,Object>) FieldInfo.of(rowType, field);
-            if (fieldInfo.hasAnnotation(Embedded.class) || ClassUtil.hasAnnotation(fieldInfo.effectiveClass(), Embeddable.class)) {
+            if (fieldInfo.hasAnnotation(Embedded.class)
+                || fieldInfo.hasAnnotation(EmbeddedId.class)
+                || ClassUtil.hasAnnotation(fieldInfo.effectiveClass(), Embeddable.class)) {
                 addEmbedded(fieldInfo);
             } else {
                 addPrimitive(fieldInfo);
@@ -226,12 +256,24 @@ public class ColumnMapping<R, B> {
             return column(getter, setter, c -> c.columnName(name));
         }
 
-        public <T> S column(Function1<R,T> getter, BiConsumer<B,T> setter) {
-            return mandatory(getter, setter, Optional.empty());
+        public <T> S column(Function1<R,T> getter, Consumer<PrimitiveColumn.Builder<?,R,B>> init) {
+            BiConsumer<B,T> setter = setter(getter);
+            return mandatory(getter, setter, Optional.of(init::accept));
         }
 
-        public <T> S column(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter) {
-            return optional(getter, setter, Optional.empty());
+        public <T> S column(FunctionOptional1<R,T> getter, Consumer<PrimitiveColumn.Builder<?,R,B>> init) {
+            BiConsumer<B,Optional<T>> setter = setter(getter);
+            return optional(getter, setter, Optional.of(init::accept));
+        }
+
+        public <T> S column(@SuppressWarnings("unused") Class<T> type, Function1<R,T> getter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
+            BiConsumer<B,T> setter = setter(getter);
+            return mandatory(getter, setter, Optional.of(init));
+        }
+
+        public <T> S column(@SuppressWarnings("unused") Class<T> type, FunctionOptional1<R,T> getter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
+            BiConsumer<B,Optional<T>> setter = setter(getter);
+            return optional(getter, setter, Optional.of(init));
         }
 
         public <T> S column(Function1<R,T> getter, BiConsumer<B,T> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
@@ -244,22 +286,22 @@ public class ColumnMapping<R, B> {
 
         public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, Function1<R,T> getter) {
             BiConsumer<B,T> setter = setter(getter);
-            return embedded(getter, setter, Optional.empty());
+            return embedded(getter, setter, Function.identity());
         }
 
         public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, FunctionOptional1<R,T> getter) {
             BiConsumer<B,Optional<T>> setter = setter(getter);
-            return embedded(getter, setter, Optional.empty());
+            return embedded(getter, setter, Function.identity());
         }
 
-        public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, Function1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
+        public <T, TB> S embedded(@SuppressWarnings("unused") Class<T> klass, Function1<R,T> getter, Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init) {
             BiConsumer<B,T> setter = setter(getter);
-            return embedded(getter, setter, Optional.of(init));
+            return embedded(getter, setter, init);
         }
 
-        public <T> S embedded(@SuppressWarnings("unused") Class<T> klass, FunctionOptional1<R,T> getter, Consumer<EmbeddedColumn.Builder<T,R,B>> init) {
+        public <T, TB> S embedded(@SuppressWarnings("unused") Class<T> klass, FunctionOptional1<R,T> getter, Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init) {
             BiConsumer<B,Optional<T>> setter = setter(getter);
-            return embedded(getter, setter, Optional.of(init));
+            return embedded(getter, setter, init);
         }
 
         S overrides(Map<String,List<AttributeOverride>> overrides) {
@@ -268,11 +310,23 @@ public class ColumnMapping<R, B> {
         }
 
         private Optional<String> overrideColumnName(String propertyName) {
+            return override(propertyName, javax.persistence.Column::name).filter(StringUtils::isNotBlank);
+        }
+
+        private Optional<Boolean> overrideInsertable(String propertyName) {
+            return override(propertyName, javax.persistence.Column::insertable);
+        }
+
+        private Optional<Boolean> overrideUpdatable(String propertyName) {
+            return override(propertyName, javax.persistence.Column::updatable);
+        }
+
+        private <T> Optional<T> override(String propertyName, Function<javax.persistence.Column,T> function) {
             return Optional.ofNullable(overrides.get(propertyName))
                 .flatMap(o -> o.stream()
                     .findFirst()
                     .map(AttributeOverride::column)
-                    .map(javax.persistence.Column::name));
+                    .map(function));
         }
 
         private <T> String determineColumnNameFor(MethodInfo<R,T> getterInfo) {
@@ -295,11 +349,29 @@ public class ColumnMapping<R, B> {
                 });
         }
 
+        private <T> boolean determineInsertableFor(FieldInfo<R,T> fieldInfo) {
+            return overrideInsertable(fieldInfo.name())
+                .orElseGet(() -> {
+                    Optional<javax.persistence.Column> annotation = fieldInfo.annotation(javax.persistence.Column.class);
+                    return annotation.map(javax.persistence.Column::insertable)
+                        .orElse(true);
+                });
+        }
+
+        private <T> boolean determineUpdateableFor(FieldInfo<R,T> fieldInfo) {
+            return overrideUpdatable(fieldInfo.name())
+                .orElseGet(() -> {
+                    Optional<javax.persistence.Column> annotation = fieldInfo.annotation(javax.persistence.Column.class);
+                    return annotation.map(javax.persistence.Column::updatable)
+                        .orElse(true);
+                });
+        }
+
         private <T> void setColumnName(PrimitiveColumn.Builder<T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
             columnBuilder.columnName(determineColumnNameFor(getterInfo));
         }
 
-        private <T> void setColumnName(EmbeddedColumn.Builder<T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
+        private <T> void setColumnName(EmbeddedColumn.Builder<T,T,R,B> columnBuilder, MethodInfo<R,T> getterInfo) {
             columnBuilder.columnName(determineColumnNameFor(getterInfo));
         }
 
@@ -341,25 +413,23 @@ public class ColumnMapping<R, B> {
             return self();
         }
 
-        private <T> S embedded(Function1<R,T> getter, BiConsumer<B,T> setter, Optional<Consumer<EmbeddedColumn.Builder<T,R,B>>> init) {
+        private <T, TB> S embedded(Function1<R,T> getter, BiConsumer<B,T> setter, Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.propertyName();
             excludedFields.add(name);
-            EmbeddedColumn.Builder<T,R,B> columnBuilder = EmbeddedColumn.mandatory(database, name, getterInfo.effectiveType(), getter, setter);
+            EmbeddedColumn.Builder<T,T,R,B> columnBuilder = EmbeddedColumn.mandatory(database, name, getterInfo.effectiveType(), getter, setter);
             setColumnName(columnBuilder, getterInfo);
-            init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add(columnBuilder.build());
+            columns.add(init.apply(columnBuilder).build());
             return self();
         }
 
-        private <T> S embedded(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Optional<Consumer<EmbeddedColumn.Builder<T,R,B>>> init) {
+        private <T, TB> S embedded(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.propertyName();
             excludedFields.add(name);
-            EmbeddedColumn.Builder<T,R,B> columnBuilder = EmbeddedColumn.optional(database, name, getterInfo.effectiveType(), getter, setter);
+            EmbeddedColumn.Builder<T,T,R,B> columnBuilder = EmbeddedColumn.optional(database, name, getterInfo.effectiveType(), getter, setter);
             setColumnName(columnBuilder, getterInfo);
-            init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add(columnBuilder.build());
+            columns.add(init.apply(columnBuilder).build());
             return self();
         }
 
@@ -370,12 +440,17 @@ public class ColumnMapping<R, B> {
             Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
                 .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
 
+            Optional<Id> idAnnotation = fieldInfo.annotation(Id.class);
+
             PrimitiveColumn.Builder<T,R,B> columnBuilder = PrimitiveColumn.optional(
                 database,
                 fieldInfo.name(),
                 dataType,
                 fieldInfo.optionalGetter(),
                 Setter.forField(builderType, fieldInfo.effectiveClass(), builderField))
+                .identifier(idAnnotation.isPresent())
+                .insertable(determineInsertableFor(fieldInfo))
+                .updatable(determineUpdateableFor(fieldInfo))
                 .columnName(determineColumnNameFor(fieldInfo));
 
             columns.add(columnBuilder.build());
@@ -391,13 +466,19 @@ public class ColumnMapping<R, B> {
             Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
                 .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
 
-            EmbeddedColumn.Builder<T,R,B> columnBuilder = EmbeddedColumn.optional(
+            Optional<Id> idAnnotation = fieldInfo.annotation(Id.class);
+            Optional<EmbeddedId> embeddedIdAnnotation = fieldInfo.annotation(EmbeddedId.class);
+
+            EmbeddedColumn.Builder<T,T,R,B> columnBuilder = EmbeddedColumn.optional(
                 database,
                 fieldInfo.name(),
                 fieldInfo.effectiveType(),
                 fieldInfo.optionalGetter(),
                 Setter.forField(builderType, fieldInfo.effectiveClass(), builderField))
                 .overrides(overrides)
+                .identifier(idAnnotation.isPresent() || embeddedIdAnnotation.isPresent())
+                .insertable(determineInsertableFor(fieldInfo))
+                .updatable(determineUpdateableFor(fieldInfo))
                 .columnName(determineColumnNameFor(fieldInfo));
 
             columns.add(columnBuilder.build());
