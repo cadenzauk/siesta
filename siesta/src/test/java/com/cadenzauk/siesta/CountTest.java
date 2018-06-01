@@ -22,15 +22,16 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
@@ -39,7 +40,8 @@ import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-class CountTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class CountTest {
     @Mock
     private Transaction transaction;
 

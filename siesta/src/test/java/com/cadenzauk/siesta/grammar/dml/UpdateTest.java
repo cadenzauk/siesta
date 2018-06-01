@@ -22,14 +22,15 @@
 
 package com.cadenzauk.siesta.grammar.dml;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
@@ -39,7 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-class UpdateTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class UpdateTest {
     @Mock
     private Transaction transaction;
 

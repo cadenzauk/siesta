@@ -22,15 +22,16 @@
 
 package com.cadenzauk.core.stream;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.junit.TestCase;
 import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -48,7 +49,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class StreamUtilTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class StreamUtilTest {
     @Mock
     private Stream<String> stream;
 
@@ -81,6 +83,7 @@ class StreamUtilTest extends MockitoTest {
         assertThat(result, contains(Tuple.of("a", 0L), Tuple.of("b", 1L), Tuple.of("c", 2L)));
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     void zipWithIndexLazy() {
         when(stream.iterator()).thenReturn(iterator);

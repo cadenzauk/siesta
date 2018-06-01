@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
@@ -30,6 +29,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.TestRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.Function;
 
@@ -45,7 +46,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-abstract class FunctionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+abstract class FunctionTest {
     @Mock
     protected Scope scope;
     @Mock

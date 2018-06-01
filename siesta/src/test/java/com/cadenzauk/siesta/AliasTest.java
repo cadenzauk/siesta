@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.catalog.Column;
@@ -33,8 +32,10 @@ import com.cadenzauk.siesta.model.WidgetRow;
 import com.google.common.reflect.TypeToken;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
@@ -44,13 +45,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class AliasTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class AliasTest {
     @Mock
     private Table<WidgetRow> widgetTable;
 

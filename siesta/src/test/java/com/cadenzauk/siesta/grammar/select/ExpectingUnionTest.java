@@ -22,16 +22,17 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
@@ -39,7 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-class ExpectingUnionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class ExpectingUnionTest {
     @Mock
     private Transaction transaction;
     @Captor

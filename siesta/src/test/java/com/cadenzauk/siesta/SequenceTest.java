@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.grammar.expression.SequenceExpression;
 import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
@@ -31,8 +30,10 @@ import com.cadenzauk.siesta.type.DefaultInteger;
 import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -43,7 +44,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-class SequenceTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SequenceTest {
     @Mock
     private Database database;
 

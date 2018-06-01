@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
@@ -31,12 +30,14 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -58,7 +59,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class CaseExpressionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class CaseExpressionTest {
     @Mock
     private Scope scope;
 
@@ -149,8 +151,7 @@ class CaseExpressionTest extends MockitoTest {
         return Arguments.of(expected, f, args);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForInitialWhen() {
+    private static Stream<Arguments> parametersForInitialWhen() {
         return Stream.of(
             testCase("when ? = ? then 'BURT'", w -> Case.when(2).isEqualTo(3).then("BURT"), 2, 3),
             testCase("when 2 = ? then 'BURT'", w -> Case.when(literal(2)).isEqualTo(3).then("BURT"), 3),

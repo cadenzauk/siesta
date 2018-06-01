@@ -22,16 +22,17 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.Aggregates;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -48,7 +49,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 
-class EmbeddedTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class EmbeddedTest {
     @Mock
     private SqlExecutor sqlExecutor;
 

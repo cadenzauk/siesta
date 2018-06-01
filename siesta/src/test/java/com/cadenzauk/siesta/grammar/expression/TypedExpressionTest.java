@@ -22,16 +22,17 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -43,7 +44,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
-class TypedExpressionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class TypedExpressionTest {
     @Mock(answer = Answers.CALLS_REAL_METHODS)
     private TypedExpression<Integer> sut;
 

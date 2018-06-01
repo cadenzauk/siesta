@@ -22,13 +22,14 @@
 
 package com.cadenzauk.siesta.jdbc;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -50,15 +51,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class JdbcSqlExecutorTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class JdbcSqlExecutorTest {
     @Mock
     private DataSource dataSource;
 
     @Mock
     private Connection connection;
-
-    @Mock
-    private JdbcTransaction transaction;
 
     @Mock
     private PreparedStatement preparedStatement;

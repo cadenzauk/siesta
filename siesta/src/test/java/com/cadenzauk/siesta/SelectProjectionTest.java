@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.ManufacturerRow;
@@ -30,16 +29,19 @@ import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-class SelectProjectionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SelectProjectionTest {
     @Mock
     private Transaction transaction;
 

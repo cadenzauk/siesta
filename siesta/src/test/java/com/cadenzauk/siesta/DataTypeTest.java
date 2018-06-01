@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.sql.ResultSetGet;
@@ -30,10 +29,12 @@ import com.cadenzauk.core.sql.SqlBiConsumer;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -57,15 +58,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-class DataTypeTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class DataTypeTest {
     @Mock
     private ResultSet rs;
 
     @Mock
     private Database db;
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForJavaClass() {
+    private static Stream<Arguments> parametersForJavaClass() {
         return Stream.of(
             Arguments.of(DataType.BIG_DECIMAL, BigDecimal.class),
             Arguments.of(DataType.BYTE, Byte.class),
@@ -90,8 +91,7 @@ class DataTypeTest extends MockitoTest {
         assertThat(actual, equalTo(expectedClass));
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForToDatabase() {
+    private static Stream<Arguments> parametersForToDatabase() {
         return Stream.of(
             testCaseForToDatabase(DataType.BIG_DECIMAL, new BigDecimal(RandomUtils.nextDouble())),
             testCaseForToDatabase(DataType.BYTE, RandomValues.randomByte()),
@@ -155,8 +155,7 @@ class DataTypeTest extends MockitoTest {
         }
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> timeZonePairs() {
+    private static Stream<Arguments> timeZonePairs() {
         return timeZones().flatMap(tz1 -> timeZones().map(tz2 -> Arguments.of(tz1, tz2)));
     }
 
@@ -193,8 +192,7 @@ class DataTypeTest extends MockitoTest {
         }
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForGet() {
+    private static Stream<Arguments> parametersForGet() {
         return Stream.of(
             testCaseForGet(DataType.BIG_DECIMAL, ResultSet::getBigDecimal, new BigDecimal("5001.12")),
             testCaseForGet(DataType.BYTE, ResultSet::getByte, (byte) 127),
@@ -267,8 +265,7 @@ class DataTypeTest extends MockitoTest {
         assertThat(result, is(Optional.of(expected)));
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForLiteral() {
+    private static Stream<Arguments> parametersForLiteral() {
         return Stream.of(
             literalTestCase(DataType.BIG_DECIMAL, new BigDecimal("5001.12"), "5001.12"),
             literalTestCase(DataType.BYTE, (byte) 127, "cast(127 as tinyint)"),

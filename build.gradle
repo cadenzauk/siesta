@@ -24,9 +24,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath "org.junit.platform:junit-platform-gradle-plugin:1.0.3"
-    }
 }
 
 allprojects {
@@ -38,21 +35,15 @@ allprojects {
 subprojects {
     project.ext {
         springVersion = '5.0.3.RELEASE'
-        junitPlatformVersion = '1.0.3'
-        junitJupiterVersion = '5.0.3'
+        junitPlatformVersion = '1.2.0'
+        junitJupiterVersion = '5.2.0'
     }
 
     apply plugin: 'maven'
     apply plugin: 'signing'
-    apply plugin: 'org.junit.platform.gradle.plugin'
 
-    junitPlatform {
-        platformVersion junitPlatformVersion
-        filters {
-            engines {
-                include 'junit-jupiter', 'junit-vintage'
-            }
-        }
+    test {
+        useJUnitPlatform()
     }
 
     repositories {
@@ -72,6 +63,5 @@ subprojects {
     dependencies {
         testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
         testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
-        testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '4.12.3'
     }
 }

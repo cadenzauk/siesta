@@ -22,11 +22,11 @@
 
 package com.cadenzauk.siesta.grammar.dml;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.model.WidgetRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,6 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -46,7 +47,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
-class ExpectingWhereTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class ExpectingWhereTest {
     @Mock
     private Transaction transaction;
 
@@ -60,8 +62,7 @@ class ExpectingWhereTest extends MockitoTest {
         return Arguments.of(whereClause, expectedSql, expectedArgs);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForWhere() {
+    private static Stream<Arguments> parametersForWhere() {
         return Stream.of(
             whereTestCase(
                 (a, s) -> s.where(upper(WidgetRow::name)).isEqualTo("BOB"),

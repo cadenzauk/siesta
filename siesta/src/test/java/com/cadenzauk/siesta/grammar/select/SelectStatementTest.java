@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.junit.TestCase;
 import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
@@ -44,9 +43,11 @@ import com.cadenzauk.siesta.model.WidgetRow;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class SelectStatementTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SelectStatementTest {
     @Mock
     private From from;
 
@@ -82,10 +84,10 @@ class SelectStatementTest extends MockitoTest {
     private CommonTableExpression<?> cte;
 
     @Mock
-    private TypedExpression<? extends Object> typedExpression1;
+    private TypedExpression<?> typedExpression1;
 
     @Mock
-    private TypedExpression<? extends Object> typedExpression2;
+    private TypedExpression<?> typedExpression2;
 
     @Mock
     private SelectStatement<Integer> union;
@@ -268,9 +270,9 @@ class SelectStatementTest extends MockitoTest {
     @Test
     void listTransaction() {
         SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
-        when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.sql(any())).thenReturn("columns");
         when(from.sql(any())).thenReturn(" from table");
-        when(transaction.query(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(ImmutableList.of(1, 2, 3));
+        when(transaction.query(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(ImmutableList.of(1, 2, 3));
 
         List<Integer> list = sut.list(transaction);
 
@@ -336,9 +338,9 @@ class SelectStatementTest extends MockitoTest {
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "expected one element but was: <1, 2>"})
     void optionalTransaction(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
         SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
-        when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.sql(any())).thenReturn("columns");
         when(from.sql(any())).thenReturn(" from table");
-        when(transaction.query(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(result);
+        when(transaction.query(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(result);
 
         with(expectedException)
             .ifPresent(e ->
@@ -416,9 +418,9 @@ class SelectStatementTest extends MockitoTest {
     @Test
     void streamTransaction() {
         SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
-        when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.sql(any())).thenReturn("columns");
         when(from.sql(any())).thenReturn(" from table");
-        when(transaction.stream(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(Stream.of(1, 2, 3));
+        when(transaction.stream(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(Stream.of(1, 2, 3));
 
         Stream<Integer> stream = sut.stream(transaction);
 
@@ -443,11 +445,11 @@ class SelectStatementTest extends MockitoTest {
     @Test
     void streamTransactionAndAutoCloseable() {
         SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
-        when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.sql(any())).thenReturn("columns");
         when(from.sql(any())).thenReturn(" from table");
         Stream<Integer> stream = Stream.of(1, 2, 3);
         when(autoCloseable.add(stream)).thenReturn(stream);
-        when(transaction.stream(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(stream);
+        when(transaction.stream(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(stream);
 
         Stream<Integer> result = sut.stream(transaction, autoCloseable);
 
@@ -463,9 +465,9 @@ class SelectStatementTest extends MockitoTest {
     @TestCase({"1,2,3,4,5", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2, 3, ...>."})
     void singleSqlExecutor(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
         SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
-        when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.sql(any())).thenReturn("columns");
         when(from.sql(any())).thenReturn(" from table");
-        when(sqlExecutor.query(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(result);
+        when(sqlExecutor.query(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(result);
 
         with(expectedException)
             .ifPresent(e ->

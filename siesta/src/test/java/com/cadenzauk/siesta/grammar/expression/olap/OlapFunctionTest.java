@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression.olap;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
@@ -38,12 +37,14 @@ import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultInteger;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,7 +63,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class OlapFunctionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class OlapFunctionTest {
     @Mock
     private TypedExpression<?> arg1;
 

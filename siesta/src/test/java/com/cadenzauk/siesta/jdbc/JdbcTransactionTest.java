@@ -22,13 +22,14 @@
 
 package com.cadenzauk.siesta.jdbc;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.sql.RowMapper;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,7 +45,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class JdbcTransactionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class JdbcTransactionTest {
     @Mock
     private JdbcSqlExecutor sqlExecutor;
 

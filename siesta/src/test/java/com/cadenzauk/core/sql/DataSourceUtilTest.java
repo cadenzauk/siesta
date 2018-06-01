@@ -22,11 +22,12 @@
 
 package com.cadenzauk.core.sql;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
@@ -41,7 +42,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class DataSourceUtilTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class DataSourceUtilTest {
     @Mock
     private DataSource dataSource;
 

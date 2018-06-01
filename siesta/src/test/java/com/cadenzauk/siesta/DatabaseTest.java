@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
@@ -32,9 +31,11 @@ import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
@@ -50,7 +51,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-class DatabaseTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class DatabaseTest {
     @Mock
     private SqlExecutor sqlExecutor;
 

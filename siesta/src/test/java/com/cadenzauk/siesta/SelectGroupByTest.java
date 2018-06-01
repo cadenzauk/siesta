@@ -22,16 +22,17 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static org.hamcrest.CoreMatchers.is;
@@ -39,7 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.mockito.Mockito.verify;
 
-class SelectGroupByTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SelectGroupByTest {
     @Mock
     private Transaction transaction;
 

@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
@@ -30,6 +29,7 @@ import com.cadenzauk.siesta.grammar.select.ExpectingHaving;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -51,7 +52,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 
-class SelectHavingTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SelectHavingTest {
     @Mock
     private Transaction transaction;
 
@@ -68,8 +70,7 @@ class SelectHavingTest extends MockitoTest {
         return Arguments.of(having, expectedSql, expectedArgs);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForHaving() {
+    private static Stream<Arguments> parametersForHaving() {
         return Stream.of(
             havingTest((w, sel) -> sel.having(count().plus(literal(1))).isGreaterThan(countDistinct(WidgetRow::name)),
                 "having count(*) + 1 > count(distinct w.NAME)",

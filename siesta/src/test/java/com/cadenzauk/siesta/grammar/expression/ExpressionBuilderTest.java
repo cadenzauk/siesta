@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
@@ -32,6 +31,7 @@ import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -39,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -58,7 +59,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class ExpressionBuilderTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class ExpressionBuilderTest {
     @Mock
     private TypedExpression<String> expression1;
 

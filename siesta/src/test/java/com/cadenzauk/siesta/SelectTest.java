@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
@@ -30,6 +29,7 @@ import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,6 +38,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.MappedSuperclass;
 import java.util.List;
@@ -59,7 +60,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class SelectTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SelectTest {
     @SuppressWarnings("unused")
     @MappedSuperclass
     public static class Row1 {
@@ -196,8 +198,7 @@ class SelectTest extends MockitoTest {
         return Arguments.of(where, expected);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForWhere() {
+    private static Stream<Arguments> parametersForWhere() {
         return Stream.of(
             testCaseForWhere((a, s) -> s.where(max(Row2::description)).isEqualTo(a, Row2::name), "where max(q.DESCRIPTION) = q.NAME"),
             testCaseForWhere((a, s) -> s.where(Row2::description).isNotEqualTo(Row2::name), "where q.DESCRIPTION <> q.NAME"),
@@ -227,8 +228,7 @@ class SelectTest extends MockitoTest {
         return Arguments.of(orderBy, expected);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForOrderByOnSelect() {
+    private static Stream<Arguments> parametersForOrderByOnSelect() {
         return Stream.of(
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
@@ -277,8 +277,7 @@ class SelectTest extends MockitoTest {
         return Arguments.of(orderBy, expected);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForOrderByOnWhereClause() {
+    private static Stream<Arguments> parametersForOrderByOnWhereClause() {
         return Stream.of(
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnWhereClause((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),

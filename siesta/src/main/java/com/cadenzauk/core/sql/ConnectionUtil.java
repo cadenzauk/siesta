@@ -32,7 +32,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class ConnectionUtil extends UtilityClass {
+public final class ConnectionUtil extends UtilityClass {
     private static final Logger LOG = LoggerFactory.getLogger(ConnectionUtil.class);
 
     public static DatabaseMetaData getMetaData(Connection connection) {

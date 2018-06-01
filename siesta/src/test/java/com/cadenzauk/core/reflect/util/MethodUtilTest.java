@@ -166,9 +166,9 @@ class MethodUtilTest {
 
         @SuppressWarnings("SameReturnValue")
         @Transient
-        @TestCase
-        @TestCase
-        @TestCase
+        @TestCase("")
+        @TestCase("a")
+        @TestCase("a")
         Optional<String> method2() {
             return Optional.of("Something");
         }

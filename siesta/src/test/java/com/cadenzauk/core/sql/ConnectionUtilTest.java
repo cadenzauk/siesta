@@ -22,61 +22,186 @@
 
 package com.cadenzauk.core.sql;
 
-import com.cadenzauk.core.MockitoTest;
-import com.cadenzauk.core.lang.RuntimeInstantiationException;
-import com.cadenzauk.core.reflect.Factory;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class ConnectionUtilTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class ConnectionUtilTest {
     @Mock
     private Connection connection;
 
     @Mock
-    private PreparedStatement expected;
+    private DatabaseMetaData metadata;
+
+    @Mock
+    private Statement statement;
+
+    @Mock
+    private PreparedStatement preparedStatement;
 
     @Test
-    void cannotInstantiate() {
-        calling(() -> Factory.forClass(ConnectionUtil.class).get())
-            .shouldThrow(RuntimeException.class)
-            .withCause(InvocationTargetException.class)
-            .withCause(RuntimeInstantiationException.class);
+    void utilityClass() {
+        assertThat(ConnectionUtil.class, isUtilityClass());
+    }
+
+    @Test
+    void getMetaData() throws SQLException {
+        when(connection.getMetaData()).thenReturn(metadata);
+
+        DatabaseMetaData result = ConnectionUtil.getMetaData(connection);
+
+        verify(connection).getMetaData();
+        verifyNoMoreInteractions(connection);
+        assertThat(result, sameInstance(metadata));
+    }
+
+    @Test
+    void getMetaDataThatThrows() throws SQLException {
+        String message = RandomStringUtils.randomAlphabetic(50);
+        when(connection.getMetaData()).thenThrow(new SQLException(message));
+
+        calling(() -> ConnectionUtil.getMetaData(connection))
+            .shouldThrow(RuntimeSqlException.class)
+            .withCause(SQLException.class)
+            .withMessage(is(message));
+
+        verify(connection).getMetaData();
+        verifyNoMoreInteractions(connection);
+    }
+
+    @Test
+    void commit() throws SQLException {
+        ConnectionUtil.commit(connection);
+
+        verify(connection).commit();
+        verifyNoMoreInteractions(connection);
+    }
+
+    @Test
+    void commitThatThrows() throws SQLException {
+        String message = RandomStringUtils.randomAlphabetic(50);
+        doThrow(new SQLException(message)).when(connection).commit();
+
+        calling(() -> ConnectionUtil.commit(connection))
+            .shouldThrow(RuntimeSqlException.class)
+            .withCause(SQLException.class)
+            .withMessage(is(message));
+
+        verify(connection).commit();
+        verifyNoMoreInteractions(connection);
+    }
+
+    @Test
+    void rollback() throws SQLException {
+        ConnectionUtil.rollback(connection);
+
+        verify(connection).rollback();
+        verifyNoMoreInteractions(connection);
+    }
+
+    @Test
+    void rollbackThatThrows() throws SQLException {
+        String message = RandomStringUtils.randomAlphabetic(50);
+        doThrow(new SQLException(message)).when(connection).rollback();
+
+        calling(() -> ConnectionUtil.rollback(connection))
+            .shouldThrow(RuntimeSqlException.class)
+            .withCause(SQLException.class)
+            .withMessage(is(message));
+
+        verify(connection).rollback();
+        verifyNoMoreInteractions(connection);
+    }
+
+    @Test
+    void execute() throws SQLException {
+        String sql = RandomStringUtils.randomAlphabetic(30);
+        when(connection.createStatement()).thenReturn(statement);
+        when(statement.execute(sql)).thenReturn(true);
+
+        boolean result = ConnectionUtil.execute(connection, sql);
+
+        verify(connection).createStatement();
+        verify(statement).execute(sql);
+        verify(statement).close();
+        verifyNoMoreInteractions(connection, statement);
+        assertThat(result, is(true));
+    }
+
+    @Test
+    void executeThatThrowsInCreateStatement() throws SQLException {
+        String message = RandomStringUtils.randomAlphabetic(50);
+        when(connection.createStatement()).thenThrow(new SQLException(message));
+
+        calling(() -> ConnectionUtil.execute(connection, RandomStringUtils.randomAlphabetic(30)))
+            .shouldThrow(RuntimeSqlException.class)
+            .withCause(SQLException.class)
+            .withMessage(is(message));
+
+        verify(connection).createStatement();
+        verifyNoMoreInteractions(connection);
+    }
+
+    @Test
+    void executeThatThrowsInStatementExecute() throws SQLException {
+        String message = RandomStringUtils.randomAlphabetic(50);
+        String sql = RandomStringUtils.randomAlphabetic(30);
+        when(connection.createStatement()).thenReturn(statement);
+        when(statement.execute(sql)).thenThrow(new SQLException(message));
+
+        calling(() -> ConnectionUtil.execute(connection, sql))
+            .shouldThrow(RuntimeSqlException.class)
+            .withCause(SQLException.class)
+            .withMessage(is(message));
+
+        verify(connection).createStatement();
+        verify(statement).execute(sql);
+        verify(statement).close();
+        verifyNoMoreInteractions(connection, statement);
     }
 
     @Test
     void prepare() throws SQLException {
-        when(connection.prepareStatement(any())).thenReturn(expected);
+        String sql = RandomStringUtils.randomAlphabetic(30);
+        when(connection.prepareStatement(any())).thenReturn(preparedStatement);
 
-        PreparedStatement actual = ConnectionUtil.prepare(connection, "select * from bob");
+        PreparedStatement actual = ConnectionUtil.prepare(connection, sql);
 
-        verify(connection).prepareStatement("select * from bob");
+        verify(connection).prepareStatement(sql);
         verifyNoMoreInteractions(connection);
-        assertThat(actual, sameInstance(expected));
+        assertThat(actual, sameInstance(preparedStatement));
     }
 
     @Test
     void prepareThatThrows() throws SQLException {
-        when(connection.prepareStatement("select * from invalid")).thenThrow(new SQLException("Syntax error"));
+        String sql = RandomStringUtils.randomAlphabetic(30);
+        when(connection.prepareStatement(sql)).thenThrow(new SQLException("Syntax error"));
 
-        calling(() -> ConnectionUtil.prepare(connection, "select * from invalid"))
+        calling(() -> ConnectionUtil.prepare(connection, sql))
             .shouldThrow(RuntimeSqlException.class)
             .withCause(SQLException.class)
             .withMessage(is("Syntax error"));
 
-        verify(connection).prepareStatement("select * from invalid");
+        verify(connection).prepareStatement(sql);
     }
 }

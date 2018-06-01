@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
@@ -30,10 +29,12 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.WidgetRow;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -49,7 +50,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class CoalesceFunctionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class CoalesceFunctionTest {
     @Mock
     private Scope scope;
 
@@ -130,31 +132,30 @@ class CoalesceFunctionTest extends MockitoTest {
         verifyNoMoreInteractions(expression1, expression2);
     }
 
-    private static Arguments coalesceTestCase(String name, Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
-        return Arguments.of(name, f, expected);
+    private static Arguments coalesceTestCase(Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
+        return Arguments.of(f, expected);
     }
 
-    @SuppressWarnings("unused")
-    static Stream<Arguments> parametersForCoalesce() {
+    private static Stream<Arguments> parametersForCoalesce() {
         return Stream.of(
-            coalesceTestCase("no alias", w -> coalesce(WidgetRow::description).orElse("Bob"), "coalesce(w.DESCRIPTION, ?)"),
-            coalesceTestCase("no alias", w -> coalesce(WidgetRow::name).orElse("Bob"), "coalesce(w.NAME, ?)"),
-            coalesceTestCase("no alias", w -> coalesce(WidgetRow::name).orElse(WidgetRow::description), "coalesce(w.NAME, w.DESCRIPTION)"),
-            coalesceTestCase("no alias", w -> coalesce(WidgetRow::description).orElse(WidgetRow::name), "coalesce(w.DESCRIPTION, w.NAME)"),
-            coalesceTestCase("string alias", w -> coalesce("w", WidgetRow::description).orElse("Bob"), "coalesce(w.DESCRIPTION, ?)"),
-            coalesceTestCase("string alias", w -> coalesce("w", WidgetRow::name).orElse("Bob"), "coalesce(w.NAME, ?)"),
-            coalesceTestCase("string alias", w -> coalesce("w", WidgetRow::name).orElse("w", WidgetRow::description), "coalesce(w.NAME, w.DESCRIPTION)"),
-            coalesceTestCase("string alias", w -> coalesce("w", WidgetRow::description).orElse("w", WidgetRow::name), "coalesce(w.DESCRIPTION, w.NAME)"),
-            coalesceTestCase("alias", w -> coalesce(w, WidgetRow::description).orElse("Bob"), "coalesce(w.DESCRIPTION, ?)"),
-            coalesceTestCase("alias", w -> coalesce(w, WidgetRow::name).orElse("Bob"), "coalesce(w.NAME, ?)"),
-            coalesceTestCase("alias", w -> coalesce(w, WidgetRow::name).orElse(w, WidgetRow::description), "coalesce(w.NAME, w.DESCRIPTION)"),
-            coalesceTestCase("alias", w -> coalesce(w, WidgetRow::description).orElse(w, WidgetRow::name), "coalesce(w.DESCRIPTION, w.NAME)")
+            coalesceTestCase(w -> coalesce(WidgetRow::description).orElse("Bob"), "coalesce(w.DESCRIPTION, ?)"),
+            coalesceTestCase(w -> coalesce(WidgetRow::name).orElse("Bob"), "coalesce(w.NAME, ?)"),
+            coalesceTestCase(w -> coalesce(WidgetRow::name).orElse(WidgetRow::description), "coalesce(w.NAME, w.DESCRIPTION)"),
+            coalesceTestCase(w -> coalesce(WidgetRow::description).orElse(WidgetRow::name), "coalesce(w.DESCRIPTION, w.NAME)"),
+            coalesceTestCase(w -> coalesce("w", WidgetRow::description).orElse("Bob"), "coalesce(w.DESCRIPTION, ?)"),
+            coalesceTestCase(w -> coalesce("w", WidgetRow::name).orElse("Bob"), "coalesce(w.NAME, ?)"),
+            coalesceTestCase(w -> coalesce("w", WidgetRow::name).orElse("w", WidgetRow::description), "coalesce(w.NAME, w.DESCRIPTION)"),
+            coalesceTestCase(w -> coalesce("w", WidgetRow::description).orElse("w", WidgetRow::name), "coalesce(w.DESCRIPTION, w.NAME)"),
+            coalesceTestCase(w -> coalesce(w, WidgetRow::description).orElse("Bob"), "coalesce(w.DESCRIPTION, ?)"),
+            coalesceTestCase(w -> coalesce(w, WidgetRow::name).orElse("Bob"), "coalesce(w.NAME, ?)"),
+            coalesceTestCase(w -> coalesce(w, WidgetRow::name).orElse(w, WidgetRow::description), "coalesce(w.NAME, w.DESCRIPTION)"),
+            coalesceTestCase(w -> coalesce(w, WidgetRow::description).orElse(w, WidgetRow::name), "coalesce(w.DESCRIPTION, w.NAME)")
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("parametersForCoalesce")
-    void coalesceTest(String name, Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
+    @ParameterizedTest(name = "{index}: {1}")
+    @MethodSource({"parametersForCoalesce"})
+    void coalesceTest(Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
             Database database = testDatabase(new AnsiDialect());
             Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
 

@@ -22,15 +22,15 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.Sequence;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,12 +41,10 @@ import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.when;
 
-class SequenceExpressionTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class SequenceExpressionTest {
     @Mock
     private Sequence<Integer> intSequence;
-
-    @Mock
-    private Sequence<Long> longSequence;
 
     @Mock
     private Scope scope;
@@ -70,7 +68,7 @@ class SequenceExpressionTest extends MockitoTest {
     }
 
     @Test
-    void rowMapper() throws SQLException {
+    void rowMapper() {
         when(intSequence.rowMapper("fred")).thenReturn(rowMapper);
         SequenceExpression<Integer> sut = new SequenceExpression<>(intSequence);
 

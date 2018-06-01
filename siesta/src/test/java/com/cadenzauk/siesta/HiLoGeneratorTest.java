@@ -22,9 +22,10 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -36,7 +37,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-class HiLoGeneratorTest extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class HiLoGeneratorTest {
     @Mock
     private Sequence<Long> sequence;
 

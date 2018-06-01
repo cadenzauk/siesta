@@ -22,10 +22,10 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.MockitoTest;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin2;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,6 +33,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -43,7 +44,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.mockito.Mockito.verify;
 
-class Select1Test extends MockitoTest {
+@ExtendWith(MockitoExtension.class)
+class Select1Test {
     @Mock
     private Transaction transaction;
 
