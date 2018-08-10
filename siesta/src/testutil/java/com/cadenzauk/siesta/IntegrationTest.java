@@ -24,12 +24,11 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.ddl.TestSchema;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.model.SalespersonRow;
-import liquibase.integration.spring.SpringLiquibase;
+import com.cadenzauk.siesta.model.TestDatabase;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,8 +37,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.rules.SpringClassRule;
-import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -97,13 +94,16 @@ public abstract class IntegrationTest {
         }
 
         @Bean
-        public SpringLiquibase springLiquibase() {
-            SpringLiquibase springLiquibase = new SpringLiquibase();
-            springLiquibase.setDataSource(dataSource());
-            springLiquibase.setChangeLog("classpath:/changelog-test.xml");
-            springLiquibase.setDefaultSchema("SIESTA");
-            springLiquibase.setDropFirst(true);
-            return springLiquibase;
+        public SpringSiesta springSiesta() {
+            return new SpringSiesta()
+                .setDropFirst(true)
+                .setDatabase(database())
+                .setSchemaDefinition(new TestSchema().schemaDefinition());
+        }
+
+        @Bean
+        public Database database() {
+            return TestDatabase.testDatabase(dataSource(), dialect());
         }
 
         @Bean

@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 class TypeUtilTest {
     @Test
@@ -123,4 +125,27 @@ class TypeUtilTest {
         assertThat(result, equalTo(expected));
     }
 
+    @ParameterizedTest
+    @MethodSource("parametersForFindPrimitiveArrayType")
+    void findPrimitiveArrayType(Type primitiveType, Optional<Class<?>> expected) {
+        Optional<Class<?>> result = TypeUtil.findPrimitiveArrayType(primitiveType);
+
+        assertThat(result, is(expected));
+    }
+
+    private static Stream<Arguments> parametersForFindPrimitiveArrayType() {
+        return Stream.of(
+            Arguments.of(Long.TYPE, Optional.of(long[].class)),
+            Arguments.of(Integer.TYPE, Optional.of(int[].class)),
+            Arguments.of(Short.TYPE, Optional.of(short[].class)),
+            Arguments.of(Byte.TYPE, Optional.of(byte[].class)),
+            Arguments.of(Double.TYPE, Optional.of(double[].class)),
+            Arguments.of(Float.TYPE, Optional.of(float[].class)),
+            Arguments.of(Character.TYPE, Optional.of(char[].class)),
+            Arguments.of(Boolean.TYPE, Optional.of(boolean[].class)),
+            Arguments.of(String.class, Optional.of(String[].class)),
+            Arguments.of(BigDecimal.class, Optional.empty()),
+            Arguments.of(String[].class, Optional.empty())
+        );
+    }
 }

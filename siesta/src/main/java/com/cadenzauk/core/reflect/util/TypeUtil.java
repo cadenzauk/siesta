@@ -56,6 +56,7 @@ public final class TypeUtil extends UtilityClass {
         .put(boolean[].class, Boolean.TYPE)
         .put(double[].class, Double.TYPE)
         .put(float[].class, Float.TYPE)
+        .put(String[].class, String.class)
         .build();
 
     @SuppressWarnings("unchecked")

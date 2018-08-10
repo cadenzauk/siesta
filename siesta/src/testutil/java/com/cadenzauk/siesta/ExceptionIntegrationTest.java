@@ -227,7 +227,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
-            .salesCount(Optional.of(Integer.MAX_VALUE + 1L))
+            .salesCount(Optional.of(Integer.MAX_VALUE + 100L))
             .build();
 
         calling(() -> database.insert(salesArea))

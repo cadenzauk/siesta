@@ -22,16 +22,15 @@
 
 package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
-import com.cadenzauk.core.sql.exception.LockingException;
-import com.cadenzauk.core.sql.exception.IllegalNullException;
-import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultTinyint;
@@ -102,6 +101,8 @@ public class Db2Dialect extends AnsiDialect {
             .register("57011", LockingException::new)
             .register("57033", LockingException::new)
         ;
+
+        setSequenceInfo(new Db2SequenceInfo());
     }
 
     @Override

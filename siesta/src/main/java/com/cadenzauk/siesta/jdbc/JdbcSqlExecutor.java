@@ -35,6 +35,7 @@ import com.cadenzauk.siesta.dialect.AutoDetectDialect;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -72,6 +73,12 @@ public class JdbcSqlExecutor implements SqlExecutor {
     @Override
     public JdbcTransaction beginTransaction() {
         return new JdbcTransaction(this);
+    }
+
+    @Override
+    public DatabaseMetaData metadata(CompositeAutoCloseable autoCloseable) {
+        Connection connection = autoCloseable.add(connect());
+        return ConnectionUtil.getMetaData(connection);
     }
 
     @Override

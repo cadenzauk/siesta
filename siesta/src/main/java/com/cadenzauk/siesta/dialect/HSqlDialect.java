@@ -56,7 +56,6 @@ public class HSqlDialect extends AnsiDialect {
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, (scope, argsSql) -> "current_timestamp at time zone interval '00:00' hour to minute")
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP, (scope, argsSql) -> currentTimestamp(scope))
             .register(DateFunctionSpecs.CURRENT_DATE, (scope, argsSql) -> String.format("cast(%s as date)", currentTimestamp(scope)));
-        ;
 
         types()
             .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
@@ -77,8 +76,7 @@ public class HSqlDialect extends AnsiDialect {
 
             .register("40001", LockingException::new)
 
-            .register("42.+", SqlSyntaxException::new)
-        ;
+            .register("42.+", SqlSyntaxException::new);
     }
 
     @Override

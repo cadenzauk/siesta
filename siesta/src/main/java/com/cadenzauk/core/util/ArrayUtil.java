@@ -25,7 +25,10 @@ package com.cadenzauk.core.util;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.function.IntFunction;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public final class ArrayUtil extends UtilityClass {
     @SuppressWarnings("unchecked")
@@ -41,5 +44,85 @@ public final class ArrayUtil extends UtilityClass {
     @SuppressWarnings("unchecked")
     public static <T> IntFunction<T[]> generator(Class<? super T> elementClass) {
         return size -> (T[])ArrayUtil.newArray(elementClass, size);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> IntFunction<T[]> generator(T prototype) {
+        return size -> (T[])ArrayUtil.newArray(((Class<T>)prototype.getClass()), size);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] arrayOf(int size, T value) {
+        T[] result = newArray((Class<T>)value.getClass(), size);
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static char[] arrayOf(int size, char value) {
+        char[] result = new char[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static boolean[] arrayOf(int size, boolean value) {
+        boolean[] result = new boolean[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static byte[] arrayOf(int size, byte value) {
+        byte[] result = new byte[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static short[] arrayOf(int size, short value) {
+        short[] result = new short[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static int[] arrayOf(int size, int value) {
+        int[] result = new int[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static long[] arrayOf(int size, long value) {
+        long[] result = new long[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static float[] arrayOf(int size, float value) {
+        float[] result = new float[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static double[] arrayOf(int size, double value) {
+        double[] result = new double[size];
+        Arrays.fill(result, value);
+        return result;
+    }
+
+    public static Stream<Boolean> stream(boolean[] booleans) {
+        return IntStream.range(0, booleans.length).mapToObj(i -> booleans[i]);
+    }
+
+    public static Stream<Byte> stream(byte[] bytes) {
+        return IntStream.range(0, bytes.length).mapToObj(i -> bytes[i]);
+    }
+
+    public static Stream<Character> stream(char[] chars) {
+        return IntStream.range(0, chars.length).mapToObj(i -> chars[i]);
+    }
+
+    public static Stream<Short> stream(short[] shorts) {
+        return IntStream.range(0, shorts.length).mapToObj(i -> shorts[i]);
+    }
+
+    public static Stream<Float> stream(float[] floats) {
+        return IntStream.range(0, floats.length).mapToObj(i -> floats[i]);
     }
 }

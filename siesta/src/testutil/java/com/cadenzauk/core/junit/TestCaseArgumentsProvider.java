@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 public class TestCaseArgumentsProvider implements ArgumentsProvider {
     @Override
-    public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+    public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         Method testMethod = context.getRequiredTestMethod();
         StringParser<Object> stringParser = stringParser(testMethod);
         return MethodUtil.annotations(TestCase.class, testMethod).map(testCase -> arguments(testCase, testMethod, stringParser));
@@ -51,13 +51,18 @@ public class TestCaseArgumentsProvider implements ArgumentsProvider {
             .map(NullValue::value)
             .orElse("null");
 
+        String emptyValue = MethodUtil.annotations(EmptyValue.class, testMethod)
+            .findFirst()
+            .map(EmptyValue::value)
+            .orElse("empty");
+
         return MethodUtil.annotations(ArgumentParser.class, testMethod)
             .findFirst()
             .map(ArgumentParser::value)
             .map(Factory::forClass)
             .map(Supplier::get)
             .map(StringParser.class::cast)
-            .orElseGet(() -> new ObjectStringParser(nullValue));
+            .orElseGet(() -> new ObjectStringParser(nullValue, emptyValue));
     }
 
     private Arguments arguments(TestCase testCase, Method testMethod, StringParser<Object> stringParser) {

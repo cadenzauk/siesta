@@ -29,8 +29,6 @@
         </encoder>
     </appender>
 
-    <logger name="LiquibaseSchemaResolver" level="warn" />
-    <logger name="liquibase" level="info" />
     <logger name="com.cadenzauk" level="debug" />
 
     <root level="warn">

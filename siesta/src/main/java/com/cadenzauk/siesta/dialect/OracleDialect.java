@@ -37,6 +37,7 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBigint;
 import com.cadenzauk.siesta.type.DefaultDate;
+import com.cadenzauk.siesta.type.DefaultSmallint;
 import com.cadenzauk.siesta.type.DefaultTime;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
@@ -82,7 +83,14 @@ public class OracleDialect extends AnsiDialect {
         ;
 
         types()
+            .register(DbTypeId.BINARY, new DefaultVarbinary("raw"))
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.SMALLINT, new DefaultSmallint(){
+                @Override
+                public String sqlType(Database database) {
+                    return "number(5)";
+                }
+            })
             .register(DbTypeId.BIGINT, new DefaultBigint() {
                 @Override
                 public String sqlType(Database database) {
@@ -158,8 +166,9 @@ public class OracleDialect extends AnsiDialect {
             .register("42.+", SqlSyntaxException::new)
             .register("61000", 60, LockingException::new)
             .register("72000", 1407, IllegalNullException::new)
-            .register("72000", 12899, InvalidValueException::new)
-        ;
+            .register("72000", 12899, InvalidValueException::new);
+
+        setSequenceInfo(new OracleSequenceInfo());
     }
 
     @Override

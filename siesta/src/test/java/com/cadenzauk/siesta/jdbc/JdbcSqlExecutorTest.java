@@ -29,10 +29,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,6 +46,7 @@ import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -67,6 +70,12 @@ class JdbcSqlExecutorTest {
 
     @Mock
     private RowMapper<String> rowMapper;
+
+    @Mock
+    private CompositeAutoCloseable closer;
+
+    @Mock
+    private DatabaseMetaData metadata;
 
     @BeforeEach
     void wireUpMocks() throws SQLException {
@@ -275,5 +284,22 @@ class JdbcSqlExecutorTest {
 
         verify(connection).prepareStatement(sql);
         verifyNoMoreInteractions(connection, preparedStatement, resultSet, rowMapper);
+    }
+
+    @Test
+    void metadata() throws SQLException {
+        Mockito.reset(connection);
+        when(dataSource.getConnection()).thenReturn(connection);
+        when(closer.add(connection)).thenReturn(connection);
+        when(connection.getMetaData()).thenReturn(metadata);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource);
+
+        DatabaseMetaData result = sut.metadata(closer);
+
+        assertThat(result, sameInstance(metadata));
+        verify(dataSource, times(1)).getConnection();
+        verify(closer, times(1)).add(connection);
+        verify(connection, times(1)).getMetaData();
+        verifyNoMoreInteractions(dataSource, connection, metadata);
     }
 }

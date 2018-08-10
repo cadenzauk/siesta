@@ -43,7 +43,9 @@ subprojects {
     apply plugin: 'signing'
 
     test {
-        useJUnitPlatform()
+        useJUnitPlatform {
+            excludeEngines 'junit-vintage'
+        }
     }
 
     repositories {

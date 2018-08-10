@@ -143,8 +143,7 @@ public class SqlServerDialect extends AnsiDialect {
             .register("40001", 1205, LockingException::new)
             .register("S0001", SqlSyntaxException::new)
             .register("S0002", 8115, InvalidValueException::new)
-            .register(1222, LockingException::new)
-        ;
+            .register(1222, LockingException::new);
     }
 
     @Override

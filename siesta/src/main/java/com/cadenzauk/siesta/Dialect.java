@@ -81,4 +81,6 @@ public interface Dialect {
     String fetchFirst(String sql, long n);
 
     String nextFromSequence(String catalog, String schema, String sequenceName);
+
+    SequenceInfo sequenceInfo();
 }

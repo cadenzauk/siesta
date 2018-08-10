@@ -30,12 +30,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 @Configuration
 public class Db2Config {
     @Bean
-    public DataSource dataSource() throws SQLException {
+    public DataSource dataSource() {
         DB2ConnectionPoolDataSource pool = new DB2ConnectionPoolDataSource();
         pool.setDatabaseName("SIESTA");
         pool.setDriverType(2);

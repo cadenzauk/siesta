@@ -38,6 +38,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class RandomValues extends UtilityClass {
     private static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
 
+    public static char randomChar() {
+        return (char) RANDOM.nextInt(Character.MIN_VALUE, Character.MAX_VALUE + 1);
+    }
+
     public static short randomShort() {
         return (short) RANDOM.nextInt(Short.MIN_VALUE, Short.MAX_VALUE + 1);
     }
@@ -70,5 +74,50 @@ public abstract class RandomValues extends UtilityClass {
 
     public static ZonedDateTime randomZonedDateTime(ZoneId zone) {
         return ZonedDateTime.of(randomLocalDate(), randomLocalTime(), zone);
+    }
+
+    public static boolean[] randomBooleanArray(int minLengthInclusive, int maxLengthExclusive) {
+        int length = RANDOM.nextInt(minLengthInclusive, maxLengthExclusive);
+        boolean[] booleans = new boolean[length];
+        for (int i = 0; i < booleans.length; i++) {
+            booleans[i] = RANDOM.nextBoolean();
+        }
+        return booleans;
+    }
+
+    public static char[] randomCharArray(int minLengthInclusive, int maxLengthExclusive) {
+        int length = RANDOM.nextInt(minLengthInclusive, maxLengthExclusive);
+        char[] chars = new char[length];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = randomChar();
+        }
+        return chars;
+    }
+
+    public static byte[] randomByteArray(int minLengthInclusive, int maxLengthExclusive) {
+        int length = RANDOM.nextInt(minLengthInclusive, maxLengthExclusive);
+        byte[] bytes = new byte[length];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = randomByte();
+        }
+        return bytes;
+    }
+
+    public static short[] randomShortArray(int minLengthInclusive, int maxLengthExclusive) {
+        int length = RANDOM.nextInt(minLengthInclusive, maxLengthExclusive);
+        short[] shorts = new short[length];
+        for (int i = 0; i < shorts.length; i++) {
+            shorts[i] = randomShort();
+        }
+        return shorts;
+    }
+
+    public static float[] randomFloatArray(int minLengthInclusive, int maxLengthExclusive) {
+        int length = RANDOM.nextInt(minLengthInclusive, maxLengthExclusive);
+        float[] floats = new float[length];
+        for (int i = 0; i < floats.length; i++) {
+            floats[i] = RANDOM.nextFloat();
+        }
+        return floats;
     }
 }

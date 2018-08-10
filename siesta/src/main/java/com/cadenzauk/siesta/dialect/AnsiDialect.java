@@ -28,6 +28,7 @@ import com.cadenzauk.core.sql.exception.SqlStateExceptionTranslator;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.SequenceInfo;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
@@ -49,11 +50,13 @@ public class AnsiDialect implements Dialect {
     private final FunctionRegistry functions = new FunctionRegistry();
     private final DbTypeRegistry types = new DbTypeRegistry();
     private final SqlStateExceptionTranslator exceptionTranslator = new SqlStateExceptionTranslator();
+    private SequenceInfo sequenceInfo;
 
     public AnsiDialect() {
         AggregateFunctionSpecs.registerDefaults(functions);
         DateFunctionSpecs.registerDefaults(functions);
         StringFunctionSpecs.registerDefaults(functions);
+        sequenceInfo = SequenceInfo.newBuilder().build();
     }
 
     @Override
@@ -180,6 +183,11 @@ public class AnsiDialect implements Dialect {
         return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
     }
 
+    @Override
+    public SequenceInfo sequenceInfo() {
+        return sequenceInfo;
+    }
+
     protected DbTypeRegistry types() {
         return types;
     }
@@ -190,5 +198,9 @@ public class AnsiDialect implements Dialect {
 
     protected SqlStateExceptionTranslator exceptions() {
         return exceptionTranslator;
+    }
+
+    protected void setSequenceInfo(SequenceInfo sequenceInfo) {
+        this.sequenceInfo = sequenceInfo;
     }
 }

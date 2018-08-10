@@ -71,8 +71,7 @@ public class H2Dialect extends AnsiDialect {
             .register("23513", ReferentialIntegrityException::new)
 
             // LOCK_TIMEOUT_1 = 50200
-            .register("HYT00", 50200, LockingException::new)
-        ;
+            .register("HYT00", 50200, LockingException::new);
     }
 
     @Override

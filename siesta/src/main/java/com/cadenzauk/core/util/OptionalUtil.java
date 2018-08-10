@@ -28,13 +28,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class OptionalUtil extends UtilityClass {
     public static class OptionalWrapper<T> {
         private final Optional<T> optional;
 
-        public OptionalWrapper(Optional<T> optional) {
+        private OptionalWrapper(Optional<T> optional) {
             this.optional = optional;
         }
 
@@ -63,6 +64,9 @@ public final class OptionalUtil extends UtilityClass {
     }
 
     public static <T> Optional<T> ofOnly(Iterable<T> iterable) {
+        if (iterable == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(Iterables.getOnlyElement(iterable, null));
     }
 
@@ -70,10 +74,16 @@ public final class OptionalUtil extends UtilityClass {
         return new OptionalWrapper<>(optional);
     }
 
-    public static <T> Optional<T> orGet(Optional<T> optional, Supplier<? extends Optional<T>> supplier) {
+    public static <T> Optional<T> or(Optional<T> optional, Optional<T> other) {
         return optional.isPresent()
             ? optional
-            : supplier.get();
+            : other;
+    }
+
+    public static <T> Optional<T> orGet(Optional<T> optional, Supplier<? extends Optional<? extends T>> supplier) {
+        return optional.isPresent()
+            ? optional
+            : supplier.get().map(Function.identity());
     }
 
     public static <T, U> Optional<U> as(Class<U> targetClass, Optional<T> source) {

@@ -22,8 +22,10 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
 
+import java.sql.DatabaseMetaData;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -31,6 +33,8 @@ public interface SqlExecutor {
     Dialect dialect();
 
     Transaction beginTransaction();
+
+    DatabaseMetaData metadata(CompositeAutoCloseable closeable);
 
     <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
 

@@ -26,7 +26,9 @@ import com.cadenzauk.core.util.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
+import static com.cadenzauk.core.lang.ObjectUtil.coalesce;
 import static java.util.stream.Collectors.joining;
 
 public final class StringUtil extends UtilityClass {
@@ -74,5 +76,13 @@ public final class StringUtil extends UtilityClass {
             builder.append(String.format("%03o", b));
         }
         return builder.toString();
+    }
+
+    public static <T> Function<T,String> prepend(String arg) {
+        return s -> coalesce(arg, "") + coalesce(s, "");
+    }
+
+    public static <T> Function<T,String> append(String arg) {
+        return s -> coalesce(s, "") + coalesce(arg, "");
     }
 }

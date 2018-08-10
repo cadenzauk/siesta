@@ -71,10 +71,26 @@ public class PostgresDialect extends AnsiDialect {
             })
             .register(MINUTE_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('minute', %1$s) - date_trunc('minute', %2$s))) / 60", argsSql[0], argsSql[1]))
             .register(SECOND_DIFF, (s, argsSql) -> String.format("extract(epoch from (%1$s - %2$s))", argsSql[0], argsSql[1]))
-            .register(INSTR, SimpleFunctionSpec.of("strpos"))
-        ;
+            .register(INSTR, SimpleFunctionSpec.of("strpos"));
 
         types()
+            .register(DbTypeId.BINARY, new DefaultVarbinary() {
+                @Override
+                public String sqlType(Database database, int arg) {
+                    return "bytea";
+                }
+
+                @Override
+                public String literal(Database database, byte[] value) {
+                    StringBuilder builder = new StringBuilder("E'");
+                    for (byte b : value) {
+                        builder.append("\\\\");
+                        builder.append(octal(b));
+                    }
+                    builder.append("'::bytea");
+                    return builder.toString();
+                }
+            })
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
             .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
                 @Override
@@ -97,8 +113,7 @@ public class PostgresDialect extends AnsiDialect {
             .register("23505", DuplicateKeyException::new)
             .register("40P01", LockingException::new)
             .register("42.+", SqlSyntaxException::new)
-            .register("55P03", LockingException::new)
-        ;
+            .register("55P03", LockingException::new);
     }
 
     @Override

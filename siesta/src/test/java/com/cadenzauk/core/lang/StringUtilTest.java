@@ -92,4 +92,51 @@ class StringUtilTest {
     void octal(byte[] input, String expectedResult) {
         assertThat(StringUtil.octal(input), is(expectedResult));
     }
-}
+
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"", "null", ""})
+    @TestCase({"", "", ""})
+    @TestCase({"null", "", ""})
+    @TestCase({"null", "null", ""})
+
+    @TestCase({"null", "A", "A"})
+    @TestCase({"", "A", "A"})
+    @TestCase({"A", "", "A"})
+    @TestCase({"A", "null", "A"})
+
+    @TestCase({"null", "xyz", "xyz"})
+    @TestCase({"", "xyz", "xyz"})
+    @TestCase({"z", "xy", "xyz"})
+    @TestCase({"yz", "x", "xyz"})
+    @TestCase({"xyz", "", "xyz"})
+    @TestCase({"xyz", "null", "xyz"})
+    void prepend(String input, String prefix, String expectedOutput) {
+        String result = StringUtil.prepend(prefix).apply(input);
+
+        assertThat(result, is(expectedOutput));
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"", "null", ""})
+    @TestCase({"", "", ""})
+    @TestCase({"null", "", ""})
+    @TestCase({"null", "null", ""})
+
+    @TestCase({"null", "A", "A"})
+    @TestCase({"", "A", "A"})
+    @TestCase({"A", "", "A"})
+    @TestCase({"A", "null", "A"})
+
+    @TestCase({"null", "xyz", "xyz"})
+    @TestCase({"", "xyz", "xyz"})
+    @TestCase({"x", "yz", "xyz"})
+    @TestCase({"xy", "z", "xyz"})
+    @TestCase({"xyz", "", "xyz"})
+    @TestCase({"xyz", "null", "xyz"})
+    void append(String input, String suffix, String expectedOutput) {
+        String result = StringUtil.append(suffix).apply(input);
+
+        assertThat(result, is(expectedOutput));
+    }}

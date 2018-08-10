@@ -37,14 +37,16 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.stream.StreamUtil.toByteArray;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toCollection;
 
 public class ObjectStringParser implements StringParser<Object> {
     private final Map<Class<?>,StringParser<?>> parsers = new ConcurrentHashMap<>();
     private final String nullValue;
+    private final String emptyValue;
 
-    public ObjectStringParser(String nullValue) {
+    public ObjectStringParser(String nullValue, String emptyValue) {
         this.nullValue = nullValue;
+        this.emptyValue = emptyValue;
 
         register(String.class, Function.identity());
 
@@ -57,12 +59,13 @@ public class ObjectStringParser implements StringParser<Object> {
         register(Class.class, nullOr(className -> ClassUtil.forName(className).orElseThrow(IllegalArgumentException::new)));
 
         register(Boolean.TYPE, defaultOr(false, Boolean::parseBoolean));
-        register(Byte.TYPE, defaultOr((byte)0, this::parseByte));
-        register(Short.TYPE, defaultOr((short)0, Short::parseShort));
+        register(Byte.TYPE, defaultOr((byte) 0, this::parseByte));
+        register(Short.TYPE, defaultOr((short) 0, Short::parseShort));
         register(Integer.TYPE, defaultOr(0, Integer::parseInt));
         register(Long.TYPE, defaultOr(0L, Long::parseLong));
 
         register(byte[].class, this::parseByteArray);
+        register(String[].class, this::parseStringArray);
 
         register(List.class, this::parseArrayList);
         register(ArrayList.class, this::parseArrayList);
@@ -90,7 +93,7 @@ public class ObjectStringParser implements StringParser<Object> {
     }
 
     private static <T> StringParser<T> defaultOr(T defaultValue, Function<String,T> parser) {
-        return (value, typeInfo) -> StringUtils.isBlank(value) ? defaultValue: parser.apply(value);
+        return (value, typeInfo) -> StringUtils.isBlank(value) ? defaultValue : parser.apply(value);
     }
 
     public Object parse(String value, TypeInfo typeInfo) {
@@ -108,28 +111,43 @@ public class ObjectStringParser implements StringParser<Object> {
             .orElseThrow(() -> new IllegalArgumentException("Cannot find a parser for " + typeInfo));
     }
 
+    @SuppressWarnings("OptionalAssignedToNull")
     private Optional<Object> parseOptional(String value, TypeInfo typeInfo) {
-        return Optional.ofNullable(parse(value, typeInfo.actualTypeArgument(0)));
+        return value == null || value.equals(nullValue)
+            ? null
+            : value.equals(emptyValue)
+            ? Optional.empty()
+            : Optional.ofNullable(parse(value, typeInfo.actualTypeArgument(0)));
     }
 
     private byte parseByte(String byteString) {
         byteString = byteString.trim();
         if (byteString.startsWith("0x") && byteString.length() > 2) {
-            return (byte)(int)Integer.valueOf(byteString.substring(2), 16);
+            return (byte) (int) Integer.valueOf(byteString.substring(2), 16);
         } else if (byteString.startsWith("0") && byteString.length() > 1) {
-            return (byte)(int)Integer.valueOf(byteString.substring(1), 8);
+            return (byte) (int) Integer.valueOf(byteString.substring(1), 8);
         }
-        return (byte)(int)Integer.valueOf(byteString);
+        return (byte) (int) Integer.valueOf(byteString);
     }
 
     private ArrayList<Object> parseArrayList(String value, TypeInfo typeInfo) {
-        return new ArrayList<>(parseStream(value, typeInfo.actualTypeArgument(0)).collect(toList()));
+        return parseStream(value, typeInfo.actualTypeArgument(0)).collect(toCollection(ArrayList::new));
     }
 
     private byte[] parseByteArray(String s, TypeInfo typeInfo) {
         return s == null || s.equals(nullValue)
             ? null
-            : toByteArray(parseStream(s, typeInfo.arrayComponentType()).mapToInt(v -> (byte)v));
+            : toByteArray(parseStream(s, typeInfo.arrayComponentType()).mapToInt(v -> (byte) v));
+    }
+
+    private String[] parseStringArray(String s, TypeInfo typeInfo) {
+        return s == null || s.equals(nullValue)
+            ? null
+            : s.equals(emptyValue)
+            ? new String[0]
+            : s.equals("")
+            ? new String[] {""}
+            : parseStream(s, typeInfo.arrayComponentType()).toArray(String[]::new);
     }
 
     private Object[] parseArray(String value, TypeInfo typeInfo) {
@@ -139,6 +157,9 @@ public class ObjectStringParser implements StringParser<Object> {
     private Stream<Object> parseStream(String value, TypeInfo typeInfo) {
         if (StringUtils.isBlank(value)) {
             return Stream.empty();
+        }
+        if (value.startsWith("{") && value.endsWith("}")) {
+            value = value.substring(1, value.length() - 1);
         }
         String[] split = value.split(",", -1);
         return Arrays.stream(split)

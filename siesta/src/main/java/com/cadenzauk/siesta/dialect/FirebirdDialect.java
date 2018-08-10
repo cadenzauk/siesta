@@ -39,6 +39,7 @@ import com.cadenzauk.siesta.type.DefaultInteger;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
+import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
 import java.time.LocalDateTime;
@@ -65,6 +66,12 @@ public class FirebirdDialect extends AnsiDialect {
             });
 
         types()
+            .register(DbTypeId.BINARY, new DefaultVarbinary("char") {
+                @Override
+                public String sqlType(Database database, int arg1) {
+                    return super.sqlType(database, arg1) + " character set octets";
+                }
+            })
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
             .register(DbTypeId.INTEGER, new DefaultInteger() {
                 @Override
@@ -121,6 +128,8 @@ public class FirebirdDialect extends AnsiDialect {
             .register("40001", 335544336, LockingException::new)
             .register("42.+", SqlSyntaxException::new)
         ;
+
+        setSequenceInfo(new FirebirdSequenceInfo());
     }
 
     @Override
