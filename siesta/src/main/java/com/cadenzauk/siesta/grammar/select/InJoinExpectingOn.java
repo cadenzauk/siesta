@@ -31,7 +31,11 @@ import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
+import java.util.Optional;
 import java.util.function.Function;
+
+import static com.cadenzauk.siesta.grammar.expression.ForeignKeyExpression.Direction.CHILD_TO_PARENT;
+import static com.cadenzauk.siesta.grammar.expression.ForeignKeyExpression.Direction.PARENT_TO_CHILD;
 
 public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
     private final SelectStatement<RT> statement;
@@ -46,6 +50,18 @@ public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
     public InJoinExpectingOn<J,RT> validate(boolean validate) {
         this.validate = validate;
         return this;
+    }
+
+    public InJoinExpectingForeignKeyOrAnd onForeignKey() {
+        return new InJoinExpectingForeignKeyOrAnd(Optional.empty());
+    }
+
+    public InJoinExpectingForeignKeyOrAnd onForeignKey(String keyName) {
+        return new InJoinExpectingForeignKeyOrAnd(Optional.of(keyName));
+    }
+
+    public <T> J on(BooleanExpression on) {
+        return setOnClause(on);
     }
 
     public <T> ExpressionBuilder<T,J> on(TypedExpression<T> lhs) {
@@ -74,6 +90,44 @@ public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
 
     public <T, R> ExpressionBuilder<T,J> on(Alias<R> alias, FunctionOptional1<R,T> lhs) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::setOnClause);
+    }
+
+    public class InJoinExpectingForeignKeyOrAnd {
+        private final Optional<String> keyName;
+
+        protected InJoinExpectingForeignKeyOrAnd(Optional<String> keyName) {
+            this.keyName = keyName;
+        }
+
+        public <C> J from(Class<C> childClass) {
+            statement.from().onForeignKey(keyName, childClass, Optional.empty(), CHILD_TO_PARENT);
+            return newJoinClause.apply(statement);
+        }
+
+        public <C> J from(Alias<C> childAlias) {
+            statement.from().onForeignKey(keyName, childAlias, CHILD_TO_PARENT);
+            return newJoinClause.apply(statement);
+        }
+
+        public <C> J from(Class<C> childClass, String childAlias) {
+            statement.from().onForeignKey(keyName, childClass, Optional.of(childAlias), CHILD_TO_PARENT);
+            return newJoinClause.apply(statement);
+        }
+
+        public <P> J to(Class<P> parentClass) {
+            statement.from().onForeignKey(keyName, parentClass, Optional.empty(), PARENT_TO_CHILD);
+            return newJoinClause.apply(statement);
+        }
+
+        public <P> J to(Alias<P> parentAlias) {
+            statement.from().onForeignKey(keyName, parentAlias, PARENT_TO_CHILD);
+            return newJoinClause.apply(statement);
+        }
+
+        public <P> J to(Class<P> parentClass, String parentAlias) {
+            statement.from().onForeignKey(keyName, parentClass, Optional.of(parentAlias), PARENT_TO_CHILD);
+            return newJoinClause.apply(statement);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -309,6 +309,15 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
             return self();
         }
 
+        @SuppressWarnings("unchecked")
+        protected Optional<? extends Column<Object,R>> findColumn(String propertyName) {
+            return columns
+                .stream()
+                .filter(col -> StringUtils.equalsIgnoreCase(col.propertyName(), propertyName))
+                .map(col -> (Column<Object,R>)col)
+                .findFirst();
+        }
+
         private Optional<String> overrideColumnName(String propertyName) {
             return override(propertyName, javax.persistence.Column::name).filter(StringUtils::isNotBlank);
         }

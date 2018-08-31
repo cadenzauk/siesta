@@ -22,12 +22,12 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.grammar.InvalidJoinException;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
-import com.google.common.collect.ImmutableList;
+import com.cadenzauk.siesta.grammar.expression.ForeignKeyExpression;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -38,11 +38,15 @@ public abstract class From {
 
     public abstract void on(BooleanExpression expression, boolean validate);
 
+    public abstract <L> void onForeignKey(Optional<String> name, Alias<L> lhs, ForeignKeyExpression.Direction direction);
+
+    public abstract <L> void onForeignKey(Optional<String> name, Class<L> lhsClass, Optional<String> lhsAlias, ForeignKeyExpression.Direction direction);
+
     public abstract void appendAnd(BooleanExpression expression);
 
     public abstract void appendOr(BooleanExpression expression);
 
-    public abstract void validate(boolean validate);
+    protected abstract Alias<?> alias();
 
     private static class FromAlias extends From {
         private final Alias<?> alias;
@@ -68,6 +72,14 @@ public abstract class From {
         }
 
         @Override
+        public <L> void onForeignKey(Optional<String> name, Alias<L> lhs, ForeignKeyExpression.Direction direction) {
+        }
+
+        @Override
+        public <L> void onForeignKey(Optional<String> name, Class<L> lhsClass, Optional<String> lhsAlias, ForeignKeyExpression.Direction direction) {
+        }
+
+        @Override
         public void appendAnd(BooleanExpression expression) {
         }
 
@@ -76,7 +88,8 @@ public abstract class From {
         }
 
         @Override
-        public void validate(boolean validate) {
+        protected Alias<?> alias() {
+            return alias;
         }
     }
 
@@ -119,6 +132,16 @@ public abstract class From {
         }
 
         @Override
+        public <L> void onForeignKey(Optional<String> name, Alias<L> lhs, ForeignKeyExpression.Direction direction) {
+            onClause.start(new ForeignKeyExpression<>(name, lhs, next, direction));
+        }
+
+        @Override
+        public <L> void onForeignKey(Optional<String> name, Class<L> lhsClass, Optional<String> lhsAlias, ForeignKeyExpression.Direction direction) {
+            onClause.start(new ForeignKeyExpression<>(name, lhsClass, lhsAlias, next, direction));
+        }
+
+        @Override
         public void appendAnd(BooleanExpression expression) {
             onClause.appendAnd(expression);
         }
@@ -129,8 +152,8 @@ public abstract class From {
         }
 
         @Override
-        public void validate(boolean validate) {
-            this.validate = validate;
+        protected Alias<?> alias() {
+            return next;
         }
     }
 

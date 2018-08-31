@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,16 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.siesta;
 
-import java.sql.SQLException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-public class RuntimeSqlException extends RuntimeException {
-    public RuntimeSqlException(SQLException cause) {
-        super(cause.getMessage(), cause);
-    }
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    public RuntimeSqlException(String message, SQLException cause) {
-        super(message, cause);
-    }
-
-    protected RuntimeSqlException(String message) {
-        super(message);
-    }
-
-    @Override
-    public synchronized SQLException getCause() {
-        return (SQLException) super.getCause();
-    }
-
-    public String sqlState() {
-        return getCause().getSQLState();
-    }
-
-    public int errorCode() {
-        return getCause().getErrorCode();
-    }
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface ForeignKeys {
+    ForeignKey[] value();
 }

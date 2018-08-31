@@ -27,6 +27,6 @@ import com.cadenzauk.siesta.Alias;
 
 public class InvalidJoinException extends RuntimeSqlException {
     public InvalidJoinException(Alias<?> unused) {
-        super(String.format("Joined table '%s' is not referenced in the ON clause.", unused.inWhereClause()), null);
+        super(String.format("Joined table '%s' is not referenced in the ON clause.", unused.inWhereClause()));
     }
 }

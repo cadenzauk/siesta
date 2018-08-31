@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,22 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.siesta.grammar;
 
-import java.sql.SQLException;
+import com.cadenzauk.core.lang.StringUtil;
+import com.cadenzauk.core.sql.RuntimeSqlException;
+import com.cadenzauk.siesta.catalog.Table;
 
-public class RuntimeSqlException extends RuntimeException {
-    public RuntimeSqlException(SQLException cause) {
-        super(cause.getMessage(), cause);
+import java.util.Optional;
+
+public class InvalidForeignKeyException extends RuntimeSqlException {
+    public InvalidForeignKeyException(Table<?> childTable, Table<?> parentTable, Optional<String> name) {
+        super(name
+            .map(n -> String.format("No foreign key called %s defined from %s to %s.", n, childTable.qualifiedName(), parentTable.qualifiedName()))
+            .orElseGet(() -> String.format("No foreign keys defined from %s to %s.", childTable.qualifiedName(), parentTable.qualifiedName())));
     }
 
-    public RuntimeSqlException(String message, SQLException cause) {
-        super(message, cause);
-    }
-
-    protected RuntimeSqlException(String message) {
+    public InvalidForeignKeyException(String message) {
         super(message);
-    }
-
-    @Override
-    public synchronized SQLException getCause() {
-        return (SQLException) super.getCause();
-    }
-
-    public String sqlState() {
-        return getCause().getSQLState();
-    }
-
-    public int errorCode() {
-        return getCause().getErrorCode();
     }
 }

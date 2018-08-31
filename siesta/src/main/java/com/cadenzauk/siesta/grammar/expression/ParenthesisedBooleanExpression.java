@@ -49,7 +49,7 @@ public class ParenthesisedBooleanExpression extends BooleanExpression {
     }
 
     public static BooleanExpression wrapIfNecessary(BooleanExpression expression) {
-        return expression.precedence().isHigherThan(Precedence.AND)
+        return expression.precedence().isHigherThan(Precedence.OR)
             ? expression
             : new ParenthesisedBooleanExpression(expression);
     }

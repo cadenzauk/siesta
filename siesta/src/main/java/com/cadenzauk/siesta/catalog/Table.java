@@ -27,21 +27,33 @@ import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapper;
+import com.cadenzauk.siesta.ForeignKey;
+import com.cadenzauk.siesta.ForeignKeys;
+import com.cadenzauk.siesta.Reference;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
+import com.cadenzauk.siesta.grammar.InvalidForeignKeyException;
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class Table<R> implements ColumnCollection<R> {
     private static final Logger LOG = LoggerFactory.getLogger(Table.class);
@@ -51,6 +63,7 @@ public class Table<R> implements ColumnCollection<R> {
     private final String schema;
     private final String tableName;
     private final ColumnMapping<R,?> columnMapping;
+    private final List<ForeignKeyReference<R,?>> foreignKeys;
 
     private <B> Table(Builder<R,B> builder) {
         database = builder.database;
@@ -59,6 +72,11 @@ public class Table<R> implements ColumnCollection<R> {
         schema = builder.schema;
         tableName = builder.tableName;
         columnMapping = new ColumnMapping<>(builder);
+        foreignKeys = builder.foreignKeys
+            .stream()
+            .map(fk -> fk.childTable(this))
+            .map(ForeignKeyReference.Builder::build)
+            .collect(Collectors.collectingAndThen(toList(), ImmutableList::copyOf));
     }
 
     public Database database() {
@@ -166,6 +184,30 @@ public class Table<R> implements ColumnCollection<R> {
         return database.execute(sql, () -> transaction.update(sql, args));
     }
 
+    public <P> Optional<ForeignKeyReference<R,P>> foreignKey(Table<P> parent, Optional<String> name) {
+        return foreignKeys
+            .stream()
+            .flatMap(fk -> fk.toParent(parent, name))
+            .limit(2)
+            .map(Optional::of)
+            .reduce(Optional.empty(), (a, b) -> {
+                if (a.isPresent()) {
+                    throw new InvalidForeignKeyException(String.format("More than one foreign key from %s to %s.  Specify the one you want with onForeignKey(<name>).",
+                        qualifiedName(),
+                        parent.qualifiedName()));
+                }
+                return b;
+            });
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F> Optional<Column<F,R>> findColumn(Class<F> fieldClass, String propertyName) {
+        return columns()
+            .filter(c -> StringUtils.equals(propertyName, c.propertyName()))
+            .map(x -> (Column<F,R>)x)
+            .findFirst();
+    }
+
     @SuppressWarnings("unchecked")
     @SafeVarargs
     private final int performInsert(SqlExecutor sqlExecutor, R... rows) {
@@ -218,12 +260,13 @@ public class Table<R> implements ColumnCollection<R> {
         return sql;
     }
 
-    public static final class Builder<R, B> extends ColumnMapping.Builder<R, B, Builder<R, B>> {
+    public static final class Builder<R, B> extends ColumnMapping.Builder<R,B,Builder<R,B>> {
         private final Database database;
         private final TypeToken<R> rowType;
         private String catalog;
         private String schema;
         private String tableName;
+        private final List<ForeignKeyReference.Builder<R,?>> foreignKeys = new ArrayList<>();
 
         public Builder(Database database, TypeToken<R> rowType, TypeToken<B> builderType, Function<B,R> buildRow) {
             super(database, rowType, builderType, buildRow);
@@ -267,12 +310,45 @@ public class Table<R> implements ColumnCollection<R> {
             return this;
         }
 
+        public <P> Builder<R,B> foreignKey(Class<P> parentClass, Function<ForeignKeyReference.Builder<R,P>,ForeignKeyReference.Builder<R,P>> init) {
+            ForeignKeyReference.Builder<R,P> fkBuilder = ForeignKeyReference.<R,P>newBuilder()
+                .parentClass(parentClass);
+            foreignKeys.add(init.apply(fkBuilder));
+            return this;
+        }
+
         public <BB> Builder<R,BB> builder(Function1<BB,R> buildRow) {
             MethodInfo<BB,R> buildMethod = MethodInfo.of(buildRow);
             return new Builder<>(database, rowType, buildMethod.declaringType(), buildRow)
                 .catalog(catalog)
                 .schema(schema)
                 .tableName(tableName);
+        }
+
+        @Override
+        protected void finish() {
+            super.finish();
+
+            ClassUtil.superclasses(rowType.getRawType())
+                .map(cls -> ClassUtil.annotation(cls, ForeignKeys.class))
+                .flatMap(StreamUtil::of)
+                .flatMap(fk -> Arrays.stream(fk.value()))
+                .forEach(this::buildForeignKey);
+        }
+
+        private void buildForeignKey(ForeignKey foreignKey) {
+            this.foreignKey(foreignKey.parent(), x -> buildForeignKeyReferences(foreignKey.references(), x.name(foreignKey.name())));
+        }
+
+        private <T> ForeignKeyReference.Builder<R,T> buildForeignKeyReferences(Reference[] references, ForeignKeyReference.Builder<R,T> fkBuilder) {
+            Arrays.stream(references)
+                .map(ref -> {
+                    Column<Object,R> childColumn = findColumn(ref.property())
+                        .orElseThrow(IllegalArgumentException::new);
+                    return Tuple.of(childColumn, ref.parentProperty());
+                })
+                .forEach(ref -> fkBuilder.column(ref.item1()).references(ref.item2()));
+            return fkBuilder;
         }
 
         private static <R> Stream<javax.persistence.Table> tableAnnotations(TypeToken<R> rowType) {

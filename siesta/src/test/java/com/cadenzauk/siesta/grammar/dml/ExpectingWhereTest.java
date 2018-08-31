@@ -150,7 +150,7 @@ class ExpectingWhereTest {
                         .and(a, WidgetRow::manufacturerId).isEqualTo(2L))
                     .or(column(a, WidgetRow::name).isEqualTo("Fred")
                         .and(a, WidgetRow::name).isEqualTo("Barney")),
-                "(w.MANUFACTURER_ID = ? and w.MANUFACTURER_ID = ?) or (w.NAME = ? and w.NAME = ?)",
+                "w.MANUFACTURER_ID = ? and w.MANUFACTURER_ID = ? or w.NAME = ? and w.NAME = ?",
                 toArray(1L, 2L, "Fred", "Barney"))
         );
     }
