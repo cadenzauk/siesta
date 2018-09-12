@@ -110,7 +110,7 @@ public class MethodInfo<C, R> {
     @SuppressWarnings("unchecked")
     public static <C, F> MethodInfo<C,F> of(Function1<C,F> getter) {
         Method method = MethodUtil.fromReference(getter);
-        return new MethodInfo<>(TypeToken.of((Class<C>) method.getDeclaringClass()), method, method.getReturnType(), (Class<F>) method.getReturnType());
+        return new MethodInfo<>(TypeToken.of((Class<C>) MethodUtil.referringClass(getter)), method, method.getReturnType(), (Class<F>) method.getReturnType());
     }
 
     @SuppressWarnings("unchecked")
@@ -118,6 +118,6 @@ public class MethodInfo<C, R> {
         Method method = MethodUtil.fromReference(getter);
         ParameterizedType genericType = (ParameterizedType) method.getGenericReturnType();
         Type argType = genericType.getActualTypeArguments()[0];
-        return new MethodInfo<>(TypeToken.of((Class<C>) method.getDeclaringClass()), method, method.getReturnType(), (Class<F>) argType);
+        return new MethodInfo<>(TypeToken.of((Class<C>) MethodUtil.referringClass(getter)), method, method.getReturnType(), (Class<F>) argType);
     }
 }

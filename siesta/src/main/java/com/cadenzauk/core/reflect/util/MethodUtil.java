@@ -35,11 +35,17 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class MethodUtil extends UtilityClass {
+
+    public static final Pattern INSTANTIATED_METHOD_PATTERN = Pattern.compile("\\(L([^;]+);.*");
+
     public static Object invoke(Method method, Object target, Object... args) {
         try {
             method.setAccessible(true);
@@ -89,5 +95,28 @@ public final class MethodUtil extends UtilityClass {
                 .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
+
+    public static <T, V> Class<?> referringClass(Function1<T,V> methodReference) {
+        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
+                .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+                .flatMap(MethodUtil::fromInstantiatedMethodType)
+                .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+    }
+
+    public static <T, V> Class<?> referringClass(FunctionOptional1<T,V> methodReference) {
+        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
+                .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+                .flatMap(MethodUtil::fromInstantiatedMethodType)
+                .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+    }
+
+    private static Optional<Class<?>> fromInstantiatedMethodType(SerializedLambda lambda){
+        Matcher matcher = INSTANTIATED_METHOD_PATTERN.matcher(lambda.getInstantiatedMethodType());
+        if (matcher.matches()){
+            return ClassUtil.forName(matcher.group(1).replaceAll("/", "."));
+        }
+        return Optional.empty();
+    }
+
 
 }

@@ -86,6 +86,14 @@ class SelectTest {
         }
     }
 
+    public static class Row3 extends Row1 {
+        private Optional<String> comment;
+
+        public Optional<String> comment() {
+            return comment;
+        }
+    }
+
     @Mock
     private Transaction transaction;
 
@@ -113,6 +121,24 @@ class SelectTest {
         assertThat(sql.getValue(), is("select ROW1.NAME as ROW1_NAME, ROW1.DESCRIPTION as ROW1_DESCRIPTION " +
             "from SIESTA.ROW1 ROW1 " +
             "where ROW1.NAME = ROW1.DESCRIPTION"));
+        assertThat(args.getValue(), arrayWithSize(0));
+    }
+
+    @Test
+    void canAliasMappedSuperclassCorrectly() {
+        Database database = Database.newBuilder().defaultSchema("SIESTA").build();
+
+        database.from(Row2.class)
+                .join(Row3.class, "row3").on(Row2::name).isEqualTo(Row3::name)
+            .where(Row2::name).isEqualTo(Row2::description)
+            .optional(transaction);
+
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
+        assertThat(sql.getValue(), is("select ROW2.NAME as ROW2_NAME, ROW2.DESCRIPTION as ROW2_DESCRIPTION, " +
+                "ROW2.COMMENT as ROW2_COMMENT, row3.NAME as row3_NAME, row3.DESCRIPTION as row3_DESCRIPTION, row3.COMMENT as row3_COMMENT " +
+                "from SIESTA.ROW2 ROW2 " +
+                "join SIESTA.ROW3 row3 on ROW2.NAME = row3.NAME " +
+                "where ROW2.NAME = ROW2.DESCRIPTION"));
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
