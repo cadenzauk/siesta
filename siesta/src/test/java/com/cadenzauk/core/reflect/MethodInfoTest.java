@@ -98,8 +98,32 @@ class MethodInfoTest {
         assertThat(result.effectiveClass(), equalTo(Integer.class));
     }
 
+    @Test
+    void findGetterForSuperclass() {
+        MethodInfo<MethodInfoTestClass, String> result = MethodInfo.of(MethodInfoTestClass::name);
+        assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
+
+    }
+
+    @Test
+    void findOptionalGetterForSuperclass() {
+        MethodInfo<MethodInfoTestClass, String> result = MethodInfo.of(MethodInfoTestClass::optionalName);
+        assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
+
+    }
+
+    private static class MethodInfoSuperClass {
+        String name() {
+            return "name";
+        }
+
+        Optional<String> optionalName() {
+            return Optional.of("name");
+        }
+    }
+
     @SuppressWarnings("unused")
-    private static class MethodInfoTestClass {
+    private static class MethodInfoTestClass extends MethodInfoSuperClass {
         private String noPrefix;
         private Optional<Integer> prefixedWithGet;
         private boolean prefixedWithIs;
