@@ -49,6 +49,9 @@ class ResultSetSpliteratorTest {
     @Mock
     private Consumer<String> action;
 
+    @Mock
+    private Runnable atEnd;
+
     @Test
     void tryAdvanceWhenHaveNext() throws SQLException {
         when(resultSet.next()).thenReturn(true);
@@ -88,6 +91,26 @@ class ResultSetSpliteratorTest {
 
         verify(resultSet).next();
         verifyNoMoreInteractions(resultSet, rowMapper, action);
+    }
+
+    @Test
+    void tryAdvanceWhenResultSetExhausted() throws SQLException {
+        when(resultSet.next())
+                .thenReturn(false)
+                .thenThrow(new SQLException("ResultSet closed"));
+        ResultSetSpliterator<String> sut = new ResultSetSpliterator<>(resultSet, rowMapper, atEnd);
+
+        boolean result = sut.tryAdvance(action);
+
+        verify(resultSet).next();
+        verify(atEnd).run();
+        verifyNoMoreInteractions(resultSet, rowMapper, action, atEnd);
+        assertThat(result, is(false));
+
+        boolean resultOnceExhausted = sut.tryAdvance(action);
+
+        verifyNoMoreInteractions(resultSet, rowMapper, action, atEnd);
+        assertThat(resultOnceExhausted, is(false));
     }
 
 }

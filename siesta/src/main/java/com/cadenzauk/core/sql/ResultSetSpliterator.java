@@ -25,12 +25,14 @@ package com.cadenzauk.core.sql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class ResultSetSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
     private final ResultSet resultSet;
     private final RowMapper<T> rowMapper;
     private final Runnable atEnd;
+    private final AtomicBoolean exhausted = new AtomicBoolean(false);
 
     public ResultSetSpliterator(ResultSet resultSet, RowMapper<T> rowMapper) {
         this(resultSet, rowMapper, () -> {});
@@ -46,8 +48,10 @@ public class ResultSetSpliterator<T> extends Spliterators.AbstractSpliterator<T>
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
         try {
-            if (!resultSet.next()) {
-                atEnd.run();
+            if (exhausted.get() || !resultSet.next()) {
+                if (!exhausted.getAndSet(true)) {
+                    atEnd.run();
+                }
                 return false;
             }
             action.accept(rowMapper.mapRow(resultSet));
