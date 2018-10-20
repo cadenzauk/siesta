@@ -43,10 +43,12 @@ import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.PartType;
 import com.cadenzauk.siesta.model.PartWithTypeRow;
+import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -90,6 +92,8 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.month;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.second;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.secondDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
+import static com.cadenzauk.siesta.grammar.expression.ExistsExpression.exists;
+import static com.cadenzauk.siesta.grammar.expression.ExistsExpression.notExists;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.instr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
@@ -100,6 +104,7 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -1212,5 +1217,38 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result.item1(), is(2));
         assertThat(result.item2(), is(0));
         assertThat(result.item3(), is(1));
+    }
+
+    @Test
+    void existsExpression() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+        SalesAreaRow salesAreaRow = SalesAreaRow.newBuilder()
+            .salesAreaId(newId())
+            .salesAreaName(RandomStringUtils.randomAlphabetic(10))
+            .salespersonId(Optional.of(salespersonRow1.salespersonId()))
+            .build();
+        database.insert(salesAreaRow);
+
+        List<SalespersonRow> existsResult = database.from(SalespersonRow.class, "s")
+            .where(SalespersonRow::salespersonId).isIn(salespersonRow1.salespersonId(), salespersonRow2.salespersonId())
+            .and(exists(database.from(SalesAreaRow.class, "a")
+                .select(literal(1))
+                .where(SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
+                .and(SalesAreaRow::salesAreaId).isEqualTo(salesAreaRow.salesAreaId())))
+            .list();
+        List<SalespersonRow> notExistsResult = database.from(SalespersonRow.class, "s")
+            .where(SalespersonRow::salespersonId).isIn(salespersonRow1.salespersonId(), salespersonRow2.salespersonId())
+            .and(notExists(database.from(SalesAreaRow.class, "a")
+                .select(literal(1))
+                .where(SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
+                .and(SalesAreaRow::salesAreaId).isEqualTo(salesAreaRow.salesAreaId())))
+            .list();
+
+
+        assertThat(existsResult, contains(salespersonRow1));
+        assertThat(notExistsResult, contains(salespersonRow2));
     }
 }

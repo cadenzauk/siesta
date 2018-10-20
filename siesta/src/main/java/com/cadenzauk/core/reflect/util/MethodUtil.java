@@ -43,8 +43,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class MethodUtil extends UtilityClass {
-
-    public static final Pattern INSTANTIATED_METHOD_PATTERN = Pattern.compile("\\(L([^;]+);.*");
+    private static final Pattern INSTANTIATED_METHOD_PATTERN = Pattern.compile("\\(L([^;]+);.*");
 
     public static Object invoke(Method method, Object target, Object... args) {
         try {
@@ -68,7 +67,7 @@ public final class MethodUtil extends UtilityClass {
         enhancer.setCallbackType(interceptor.getClass());
 
         Class<?> proxyClass = enhancer.createClass();
-        Enhancer.registerCallbacks(proxyClass, new Callback[]{interceptor});
+        Enhancer.registerCallbacks(proxyClass, new Callback[] {interceptor});
         @SuppressWarnings("unchecked") T proxy = (T) ObjenesisHelper.newInstance(proxyClass);
 
         methodReference.apply(proxy);
@@ -98,25 +97,22 @@ public final class MethodUtil extends UtilityClass {
 
     public static <T, V> Class<?> referringClass(Function1<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-                .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
-                .flatMap(MethodUtil::fromInstantiatedMethodType)
-                .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+            .flatMap(MethodUtil::fromInstantiatedMethodType)
+            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T, V> Class<?> referringClass(FunctionOptional1<T,V> methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-                .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
-                .flatMap(MethodUtil::fromInstantiatedMethodType)
-                .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+            .flatMap(MethodUtil::fromInstantiatedMethodType)
+            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
-    private static Optional<Class<?>> fromInstantiatedMethodType(SerializedLambda lambda){
+    private static Optional<Class<?>> fromInstantiatedMethodType(SerializedLambda lambda) {
         Matcher matcher = INSTANTIATED_METHOD_PATTERN.matcher(lambda.getInstantiatedMethodType());
-        if (matcher.matches()){
-            return ClassUtil.forName(matcher.group(1).replaceAll("/", "."));
-        }
-        return Optional.empty();
+        return matcher.matches()
+            ? ClassUtil.forName(matcher.group(1).replaceAll("/", "."))
+            : Optional.empty();
     }
-
-
 }

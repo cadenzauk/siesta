@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.model;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
 
 @Table(name = "SALESPERSON", schema = "SIESTA")
@@ -44,6 +45,24 @@ public class SalespersonRow {
         surname = builder.surname;
         numberOfSales = builder.numberOfSales;
         commission = builder.commission;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SalespersonRow that = (SalespersonRow) o;
+        return salespersonId == that.salespersonId &&
+            numberOfSales == that.numberOfSales &&
+            Objects.equals(firstName, that.firstName) &&
+            Objects.equals(middleNames, that.middleNames) &&
+            Objects.equals(surname, that.surname) &&
+            Objects.equals(commission, that.commission);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(salespersonId, firstName, middleNames, surname, numberOfSales, commission);
     }
 
     public long salespersonId() {
