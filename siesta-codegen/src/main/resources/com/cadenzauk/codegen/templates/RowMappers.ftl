@@ -34,6 +34,20 @@ public class RowMappers {
     }
    <#list 3..n as i>
 
+    public static <T1<#list 2..i as j>, T${j}</#list>> RowMapper<Tuple${i}<T1<#list 2..i as j>,T${j}</#list>>> of(
+        <#list 1..i as j>
+           RowMapper<T${j}> mapper${j}<#if j < i>,</#if>
+        </#list>
+    ) {
+        return rs -> Tuple.of(
+        <#list 1..i as j>
+                mapper${j}.mapRow(rs)<#if j < i>,</#if>
+        </#list>
+            );
+    }
+    </#list>
+    <#list 3..n as i>
+
     public static <T1<#list 2..i as j>, T${j}</#list>> RowMapper<Tuple${i}<T1<#list 2..i as j>,T${j}</#list>>> add${i}<#if i = 3>rd<#else>th</#if>(RowMapper<Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>>> mapper${i-1}, RowMapper<T${i}> mapper) {
         return rs -> {
             Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>> tuple = mapper${i-1}.mapRow(rs);

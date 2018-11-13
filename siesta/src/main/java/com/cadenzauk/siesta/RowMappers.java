@@ -24,6 +24,14 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.core.tuple.Tuple4;
+import com.cadenzauk.core.tuple.Tuple5;
+import com.cadenzauk.core.tuple.Tuple6;
+import com.cadenzauk.core.tuple.Tuple7;
+import com.cadenzauk.core.tuple.Tuple8;
+import com.cadenzauk.core.tuple.Tuple9;
 import com.cadenzauk.core.tuple.Tuple10;
 import com.cadenzauk.core.tuple.Tuple11;
 import com.cadenzauk.core.tuple.Tuple12;
@@ -34,19 +42,533 @@ import com.cadenzauk.core.tuple.Tuple16;
 import com.cadenzauk.core.tuple.Tuple17;
 import com.cadenzauk.core.tuple.Tuple18;
 import com.cadenzauk.core.tuple.Tuple19;
-import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple20;
-import com.cadenzauk.core.tuple.Tuple3;
-import com.cadenzauk.core.tuple.Tuple4;
-import com.cadenzauk.core.tuple.Tuple5;
-import com.cadenzauk.core.tuple.Tuple6;
-import com.cadenzauk.core.tuple.Tuple7;
-import com.cadenzauk.core.tuple.Tuple8;
-import com.cadenzauk.core.tuple.Tuple9;
 
 public class RowMappers {
     public static <T1, T2> RowMapper<Tuple2<T1,T2>> of(RowMapper<T1> mapper1, RowMapper<T2> mapper2) {
         return rs -> Tuple.of(mapper1.mapRow(rs), mapper2.mapRow(rs));
+    }
+
+    public static <T1, T2, T3> RowMapper<Tuple3<T1,T2,T3>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4> RowMapper<Tuple4<T1,T2,T3,T4>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5> RowMapper<Tuple5<T1,T2,T3,T4,T5>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6> RowMapper<Tuple6<T1,T2,T3,T4,T5,T6>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7> RowMapper<Tuple7<T1,T2,T3,T4,T5,T6,T7>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8> RowMapper<Tuple8<T1,T2,T3,T4,T5,T6,T7,T8>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> RowMapper<Tuple9<T1,T2,T3,T4,T5,T6,T7,T8,T9>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> RowMapper<Tuple10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> RowMapper<Tuple11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> RowMapper<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> RowMapper<Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> RowMapper<Tuple14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> RowMapper<Tuple15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14,
+           RowMapper<T15> mapper15
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs),
+                mapper15.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> RowMapper<Tuple16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14,
+           RowMapper<T15> mapper15,
+           RowMapper<T16> mapper16
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs),
+                mapper15.mapRow(rs),
+                mapper16.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> RowMapper<Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14,
+           RowMapper<T15> mapper15,
+           RowMapper<T16> mapper16,
+           RowMapper<T17> mapper17
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs),
+                mapper15.mapRow(rs),
+                mapper16.mapRow(rs),
+                mapper17.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> RowMapper<Tuple18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14,
+           RowMapper<T15> mapper15,
+           RowMapper<T16> mapper16,
+           RowMapper<T17> mapper17,
+           RowMapper<T18> mapper18
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs),
+                mapper15.mapRow(rs),
+                mapper16.mapRow(rs),
+                mapper17.mapRow(rs),
+                mapper18.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> RowMapper<Tuple19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14,
+           RowMapper<T15> mapper15,
+           RowMapper<T16> mapper16,
+           RowMapper<T17> mapper17,
+           RowMapper<T18> mapper18,
+           RowMapper<T19> mapper19
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs),
+                mapper15.mapRow(rs),
+                mapper16.mapRow(rs),
+                mapper17.mapRow(rs),
+                mapper18.mapRow(rs),
+                mapper19.mapRow(rs)
+            );
+    }
+
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> RowMapper<Tuple20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>> of(
+           RowMapper<T1> mapper1,
+           RowMapper<T2> mapper2,
+           RowMapper<T3> mapper3,
+           RowMapper<T4> mapper4,
+           RowMapper<T5> mapper5,
+           RowMapper<T6> mapper6,
+           RowMapper<T7> mapper7,
+           RowMapper<T8> mapper8,
+           RowMapper<T9> mapper9,
+           RowMapper<T10> mapper10,
+           RowMapper<T11> mapper11,
+           RowMapper<T12> mapper12,
+           RowMapper<T13> mapper13,
+           RowMapper<T14> mapper14,
+           RowMapper<T15> mapper15,
+           RowMapper<T16> mapper16,
+           RowMapper<T17> mapper17,
+           RowMapper<T18> mapper18,
+           RowMapper<T19> mapper19,
+           RowMapper<T20> mapper20
+    ) {
+        return rs -> Tuple.of(
+                mapper1.mapRow(rs),
+                mapper2.mapRow(rs),
+                mapper3.mapRow(rs),
+                mapper4.mapRow(rs),
+                mapper5.mapRow(rs),
+                mapper6.mapRow(rs),
+                mapper7.mapRow(rs),
+                mapper8.mapRow(rs),
+                mapper9.mapRow(rs),
+                mapper10.mapRow(rs),
+                mapper11.mapRow(rs),
+                mapper12.mapRow(rs),
+                mapper13.mapRow(rs),
+                mapper14.mapRow(rs),
+                mapper15.mapRow(rs),
+                mapper16.mapRow(rs),
+                mapper17.mapRow(rs),
+                mapper18.mapRow(rs),
+                mapper19.mapRow(rs),
+                mapper20.mapRow(rs)
+            );
     }
 
     public static <T1, T2, T3> RowMapper<Tuple3<T1,T2,T3>> add3rd(RowMapper<Tuple2<T1,T2>> mapper2, RowMapper<T3> mapper) {

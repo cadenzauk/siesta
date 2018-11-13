@@ -117,4 +117,8 @@ public class H2Dialect extends AnsiDialect {
         return false;
     }
 
+    @Override
+    public boolean supportsMultipleValueIn() {
+        return false;
+    }
 }

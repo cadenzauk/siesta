@@ -42,6 +42,7 @@ import javax.persistence.Table;
 import java.util.Optional;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
+import static com.cadenzauk.siesta.grammar.expression.TupleBuilder.tuple;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -548,6 +549,28 @@ class DatabaseTest {
         ExpectingWhere result = database.delete(SalespersonRow.class, "sp");
 
         assertThat(result.sql(), is("delete from SIESTA.SALESPERSON sp"));
+    }
+
+    @Test
+    void selectTuple() {
+        Database database = Database.newBuilder().build();
+        Alias<SalespersonRow> sp = database.table(SalespersonRow.class).as("sp");
+
+        String result = database.from(sp)
+            .select(SalespersonRow::firstName)
+            .where(tuple(SalespersonRow::firstName)
+                .comma("sp", SalespersonRow::numberOfSales)
+                .comma(sp, SalespersonRow::salespersonId))
+            .isIn(database.from(SalespersonRow.class, "i")
+                .select(SalespersonRow::middleNames)
+                .comma(SalespersonRow::numberOfSales)
+                .comma(SalespersonRow::salespersonId))
+            .sql();
+
+        assertThat(result, is("select sp.FIRST_NAME as sp_FIRST_NAME from SIESTA.SALESPERSON sp " +
+            "where (sp.FIRST_NAME, sp.NUMBER_OF_SALES, sp.SALESPERSON_ID) " +
+            "in (select i.MIDDLE_NAMES as i_MIDDLE_NAMES, i.NUMBER_OF_SALES as i_NUMBER_OF_SALES, i.SALESPERSON_ID as i_SALESPERSON_ID " +
+            "from SIESTA.SALESPERSON i)"));
     }
 
     @NotNull

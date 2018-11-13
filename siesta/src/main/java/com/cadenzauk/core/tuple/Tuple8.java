@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -128,11 +128,11 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         return item8;
     }
 
-    public <T> T map(Function8<T1,T2,T3,T4,T5,T6,T7,T8,T> function) {
+    public <T> T map(Function8<? super T1,? super T2,? super T3,? super T4,? super T5,? super T6,? super T7,? super T8,? extends T> function) {
         return function.apply(item1, item2, item3, item4, item5, item6, item7, item8);
     }
 
-    public <T> Tuple8<T,T2,T3,T4,T5,T6,T7,T8> map1(Function<T1,T> function) {
+    public <T> Tuple8<T,T2,T3,T4,T5,T6,T7,T8> map1(Function<? super T1, ? extends T> function) {
         return Tuple.of(
             function.apply(item1),
             item2,
@@ -145,7 +145,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T,T3,T4,T5,T6,T7,T8> map2(Function<T2,T> function) {
+    public <T> Tuple8<T1,T,T3,T4,T5,T6,T7,T8> map2(Function<? super T2, ? extends T> function) {
         return Tuple.of(
             item1,
             function.apply(item2),
@@ -158,7 +158,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T2,T,T4,T5,T6,T7,T8> map3(Function<T3,T> function) {
+    public <T> Tuple8<T1,T2,T,T4,T5,T6,T7,T8> map3(Function<? super T3, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -171,7 +171,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T2,T3,T,T5,T6,T7,T8> map4(Function<T4,T> function) {
+    public <T> Tuple8<T1,T2,T3,T,T5,T6,T7,T8> map4(Function<? super T4, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -184,7 +184,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T2,T3,T4,T,T6,T7,T8> map5(Function<T5,T> function) {
+    public <T> Tuple8<T1,T2,T3,T4,T,T6,T7,T8> map5(Function<? super T5, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -197,7 +197,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T2,T3,T4,T5,T,T7,T8> map6(Function<T6,T> function) {
+    public <T> Tuple8<T1,T2,T3,T4,T5,T,T7,T8> map6(Function<? super T6, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -210,7 +210,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T2,T3,T4,T5,T6,T,T8> map7(Function<T7,T> function) {
+    public <T> Tuple8<T1,T2,T3,T4,T5,T6,T,T8> map7(Function<? super T7, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -223,7 +223,7 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
         );
     }
 
-    public <T> Tuple8<T1,T2,T3,T4,T5,T6,T7,T> map8(Function<T8,T> function) {
+    public <T> Tuple8<T1,T2,T3,T4,T5,T6,T7,T> map8(Function<? super T8, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,

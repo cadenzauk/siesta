@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 class FieldUtilTest {
-   @Test
+    @Test
     void isUtility() {
        assertThat(FieldUtil.class, isUtilityClass());
     }

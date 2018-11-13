@@ -55,6 +55,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -97,6 +98,7 @@ import static com.cadenzauk.siesta.grammar.expression.ExistsExpression.notExists
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.instr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
+import static com.cadenzauk.siesta.grammar.expression.TupleBuilder.tuple;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.cast;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
@@ -105,6 +107,7 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -1250,5 +1253,52 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(existsResult, contains(salespersonRow1));
         assertThat(notExistsResult, contains(salespersonRow2));
+    }
+
+    @Test
+    void selectTupleWithOneElementIn() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+
+        List<SalespersonRow> result = database.from(SalespersonRow.class, "s")
+            .where(
+                tuple(SalespersonRow::salespersonId)
+            )
+            .isIn(
+                database.from(SalespersonRow.class, "i")
+                    .select(SalespersonRow::salespersonId)
+                    .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow1.salespersonId())
+                    .or(SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId())
+            )
+            .list();
+
+        assertThat(result, containsInAnyOrder(salespersonRow1, salespersonRow2));
+    }
+
+    @Test
+    void selectTupleWithMoreThanOneElementIn() {
+        assumeTrue(dialect.supportsMultipleValueIn(), dialect.getClass().getSimpleName() + " does not support '... WHERE (A, B) in (SELECT A, B FROM ...)'");
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+
+        List<SalespersonRow> result = database.from(SalespersonRow.class, "s")
+            .where(
+                tuple(SalespersonRow::salespersonId)
+                    .comma(SalespersonRow::firstName)
+            )
+            .isIn(
+                database.from(SalespersonRow.class, "i")
+                    .select(SalespersonRow::salespersonId)
+                    .comma(SalespersonRow::firstName)
+                    .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow1.salespersonId())
+                    .or(SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId())
+            )
+            .list();
+
+        assertThat(result, containsInAnyOrder(salespersonRow1, salespersonRow2));
     }
 }

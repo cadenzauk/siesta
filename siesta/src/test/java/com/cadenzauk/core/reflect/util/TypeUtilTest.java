@@ -22,14 +22,12 @@
 
 package com.cadenzauk.core.reflect.util;
 
-import com.cadenzauk.core.lang.RuntimeInstantiationException;
-import com.cadenzauk.core.reflect.Factory;
+import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -39,17 +37,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 class TypeUtilTest {
     @Test
-    void cannotInstantiate() {
-        calling(() -> Factory.forClass(TypeUtil.class).get())
-            .shouldThrow(RuntimeException.class)
-            .withCause(InvocationTargetException.class)
-            .withCause(RuntimeInstantiationException.class);
+    void isUtility() {
+        assertThat(TypeUtil.class, isUtilityClass());
     }
 
     private static Stream<Arguments> parametersForBoxedType() {
@@ -71,6 +67,14 @@ class TypeUtilTest {
         Class<?> result = TypeUtil.boxedType(unboxed);
 
         assertThat(result, equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForBoxedType")
+    void boxedTypeAsTypeToken(Class<?> unboxed, Class<?> expected) {
+        TypeToken<?> result = TypeUtil.boxedType(TypeToken.of(unboxed));
+
+        assertThat(result, equalTo(TypeToken.of(expected)));
     }
 
     private static Stream<Arguments> parametersForPrimitiveComponentType() {

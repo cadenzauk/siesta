@@ -72,6 +72,8 @@ public interface Dialect {
 
     boolean supportsOrderByInOlap();
 
+    boolean supportsMultipleValueIn();
+
     boolean requiresOrderByInRowNumber();
 
     String qualifiedName(String catalog, String schema, String name);

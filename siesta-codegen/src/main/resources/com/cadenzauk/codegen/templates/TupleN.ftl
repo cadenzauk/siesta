@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${year} Cadenza United Kingdom Limited
+ * Copyright (c) 2017, ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +29,16 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 <#if n = 2>
+import java.util.Map;
 import java.util.function.BiFunction;
 </#if>
 import java.util.function.Function;
 
+<#if n = 2>
+public class Tuple2<T1, T2> implements Tuple, Map.Entry<T1, T2> {
+<#else>
 public class Tuple${n}<<#list 1..n-1 as i>T${i}, </#list>T${n}> implements Tuple {
+</#if>
 <#list 1..n as i>
     private final T${i} item${i};
 </#list>
@@ -80,6 +85,23 @@ public class Tuple${n}<<#list 1..n-1 as i>T${i}, </#list>T${n}> implements Tuple
 </#list>
             .toHashCode();
     }
+<#if n = 2>
+
+    @Override
+    public T1 getKey() {
+        return item1;
+    }
+
+    @Override
+    public T2 getValue() {
+        return item2;
+    }
+
+    @Override
+    public T2 setValue(T2 value) {
+        throw new UnsupportedOperationException();
+    }
+</#if>
 <#list 1..n as i>
 
     public T${i} item${i}() {
@@ -87,15 +109,15 @@ public class Tuple${n}<<#list 1..n-1 as i>T${i}, </#list>T${n}> implements Tuple
     }
 </#list>
 
-    public <T> T map(<#if n = 2>BiFunction<T1, T2, T><#else>Function${n}<<#list 1..n as i>T${i},</#list>T></#if> function) {
+    public <T> T map(<#if n = 2>BiFunction<? super T1, ? super T2, ? extends T><#else>Function${n}<<#list 1..n as i>? super T${i},</#list>? extends T></#if> function) {
         return function.apply(item1<#list 2..n as i>, item${i}</#list>);
     }
 <#list 1..n as i>
 
-    public <T> Tuple${n}<<#list 1..n as j><#if j=i>T<#else>T${j}</#if><#if j<n>,</#if></#list>> map${i}(Function<T${i},T> function) {
+    public <T> Tuple${n}<<#list 1..n as j><#if j=i>T<#else>T${j}</#if><#if j<n>,</#if></#list>> map${i}(Function<? super T${i}, ? extends T> function) {
         return Tuple.of(
     <#list 1..n as j>
-            <#if j=i>function.apply(item${i})<#else>item${j}</#if><#if j<n>,</#if>
+            <#if j=i>function.apply(item${i})<#else>item${j}</#if><#if j < n>,</#if>
     </#list>
         );
     }

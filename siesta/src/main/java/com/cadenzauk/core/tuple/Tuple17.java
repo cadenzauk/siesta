@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -209,11 +209,11 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         return item17;
     }
 
-    public <T> T map(Function17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T> function) {
+    public <T> T map(Function17<? super T1,? super T2,? super T3,? super T4,? super T5,? super T6,? super T7,? super T8,? super T9,? super T10,? super T11,? super T12,? super T13,? super T14,? super T15,? super T16,? super T17,? extends T> function) {
         return function.apply(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17);
     }
 
-    public <T> Tuple17<T,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map1(Function<T1,T> function) {
+    public <T> Tuple17<T,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map1(Function<? super T1, ? extends T> function) {
         return Tuple.of(
             function.apply(item1),
             item2,
@@ -235,7 +235,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map2(Function<T2,T> function) {
+    public <T> Tuple17<T1,T,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map2(Function<? super T2, ? extends T> function) {
         return Tuple.of(
             item1,
             function.apply(item2),
@@ -257,7 +257,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map3(Function<T3,T> function) {
+    public <T> Tuple17<T1,T2,T,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map3(Function<? super T3, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -279,7 +279,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map4(Function<T4,T> function) {
+    public <T> Tuple17<T1,T2,T3,T,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map4(Function<? super T4, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -301,7 +301,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map5(Function<T5,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map5(Function<? super T5, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -323,7 +323,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map6(Function<T6,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map6(Function<? super T6, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -345,7 +345,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map7(Function<T7,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17> map7(Function<? super T7, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -367,7 +367,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T,T9,T10,T11,T12,T13,T14,T15,T16,T17> map8(Function<T8,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T,T9,T10,T11,T12,T13,T14,T15,T16,T17> map8(Function<? super T8, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -389,7 +389,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T,T10,T11,T12,T13,T14,T15,T16,T17> map9(Function<T9,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T,T10,T11,T12,T13,T14,T15,T16,T17> map9(Function<? super T9, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -411,7 +411,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T,T11,T12,T13,T14,T15,T16,T17> map10(Function<T10,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T,T11,T12,T13,T14,T15,T16,T17> map10(Function<? super T10, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -433,7 +433,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T,T12,T13,T14,T15,T16,T17> map11(Function<T11,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T,T12,T13,T14,T15,T16,T17> map11(Function<? super T11, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -455,7 +455,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T,T13,T14,T15,T16,T17> map12(Function<T12,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T,T13,T14,T15,T16,T17> map12(Function<? super T12, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -477,7 +477,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T,T14,T15,T16,T17> map13(Function<T13,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T,T14,T15,T16,T17> map13(Function<? super T13, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -499,7 +499,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T,T15,T16,T17> map14(Function<T14,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T,T15,T16,T17> map14(Function<? super T14, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -521,7 +521,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T,T16,T17> map15(Function<T15,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T,T16,T17> map15(Function<? super T15, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -543,7 +543,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T,T17> map16(Function<T16,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T,T17> map16(Function<? super T16, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,
@@ -565,7 +565,7 @@ public class Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14
         );
     }
 
-    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T> map17(Function<T17,T> function) {
+    public <T> Tuple17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T> map17(Function<? super T17, ? extends T> function) {
         return Tuple.of(
             item1,
             item2,

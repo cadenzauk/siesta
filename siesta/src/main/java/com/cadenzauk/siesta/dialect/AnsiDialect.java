@@ -174,6 +174,11 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
+    public boolean supportsMultipleValueIn() {
+        return true;
+    }
+
+    @Override
     public boolean requiresOrderByInRowNumber() {
         return false;
     }

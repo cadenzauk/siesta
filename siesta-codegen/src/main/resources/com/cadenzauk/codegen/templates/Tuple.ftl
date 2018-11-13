@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${year} Cadenza United Kingdom Limited
+ * Copyright (c) 2017, ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,10 @@
 package com.cadenzauk.core.tuple;
 
 public interface Tuple {
+    static <T1> Tuple1<T1> of(T1 item1) {
+        return new Tuple1<>(item1);
+    }
+
 <#list 2..n as i>
     static <T1<#list 2..i as j>, T${j}</#list>> Tuple${i}<T1<#list 2..i as j>,T${j}</#list>> of(T1 item1<#list 2..i as j>, T${j} item${j}</#list>) {
         return new Tuple${i}<>(item1<#list 2..i as j>, item${j}</#list>);

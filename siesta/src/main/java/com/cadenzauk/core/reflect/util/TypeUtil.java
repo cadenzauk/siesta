@@ -25,6 +25,7 @@ package com.cadenzauk.core.reflect.util;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.core.util.UtilityClass;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -62,6 +63,13 @@ public final class TypeUtil extends UtilityClass {
     @SuppressWarnings("unchecked")
     public static <V> Class<V> boxedType(Class<V> primitiveType) {
         return Optional.ofNullable((Class<V>) PRIMITIVE_TO_BOXED.get(primitiveType))
+            .orElse(primitiveType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <V> TypeToken<V> boxedType(TypeToken<V> primitiveType) {
+        return Optional.ofNullable((Class<V>) PRIMITIVE_TO_BOXED.get(primitiveType.getRawType()))
+            .map(TypeToken::of)
             .orElse(primitiveType);
     }
 

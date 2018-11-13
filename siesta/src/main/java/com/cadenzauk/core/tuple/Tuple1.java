@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,18 +29,16 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class Tuple2<T1, T2> implements Tuple, Map.Entry<T1, T2> {
+public class Tuple1<T1> implements Tuple {
     private final T1 item1;
-    private final T2 item2;
 
-    public Tuple2(T1 item1, T2 item2) {
+    public Tuple1(T1 item1) {
         this.item1 = item1;
-        this.item2 = item2;
     }
 
     @Override
     public String toString() {
-        return "(" + item1 + ", " + item2 + ')';
+        return "(" + item1 + ')';
     }
 
     @Override
@@ -49,11 +47,10 @@ public class Tuple2<T1, T2> implements Tuple, Map.Entry<T1, T2> {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        Tuple2<?,?> tuple2 = (Tuple2<?,?>) o;
+        Tuple1<?> tuple2 = (Tuple1<?>) o;
 
         return new EqualsBuilder()
             .append(item1, tuple2.item1)
-            .append(item2, tuple2.item2)
             .isEquals();
     }
 
@@ -61,48 +58,20 @@ public class Tuple2<T1, T2> implements Tuple, Map.Entry<T1, T2> {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
             .append(item1)
-            .append(item2)
             .toHashCode();
-    }
-
-    @Override
-    public T1 getKey() {
-        return item1;
-    }
-
-    @Override
-    public T2 getValue() {
-        return item2;
-    }
-
-    @Override
-    public T2 setValue(T2 value) {
-        throw new UnsupportedOperationException();
     }
 
     public T1 item1() {
         return item1;
     }
 
-    public T2 item2() {
-        return item2;
+    public <T> T map(Function<? super T1, ? extends T> function) {
+        return function.apply(item1);
     }
 
-    public <T> T map(BiFunction<? super T1, ? super T2, ? extends T> function) {
-        return function.apply(item1, item2);
-    }
-
-    public <T> Tuple2<T,T2> map1(Function<? super T1, ? extends T> function) {
+    public <T> Tuple1<T> map1(Function<T1,T> function) {
         return Tuple.of(
-            function.apply(item1),
-            item2
-        );
-    }
-
-    public <T> Tuple2<T1,T> map2(Function<? super T2, ? extends T> function) {
-        return Tuple.of(
-            item1,
-            function.apply(item2)
+            function.apply(item1)
         );
     }
 }

@@ -151,4 +151,9 @@ public class FirebirdDialect extends AnsiDialect {
     public String qualifiedName(String catalog, String schema, String name) {
         return name;
     }
+
+    @Override
+    public boolean supportsMultipleValueIn() {
+        return false;
+    }
 }

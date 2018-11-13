@@ -172,6 +172,11 @@ public class SqlServerDialect extends AnsiDialect {
     }
 
     @Override
+    public boolean supportsMultipleValueIn() {
+        return false;
+    }
+
+    @Override
     public String setLockTimeout(long time, TimeUnit unit) {
         return String.format("set lock_timeout %d", unit.toMillis(time));
     }

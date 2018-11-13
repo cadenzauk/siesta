@@ -24,12 +24,10 @@ package com.cadenzauk.codegen;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,6 +81,10 @@ public class SiestaCodeGenerator {
         generate("ExpectingJoinN.ftl", n, max, SIESTA + "/grammar/select/ExpectingJoin" + n + ".java");
     }
 
+    private void generateTupleBuilderN(int n, int max) {
+        generate("TupleBuilderN.ftl", n, max, SIESTA + "/grammar/expression/TupleBuilder" + n + ".java");
+    }
+
     private void generateFunctions(int max) {
         IntStream.range(3, max + 1).forEach(i -> generateFunction(i, max));
     }
@@ -91,19 +93,24 @@ public class SiestaCodeGenerator {
         IntStream.range(2, max + 1).forEach(i -> generateExpectingJoin(i, max));
     }
 
+    private void generateTupleBuilders(int max) {
+        IntStream.range(1, max + 1).forEach(i -> generateTupleBuilderN(i, max));
+    }
+
     private void generateTuples(int max) {
         generateTuple(max, max);
         IntStream.range(2, max + 1).forEach(i -> generateTupleN(i, max));
     }
 
     private void generateAll() {
-        //generateFunctions(20);
-        //generateTuples(20);
-        //generateRowMappers(20);
+        generateFunctions(20);
+        generateTuples(20);
+        generateRowMappers(20);
         generateExpectingJoins(20);
+        generateTupleBuilders(20);
     }
 
-    public static void main(String[] args) throws IOException, TemplateException {
+    public static void main(String[] args) {
         new SiestaCodeGenerator().generateAll();
     }
 }
