@@ -24,5 +24,5 @@ package com.cadenzauk.siesta.h2;
 
 import com.cadenzauk.siesta.LockingIntegrationTest;
 
-public class LockingIntegrationTestH2 extends LockingIntegrationTest {
+class LockingIntegrationTestH2 extends LockingIntegrationTest {
 }

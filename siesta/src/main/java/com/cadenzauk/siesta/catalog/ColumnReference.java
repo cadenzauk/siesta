@@ -62,10 +62,11 @@ public class ColumnReference<C, P, F> {
         return new Builder<>();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static final class Builder<C, P, F> {
         private ForeignKeyReference<C,P> foreignKey;
         private Function<ForeignKeyReference<C,P>,Column<F,C>> childColumnGetter;
-        private Function<ForeignKeyReference<C,P>,Column<F,P>> parentColumnGetter;;
+        private Function<ForeignKeyReference<C,P>,Column<F,P>> parentColumnGetter;
         private Class<F> fieldClass;
 
         private Builder() {

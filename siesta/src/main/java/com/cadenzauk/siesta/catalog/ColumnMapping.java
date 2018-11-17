@@ -98,14 +98,14 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
         String propertyName = methodInfo.propertyName();
         return findColumn(methodInfo.effectiveType(), propertyName)
-            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + methodInfo.declaringClass()));
+            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + methodInfo.referringClass()));
     }
 
     @Override
     public <T> ColumnCollection<T> embedded(MethodInfo<R,T> methodInfo) {
         String propertyName = methodInfo.propertyName();
         return OptionalUtil.as(new TypeToken<ColumnCollection<T>>() {}, column(methodInfo))
-            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + methodInfo.declaringClass()));
+            .orElseThrow(() -> new IllegalArgumentException("No column for property " + propertyName + " in " + methodInfo.referringClass()));
     }
 
     @Override
@@ -179,6 +179,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         return buildRow.apply(builder);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static class Builder<R, B, S extends Builder<R,B,S>> {
         private final Set<String> excludedFields = new HashSet<>();
         protected final Database database;
@@ -276,10 +277,12 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
             return optional(getter, setter, Optional.of(init));
         }
 
+        @SuppressWarnings("WeakerAccess")
         public <T> S column(Function1<R,T> getter, BiConsumer<B,T> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
             return mandatory(getter, setter, Optional.of(init));
         }
 
+        @SuppressWarnings("WeakerAccess")
         public <T> S column(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
             return optional(getter, setter, Optional.of(init));
         }

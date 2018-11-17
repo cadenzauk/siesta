@@ -22,18 +22,12 @@
 
 package com.cadenzauk.siesta.ddl.definition.action;
 
-import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class DropTableAction extends LoggableAction {
     private final Optional<String> catalog;
@@ -52,7 +46,7 @@ public class DropTableAction extends LoggableAction {
     }
 
     public String qualifiedName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), tableName.orElse(""));
+        return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName.orElse(""));
     }
 
     public static Builder newBuilder() {

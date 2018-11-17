@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SqlServerConfig.class)
-public class HiLoGeneratorIntegrationTestSqlServer extends HiLoGeneratorIntegrationTest {
+class HiLoGeneratorIntegrationTestSqlServer extends HiLoGeneratorIntegrationTest {
 }

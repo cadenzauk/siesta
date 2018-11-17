@@ -47,6 +47,7 @@ public abstract class TupleBuilder {
         return items().flatMap(item -> item.args(scope));
     }
 
+    @SuppressWarnings("SameReturnValue")
     public Precedence precedence() {
         return Precedence.PARENTHESES;
     }

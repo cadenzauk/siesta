@@ -38,26 +38,32 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class MethodInfo<C, R> {
-    private final TypeToken<C> declaringType;
+    private final TypeToken<? super C> declaringType;
+    private final TypeToken<C> referringType;
     private final Method method;
     private final Class<?> actualType;
     private final Class<R> effectiveType;
     private final Lazy<Optional<FieldInfo<C,?>>> field = new Lazy<>(this::findField);
 
-    private MethodInfo(TypeToken<C> declaringType, Method method, Class<?> actualType, Class<R> effectiveType) {
+    private MethodInfo(TypeToken<? super C> declaringType, TypeToken<C> referringType, Method method, Class<?> actualType, Class<R> effectiveType) {
         this.declaringType = declaringType;
+        this.referringType = referringType;
         this.method = method;
         this.actualType = actualType;
         this.effectiveType = effectiveType;
     }
 
-    public TypeToken<C> declaringType() {
+    public TypeToken<? super C> declaringType() {
         return declaringType;
     }
 
+    public TypeToken<C> referringType() {
+        return referringType;
+    }
+
     @SuppressWarnings("unchecked")
-    public Class<C> declaringClass() {
-        return (Class<C>) declaringType.getRawType();
+    public Class<C> referringClass() {
+        return (Class<C>) referringType.getRawType();
     }
 
     public Method method() {
@@ -83,7 +89,7 @@ public class MethodInfo<C, R> {
     public String propertyName() {
         return field()
             .map(FieldInfo::name)
-            .orElseThrow(() -> new IllegalArgumentException("Cannot find field for getter " + this));
+            .orElseThrow(() -> new IllegalArgumentException("Cannot find field for getter " + method));
     }
 
     public <A extends Annotation> Optional<A> annotation(Class<A> annotationClass) {
@@ -92,11 +98,11 @@ public class MethodInfo<C, R> {
 
     private Optional<FieldInfo<C, ?>> findField() {
         return Getter.possibleFieldNames(method.getName())
-            .map(name -> ClassUtil.findField(declaringType.getRawType(), name))
+            .map(name -> ClassUtil.findField(referringType.getRawType(), name))
             .flatMap(StreamUtil::of)
             .filter(f -> actualType.isAssignableFrom(f.getType()))
             .findFirst()
-            .map(field -> FieldInfo.of(declaringType, field, actualType));
+            .map(field -> FieldInfo.of(referringType, field, actualType));
     }
 
     public static <R, T> Optional<MethodInfo<R,T>> findGetterForField(FieldInfo<R,T> fieldInfo) {
@@ -104,13 +110,23 @@ public class MethodInfo<C, R> {
             .filter(m -> m.getReturnType() == fieldInfo.fieldType())
             .filter(m -> Getter.isGetter(m, fieldInfo.field()))
             .findAny()
-            .map(m -> new MethodInfo<>(TypeToken.of(fieldInfo.declaringClass()), m, fieldInfo.fieldType(), fieldInfo.effectiveClass()));
+            .map(m -> new MethodInfo<>(
+                TypeToken.of(fieldInfo.declaringClass()),
+                TypeToken.of(fieldInfo.declaringClass()),
+                m,
+                fieldInfo.fieldType(),
+                fieldInfo.effectiveClass()));
     }
 
     @SuppressWarnings("unchecked")
     public static <C, F> MethodInfo<C,F> of(Function1<C,F> getter) {
         Method method = MethodUtil.fromReference(getter);
-        return new MethodInfo<>(TypeToken.of((Class<C>) MethodUtil.referringClass(getter)), method, method.getReturnType(), (Class<F>) method.getReturnType());
+        return new MethodInfo<>(
+            TypeToken.of((Class<C>) method.getDeclaringClass()),
+            TypeToken.of((Class<C>) MethodUtil.referringClass(getter)),
+            method,
+            method.getReturnType(),
+            (Class<F>) method.getReturnType());
     }
 
     @SuppressWarnings("unchecked")
@@ -118,6 +134,11 @@ public class MethodInfo<C, R> {
         Method method = MethodUtil.fromReference(getter);
         ParameterizedType genericType = (ParameterizedType) method.getGenericReturnType();
         Type argType = genericType.getActualTypeArguments()[0];
-        return new MethodInfo<>(TypeToken.of((Class<C>) MethodUtil.referringClass(getter)), method, method.getReturnType(), (Class<F>) argType);
+        return new MethodInfo<>(
+            TypeToken.of((Class<C>) method.getDeclaringClass()),
+            TypeToken.of((Class<C>) MethodUtil.referringClass(getter)),
+            method,
+            method.getReturnType(),
+            (Class<F>) argType);
     }
 }

@@ -78,7 +78,7 @@ class SelectTest {
     }
 
     @SuppressWarnings("unused")
-    public static class Row2 extends Row1 {
+    static class Row2 extends Row1 {
         private Optional<String> comment;
 
         public Optional<String> comment() {
@@ -86,7 +86,8 @@ class SelectTest {
         }
     }
 
-    public static class Row3 extends Row1 {
+    @SuppressWarnings("unused")
+    static class Row3 extends Row1 {
         private Optional<String> comment;
 
         public Optional<String> comment() {

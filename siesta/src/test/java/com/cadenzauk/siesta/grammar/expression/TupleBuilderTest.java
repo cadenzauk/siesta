@@ -65,7 +65,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TupleBuilderTest {
-    private static Database database = TestDatabase.testDatabaseBuilder().build();
+    private static final Database database = TestDatabase.testDatabaseBuilder().build();
 
     @Mock
     private Scope scope;

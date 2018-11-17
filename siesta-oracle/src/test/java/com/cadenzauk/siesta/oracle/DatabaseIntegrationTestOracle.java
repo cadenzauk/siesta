@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = OracleConfig.class)
-public class DatabaseIntegrationTestOracle extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestOracle extends DatabaseIntegrationTest {
 }

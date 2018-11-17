@@ -38,7 +38,7 @@ import java.util.Optional;
 import static com.cadenzauk.core.reflect.util.FieldUtil.genericTypeArgument;
 
 public class FieldInfo<C, F> {
-    private final TypeToken<C> declaringClass;
+    private final TypeToken<C> declaringType;
     private final Field field;
     private final Class<F> effectiveType;
     private final FunctionOptional1<C,F> optionalGetter;
@@ -47,7 +47,7 @@ public class FieldInfo<C, F> {
         Objects.requireNonNull(declaringType, "declaringType");
         Objects.requireNonNull(field, "field");
         Objects.requireNonNull(effectiveType, "effectiveType");
-        this.declaringClass = declaringType;
+        this.declaringType = declaringType;
         this.field = field;
         this.effectiveType = effectiveType;
         this.optionalGetter = Getter.forField(declaringType, effectiveType, field);
@@ -59,12 +59,12 @@ public class FieldInfo<C, F> {
     }
 
     public TypeToken<C> declaringType() {
-        return declaringClass;
+        return declaringType;
     }
 
     @SuppressWarnings("unchecked")
     public Class<C> declaringClass() {
-        return (Class<C>) declaringClass.getRawType();
+        return (Class<C>) declaringType.getRawType();
     }
 
     public Field field() {
@@ -135,11 +135,11 @@ public class FieldInfo<C, F> {
     }
 
     public static <C, F> Optional<FieldInfo<C,F>> ofGetter(MethodInfo<C,F> getter) {
-        return Arrays.stream(getter.declaringClass().getDeclaredFields())
+        return Arrays.stream(getter.referringClass().getDeclaredFields())
             .filter(f -> getter.actualType().isAssignableFrom(f.getType()))
             .filter(f -> Getter.isGetter(getter.method(), f))
             .findAny()
-            .map(f -> of(getter.declaringClass(), f, getter.effectiveClass()));
+            .map(f -> of(getter.referringClass(), f, getter.effectiveClass()));
     }
 
     private static boolean isCompatibleWith(Field field, Class<?> targetType) {

@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = FirebirdConfig.class)
-public class DatabaseIntegrationTestFirebird extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestFirebird extends DatabaseIntegrationTest {
 }

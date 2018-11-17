@@ -70,7 +70,21 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public String qualifiedName(String catalog, String schema, String name) {
+    public String qualifiedSequenceName(String catalog, String schema, String name) {
+        return qualified(schema, name);
+    }
+
+    @Override
+    public String qualifiedIndexName(String catalog, String schema, String name) {
+        return qualified(schema, name);
+    }
+
+    @Override
+    public String qualifiedTableName(String catalog, String schema, String name) {
+        return qualified(schema, name);
+    }
+
+    private String qualified(String schema, String name) {
         return Optional.ofNullable(schema)
             .filter(StringUtils::isNotBlank)
             .map(s -> String.format("%s.%s", s, name))
@@ -185,7 +199,7 @@ public class AnsiDialect implements Dialect {
 
     @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
-        return String.format("%s.NEXTVAL", qualifiedName(catalog, schema, sequenceName));
+        return String.format("%s.NEXTVAL", qualifiedSequenceName(catalog, schema, sequenceName));
     }
 
     @Override

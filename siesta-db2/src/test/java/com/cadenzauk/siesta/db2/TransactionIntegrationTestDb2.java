@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = Db2Config.class)
-public class TransactionIntegrationTestDb2 extends TransactionIntegrationTest {
+class TransactionIntegrationTestDb2 extends TransactionIntegrationTest {
 }

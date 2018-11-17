@@ -147,11 +147,11 @@ class FieldUtilTest {
 
         private Optional<String> optionalStringField;
 
-        public String getStringField() {
+        private String getStringField() {
             return stringField;
         }
 
-        public void setStringField(String stringField) {
+        private void setStringField(String stringField) {
             this.stringField = stringField;
         }
     }

@@ -24,11 +24,9 @@ package com.cadenzauk.siesta.ddl;
 
 import com.cadenzauk.siesta.ddl.action.Action;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
-import com.cadenzauk.siesta.ddl.definition.action.ColumnDataType;
 import com.cadenzauk.siesta.ddl.definition.action.CreateIndexAction;
 import com.cadenzauk.siesta.ddl.definition.action.CreateSequenceAction;
 import com.cadenzauk.siesta.ddl.definition.action.CreateTableAction;
-import com.cadenzauk.siesta.type.DbTypeId;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
@@ -39,14 +37,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.integer;
-
 public class SchemaDefinition {
-    private final String id;
     private final List<LoggableAction> actions;
 
     private SchemaDefinition(Builder builder) {
-        id = builder.id;
         actions = ImmutableList.copyOf(builder.actions);
     }
 
@@ -67,8 +61,8 @@ public class SchemaDefinition {
             return this;
         }
 
-        public Builder createSequence(Consumer<CreateSequenceAction.Builder<Integer>> sequenceDef) {
-            CreateSequenceAction.Builder tableBuilder = CreateSequenceAction.newBuilder(integer())
+        public Builder createSequence(Consumer<CreateSequenceAction.Builder> sequenceDef) {
+            CreateSequenceAction.Builder tableBuilder = CreateSequenceAction.newBuilder()
                 .definition(id);
             sequenceDef.accept(tableBuilder);
             actions.add(tableBuilder.build());

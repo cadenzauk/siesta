@@ -27,9 +27,7 @@ import com.cadenzauk.siesta.ddl.action.Action;
 import com.cadenzauk.siesta.ddl.action.ActionInterceptor;
 import com.cadenzauk.siesta.ddl.action.Priority;
 import com.cadenzauk.siesta.ddl.definition.action.CreateIndexAction;
-import com.cadenzauk.siesta.ddl.definition.action.CreateTableAction;
 import com.cadenzauk.siesta.ddl.sql.action.CreateIndexSql;
-import com.cadenzauk.siesta.ddl.sql.action.CreateTableSql;
 import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;

@@ -111,7 +111,7 @@ public class JdbcSqlExecutor implements SqlExecutor {
     }
 
     <T> CompletableFuture<List<T>> queryAsync(Connection connection, String sql, Object[] args, RowMapper<T> rowMapper) {
-        return CompletableFuture.supplyAsync(() -> query(connection, sql, args, rowMapper));
+        return CompletableFuture.supplyAsync(() -> query(connection, sql, args, rowMapper), executor);
     }
 
     <T> Stream<T> stream(Connection connection, String sql, Object[] args, RowMapper<T> rowMapper, CompositeAutoCloseable closeable) {

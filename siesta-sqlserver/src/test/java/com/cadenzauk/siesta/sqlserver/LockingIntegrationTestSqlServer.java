@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.LockingIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SqlServerConfig.class)
-public class LockingIntegrationTestSqlServer extends LockingIntegrationTest {
+class LockingIntegrationTestSqlServer extends LockingIntegrationTest {
 }

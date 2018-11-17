@@ -82,7 +82,7 @@ class StringFunctionsTest extends FunctionTest {
     }
 
     @SuppressWarnings("unused")
-    private static Stream<Arguments> parametersForFunctionTest() {
+    static Stream<Arguments> parametersForFunctionTest() {
         return Stream.of(
             testCase(s -> upper("ABC"), "upper(?)", toArray("ABC")),
             testCase(s -> upper(lower("ABC")), "upper(lower(?))", toArray("ABC")),

@@ -23,11 +23,13 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.Optional;
 
+import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -80,7 +82,7 @@ class MethodInfoTest {
     void ofNonOptional() {
         MethodInfo<MethodInfoTestClass,String> result = MethodInfo.of(MethodInfoTestClass::string);
 
-        assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
+        assertThat(result.referringClass(), equalTo(MethodInfoTestClass.class));
         assertThat(result.method(), notNullValue());
         assertThat(result.method(), equalTo(ClassUtil.getDeclaredMethod(MethodInfoTestClass.class, "string")));
         assertThat(result.actualType(), equalTo(String.class));
@@ -91,7 +93,7 @@ class MethodInfoTest {
     void ofOptional() {
         MethodInfo<MethodInfoTestClass,Integer> result = MethodInfo.of(MethodInfoTestClass::optionalInteger);
 
-        assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
+        assertThat(result.referringClass(), equalTo(MethodInfoTestClass.class));
         assertThat(result.method(), notNullValue());
         assertThat(result.method(), equalTo(ClassUtil.getDeclaredMethod(MethodInfoTestClass.class, "optionalInteger")));
         assertThat(result.actualType(), equalTo(Optional.class));
@@ -100,19 +102,173 @@ class MethodInfoTest {
 
     @Test
     void findGetterForSuperclass() {
-        MethodInfo<MethodInfoTestClass, String> result = MethodInfo.of(MethodInfoTestClass::name);
-        assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
+        MethodInfo<MethodInfoTestClass,String> result = MethodInfo.of(MethodInfoTestClass::name);
 
+        assertThat(result.referringClass(), equalTo(MethodInfoTestClass.class));
     }
 
     @Test
     void findOptionalGetterForSuperclass() {
-        MethodInfo<MethodInfoTestClass, String> result = MethodInfo.of(MethodInfoTestClass::optionalName);
-        assertThat(result.declaringClass(), equalTo(MethodInfoTestClass.class));
+        MethodInfo<MethodInfoTestClass,String> result = MethodInfo.of(MethodInfoTestClass::optionalName);
 
+        assertThat(result.referringClass(), equalTo(MethodInfoTestClass.class));
+    }
+
+    @Test
+    void effectiveTypeReturnsCorrectValue() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        TypeToken<String> result = sut.effectiveType();
+
+        assertThat(result, is(TypeToken.of(String.class)));
+    }
+
+    @Test
+    void declaringTypeReturnsTheCorrectValueForSuperClass() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        TypeToken<? super MethodInfoTestClass> result = sut.declaringType();
+
+        assertThat(result, is(TypeToken.of(MethodInfoSuperClass.class)));
+    }
+
+    @Test
+    void referringTypeReturnsTheCorrectValueForSuperClassMethod() {
+        MethodInfo<MethodInfoSuperClass,String> sut = MethodInfo.of(MethodInfoSuperClass::optionalName);
+
+        TypeToken<MethodInfoSuperClass> result = sut.referringType();
+
+        assertThat(result, is(TypeToken.of(MethodInfoSuperClass.class)));
+    }
+
+    @Test
+    void referringTypeReturnsTheCorrectValueForSuperClassMethodAsSubclass() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoSuperClass::optionalName);
+
+        TypeToken<MethodInfoTestClass> result = sut.referringType();
+
+        assertThat(result, is(TypeToken.of(MethodInfoTestClass.class)));
+    }
+
+    @Test
+    void referringTypeReturnsTheCorrectValueForSuperClassMethodInSubclass() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        TypeToken<? super MethodInfoTestClass> result = sut.referringType();
+
+        assertThat(result, is(TypeToken.of(MethodInfoTestClass.class)));
+    }
+
+    @Test
+    void fieldForGetterWithNoPrefixReturnsField() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::noPrefix);
+
+        Optional<FieldInfo<MethodInfoTestClass,?>> result = sut.field();
+
+        assertThat(result.map(FieldInfo::name), is(Optional.of("noPrefix")));
+    }
+
+    @Test
+    void fieldForGetterWithGetPrefixReturnsField() {
+        MethodInfo<MethodInfoTestClass,Integer> sut = MethodInfo.of(MethodInfoTestClass::getPrefixedWithGet);
+
+        Optional<FieldInfo<MethodInfoTestClass,?>> result = sut.field();
+
+        assertThat(result.map(FieldInfo::name), is(Optional.of("prefixedWithGet")));
+    }
+
+    @Test
+    void fieldForGetterWithIsPrefixReturnsField() {
+        MethodInfo<MethodInfoTestClass,Boolean> sut = MethodInfo.of(MethodInfoTestClass::isPrefixedWithIs);
+
+        Optional<FieldInfo<MethodInfoTestClass,?>> result = sut.field();
+
+        assertThat(result.map(FieldInfo::name), is(Optional.of("prefixedWithIs")));
+    }
+
+    @Test
+    void fieldForFieldlessGetterWithNoPrefixReturnsEmpty() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::fieldlessNoPrefix);
+
+        Optional<FieldInfo<MethodInfoTestClass,?>> result = sut.field();
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void fieldForFieldlessGetterWithGetPrefixReturnsField() {
+        MethodInfo<MethodInfoTestClass,Integer> sut = MethodInfo.of(MethodInfoTestClass::getFieldlessPrefixedWithGet);
+
+        Optional<FieldInfo<MethodInfoTestClass,?>> result = sut.field();
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void fieldForFieldlessGetterWithIsPrefixReturnsField() {
+        MethodInfo<MethodInfoTestClass,Boolean> sut = MethodInfo.of(MethodInfoTestClass::isFieldlessPrefixedWithIs);
+
+        Optional<FieldInfo<MethodInfoTestClass,?>> result = sut.field();
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void propertyNameForGetterWithNoPrefixReturnsFieldName() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::noPrefix);
+
+        String result = sut.propertyName();
+
+        assertThat(result, is("noPrefix"));
+    }
+
+    @Test
+    void propertyNameForGetterWithGetPrefixReturnsFieldName() {
+        MethodInfo<MethodInfoTestClass,Integer> sut = MethodInfo.of(MethodInfoTestClass::getPrefixedWithGet);
+
+        String result = sut.propertyName();
+
+        assertThat(result, is("prefixedWithGet"));
+    }
+
+    @Test
+    void propertyNameForGetterWithIsPrefixReturnsFieldName() {
+        MethodInfo<MethodInfoTestClass,Boolean> sut = MethodInfo.of(MethodInfoTestClass::isPrefixedWithIs);
+
+        String result = sut.propertyName();
+
+        assertThat(result, is("prefixedWithIs"));
+    }
+
+    @Test
+    void propertyNameForFieldlessGetterWithNoPrefixThrows() {
+        MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::fieldlessNoPrefix);
+
+        calling(sut::propertyName)
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Cannot find field for getter java.lang.String com.cadenzauk.core.reflect.MethodInfoTest$MethodInfoTestClass.fieldlessNoPrefix()");
+    }
+
+    @Test
+    void propertyNameForFieldlessGetterWithGetPrefixThrows() {
+        MethodInfo<MethodInfoTestClass,Integer> sut = MethodInfo.of(MethodInfoTestClass::getFieldlessPrefixedWithGet);
+
+        calling(sut::propertyName)
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Cannot find field for getter java.util.Optional com.cadenzauk.core.reflect.MethodInfoTest$MethodInfoTestClass.getFieldlessPrefixedWithGet()");
+    }
+
+    @Test
+    void propertyNameForFieldlessGetterWithIsPrefixThrows() {
+        MethodInfo<MethodInfoTestClass,Boolean> sut = MethodInfo.of(MethodInfoTestClass::isFieldlessPrefixedWithIs);
+
+        calling(sut::propertyName)
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Cannot find field for getter boolean com.cadenzauk.core.reflect.MethodInfoTest$MethodInfoTestClass.isFieldlessPrefixedWithIs()");
     }
 
     private static class MethodInfoSuperClass {
+        @SuppressWarnings("SameReturnValue")
         String name() {
             return "name";
         }
@@ -122,13 +278,12 @@ class MethodInfoTest {
         }
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "SameReturnValue"})
     private static class MethodInfoTestClass extends MethodInfoSuperClass {
         private String noPrefix;
         private Optional<Integer> prefixedWithGet;
         private boolean prefixedWithIs;
 
-        @SuppressWarnings("SameReturnValue")
         String string() {
             return "a string";
         }
@@ -137,13 +292,11 @@ class MethodInfoTest {
             return Optional.empty();
         }
 
-        @SuppressWarnings("SameReturnValue")
         @XmlElement
         String methodWithAnnotation() {
             return "xmlElement";
         }
 
-        @SuppressWarnings("SameReturnValue")
         String methodWithoutAnnotation() {
             return "xmlElement";
         }
@@ -158,6 +311,18 @@ class MethodInfoTest {
 
         boolean isPrefixedWithIs() {
             return prefixedWithIs;
+        }
+
+        String fieldlessNoPrefix() {
+            return "";
+        }
+
+        Optional<Integer> getFieldlessPrefixedWithGet() {
+            return Optional.empty();
+        }
+
+        boolean isFieldlessPrefixedWithIs() {
+            return false;
         }
     }
 }

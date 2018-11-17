@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = PostgresConfig.class)
-public class DatabaseIntegrationTestPostgres extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestPostgres extends DatabaseIntegrationTest {
 }

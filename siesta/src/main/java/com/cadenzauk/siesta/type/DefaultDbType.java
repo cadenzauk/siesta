@@ -32,6 +32,7 @@ public class DefaultDbType<T> implements DbType<T> {
     private final SqlBiFunction<ResultSet,String,T> byLabel;
     private final SqlBiFunction<ResultSet,Integer,T> byColNo;
 
+    @SuppressWarnings("WeakerAccess")
     public DefaultDbType(String sqlType, SqlBiFunction<ResultSet,String,T> byLabel, SqlBiFunction<ResultSet,Integer,T> byColNo) {
         this.sqlType = sqlType;
         this.byLabel = byLabel;
@@ -53,6 +54,7 @@ public class DefaultDbType<T> implements DbType<T> {
         return sqlType;
     }
 
+    @SuppressWarnings("WeakerAccess")
     @FunctionalInterface
     public interface SqlBiFunction<T1, T2, R> {
         R apply(T1 arg1, T2 arg2) throws SQLException;

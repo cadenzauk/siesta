@@ -60,17 +60,17 @@ public class ActionPipeline {
         private final TypeToken<T> supportedType;
         private final ActionInterceptor<T> interceptor;
 
-        public Adapter(ActionInterceptor<T> interceptor) {
+        private Adapter(ActionInterceptor<T> interceptor) {
             this.priority = interceptor.priority();
             this.supportedType = interceptor.supportedType();
             this.interceptor = interceptor;
         }
 
-        public int priority() {
+        private int priority() {
             return priority;
         }
 
-        public Stream<Action> intercept(Database database, Action action) {
+        private Stream<Action> intercept(Database database, Action action) {
             LOG.trace("{} -> {}", action, interceptor);
             return OptionalUtil.as(supportedType, action)
                 .filter(a -> interceptor.supports(database, a))

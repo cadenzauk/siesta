@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = OracleConfig.class)
-public class HiLoGeneratorIntegrationTestOracle extends HiLoGeneratorIntegrationTest {
+class HiLoGeneratorIntegrationTestOracle extends HiLoGeneratorIntegrationTest {
 }

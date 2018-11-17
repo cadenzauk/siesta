@@ -72,6 +72,15 @@ public class TestSchema {
                 .column("RETAIL_PRICE_AMOUNT", decimal(15, 2))
                 .column("RETAIL_PRICE_CCY", character(3))
             )
+            .createIndex(i -> i
+                .id("create FK_PART_WIDGET_ID index")
+                .author("mark")
+                .schemaName("SIESTA")
+                .tableName("PART")
+                .indexName("FK_PART_WIDGET_ID")
+                .unique(false)
+                .column("WIDGET_ID")
+            )
             .createTable(t -> t
                 .id("create manufacturer table")
                 .author("mark")

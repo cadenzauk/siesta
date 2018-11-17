@@ -100,7 +100,7 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
     @SuppressWarnings("unchecked")
     @Override
     public Alias<R> resolve(Scope scope) {
-        Class<R> rowClass = getterMethod.declaringClass();
+        Class<R> rowClass = getterMethod.referringClass();
         return this.alias
             .map(a -> scope.findAlias(rowClass, a))
             .orElseGet(() -> scope.findAlias(rowClass));

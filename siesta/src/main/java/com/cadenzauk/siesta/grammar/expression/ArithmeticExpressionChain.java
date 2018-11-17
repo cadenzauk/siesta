@@ -109,33 +109,33 @@ public class ArithmeticExpressionChain<T> implements TypedExpression<T> {
         private final String operator;
         private final TypedExpression<T> operand;
 
-        public Term(Precedence precedence, String operator, TypedExpression<T> operand) {
+        private Term(Precedence precedence, String operator, TypedExpression<T> operand) {
             this.precedence = precedence;
             this.operator = operator;
             this.operand = ParenthesisedArithmeticExpression.wrapIfNecessary(operand);
         }
 
-        public TypedExpression<T> operand() {
+        private TypedExpression<T> operand() {
             return operand;
         }
 
-        public String sql(Scope scope) {
+        private String sql(Scope scope) {
             return " " + operator + " " + operand.sql(scope);
         }
 
-        public static <T> Term<T> plus(TypedExpression<T> expression) {
+        private static <T> Term<T> plus(TypedExpression<T> expression) {
             return new Term<>(Precedence.PLUS_MINUS, "+", expression);
         }
 
-        public static <T> Term<T> minus(TypedExpression<T> expression) {
+        private static <T> Term<T> minus(TypedExpression<T> expression) {
             return new Term<>(Precedence.PLUS_MINUS, "-", expression);
         }
 
-        public static <T> Term<T> times(TypedExpression<T> expression) {
+        private static <T> Term<T> times(TypedExpression<T> expression) {
             return new Term<>(Precedence.TIMES_DIVIDE, "*", expression);
         }
 
-        public static <T> Term<T> dividedBy(TypedExpression<T> expression) {
+        private static <T> Term<T> dividedBy(TypedExpression<T> expression) {
             return new Term<>(Precedence.TIMES_DIVIDE, "/", expression);
         }
     }

@@ -36,7 +36,7 @@ public final class StringUtil extends UtilityClass {
         if (StringUtils.isEmpty(s)) {
             return "";
         }
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
+        return s.substring(0, 1).toLowerCase() + s.substring(1);
     }
 
     public static String uppercaseFirst(String s) {

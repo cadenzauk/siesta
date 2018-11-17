@@ -23,6 +23,7 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -96,6 +97,7 @@ class FieldInfoTest {
 
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.field(), sameInstance(field));
@@ -109,6 +111,7 @@ class FieldInfoTest {
 
         FieldInfo<ClassWithField,?> fieldInfo = FieldInfo.of(ClassWithField.class, field);
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.field(), sameInstance(field));
@@ -122,6 +125,7 @@ class FieldInfoTest {
 
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, field, String.class);
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.field(), sameInstance(field));
@@ -135,6 +139,7 @@ class FieldInfoTest {
 
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, field, String.class);
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.field(), sameInstance(field));
@@ -146,6 +151,7 @@ class FieldInfoTest {
     void ofOptionalByName() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, "optionalString", String.class);
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.fieldType(), equalTo(Optional.class));
@@ -156,6 +162,7 @@ class FieldInfoTest {
     void ofNonOptionalByName() {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.of(ClassWithField.class, "string", String.class);
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.fieldType(), equalTo(String.class));
@@ -174,6 +181,7 @@ class FieldInfoTest {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::optionalString))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for optionalString but didn't"));
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("optionalString"));
         assertThat(fieldInfo.fieldType(), equalTo(Optional.class));
@@ -185,6 +193,7 @@ class FieldInfoTest {
         FieldInfo<ClassWithField,String> fieldInfo = FieldInfo.ofGetter(MethodInfo.of(ClassWithField::string))
             .orElseThrow(() -> new AssertionError("Should have got FieldInfo for string but didn't"));
 
+        assertThat(fieldInfo.declaringType(), equalTo(TypeToken.of(ClassWithField.class)));
         assertThat(fieldInfo.declaringClass(), equalTo(ClassWithField.class));
         assertThat(fieldInfo.name(), equalTo("string"));
         assertThat(fieldInfo.fieldType(), equalTo(String.class));

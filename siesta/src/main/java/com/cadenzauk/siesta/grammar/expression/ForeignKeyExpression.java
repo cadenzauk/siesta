@@ -84,10 +84,10 @@ public class ForeignKeyExpression<L, R> extends BooleanExpression {
         return Precedence.AND;
     }
 
-    public static class ForeignKeyBuilder1 {
+    public static final class ForeignKeyBuilder1 {
         private final Optional<String> name;
 
-        public ForeignKeyBuilder1(Optional<String> name) {
+        private ForeignKeyBuilder1(Optional<String> name) {
             this.name = name;
         }
 
@@ -100,12 +100,12 @@ public class ForeignKeyExpression<L, R> extends BooleanExpression {
         }
     }
 
-    public static class ForeignKeyBuilder2<C> {
+    public static final class ForeignKeyBuilder2<C> {
         private final Optional<String> name;
         private final Class<C> childClass;
         private final Optional<String> childAlias;
 
-        public ForeignKeyBuilder2(Optional<String> name, Class<C> childClass, Optional<String> childAlias) {
+        private ForeignKeyBuilder2(Optional<String> name, Class<C> childClass, Optional<String> childAlias) {
             this.name = name;
             this.childClass = childClass;
             this.childAlias = childAlias;

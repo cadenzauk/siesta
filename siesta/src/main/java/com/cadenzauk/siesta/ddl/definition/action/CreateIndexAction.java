@@ -22,8 +22,6 @@
 
 package com.cadenzauk.siesta.ddl.definition.action;
 
-import com.cadenzauk.core.lang.StringUtil;
-import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
@@ -34,9 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
 
 public class CreateIndexAction extends LoggableAction {
     private final boolean unique;
@@ -65,11 +60,11 @@ public class CreateIndexAction extends LoggableAction {
     }
 
     public String qualifiedIndexName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), indexName);
+        return database.dialect().qualifiedIndexName(catalog.orElse(""), schemaName.orElse(""), indexName);
     }
 
     public String qualifiedTableName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), tableName);
+        return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName);
     }
 
     public List<String> columnNames() {
@@ -80,6 +75,7 @@ public class CreateIndexAction extends LoggableAction {
         return new Builder();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static final class Builder extends LoggableAction.Builder<Builder> {
         private boolean unique;
         private Optional<String> catalog = Optional.empty();

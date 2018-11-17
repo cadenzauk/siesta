@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.model;
 
-import javax.persistence.Column;
 import javax.persistence.Table;
 
 @Table(name = "NO_SUCH_TABLE")

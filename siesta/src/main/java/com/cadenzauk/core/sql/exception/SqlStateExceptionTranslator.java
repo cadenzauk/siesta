@@ -24,7 +24,6 @@ package com.cadenzauk.core.sql.exception;
 
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.core.stream.StreamUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -46,16 +45,19 @@ public class SqlStateExceptionTranslator implements SqlExceptionTranslator {
             .orElseGet(() -> new RuntimeSqlException(statement, cause));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public SqlStateExceptionTranslator register(String sqlState, SqlExceptionConstructor constructor) {
         mappings.add(new ExceptionMapping(sqlState, constructor));
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public SqlStateExceptionTranslator register(int errorCode, SqlExceptionConstructor constructor) {
         mappings.add(new ExceptionMapping(".*", errorCode, constructor));
         return this;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public SqlStateExceptionTranslator register(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
         mappings.add(new ExceptionMapping(sqlState, errorCode, constructor));
         return this;
@@ -66,25 +68,25 @@ public class SqlStateExceptionTranslator implements SqlExceptionTranslator {
         private final SqlExceptionConstructor constructor;
         private final int priority;
 
-        public ExceptionMapping(String sqlState, SqlExceptionConstructor constructor) {
+        private ExceptionMapping(String sqlState, SqlExceptionConstructor constructor) {
             Predicate<String> sqlStateMatches = Pattern.compile("^" + sqlState + "$").asPredicate();
             this.applies = e -> sqlStateMatches.test(e.getSQLState());
             this.constructor = constructor;
             priority = 1;
         }
 
-        public ExceptionMapping(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
+        private ExceptionMapping(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
             Predicate<String> sqlStateMatches = Pattern.compile("^" + sqlState + "$").asPredicate();
             this.applies = e -> sqlStateMatches.test(e.getSQLState()) && e.getErrorCode() == errorCode;
             this.constructor = constructor;
             priority = 1;
         }
 
-        public int priority() {
+        private int priority() {
             return priority;
         }
 
-        public Optional<RuntimeSqlException> map(String statement, SQLException cause) {
+        private Optional<RuntimeSqlException> map(String statement, SQLException cause) {
             return applies.test(cause)
                 ? Optional.of(constructor.construct(statement, cause))
                 : Optional.empty();

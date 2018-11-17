@@ -59,6 +59,7 @@ public class DbTypeId<T> {
     private final int typeCode;
     private final Class<T> javaClass;
 
+    @SuppressWarnings("WeakerAccess")
     public DbTypeId(String name, int typeCode, Class<T> javaClass) {
         this.name = name;
         this.typeCode = typeCode;

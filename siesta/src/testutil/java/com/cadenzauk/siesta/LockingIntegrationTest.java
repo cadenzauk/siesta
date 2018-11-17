@@ -244,46 +244,46 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
         private final CompletableFuture<Void> beforeCommit = new CompletableFuture<>();
         private final CompletableFuture<Void> commitDone = new CompletableFuture<>();
 
-        public void select() {
+        private void select() {
             beforeSelect.complete(null);
             selectDone.join();
         }
 
-        public void update() {
+        private void update() {
             beforeUpdate.complete(null);
             updateDone.join();
         }
 
-        public void updateAsync() {
+        private void updateAsync() {
             beforeUpdate.complete(null);
         }
 
-        public void commit() {
+        private void commit() {
             beforeCommit.complete(null);
             commitDone.join();
         }
 
-        public void waitToSelect() {
+        private void waitToSelect() {
             beforeSelect.join();
         }
 
-        public void waitToUpdate() {
+        private void waitToUpdate() {
             selectDone.complete(null);
             beforeUpdate.join();
         }
 
-        public void waitToCommit() {
+        private void waitToCommit() {
             updateDone.complete(null);
             LOG.info("Waiting to commit");
             beforeCommit.join();
         }
 
-        public void finished() {
+        private void finished() {
             updateDone.complete(null);
             commitDone.complete(null);
         }
 
-        public void updateFailed() {
+        private void updateFailed() {
             updateDone.complete(null);
         }
     }

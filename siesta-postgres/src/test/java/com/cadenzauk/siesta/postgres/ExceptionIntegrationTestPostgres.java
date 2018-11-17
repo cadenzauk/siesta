@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.ExceptionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = PostgresConfig.class)
-public class ExceptionIntegrationTestPostgres extends ExceptionIntegrationTest {
+class ExceptionIntegrationTestPostgres extends ExceptionIntegrationTest {
 }

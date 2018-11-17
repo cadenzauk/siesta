@@ -144,11 +144,21 @@ public class FirebirdDialect extends AnsiDialect {
 
     @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
-        return "next value for " + qualifiedName(catalog, schema, sequenceName);
+        return "next value for " + qualifiedSequenceName(catalog, schema, sequenceName);
     }
 
     @Override
-    public String qualifiedName(String catalog, String schema, String name) {
+    public String qualifiedSequenceName(String catalog, String schema, String name) {
+        return name;
+    }
+
+    @Override
+    public String qualifiedIndexName(String catalog, String schema, String name) {
+        return name;
+    }
+
+    @Override
+    public String qualifiedTableName(String catalog, String schema, String name) {
         return name;
     }
 

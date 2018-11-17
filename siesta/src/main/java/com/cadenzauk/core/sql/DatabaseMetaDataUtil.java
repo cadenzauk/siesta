@@ -22,8 +22,6 @@
 
 package com.cadenzauk.core.sql;
 
-import com.cadenzauk.core.tuple.Tuple;
-import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.UtilityClass;
 
 import java.sql.DatabaseMetaData;

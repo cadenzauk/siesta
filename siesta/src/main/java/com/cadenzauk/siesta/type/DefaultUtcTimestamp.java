@@ -68,11 +68,11 @@ public class DefaultUtcTimestamp implements DbType<ZonedDateTime> {
         return "cast(? as timestamp)";
     }
 
-    protected static Timestamp getTimestamp(ResultSet resultSet, String columnLabel, Database db) throws SQLException {
+    private static Timestamp getTimestamp(ResultSet resultSet, String columnLabel, Database db) throws SQLException {
         return resultSet.getTimestamp(columnLabel, new GregorianCalendar(TimeZone.getTimeZone(db.databaseTimeZone())));
     }
 
-    protected static Timestamp getTimestamp(ResultSet resultSet, int columnNo, Database db) throws SQLException {
+    private static Timestamp getTimestamp(ResultSet resultSet, int columnNo, Database db) throws SQLException {
         return resultSet.getTimestamp(columnNo, new GregorianCalendar(TimeZone.getTimeZone(db.databaseTimeZone())));
     }
 }

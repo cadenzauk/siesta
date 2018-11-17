@@ -50,10 +50,11 @@ public class FluentAssert {
         }
     }
 
-    public static class ThrowableMatcher<T extends Throwable> {
+    @SuppressWarnings("UnusedReturnValue")
+    public static final class ThrowableMatcher<T extends Throwable> {
         private final T actual;
 
-        public ThrowableMatcher(T actual) {
+        private ThrowableMatcher(T actual) {
             this.actual = actual;
         }
 
@@ -93,6 +94,7 @@ public class FluentAssert {
             this.throwable = throwable;
         }
 
+        @SuppressWarnings("unused")
         public Result<T> hasResult(Matcher<T> matcher) {
             assertThat(result, matcher);
             return this;
@@ -107,11 +109,11 @@ public class FluentAssert {
                     .orElseThrow(() -> new AssertionError("Expected exception: " + throwableClass + " but no exception thrown."));
         }
 
-        public static <T> Result<T> success(T result) {
+        private static <T> Result<T> success(T result) {
             return new Result<>(result, Optional.empty());
         }
 
-        public static <T> Result<T> failure(Throwable t) {
+        private static <T> Result<T> failure(Throwable t) {
             return new Result<>(null, Optional.of(t));
         }
     }

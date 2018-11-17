@@ -22,13 +22,9 @@
 
 package com.cadenzauk.siesta.ddl.definition.action;
 
-import com.cadenzauk.core.lang.StringUtil;
-import com.cadenzauk.core.sql.QualifiedName;
-import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -37,8 +33,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
 
 public class CreateTableAction extends LoggableAction {
     private final Optional<String> catalog;
@@ -64,7 +58,7 @@ public class CreateTableAction extends LoggableAction {
     }
 
     public String qualifiedName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), tableName);
+        return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName);
     }
 
     public Stream<Column> columns() {

@@ -24,26 +24,22 @@ package com.cadenzauk.siesta.ddl.sql.action;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SequenceInfo;
-import com.cadenzauk.siesta.ddl.definition.action.Column;
 import com.cadenzauk.siesta.ddl.definition.action.CreateSequenceAction;
 
 import static com.cadenzauk.core.lang.StringUtil.prepend;
-import static java.util.stream.Collectors.joining;
 
-public class CreateSequenceSql<T> extends SqlAction {
-    private final CreateSequenceAction<T> definition;
-    private final boolean includeDataType = false;
+public class CreateSequenceSql extends SqlAction {
+    private final CreateSequenceAction definition;
 
-    public CreateSequenceSql(CreateSequenceAction<T> definition) {
+    public CreateSequenceSql(CreateSequenceAction definition) {
         this.definition = definition;
     }
 
     @Override
     public String sql(Database database) {
         SequenceInfo sequenceInfo = database.dialect().sequenceInfo();
-        return String.format("create sequence %s%s%s",
+        return String.format("create sequence %s%s",
             definition.qualifiedName(database),
-            includeDataType ? definition.dataType().sql(database) : "",
             definition.startValue().filter(x -> sequenceInfo.supportsStartValue()).map(prepend(" start with ")).orElse("")
         );
     }

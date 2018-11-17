@@ -70,7 +70,7 @@ public final class Olap extends UtilityClass {
         return function("sum", argument.type(), argument);
     }
 
-    public static <T> InOlapExpectingPartitionBy<T> function(String function, TypeToken<T> type, TypedExpression<?>... arguments) {
+    private static <T> InOlapExpectingPartitionBy<T> function(String function, TypeToken<T> type, TypedExpression<?>... arguments) {
         return new InOlapExpectingPartitionBy<>(new OlapFunction<>(function, type, arguments));
     }
 }

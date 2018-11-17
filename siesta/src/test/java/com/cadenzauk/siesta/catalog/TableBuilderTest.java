@@ -22,8 +22,11 @@
 
 package com.cadenzauk.siesta.catalog;
 
+import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.dialect.AnsiDialect;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.AttributeOverride;
@@ -33,12 +36,74 @@ import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class TableBuilderTest {
+    @Test
+    void catalogFromDefault() {
+        Database database = Database.newBuilder()
+            .defaultCatalog("DEFAULT_CATALOG")
+            .dialect(new AnsiDialect() {
+                @Override
+                public String qualifiedTableName(String catalog, String schema, String name) {
+                    return Stream.of(catalog, schema, name)
+                        .map(OptionalUtil::ofBlankable)
+                        .flatMap(StreamUtil::of)
+                        .collect(joining("."));
+                }
+            })
+            .build();
+
+        Table<NameInAnnotation> result = database.table(NameInAnnotation.class);
+
+        assertThat(result.qualifiedName(), is("DEFAULT_CATALOG.NAME_IN_ANNOTATION"));
+    }
+
+    @Test
+    void catalogFromBuilder() {
+        Database database = Database.newBuilder()
+            .defaultCatalog("DEFAULT_CATALOG")
+            .table(CatalogInAnnotation.class, t -> t.catalog("BUILDER_CATALOG"))
+            .dialect(new AnsiDialect() {
+                @Override
+                public String qualifiedTableName(String catalog, String schema, String name) {
+                    return Stream.of(catalog, schema, name)
+                        .map(OptionalUtil::ofBlankable)
+                        .flatMap(StreamUtil::of)
+                        .collect(joining("."));
+                }
+            })
+            .build();
+
+        Table<CatalogInAnnotation> result = database.table(CatalogInAnnotation.class);
+
+        assertThat(result.qualifiedName(), is("BUILDER_CATALOG.CATALOG_IN_ANNOTATION"));
+    }
+
+    @Test
+    void catalogFromAnnotation() {
+        Database database = Database.newBuilder()
+            .defaultCatalog("DEFAULT_CATALOG")
+            .dialect(new AnsiDialect() {
+                @Override
+                public String qualifiedTableName(String catalog, String schema, String name) {
+                    return Stream.of(catalog, schema, name)
+                        .map(OptionalUtil::ofBlankable)
+                        .flatMap(StreamUtil::of)
+                        .collect(joining("."));
+                }
+            })
+            .build();
+
+        Table<CatalogInAnnotation> result = database.table(CatalogInAnnotation.class);
+
+        assertThat(result.qualifiedName(), is("ANNOTATION_CATALOG.CATALOG_IN_ANNOTATION"));
+    }
+
     @Test
     void schemaFromDefault() {
         Database database = Database.newBuilder()
@@ -468,6 +533,10 @@ class TableBuilderTest {
         public Optional<ZonedDateTime> insertTime() {
             return insertTime;
         }
+    }
+
+    @javax.persistence.Table(catalog = "ANNOTATION_CATALOG")
+    private static class CatalogInAnnotation {
     }
 
     @javax.persistence.Table(schema = "ANNOTATION_SCHEMA")

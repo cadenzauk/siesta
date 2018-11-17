@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.ddl.sql.action;
 
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.ddl.definition.action.Column;
 import com.cadenzauk.siesta.ddl.definition.action.CreateIndexAction;
 
 public class CreateIndexSql extends SqlAction {

@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = Db2Config.class)
-public class HiLoGeneratorIntegrationTestDb2 extends HiLoGeneratorIntegrationTest {
+class HiLoGeneratorIntegrationTestDb2 extends HiLoGeneratorIntegrationTest {
 }

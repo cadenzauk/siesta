@@ -108,25 +108,25 @@ public class BooleanExpressionChain extends BooleanExpression {
         private final String operator;
         private final BooleanExpression operand;
 
-        public Term(Precedence precedence, String operator, BooleanExpression operand) {
+        private Term(Precedence precedence, String operator, BooleanExpression operand) {
             this.precedence = precedence;
             this.operator = operator;
             this.operand = operand;
         }
 
-        public BooleanExpression operand() {
+        private BooleanExpression operand() {
             return operand;
         }
 
-        public String sql(Scope scope) {
+        private String sql(Scope scope) {
             return " " + operator + " " + operand.sql(scope);
         }
 
-        public static Term or(BooleanExpression expression) {
+        private static Term or(BooleanExpression expression) {
             return new Term(Precedence.OR, "or", expression);
         }
 
-        public static Term and(BooleanExpression expression) {
+        private static Term and(BooleanExpression expression) {
             return new Term(Precedence.AND, "and", expression);
         }
     }

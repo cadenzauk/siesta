@@ -45,13 +45,9 @@ public class QualifiedName {
     private final Optional<String> name;
 
     public QualifiedName(String catalog, String schema, String name) {
-        this(Optional.ofNullable(catalog), Optional.ofNullable(schema), Optional.ofNullable(name));
-    }
-
-    public QualifiedName(Optional<String> catalog, Optional<String> schema, Optional<String> name) {
-        this.catalog = catalog.filter(StringUtils::isNotBlank).map(String::trim);
-        this.schema = schema.filter(StringUtils::isNotBlank).map(String::trim);
-        this.name = name.filter(StringUtils::isNotBlank).map(String::trim);
+        this.catalog = Optional.ofNullable(catalog).filter(StringUtils::isNotBlank).map(String::trim);
+        this.schema = Optional.ofNullable(schema).filter(StringUtils::isNotBlank).map(String::trim);
+        this.name = Optional.ofNullable(name).filter(StringUtils::isNotBlank).map(String::trim);
     }
 
     @Override

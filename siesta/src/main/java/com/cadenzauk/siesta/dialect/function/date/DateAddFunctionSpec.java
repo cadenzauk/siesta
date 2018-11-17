@@ -29,7 +29,7 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import java.util.stream.Stream;
 
 public class DateAddFunctionSpec implements FunctionSpec {
-    private String part;
+    private final String part;
 
     private DateAddFunctionSpec(String part) {
         this.part = part;

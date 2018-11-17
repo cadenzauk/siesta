@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SqlServerConfig.class)
-public class DatabaseIntegrationTestSqlServer extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestSqlServer extends DatabaseIntegrationTest {
 }

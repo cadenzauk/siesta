@@ -75,16 +75,23 @@ public class ObjectStringParser implements StringParser<Object> {
         register(Enum.class, ObjectStringParser::parseEnum);
     }
 
+    public Object parse(String value, TypeInfo typeInfo) {
+        if (value == null || value.equals(nullValue)) {
+            return null;
+        }
+        return findParser(typeInfo).parse(value, typeInfo);
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static <T extends Enum<T>> Enum<T> parseEnum(String value, TypeInfo typeInfo) {
         return Enum.valueOf((Class<Enum>) typeInfo.rawClass(), value);
     }
 
-    public <T> void register(Class<T> targetClass, Function<String,T> parser) {
+    private <T> void register(Class<T> targetClass, Function<String,T> parser) {
         parsers.put(targetClass, (value, typeInfo) -> parser.apply(value));
     }
 
-    public <T> void register(Class<T> targetClass, StringParser<? extends T> parser) {
+    private <T> void register(Class<T> targetClass, StringParser<? extends T> parser) {
         parsers.put(targetClass, parser);
     }
 
@@ -94,13 +101,6 @@ public class ObjectStringParser implements StringParser<Object> {
 
     private static <T> StringParser<T> defaultOr(T defaultValue, Function<String,T> parser) {
         return (value, typeInfo) -> StringUtils.isBlank(value) ? defaultValue : parser.apply(value);
-    }
-
-    public Object parse(String value, TypeInfo typeInfo) {
-        if (value == null || value.equals(nullValue)) {
-            return null;
-        }
-        return findParser(typeInfo).parse(value, typeInfo);
     }
 
     private StringParser<?> findParser(TypeInfo typeInfo) {

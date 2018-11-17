@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = PostgresConfig.class)
-public class TransactionIntegrationTestPostgres extends TransactionIntegrationTest {
+class TransactionIntegrationTestPostgres extends TransactionIntegrationTest {
 }

@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = FirebirdConfig.class)
-public class AutoDetectDialectIntegrationTestFirebird extends AutoDetectDialectIntegrationTest {
+class AutoDetectDialectIntegrationTestFirebird extends AutoDetectDialectIntegrationTest {
 }

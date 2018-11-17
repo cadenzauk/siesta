@@ -76,7 +76,11 @@ public interface Dialect {
 
     boolean requiresOrderByInRowNumber();
 
-    String qualifiedName(String catalog, String schema, String name);
+    String qualifiedSequenceName(String catalog, String schema, String name);
+
+    String qualifiedIndexName(String catalog, String schema, String name);
+
+    String qualifiedTableName(String catalog, String schema, String name);
 
     String concat(Stream<String> sql);
 

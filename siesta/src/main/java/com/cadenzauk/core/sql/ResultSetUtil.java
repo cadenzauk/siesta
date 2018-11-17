@@ -51,7 +51,7 @@ public final class ResultSetUtil extends UtilityClass  {
     public static <T> Stream<T> stream(ResultSet rs, RowMapper<T> rowMapper) {
         CompositeAutoCloseable closer = new CompositeAutoCloseable();
         closer.add(rs);
-        return StreamSupport.stream(new ResultSetSpliterator<T>(rs, rowMapper, closer::close), false).onClose(closer::close);
+        return StreamSupport.stream(new ResultSetSpliterator<>(rs, rowMapper, closer::close), false).onClose(closer::close);
     }
 
     public static <T> Stream<T> stream(ThrowingSupplier<ResultSet, ? extends SQLException> rs, RowMapper<T> rowMapper) {

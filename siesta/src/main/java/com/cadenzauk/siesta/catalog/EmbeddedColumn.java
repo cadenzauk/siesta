@@ -265,7 +265,7 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
 
         public <BB> Builder<T,BB,R,RB> builder(Function1<BB,T> buildRow) {
             MethodInfo<BB,T> buildMethod = MethodInfo.of(buildRow);
-            return new Builder<>(database, propertyName, rowType, buildMethod.declaringType(), getter, setter, buildRow)
+            return new Builder<>(database, propertyName, rowType, buildMethod.referringType(), getter, setter, buildRow)
                 .identifier(identifier)
                 .insertable(insertable)
                 .updatable(updatable)

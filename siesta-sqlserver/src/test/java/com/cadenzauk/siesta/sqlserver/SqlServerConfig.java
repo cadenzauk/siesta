@@ -30,12 +30,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 
 @Configuration
 public class SqlServerConfig {
     @Bean
-    public DataSource dataSource() throws SQLException {
+    public DataSource dataSource() {
         SQLServerConnectionPoolDataSource pool = new SQLServerConnectionPoolDataSource();
         pool.setServerName("localhost\\SQLEXPRESS");
         pool.setDatabaseName("SIESTA");

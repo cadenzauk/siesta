@@ -148,16 +148,16 @@ class TypedExpressionTest {
         private final int mandatoryInt;
         private final Optional<Integer> optionalInt;
 
-        public TestTable(int mandatoryInt, Optional<Integer> optionalInt) {
+        private TestTable(int mandatoryInt, Optional<Integer> optionalInt) {
             this.mandatoryInt = mandatoryInt;
             this.optionalInt = optionalInt;
         }
 
-        public int mandatoryInt() {
+        int mandatoryInt() {
             return mandatoryInt;
         }
 
-        public Optional<Integer> optionalInt() {
+        Optional<Integer> optionalInt() {
             return optionalInt;
         }
     }

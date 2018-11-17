@@ -49,6 +49,6 @@ public class SpringSiesta implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         SchemaGenerator schemaGenerator = new SchemaGenerator(dropFirst);
-        schemaGenerator.generate(database, "", schemaDefinition);
+        schemaGenerator.generate(database, schemaDefinition);
     }
 }

@@ -103,7 +103,7 @@ public class ForeignKeyReference<C, P> {
     public static class Builder<C, P> {
         private Table<C> childTable;
         private Class<P> parentClass;
-        private List<ColumnReference.Builder<C,P,?>> columnReferences = new ArrayList<>();
+        private final List<ColumnReference.Builder<C,P,?>> columnReferences = new ArrayList<>();
         private Optional<String> name = Optional.empty();
 
         private Builder() {
@@ -146,10 +146,10 @@ public class ForeignKeyReference<C, P> {
             return new ForeignKeyReference<>(this);
         }
 
-        public class ReferenceBuilder<F> {
+        public final class ReferenceBuilder<F> {
             private final ColumnReference.Builder<C,P,F> childColumn;
 
-            public ReferenceBuilder(ColumnReference.Builder<C,P,F> childColumn) {
+            private ReferenceBuilder(ColumnReference.Builder<C,P,F> childColumn) {
                 this.childColumn = childColumn;
             }
 

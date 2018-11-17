@@ -64,7 +64,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public CompletableFuture<List<RT>> listAsync() {
-        return listAsync(defaultSqlExecutor());
+        return statement.listAsync(defaultSqlExecutor());
     }
 
     public CompletableFuture<List<RT>> listAsync(SqlExecutor sqlExecutor) {
@@ -88,7 +88,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public CompletableFuture<Optional<RT>> optionalAsync() {
-        return optionalAsync(defaultSqlExecutor());
+        return statement.optionalAsync(defaultSqlExecutor());
     }
 
     public CompletableFuture<Optional<RT>> optionalAsync(SqlExecutor sqlExecutor) {
@@ -132,7 +132,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public CompletableFuture<RT> singleAsync() {
-        return singleAsync(defaultSqlExecutor());
+        return statement.singleAsync(defaultSqlExecutor());
     }
 
     public CompletableFuture<RT> singleAsync(SqlExecutor sqlExecutor) {

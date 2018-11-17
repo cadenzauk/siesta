@@ -86,7 +86,7 @@ public abstract class Try<T> {
     private static final class Success<T> extends Try<T> {
         private final T value;
 
-        public Success(T value) {
+        private Success(T value) {
 
             this.value = value;
         }
@@ -138,7 +138,7 @@ public abstract class Try<T> {
         }
 
         @Override
-        public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) {
             return value;
         }
 
@@ -196,7 +196,7 @@ public abstract class Try<T> {
     private static final class Failure<T> extends Try<T> {
         private final Throwable throwable;
 
-        public Failure(Throwable throwable) {
+        private Failure(Throwable throwable) {
             this.throwable = throwable;
         }
 

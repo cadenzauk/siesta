@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = Db2Config.class)
-public class AutoDetectDialectIntegrationTestDb2 extends AutoDetectDialectIntegrationTest {
+class AutoDetectDialectIntegrationTestDb2 extends AutoDetectDialectIntegrationTest {
 }

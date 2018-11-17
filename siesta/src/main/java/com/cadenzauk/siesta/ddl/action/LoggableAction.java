@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.ddl.action;
 
+import java.util.Objects;
+
 public abstract class LoggableAction extends Action {
     private final String definition;
     private final String id;
@@ -29,10 +31,15 @@ public abstract class LoggableAction extends Action {
     private final boolean logged;
 
     protected LoggableAction(Builder builder) {
-        definition = builder.definitiion;
+        definition = builder.definition;
         id = builder.id;
-        author = builder.author;
+        author = builder.author == null ? System.getProperty("user.name") : builder.author;
         logged = builder.logged;
+
+        if (logged) {
+            Objects.requireNonNull(definition, "Missing definition()");
+            Objects.requireNonNull(id, "Missing id()");
+        }
     }
 
     public String definition() {
@@ -57,7 +64,7 @@ public abstract class LoggableAction extends Action {
     }
 
     public static class Builder<B extends Builder<B>>  {
-        private String definitiion;
+        private String definition;
         protected String id;
         private String author;
         private boolean logged = true;
@@ -65,15 +72,8 @@ public abstract class LoggableAction extends Action {
         protected Builder() {
         }
 
-        protected <T extends Builder<T>> B clone(Builder<T> other) {
-            definitiion = other.definitiion;
-            id = other.id;
-            author = other.author;
-            return self();
-        }
-
         public B definition(String val) {
-            definitiion = val;
+            definition = val;
             return self();
         }
 

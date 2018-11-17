@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.ExceptionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = OracleConfig.class)
-public class ExceptionIntegrationTestOracle extends ExceptionIntegrationTest {
+class ExceptionIntegrationTestOracle extends ExceptionIntegrationTest {
 }

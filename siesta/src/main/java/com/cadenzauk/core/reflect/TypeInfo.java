@@ -72,7 +72,7 @@ public class TypeInfo {
             .map(Class.class::cast)
             .orElseGet(() -> genericArrayType
                 .flatMap(x -> ClassUtil.forArrayOf(of(x.getGenericComponentType()).rawClass()))
-                .orElseGet(() -> Class.class.cast(type)));
+                .orElseGet(() -> (Class) type));
     }
 
     private static Type typeArg(ParameterizedType p, int index) {
@@ -83,7 +83,7 @@ public class TypeInfo {
         return actualTypeArguments[index];
     }
 
-    public static TypeInfo of(Type t) {
+    private static TypeInfo of(Type t) {
         return new TypeInfo(t);
     }
 

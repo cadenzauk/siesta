@@ -58,7 +58,7 @@ class DateFunctionsTest extends FunctionTest {
     }
 
     @SuppressWarnings("unused")
-    private static Stream<Arguments> parametersForFunctionTest() {
+    static Stream<Arguments> parametersForFunctionTest() {
         LocalDate randomLocalDate = RandomValues.randomLocalDate();
         LocalDateTime randomLocalDateTime = RandomValues.randomLocalDateTime();
         ZonedDateTime randomZonedDateTime = RandomValues.randomZonedDateTime(ZoneId.systemDefault());

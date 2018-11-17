@@ -32,7 +32,7 @@ import static com.cadenzauk.core.util.OptionalUtil.with;
 public class RuntimeSqlExceptionMatcher extends BaseMatcher<RuntimeSqlException> {
     private final Class<? extends RuntimeSqlException> expectedClass;
 
-    public RuntimeSqlExceptionMatcher(Class<? extends RuntimeSqlException> expectedClass) {
+    private RuntimeSqlExceptionMatcher(Class<? extends RuntimeSqlException> expectedClass) {
         this.expectedClass = expectedClass;
     }
 

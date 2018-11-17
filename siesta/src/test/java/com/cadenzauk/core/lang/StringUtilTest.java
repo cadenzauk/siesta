@@ -25,13 +25,33 @@ package com.cadenzauk.core.lang;
 import com.cadenzauk.core.junit.NullValue;
 import com.cadenzauk.core.junit.TestCase;
 import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
+import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class StringUtilTest {
+    @Test
+    void isUtility() {
+        assertThat(StringUtil.class, isUtilityClass());
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"null", ""})
+    @TestCase({"", ""})
+    @TestCase({"a", "a"})
+    @TestCase({"B", "b"})
+    @TestCase({"abc", "abc"})
+    @TestCase({"ABC", "aBC"})
+    @TestCase({" DEF", " DEF"})
+    void lowercaseFirst(String input, String expected) {
+        assertThat(StringUtil.lowercaseFirst(input), is(expected));
+    }
+
     @ParameterizedTest
     @ArgumentsSource(TestCaseArgumentsProvider.class)
     @TestCase({"null", ""})
@@ -139,4 +159,5 @@ class StringUtilTest {
         String result = StringUtil.append(suffix).apply(input);
 
         assertThat(result, is(expectedOutput));
-    }}
+    }
+}

@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.ddl;
 
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.dialect.Db2Dialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.SalespersonRow;

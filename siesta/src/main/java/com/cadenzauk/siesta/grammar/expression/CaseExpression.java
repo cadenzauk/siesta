@@ -199,7 +199,7 @@ public class CaseExpression<T> implements TypedExpression<T> {
     public class InSubsequentWhenExpectingThen {
         private final BooleanExpression booleanExpression;
 
-        public InSubsequentWhenExpectingThen(BooleanExpression booleanExpression) {
+        private InSubsequentWhenExpectingThen(BooleanExpression booleanExpression) {
             this.booleanExpression = booleanExpression;
         }
 

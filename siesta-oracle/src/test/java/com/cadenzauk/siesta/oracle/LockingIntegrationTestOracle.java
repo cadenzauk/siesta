@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.LockingIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = OracleConfig.class)
-public class LockingIntegrationTestOracle extends LockingIntegrationTest {
+class LockingIntegrationTestOracle extends LockingIntegrationTest {
 }

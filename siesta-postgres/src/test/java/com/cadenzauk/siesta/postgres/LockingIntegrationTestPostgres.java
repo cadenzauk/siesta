@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.LockingIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = PostgresConfig.class)
-public class LockingIntegrationTestPostgres extends LockingIntegrationTest {
+class LockingIntegrationTestPostgres extends LockingIntegrationTest {
 }

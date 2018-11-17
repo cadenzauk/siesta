@@ -117,6 +117,7 @@ public class Database {
         return sequence(valueClass, defaultCatalog, defaultSchema, name);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public <T extends Number> Sequence<T> sequence(Class<T> valueClass, String catalog, String schema, String name) {
         return Sequence.<T>newBuilder()
             .database(this)
@@ -131,6 +132,7 @@ public class Database {
         return withLockTimeout(getDefaultSqlExecutor(), time, unit);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public UncheckedAutoCloseable withLockTimeout(SqlExecutor executor, long time, TimeUnit unit) {
         String sql = dialect.setLockTimeout(time, unit);
         LOG.debug(sql);
@@ -222,6 +224,7 @@ public class Database {
             .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + valueClass));
     }
 
+    @SuppressWarnings("WeakerAccess")
     public <T, R> Optional<DataType<T>> dataTypeOf(MethodInfo<R,T> getterInfo) {
         return dataTypeRegistry.dataTypeOf(getterInfo.effectiveClass());
     }
@@ -263,7 +266,7 @@ public class Database {
     }
 
     public <T, R> Column<T,R> column(MethodInfo<R,T> methodInfo) {
-        return table(methodInfo.declaringClass()).column(methodInfo);
+        return table(methodInfo.referringClass()).column(methodInfo);
     }
 
     public SqlExecutor getDefaultSqlExecutor() {
@@ -341,6 +344,7 @@ public class Database {
         return Update.update(this, table(rowClass).as(alias));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public <R> int update(R row) {
         return update(getDefaultSqlExecutor(), row);
     }
@@ -351,7 +355,7 @@ public class Database {
         return table(rowClass).update(sqlExecutor, row);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     public <R> int update(Transaction transaction, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).update(transaction, row);
@@ -369,6 +373,7 @@ public class Database {
         return Delete.delete(this, table(rowClass).as(alias));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public <R> int delete(R row) {
         return delete(getDefaultSqlExecutor(), row);
     }
@@ -379,7 +384,7 @@ public class Database {
         return table(rowClass).delete(sqlExecutor, row);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     public <R> int delete(Transaction transaction, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).delete(transaction, row);
@@ -438,6 +443,7 @@ public class Database {
             return this;
         }
 
+        @SuppressWarnings("WeakerAccess")
         public <T> Builder type(Class<T> javaClass, DbTypeId<T> dbTypeId, DbType<T> dbType) {
             customizations.add(dialect -> dialect.registerType(dbTypeId, dbType));
             dataTypes.add(reg -> reg.register(new DataType<>(javaClass, dbTypeId)));
@@ -471,7 +477,7 @@ public class Database {
             return this;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "WeakerAccess"})
         public <R> Builder table(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
             TableInitializer<?,?> existing = tables.get(rowType);
             TableInitializer<?,?> tableInitializer =
@@ -501,16 +507,17 @@ public class Database {
         private final TypeToken<R> rowType;
         private final Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer;
 
-        public TableInitializer(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer) {
+        private TableInitializer(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer) {
             this.rowType = rowType;
             this.initializer = initializer;
         }
 
-        public Table<R> apply(Database database) {
+        @SuppressWarnings("UnusedReturnValue")
+        private Table<R> apply(Database database) {
             return database.table(rowType, initializer);
         }
 
-        public TableInitializer<R,B> concat(Consumer<Table.Builder<R,?>> next) {
+        private TableInitializer<R,B> concat(Consumer<Table.Builder<R,?>> next) {
             Function<Table.Builder<R,R>,Table.Builder<R,B>> newInitializer = b -> {
                 Table.Builder<R,B> builder = initializer.apply(b);
                 next.accept(builder);
@@ -519,7 +526,7 @@ public class Database {
             return new TableInitializer<>(rowType, newInitializer);
         }
 
-        public static <R> TableInitializer<R,?> of(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
+        private static <R> TableInitializer<R,?> of(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
             return new TableInitializer<>(rowType, Function.identity()).concat(init);
         }
     }

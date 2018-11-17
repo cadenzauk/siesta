@@ -25,6 +25,8 @@ package com.cadenzauk.core.lang;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.List;
+
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.Matchers.is;
@@ -32,6 +34,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class CompositeAutoCloseableTest {
+    @Test
+    void canCloseWithCustomCloser() {
+        CompositeAutoCloseable sut = new CompositeAutoCloseable();
+        List<?> list = sut.add(mock(List.class), List::clear);
+
+        sut.close();
+
+        verify(list).clear();
+    }
+
     @Test
     void closeClosesAll() {
         CompositeAutoCloseable sut = new CompositeAutoCloseable();
@@ -109,5 +121,4 @@ class CompositeAutoCloseableTest {
 
         verify(closeable).close();
     }
-
 }

@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = OracleConfig.class)
-public class TransactionIntegrationTestOracle extends TransactionIntegrationTest {
+class TransactionIntegrationTestOracle extends TransactionIntegrationTest {
 }

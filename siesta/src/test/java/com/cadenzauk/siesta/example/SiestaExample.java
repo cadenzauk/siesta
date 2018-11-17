@@ -105,20 +105,20 @@ class SiestaExample extends IntegrationTest {
         assertThat(makersOfGizmos.get(0).item3().isAfter(end), is(false));
     }
 
-    public static class ManufacturerSummary {
+    private static class ManufacturerSummary {
         private final String name;
         private final int numberOfPartsSupplied;
 
-        public ManufacturerSummary(String name, int numberOfPartsSupplied) {
+        private ManufacturerSummary(String name, int numberOfPartsSupplied) {
             this.name = name;
             this.numberOfPartsSupplied = numberOfPartsSupplied;
         }
 
-        public String name() {
+        String name() {
             return name;
         }
 
-        public int numberOfPartsSupplied() {
+        int numberOfPartsSupplied() {
             return numberOfPartsSupplied;
         }
     }

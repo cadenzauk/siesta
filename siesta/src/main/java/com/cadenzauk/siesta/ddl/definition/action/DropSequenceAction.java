@@ -46,7 +46,7 @@ public class DropSequenceAction extends LoggableAction {
     }
 
     public String qualifiedName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), sequenceName.orElse(""));
+        return database.dialect().qualifiedSequenceName(catalog.orElse(""), schemaName.orElse(""), sequenceName.orElse(""));
     }
 
     public static Builder newBuilder() {

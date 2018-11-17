@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.LockingIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = Db2Config.class)
-public class LockingIntegrationTestDb2 extends LockingIntegrationTest {
+class LockingIntegrationTestDb2 extends LockingIntegrationTest {
 }

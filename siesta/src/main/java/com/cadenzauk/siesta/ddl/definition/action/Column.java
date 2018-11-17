@@ -39,6 +39,7 @@ public class Column {
         primaryKey = builder.primaryKey;
         foreignKey = builder.foreignKey
             .map(fk -> AddForeignKeyAction.newBuilder()
+                .logged(false)
                 .catalog(catalog)
                 .schemaName(schemaName)
                 .tableName(tableName)
@@ -91,17 +92,17 @@ public class Column {
             return this;
         }
 
-        public Builder notNull() {
+        private Builder notNull() {
             nullable = false;
             return this;
         }
 
-        public Builder primaryKey() {
+        private Builder primaryKey() {
             primaryKey = true;
             return this;
         }
 
-        public Builder foreignKey(Function<AddForeignKeyAction.Builder,AddForeignKeyAction.Builder> val) {
+        private Builder foreignKey(Function<AddForeignKeyAction.Builder,AddForeignKeyAction.Builder> val) {
             foreignKey = Optional.of(val);
             return this;
         }
@@ -128,7 +129,7 @@ public class Column {
     public static class ForeignKeyInit {
         private final String constraintName;
 
-        public ForeignKeyInit(String constraintName) {
+        private ForeignKeyInit(String constraintName) {
             this.constraintName = constraintName;
         }
 
@@ -141,7 +142,7 @@ public class Column {
         private final String constraintName;
         private final String referencedTable;
 
-        public ForeignKeyBuilder(String constraintName, String referencedTable) {
+        private ForeignKeyBuilder(String constraintName, String referencedTable) {
             this.constraintName = constraintName;
             this.referencedTable = referencedTable;
         }

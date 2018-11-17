@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = FirebirdConfig.class)
-public class HiLoGeneratorIntegrationTestFirebird extends HiLoGeneratorIntegrationTest {
+class HiLoGeneratorIntegrationTestFirebird extends HiLoGeneratorIntegrationTest {
 }

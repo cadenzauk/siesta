@@ -157,6 +157,11 @@ public class SqlServerDialect extends AnsiDialect {
     }
 
     @Override
+    public String qualifiedIndexName(String catalog, String schema, String name) {
+        return name;
+    }
+
+    @Override
     public String concat(Stream<String> sql) {
         return "concat(" + sql.collect(joining(", ")) + ")";
     }
@@ -193,6 +198,6 @@ public class SqlServerDialect extends AnsiDialect {
 
     @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
-        return "next value for " + qualifiedName(catalog, schema, sequenceName);
+        return "next value for " + qualifiedSequenceName(catalog, schema, sequenceName);
     }
 }

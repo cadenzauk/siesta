@@ -25,8 +25,6 @@ package com.cadenzauk.core.tuple;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Tuple1<T1> implements Tuple {

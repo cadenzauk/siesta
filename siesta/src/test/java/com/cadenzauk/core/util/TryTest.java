@@ -455,7 +455,7 @@ class TryTest {
         throw new IOException();
     }
 
-    private static int failError() throws IOException {
+    private static int failError() {
         throw new IllegalAccessError();
     }
 

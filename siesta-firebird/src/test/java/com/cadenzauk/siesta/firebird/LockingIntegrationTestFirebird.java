@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.LockingIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = FirebirdConfig.class)
-public class LockingIntegrationTestFirebird extends LockingIntegrationTest {
+class LockingIntegrationTestFirebird extends LockingIntegrationTest {
 }

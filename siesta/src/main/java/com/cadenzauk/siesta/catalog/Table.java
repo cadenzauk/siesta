@@ -121,7 +121,7 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     public String qualifiedName() {
-        return database.dialect().qualifiedName(catalog, schema, tableName);
+        return database.dialect().qualifiedTableName(catalog, schema, tableName);
     }
 
     public Alias<R> as(String alias) {
@@ -317,9 +317,10 @@ public class Table<R> implements ColumnCollection<R> {
             return this;
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public <BB> Builder<R,BB> builder(Function1<BB,R> buildRow) {
             MethodInfo<BB,R> buildMethod = MethodInfo.of(buildRow);
-            return new Builder<>(database, rowType, buildMethod.declaringType(), buildRow)
+            return new Builder<>(database, rowType, buildMethod.referringType(), buildRow)
                 .catalog(catalog)
                 .schema(schema)
                 .tableName(tableName);

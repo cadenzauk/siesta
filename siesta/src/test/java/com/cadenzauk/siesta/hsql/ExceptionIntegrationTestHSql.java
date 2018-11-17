@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.ExceptionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = HSqlConfig.class)
-public class ExceptionIntegrationTestHSql extends ExceptionIntegrationTest {
+class ExceptionIntegrationTestHSql extends ExceptionIntegrationTest {
 }

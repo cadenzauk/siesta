@@ -52,7 +52,7 @@ public class DropForeignKeyAction extends LoggableAction {
     }
 
     public String qualifiedTableName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), tableName);
+        return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName);
     }
 
     public String constraintName() {

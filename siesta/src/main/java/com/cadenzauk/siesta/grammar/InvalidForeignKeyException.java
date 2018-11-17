@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar;
 
-import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.catalog.Table;
 

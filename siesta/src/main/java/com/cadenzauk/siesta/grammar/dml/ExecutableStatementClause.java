@@ -37,6 +37,7 @@ public class ExecutableStatementClause {
         return execute(database().getDefaultSqlExecutor());
     }
 
+    @SuppressWarnings("WeakerAccess")
     public int execute(SqlExecutor sqlExecutor) {
         return statement.execute(sqlExecutor);
     }

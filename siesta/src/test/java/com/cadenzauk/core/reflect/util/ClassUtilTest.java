@@ -27,7 +27,6 @@ import com.cadenzauk.core.reflect.Factory;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

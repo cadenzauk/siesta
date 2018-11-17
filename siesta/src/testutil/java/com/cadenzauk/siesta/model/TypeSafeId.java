@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public abstract class TypeSafeId {
     private final long id;
 
-    public TypeSafeId(long id) {
+    protected TypeSafeId(long id) {
         this.id = id;
     }
 

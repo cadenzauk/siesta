@@ -78,8 +78,8 @@ public class DefaultUuid implements DbType<UUID> {
 
     private static UUID fromBytes(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        Long high = buffer.getLong();
-        Long low = buffer.getLong();
+        long high = buffer.getLong();
+        long low = buffer.getLong();
         return new UUID(high, low);
     }
 

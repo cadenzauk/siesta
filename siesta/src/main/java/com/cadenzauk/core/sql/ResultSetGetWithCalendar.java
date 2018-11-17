@@ -23,10 +23,9 @@
 package com.cadenzauk.core.sql;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Calendar;
 
 @FunctionalInterface
 public interface ResultSetGetWithCalendar<T>  {
-    T get(ResultSet rs, String label, Calendar calendar) throws SQLException;
+    T get(ResultSet rs, String label, Calendar calendar);
 }

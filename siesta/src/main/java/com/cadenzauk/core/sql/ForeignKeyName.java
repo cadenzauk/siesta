@@ -30,7 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 public class ForeignKeyName {
     private static final Pattern NAME_PATTERN = Pattern.compile("^(?:(.*)\\.)?([^.]+)$", 0);

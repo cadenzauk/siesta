@@ -31,8 +31,8 @@ import java.util.Optional;
 public class SalesAreaRow {
     private final long salesAreaId;
     private final String salesAreaName;
-    private Optional<Long> salespersonId;
-    private Optional<Long> salesCount;
+    private final Optional<Long> salespersonId;
+    private final Optional<Long> salesCount;
     @Column(insertable = false, updatable = false)
     private Optional<ZonedDateTime> insertTime;
 

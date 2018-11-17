@@ -23,8 +23,6 @@
 package com.cadenzauk.siesta.ddl.action;
 
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.ddl.action.Action;
-import com.cadenzauk.siesta.ddl.action.Priority;
 import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;

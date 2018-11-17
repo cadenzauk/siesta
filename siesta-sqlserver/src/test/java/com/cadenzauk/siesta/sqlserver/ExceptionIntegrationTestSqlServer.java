@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.ExceptionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SqlServerConfig.class)
-public class ExceptionIntegrationTestSqlServer extends ExceptionIntegrationTest {
+class ExceptionIntegrationTestSqlServer extends ExceptionIntegrationTest {
 }

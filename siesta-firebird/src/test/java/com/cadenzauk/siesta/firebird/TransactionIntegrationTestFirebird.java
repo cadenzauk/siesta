@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = FirebirdConfig.class)
-public class TransactionIntegrationTestFirebird extends TransactionIntegrationTest {
+class TransactionIntegrationTestFirebird extends TransactionIntegrationTest {
 }

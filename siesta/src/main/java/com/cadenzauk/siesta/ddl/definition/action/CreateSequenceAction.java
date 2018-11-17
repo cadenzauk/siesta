@@ -22,22 +22,20 @@
 
 package com.cadenzauk.siesta.ddl.definition.action;
 
-import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
+import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.integer;
 
-public class CreateSequenceAction<T> extends LoggableAction {
+public class CreateSequenceAction extends LoggableAction {
     private final Optional<String> catalog;
     private final Optional<String> schemaName;
     private final String sequenceName;
-    private final ColumnDataType<T> dataType;
+    private final ColumnDataType<?> dataType;
     private final Optional<Boolean> cycle;
     private final Optional<Boolean> ordered;
     private final Optional<Long> startValue;
@@ -45,7 +43,7 @@ public class CreateSequenceAction<T> extends LoggableAction {
     private final Optional<Long> maxValue;
     private final Optional<Long> incrementBy;
 
-    private CreateSequenceAction(Builder<T> builder) {
+    private CreateSequenceAction(Builder builder) {
         super(builder);
         catalog = builder.catalog;
         schemaName = builder.schemaName;
@@ -61,7 +59,7 @@ public class CreateSequenceAction<T> extends LoggableAction {
         incrementBy = builder.incrementBy;
     }
 
-    public ColumnDataType<T> dataType() {
+    public ColumnDataType<?> dataType() {
         return dataType;
     }
 
@@ -90,15 +88,16 @@ public class CreateSequenceAction<T> extends LoggableAction {
     }
 
     public String qualifiedName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), sequenceName);
+        return database.dialect().qualifiedSequenceName(catalog.orElse(""), schemaName.orElse(""), sequenceName);
     }
 
-    public static <T> Builder<T> newBuilder(ColumnDataType<T> dataType) {
-        return new Builder<>(dataType);
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
-    public static final class Builder<T> extends LoggableAction.Builder<Builder<T>> {
-        private final ColumnDataType<T> dataType;
+    @SuppressWarnings("UnusedReturnValue")
+    public static final class Builder extends LoggableAction.Builder<Builder> {
+        private ColumnDataType<?> dataType = integer();
         private Optional<Boolean> cycle = Optional.empty();
         private Optional<Boolean> ordered = Optional.empty();
         private Optional<Long> startValue = Optional.empty();
@@ -109,84 +108,68 @@ public class CreateSequenceAction<T> extends LoggableAction {
         private Optional<String> schemaName = Optional.empty();
         private Optional<String> sequenceName = Optional.empty();
 
-        public Builder(ColumnDataType<T> dataType) {
-            this.dataType = dataType;
+        public Builder dataType(ColumnDataType<?> val) {
+            dataType = val;
+            return this;
         }
 
-        public <U> Builder<U> dataType(ColumnDataType<U> val) {
-            Builder<U> newBuilder = newBuilder(val)
-                .clone(this);
-
-            cycle.map(newBuilder::cycle);
-            ordered.map(newBuilder::ordered);
-            catalog.map(newBuilder::catalog);
-            schemaName.map(newBuilder::schemaName);
-            sequenceName.map(newBuilder::sequenceName);
-            startValue.map(newBuilder::startValue);
-            minValue.map(newBuilder::minValue);
-            maxValue.map(newBuilder::maxValue);
-            incrementBy.map(newBuilder::incrementBy);
-
-            return newBuilder;
-        }
-
-        public Builder<T> catalog(String val) {
+        public Builder catalog(String val) {
             catalog = OptionalUtil.ofBlankable(val);
             return this;
         }
 
-        public Builder<T> catalog(Optional<String> val) {
+        public Builder catalog(Optional<String> val) {
             catalog = val;
             return this;
         }
 
-        public Builder<T> schemaName(String val) {
+        public Builder schemaName(String val) {
             schemaName = OptionalUtil.ofBlankable(val);
             return this;
         }
 
-        public Builder<T> sequenceName(String val) {
+        public Builder sequenceName(String val) {
             sequenceName = OptionalUtil.ofBlankable(val);
             return this;
         }
 
-        public Builder<T> sequenceName(Optional<String> val) {
+        public Builder sequenceName(Optional<String> val) {
             sequenceName = val;
             return this;
         }
 
-        public Builder<T> cycle(boolean val) {
+        public Builder cycle(boolean val) {
             cycle = Optional.of(val);
             return this;
         }
 
-        public Builder<T> ordered(boolean val) {
+        public Builder ordered(boolean val) {
             ordered = Optional.of(val);
             return this;
         }
 
-        public Builder<T> startValue(long val) {
+        public Builder startValue(long val) {
             startValue = Optional.of(val);
             return this;
         }
 
-        public Builder<T> minValue(long val) {
+        public Builder minValue(long val) {
             minValue = Optional.of(val);
             return this;
         }
 
-        public Builder<T> maxValue(long val) {
+        public Builder maxValue(long val) {
             maxValue = Optional.of(val);
             return this;
         }
 
-        public Builder<T> incrementBy(long val) {
+        public Builder incrementBy(long val) {
             incrementBy = Optional.of(val);
             return this;
         }
 
         public CreateSequenceAction build() {
-            return new CreateSequenceAction<>(this);
+            return new CreateSequenceAction(this);
         }
     }
 }

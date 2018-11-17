@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = PostgresConfig.class)
-public class AutoDetectDialectIntegrationTestPostgres extends AutoDetectDialectIntegrationTest {
+class AutoDetectDialectIntegrationTestPostgres extends AutoDetectDialectIntegrationTest {
 }

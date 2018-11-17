@@ -24,8 +24,6 @@ package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.siesta.SequenceInfo;
 
-import static org.apache.commons.lang3.ArrayUtils.toArray;
-
 public class Db2SequenceInfo extends SequenceInfo {
     public Db2SequenceInfo() {
         super(SequenceInfo.newBuilder()

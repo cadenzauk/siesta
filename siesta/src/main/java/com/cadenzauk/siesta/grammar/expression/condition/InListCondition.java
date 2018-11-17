@@ -23,12 +23,10 @@
 package com.cadenzauk.siesta.grammar.expression.condition;
 
 import com.cadenzauk.siesta.Condition;
-import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;

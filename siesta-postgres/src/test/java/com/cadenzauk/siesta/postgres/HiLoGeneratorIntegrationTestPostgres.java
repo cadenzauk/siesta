@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.HiLoGeneratorIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = PostgresConfig.class)
-public class HiLoGeneratorIntegrationTestPostgres extends HiLoGeneratorIntegrationTest {
+class HiLoGeneratorIntegrationTestPostgres extends HiLoGeneratorIntegrationTest {
 }

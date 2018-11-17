@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = Db2Config.class)
-public class DatabaseIntegrationTestDb2 extends DatabaseIntegrationTest {
+class DatabaseIntegrationTestDb2 extends DatabaseIntegrationTest {
 }

@@ -138,10 +138,12 @@ class EmbeddedTest {
             this.line2 = line2;
         }
 
+        @SuppressWarnings("WeakerAccess")
         public String line1() {
             return line1;
         }
 
+        @SuppressWarnings("WeakerAccess")
         public Optional<String> line2() {
             return line2;
         }
@@ -158,6 +160,7 @@ class EmbeddedTest {
             this.address = address;
         }
 
+        @SuppressWarnings("WeakerAccess")
         public Address address() {
             return address;
         }

@@ -190,7 +190,7 @@ class TypeInfoTest {
         return ClassUtil.getDeclaredMethod(getClass(), "randomMethod", Optional.class, Integer.TYPE, ZonedDateTime.class, List[].class, float[].class, Map.class);
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "EmptyMethod", "WeakerAccess"})
     private void randomMethod(Optional<String> optString, int i, ZonedDateTime ts, List<Optional<UUID>>[] strings, float[] f, Map<Short,BigDecimal> map) {
     }
 }

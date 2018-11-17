@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.dialect.function.date;
 
-import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;

@@ -25,7 +25,6 @@ package com.cadenzauk.siesta.ddl.definition.action;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class AddForeignKeyAction extends LoggableAction {
     }
 
     public String qualifiedTableName(Database database) {
-        return database.dialect().qualifiedName(catalog.orElse(""), schemaName.orElse(""), tableName);
+        return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName);
     }
 
     public String constraintName() {
@@ -80,7 +79,7 @@ public class AddForeignKeyAction extends LoggableAction {
     }
 
     public String qualifiedReferencedTableName(Database database) {
-        return database.dialect().qualifiedName(referencedCatalog.orElse(""), referencedSchemaName.orElse(""), referencedTableName);
+        return database.dialect().qualifiedTableName(referencedCatalog.orElse(""), referencedSchemaName.orElse(""), referencedTableName);
     }
 
     public String referencedColumnNames() {

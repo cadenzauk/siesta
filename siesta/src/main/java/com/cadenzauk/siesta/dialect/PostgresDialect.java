@@ -127,6 +127,11 @@ public class PostgresDialect extends AnsiDialect {
     }
 
     @Override
+    public String qualifiedIndexName(String catalog, String schema, String name) {
+        return name;
+    }
+
+    @Override
     public String fetchFirst(String sql, long n) {
         return String.format("%s offset 0 rows fetch next %d rows only", sql, n);
     }

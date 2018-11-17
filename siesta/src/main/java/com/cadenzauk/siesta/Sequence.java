@@ -61,7 +61,7 @@ public class Sequence<T> {
     }
 
     public String name() {
-        return database.dialect().qualifiedName(catalog, schema, sequenceName);
+        return database.dialect().qualifiedSequenceName(catalog, schema, sequenceName);
     }
 
     private T single(SqlExecutor sqlExecutor) {

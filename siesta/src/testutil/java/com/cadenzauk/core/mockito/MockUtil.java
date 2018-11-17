@@ -33,13 +33,14 @@ import static org.apache.commons.lang3.ArrayUtils.remove;
 
 public final class MockUtil extends UtilityClass  {
     public static <T> OngoingStubbingWrapper<T> when(T invocation) {
-        return new OngoingStubbingWrapper<T>(Mockito.when(invocation));
+        return new OngoingStubbingWrapper<>(Mockito.when(invocation));
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static class OngoingStubbingWrapper<T> {
         private OngoingStubbing<T> stubbing;
 
-        public OngoingStubbingWrapper(OngoingStubbing<T> stubbing) {
+        private OngoingStubbingWrapper(OngoingStubbing<T> stubbing) {
             this.stubbing = stubbing;
         }
 

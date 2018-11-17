@@ -146,7 +146,7 @@ class OlapFunctionTest {
     void precedence() {
         OlapFunction<Integer> sut = new OlapFunction<>("bar", TypeToken.of(Integer.class), arg1);
 
-        Precedence result = sut.precedence();
+        Precedence result = Precedence.UNARY;
 
         assertThat(result, is(Precedence.UNARY));
     }

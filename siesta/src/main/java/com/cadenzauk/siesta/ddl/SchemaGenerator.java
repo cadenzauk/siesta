@@ -24,7 +24,6 @@ package com.cadenzauk.siesta.ddl;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
-import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.Factory;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.DatabaseMetaDataUtil;
@@ -49,7 +48,6 @@ import com.cadenzauk.siesta.ddl.log.intercept.ActionLogGenerator;
 import com.cadenzauk.siesta.ddl.log.intercept.ActionLogRecorder;
 import com.cadenzauk.siesta.ddl.log.intercept.ActionLogTableCreator;
 import com.cadenzauk.siesta.ddl.sql.intercept.SqlActionExecutor;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +79,7 @@ public class SchemaGenerator {
         pipeline.addInterceptor(new ActionLogRecorder());
     }
 
-    public long generate(Database database, String name, SchemaDefinition schemaDefinition) {
+    public void generate(Database database, SchemaDefinition schemaDefinition) {
         if (dropFirst) {
             long dropped = dropAll(database);
             LOG.debug("Dropped {} objects", dropped);
@@ -89,9 +87,10 @@ public class SchemaGenerator {
         Stream<Action> actions = Stream.concat(
             Stream.of(new CreateActionLogTable(database.defaultCatalog(), database.defaultSchema())),
             schemaDefinition.actions());
-        return pipeline
+        long count = pipeline
             .process(database, actions)
             .count();
+        LOG.debug("Processed {} actions", count);
     }
 
     private long dropAll(Database database) {
@@ -147,7 +146,7 @@ public class SchemaGenerator {
 
     public <T> void generate(Database database, Function1<T,SchemaDefinition> schemaDefinition) {
         MethodInfo<T,SchemaDefinition> methodInfo = MethodInfo.of(schemaDefinition);
-        T schemaDefintionFactory = Factory.forClass(methodInfo.declaringClass()).get();
-        generate(database, methodInfo.declaringClass().getCanonicalName(), schemaDefinition.apply(schemaDefintionFactory));
+        T schemaDefintionFactory = Factory.forClass(methodInfo.referringClass()).get();
+        generate(database, schemaDefinition.apply(schemaDefintionFactory));
     }
 }

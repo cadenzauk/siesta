@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = HSqlConfig.class)
-public class TransactionIntegrationTestHSql extends TransactionIntegrationTest {
+class TransactionIntegrationTestHSql extends TransactionIntegrationTest {
 }

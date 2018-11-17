@@ -55,7 +55,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

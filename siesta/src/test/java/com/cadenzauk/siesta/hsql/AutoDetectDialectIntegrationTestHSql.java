@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.dialect.AutoDetectDialectIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = HSqlConfig.class)
-public class AutoDetectDialectIntegrationTestHSql extends AutoDetectDialectIntegrationTest {
+class AutoDetectDialectIntegrationTestHSql extends AutoDetectDialectIntegrationTest {
 }

@@ -26,5 +26,5 @@ import com.cadenzauk.siesta.ExceptionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = FirebirdConfig.class)
-public class ExceptionIntegrationTestFirebird extends ExceptionIntegrationTest {
+class ExceptionIntegrationTestFirebird extends ExceptionIntegrationTest {
 }
