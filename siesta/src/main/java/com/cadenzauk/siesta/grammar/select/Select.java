@@ -52,7 +52,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public List<RT> list() {
-        return list(defaultSqlExecutor());
+        return statement.list(defaultSqlExecutor());
     }
 
     public List<RT> list(SqlExecutor sqlExecutor) {
@@ -105,6 +105,10 @@ public abstract class Select<RT> implements TypedExpression<RT> {
 
     public Stream<RT> stream(CompositeAutoCloseable compositeAutoCloseable) {
         return statement.stream(defaultSqlExecutor(), compositeAutoCloseable);
+    }
+
+    public Stream<RT> stream(SqlExecutor sqlExecutor) {
+        return statement.stream(sqlExecutor);
     }
 
     public Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable compositeAutoCloseable) {
@@ -211,14 +215,14 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     }
 
     public static <R> ExpectingJoin1<R> from(Database database, CommonTableExpression<R> cte) {
-        Alias<R> alias = cte.asAlias();
-        SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), alias.type(), From.from(alias), alias.rowMapper(), Projection.of(alias));
-        cte.commonTableExpressions().forEach(select::addCommonTableExpression);
-        return new ExpectingJoin1<>(select);
+        return from(database, cte, cte.asAlias());
     }
 
     public static <R> ExpectingJoin1<R> from(Database database, CommonTableExpression<R> cte, String aliasName) {
-        Alias<R> alias = cte.as(aliasName);
+        return from(database, cte, cte.as(aliasName));
+    }
+
+    private static <R> ExpectingJoin1<R> from(Database database, CommonTableExpression<R> cte, Alias<R> alias) {
         SelectStatement<R> select = new SelectStatement<>(new Scope(database, alias), alias.type(), From.from(alias), alias.rowMapper(), Projection.of(alias));
         cte.commonTableExpressions().forEach(select::addCommonTableExpression);
         return new ExpectingJoin1<>(select);

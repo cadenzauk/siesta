@@ -22,6 +22,7 @@
 
 package com.cadenzauk.core.tuple;
 
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -104,5 +105,15 @@ public class Tuple2<T1, T2> implements Tuple, Map.Entry<T1, T2> {
             item1,
             function.apply(item2)
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2> TypeToken<T1> type1(TypeToken<Tuple2<T1,T2>> type) {
+        return (TypeToken<T1>) type.resolveType(Tuple2.class.getTypeParameters()[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2> TypeToken<T2> type2(TypeToken<Tuple2<T1,T2>> type) {
+        return (TypeToken<T2>) type.resolveType(Tuple2.class.getTypeParameters()[1]);
     }
 }

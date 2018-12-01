@@ -23,6 +23,7 @@
 package com.cadenzauk.core.tuple;
 
 import com.cadenzauk.core.function.Function3;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -106,5 +107,20 @@ public class Tuple3<T1, T2, T3> implements Tuple {
             item2,
             function.apply(item3)
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3> TypeToken<T1> type1(TypeToken<Tuple3<T1,T2,T3>> type) {
+        return (TypeToken<T1>) type.resolveType(Tuple3.class.getTypeParameters()[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3> TypeToken<T2> type2(TypeToken<Tuple3<T1,T2,T3>> type) {
+        return (TypeToken<T2>) type.resolveType(Tuple3.class.getTypeParameters()[1]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3> TypeToken<T3> type3(TypeToken<Tuple3<T1,T2,T3>> type) {
+        return (TypeToken<T3>) type.resolveType(Tuple3.class.getTypeParameters()[2]);
     }
 }

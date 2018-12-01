@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin8<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8> extends InJoinExpectingAnd<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8>,Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8>> {
@@ -70,7 +71,16 @@ public class ExpectingJoin8<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8> extends InJo
     private <R9> InJoinExpectingOn<ExpectingJoin9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R9>, Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R9>> join(JoinType joinType, Alias<R9> alias) {
         SelectStatement<Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R9>> select9 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R9>>() {},
+            new TypeToken<Tuple9<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,R9>>() {}
+                .where(new TypeParameter<RT1>() {}, Tuple8.type1(type()))
+                .where(new TypeParameter<RT2>() {}, Tuple8.type2(type()))
+                .where(new TypeParameter<RT3>() {}, Tuple8.type3(type()))
+                .where(new TypeParameter<RT4>() {}, Tuple8.type4(type()))
+                .where(new TypeParameter<RT5>() {}, Tuple8.type5(type()))
+                .where(new TypeParameter<RT6>() {}, Tuple8.type6(type()))
+                .where(new TypeParameter<RT7>() {}, Tuple8.type7(type()))
+                .where(new TypeParameter<RT8>() {}, Tuple8.type8(type()))
+                .where(new TypeParameter<R9>() {}, alias.type()),
             statement.from().join(joinType, alias),
             RowMappers.add9th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

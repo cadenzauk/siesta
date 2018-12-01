@@ -123,11 +123,11 @@ public class ObjectStringParser implements StringParser<Object> {
     private byte parseByte(String byteString) {
         byteString = byteString.trim();
         if (byteString.startsWith("0x") && byteString.length() > 2) {
-            return (byte) (int) Integer.valueOf(byteString.substring(2), 16);
+            return (byte) Integer.parseInt(byteString.substring(2), 16);
         } else if (byteString.startsWith("0") && byteString.length() > 1) {
-            return (byte) (int) Integer.valueOf(byteString.substring(1), 8);
+            return (byte) Integer.parseInt(byteString.substring(1), 8);
         }
-        return (byte) (int) Integer.valueOf(byteString);
+        return (byte) Integer.parseInt(byteString);
     }
 
     private ArrayList<Object> parseArrayList(String value, TypeInfo typeInfo) {
@@ -147,7 +147,7 @@ public class ObjectStringParser implements StringParser<Object> {
             ? new String[0]
             : s.equals("")
             ? new String[] {""}
-            : parseStream(s, typeInfo.arrayComponentType()).toArray(String[]::new);
+            : parseStream(s, typeInfo.arrayComponentType()).map(String.class::cast).toArray(String[]::new);
     }
 
     private Object[] parseArray(String value, TypeInfo typeInfo) {

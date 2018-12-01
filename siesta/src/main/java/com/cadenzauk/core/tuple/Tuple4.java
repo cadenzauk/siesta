@@ -23,6 +23,7 @@
 package com.cadenzauk.core.tuple;
 
 import com.cadenzauk.core.function.Function4;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -130,5 +131,25 @@ public class Tuple4<T1, T2, T3, T4> implements Tuple {
             item3,
             function.apply(item4)
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4> TypeToken<T1> type1(TypeToken<Tuple4<T1,T2,T3,T4>> type) {
+        return (TypeToken<T1>) type.resolveType(Tuple4.class.getTypeParameters()[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4> TypeToken<T2> type2(TypeToken<Tuple4<T1,T2,T3,T4>> type) {
+        return (TypeToken<T2>) type.resolveType(Tuple4.class.getTypeParameters()[1]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4> TypeToken<T3> type3(TypeToken<Tuple4<T1,T2,T3,T4>> type) {
+        return (TypeToken<T3>) type.resolveType(Tuple4.class.getTypeParameters()[2]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4> TypeToken<T4> type4(TypeToken<Tuple4<T1,T2,T3,T4>> type) {
+        return (TypeToken<T4>) type.resolveType(Tuple4.class.getTypeParameters()[3]);
     }
 }

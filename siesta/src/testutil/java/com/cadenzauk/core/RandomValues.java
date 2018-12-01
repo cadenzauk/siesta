@@ -35,6 +35,19 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static java.util.Calendar.APRIL;
+import static java.util.Calendar.AUGUST;
+import static java.util.Calendar.DECEMBER;
+import static java.util.Calendar.FEBRUARY;
+import static java.util.Calendar.JANUARY;
+import static java.util.Calendar.JULY;
+import static java.util.Calendar.JUNE;
+import static java.util.Calendar.MARCH;
+import static java.util.Calendar.MAY;
+import static java.util.Calendar.NOVEMBER;
+import static java.util.Calendar.OCTOBER;
+import static java.util.Calendar.SEPTEMBER;
+
 public abstract class RandomValues extends UtilityClass {
     private static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
 
@@ -54,11 +67,12 @@ public abstract class RandomValues extends UtilityClass {
         return new BigDecimal(RandomStringUtils.randomNumeric(1, scale) + "." + RandomStringUtils.randomNumeric(precision));
     }
 
+    @SuppressWarnings("MagicConstant")
     public static LocalDate randomLocalDate() {
         int year = RANDOM.nextInt(1970, 2036);
-        int month = RANDOM.nextInt(1, 13);
-        int day = RANDOM.nextInt(1, new GregorianCalendar(year, month - 1, 1).getActualMaximum(Calendar.DAY_OF_MONTH) + 1);
-        return LocalDate.of(year, month, day);
+        int month = randomOf(JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER);
+        int day = RANDOM.nextInt(1, new GregorianCalendar(year, month, 1).getActualMaximum(Calendar.DAY_OF_MONTH) + 1);
+        return LocalDate.of(year, month + 1, day);
     }
 
     public static LocalTime randomLocalTime() {
@@ -119,5 +133,10 @@ public abstract class RandomValues extends UtilityClass {
             floats[i] = RANDOM.nextFloat();
         }
         return floats;
+    }
+
+    @SafeVarargs
+    public static <T> T randomOf(T... values) {
+        return values[RANDOM.nextInt(0, values.length)];
     }
 }

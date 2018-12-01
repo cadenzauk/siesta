@@ -25,6 +25,7 @@ package com.cadenzauk.core.tuple;
 <#if n &gt; 2>
 import com.cadenzauk.core.function.Function${n};
 </#if>
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -120,6 +121,13 @@ public class Tuple${n}<<#list 1..n-1 as i>T${i}, </#list>T${n}> implements Tuple
             <#if j=i>function.apply(item${i})<#else>item${j}</#if><#if j < n>,</#if>
     </#list>
         );
+    }
+</#list>
+<#list 1..n as i>
+
+    @SuppressWarnings("unchecked")
+    public static <<#list 1..n-1 as j>T${j}, </#list>T${n}> TypeToken<T${i}> type${i}(TypeToken<Tuple${n}<<#list 1..n-1 as j>T${j},</#list>T${n}>> type) {
+        return (TypeToken<T${i}>) type.resolveType(Tuple${n}.class.getTypeParameters()[${i-1}]);
     }
 </#list>
 }

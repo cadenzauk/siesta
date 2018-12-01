@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<ExpectingJoin4<RT1,RT2,RT3,RT4>,Tuple4<RT1,RT2,RT3,RT4>> {
@@ -70,7 +71,12 @@ public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<Expec
     private <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> join(JoinType joinType, Alias<R5> alias) {
         SelectStatement<Tuple5<RT1,RT2,RT3,RT4,R5>> select5 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple5<RT1,RT2,RT3,RT4,R5>>() {},
+            new TypeToken<Tuple5<RT1,RT2,RT3,RT4,R5>>() {}
+                .where(new TypeParameter<RT1>() {}, Tuple4.type1(type()))
+                .where(new TypeParameter<RT2>() {}, Tuple4.type2(type()))
+                .where(new TypeParameter<RT3>() {}, Tuple4.type3(type()))
+                .where(new TypeParameter<RT4>() {}, Tuple4.type4(type()))
+                .where(new TypeParameter<R5>() {}, alias.type()),
             statement.from().join(joinType, alias),
             RowMappers.add5th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

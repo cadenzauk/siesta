@@ -23,6 +23,7 @@
 package com.cadenzauk.core.tuple;
 
 import com.cadenzauk.core.function.Function12;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -370,5 +371,65 @@ public class Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> implemen
             item11,
             function.apply(item12)
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T1> type1(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T1>) type.resolveType(Tuple12.class.getTypeParameters()[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T2> type2(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T2>) type.resolveType(Tuple12.class.getTypeParameters()[1]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T3> type3(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T3>) type.resolveType(Tuple12.class.getTypeParameters()[2]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T4> type4(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T4>) type.resolveType(Tuple12.class.getTypeParameters()[3]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T5> type5(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T5>) type.resolveType(Tuple12.class.getTypeParameters()[4]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T6> type6(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T6>) type.resolveType(Tuple12.class.getTypeParameters()[5]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T7> type7(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T7>) type.resolveType(Tuple12.class.getTypeParameters()[6]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T8> type8(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T8>) type.resolveType(Tuple12.class.getTypeParameters()[7]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T9> type9(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T9>) type.resolveType(Tuple12.class.getTypeParameters()[8]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T10> type10(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T10>) type.resolveType(Tuple12.class.getTypeParameters()[9]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T11> type11(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T11>) type.resolveType(Tuple12.class.getTypeParameters()[10]);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypeToken<T12> type12(TypeToken<Tuple12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>> type) {
+        return (TypeToken<T12>) type.resolveType(Tuple12.class.getTypeParameters()[11]);
     }
 }

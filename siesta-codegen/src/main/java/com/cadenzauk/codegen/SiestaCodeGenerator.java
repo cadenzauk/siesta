@@ -81,6 +81,10 @@ public class SiestaCodeGenerator {
         generate("ExpectingJoinN.ftl", n, max, SIESTA + "/grammar/select/ExpectingJoin" + n + ".java");
     }
 
+    private void generateInProjectionExpectingComma(int n, int max) {
+        generate("InProjectionExpectingCommaN.ftl", n, max, SIESTA + "/grammar/select/InProjectionExpectingComma" + n + ".java");
+    }
+
     private void generateTupleBuilderN(int n, int max) {
         generate("TupleBuilderN.ftl", n, max, SIESTA + "/grammar/expression/TupleBuilder" + n + ".java");
     }
@@ -91,6 +95,10 @@ public class SiestaCodeGenerator {
 
     private void generateExpectingJoins(int max) {
         IntStream.range(2, max + 1).forEach(i -> generateExpectingJoin(i, max));
+    }
+
+    private void generateInProjectionExpectingCommas(int max) {
+        IntStream.range(2, max + 1).forEach(i -> generateInProjectionExpectingComma(i, max));
     }
 
     private void generateTupleBuilders(int max) {
@@ -107,6 +115,7 @@ public class SiestaCodeGenerator {
         generateTuples(20);
         generateRowMappers(20);
         generateExpectingJoins(20);
+        generateInProjectionExpectingCommas(19);
         generateTupleBuilders(20);
     }
 

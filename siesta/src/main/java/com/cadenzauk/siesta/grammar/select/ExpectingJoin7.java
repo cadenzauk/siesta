@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin7<RT1, RT2, RT3, RT4, RT5, RT6, RT7> extends InJoinExpectingAnd<ExpectingJoin7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>,Tuple7<RT1,RT2,RT3,RT4,RT5,RT6,RT7>> {
@@ -70,7 +71,15 @@ public class ExpectingJoin7<RT1, RT2, RT3, RT4, RT5, RT6, RT7> extends InJoinExp
     private <R8> InJoinExpectingOn<ExpectingJoin8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>, Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> join(JoinType joinType, Alias<R8> alias) {
         SelectStatement<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>> select8 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>>() {},
+            new TypeToken<Tuple8<RT1,RT2,RT3,RT4,RT5,RT6,RT7,R8>>() {}
+                .where(new TypeParameter<RT1>() {}, Tuple7.type1(type()))
+                .where(new TypeParameter<RT2>() {}, Tuple7.type2(type()))
+                .where(new TypeParameter<RT3>() {}, Tuple7.type3(type()))
+                .where(new TypeParameter<RT4>() {}, Tuple7.type4(type()))
+                .where(new TypeParameter<RT5>() {}, Tuple7.type5(type()))
+                .where(new TypeParameter<RT6>() {}, Tuple7.type6(type()))
+                .where(new TypeParameter<RT7>() {}, Tuple7.type7(type()))
+                .where(new TypeParameter<R8>() {}, alias.type()),
             statement.from().join(joinType, alias),
             RowMappers.add8th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

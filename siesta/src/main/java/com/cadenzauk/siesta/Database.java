@@ -172,7 +172,8 @@ public class Database {
         try {
             return statement.get();
         } catch (RuntimeSqlException exception) {
-            throw dialect.exceptionTranslator().translate(sql, exception.getCause());
+            translateException(sql, exception);
+            throw exception;
         }
     }
 
@@ -462,17 +463,17 @@ public class Database {
             return table(TypeToken.of(rowClass), init);
         }
 
-        public Builder exeption(String sqlState, SqlExceptionConstructor constructor) {
+        public Builder exception(String sqlState, SqlExceptionConstructor constructor) {
             customizations.add(dialect -> dialect.exception(sqlState, constructor));
             return this;
         }
 
-        public Builder exeption(int errorCode, SqlExceptionConstructor constructor) {
+        public Builder exception(int errorCode, SqlExceptionConstructor constructor) {
             customizations.add(dialect -> dialect.exception(errorCode, constructor));
             return this;
         }
 
-        public Builder exeption(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
+        public Builder exception(String sqlState, int errorCode, SqlExceptionConstructor constructor) {
             customizations.add(dialect -> dialect.exception(sqlState, errorCode, constructor));
             return this;
         }

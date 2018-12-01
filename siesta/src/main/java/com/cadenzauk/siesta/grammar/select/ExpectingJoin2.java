@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin2<RT1, RT2> extends InJoinExpectingAnd<ExpectingJoin2<RT1,RT2>,Tuple2<RT1,RT2>> {
@@ -70,7 +71,10 @@ public class ExpectingJoin2<RT1, RT2> extends InJoinExpectingAnd<ExpectingJoin2<
     private <R3> InJoinExpectingOn<ExpectingJoin3<RT1,RT2,R3>, Tuple3<RT1,RT2,R3>> join(JoinType joinType, Alias<R3> alias) {
         SelectStatement<Tuple3<RT1,RT2,R3>> select3 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple3<RT1,RT2,R3>>() {},
+            new TypeToken<Tuple3<RT1,RT2,R3>>() {}
+                .where(new TypeParameter<RT1>() {}, Tuple2.type1(type()))
+                .where(new TypeParameter<RT2>() {}, Tuple2.type2(type()))
+                .where(new TypeParameter<R3>() {}, alias.type()),
             statement.from().join(joinType, alias),
             RowMappers.add3rd(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

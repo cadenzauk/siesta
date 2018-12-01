@@ -134,7 +134,7 @@ class DatabaseMetaDataUtilTest {
     @TestCase({"NULL", "NULL", "BOBBY", ",,", ",,", "FRED,BOB,JOE", "false"})
     @TestCase({"NULL", "SX", "BOB", "C1,C2,C3", "S1,S2,S3", "FRED,BOB,JOE", "false"})
     @TestCase({"CX", "NULL", "BOB", "C1,C2,C3", "S1,S2,S3", "FRED,BOB,JOE", "false"})
-    void tableExists(String catalog, String schema, String tableName, String[] actualCatalog, String actualSchema[], String actualTable[], boolean exists) throws SQLException {
+    void tableExists(String catalog, String schema, String tableName, String[] actualCatalog, String[] actualSchema, String[] actualTable, boolean exists) throws SQLException {
         when(metaData.getTables(isNull(), isNull(), isNull(), eq(new String[] {"TABLE"})))
             .thenReturn(resultSet);
         when(resultSet.getString("TABLE_CAT"))
@@ -183,7 +183,7 @@ class DatabaseMetaDataUtilTest {
     @TestCase({"C", "F", "NULL,NULL,NULL", "NULL,NULL,NULL", "FRED,BOB,JOE", "FRED,BOB,JOE"})
     @TestCase({"C", "F", "NULL,NULL,NULL", "D,E,F", "FRED,BOB,JOE", "F.JOE"})
     @TestCase({"C", "F", "A,B,C", "D,E,F", "FRED,BOB,JOE", "C.F.JOE"})
-    void tableNames(String catalog, String schema, String[] actualCatalog, String actualSchema[], String actualTable[], String[] expectedTableNames) throws SQLException {
+    void tableNames(String catalog, String schema, String[] actualCatalog, String[] actualSchema, String[] actualTable, String[] expectedTableNames) throws SQLException {
         QualifiedName[] expectedTables = parseQualifiedNames(expectedTableNames);
         when(metaData.getTables(isNull(), isNull(), isNull(), eq(new String[] {"TABLE"})))
             .thenReturn(resultSet);
@@ -245,7 +245,7 @@ class DatabaseMetaDataUtilTest {
     @TestCase({"A", "X", "A.X.FRED,B.Y.BOB,C.Z.JOE", "A.X.FRED.REFA,B.Y.BOB.REFB,B.Y.BOB.REFC", "A.X.FRED.REFA"})
     @TestCase({"B", "Y", "A.X.FRED,B.Y.BOB,C.Z.JOE", "A.X.FRED.REFA,B.Y.BOB.REFB,B.Y.BOB.REFC", "B.Y.BOB.REFB,B.Y.BOB.REFC"})
     @TestCase({"C", "Z", "A.X.FRED,B.Y.BOB,C.Z.JOE", "A.X.FRED.REFA,B.Y.BOB.REFB,B.Y.BOB.REFC", ""})
-    void foreignKeyNames(String catalog, String schema, String actualTableNames[], String[] actualFks, String[] expectedFks) throws SQLException {
+    void foreignKeyNames(String catalog, String schema, String[] actualTableNames, String[] actualFks, String[] expectedFks) throws SQLException {
         whenGetTablesThen(actualTableNames);
         whenGetImportedKeysThen(actualTableNames, actualFks);
 

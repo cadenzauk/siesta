@@ -140,7 +140,7 @@ class SelectStatement<RT> {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return scope.database().execute(sql, () ->sqlExecutor.query(sql, args, rowMapper()));
+        return scope.database().execute(sql, () -> sqlExecutor.query(sql, args, rowMapper()));
     }
 
     List<RT> list(Transaction transaction) {
@@ -188,14 +188,14 @@ class SelectStatement<RT> {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return sqlExecutor.stream(sql, args, rowMapper());
+        return scope.database().execute(sql, () -> sqlExecutor.stream(sql, args, rowMapper()));
     }
 
     Stream<RT> stream(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
         LOG.debug(sql);
-        return transaction.stream(sql, args, rowMapper());
+        return scope.database().execute(sql, () -> transaction.stream(sql, args, rowMapper()));
     }
 
     Stream<RT> stream(SqlExecutor sqlExecutor, CompositeAutoCloseable autoCloseable) {

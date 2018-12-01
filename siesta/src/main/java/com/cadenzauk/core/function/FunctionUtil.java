@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,14 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.select;
+package com.cadenzauk.core.function;
 
-import com.cadenzauk.core.tuple.Tuple20;
+import com.cadenzauk.core.util.UtilityClass;
 
-public class ExpectingJoin20<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, RT11, RT12, RT13, RT14, RT15, RT16, RT17, RT18, RT19, RT20> extends InJoinExpectingAnd<ExpectingJoin20<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,RT18,RT19,RT20>,Tuple20<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,RT18,RT19,RT20>> {
-    public ExpectingJoin20(SelectStatement<Tuple20<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,RT18,RT19,RT20>> statement) {
-        super(statement);
+import java.util.function.Supplier;
+
+public class FunctionUtil extends UtilityClass {
+    public static <T> Supplier<T> supplier(Supplier<T> supplier) {
+        return supplier;
     }
-
 }

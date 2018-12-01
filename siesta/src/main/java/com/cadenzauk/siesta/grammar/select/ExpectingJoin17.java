@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class ExpectingJoin17<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, RT11, RT12, RT13, RT14, RT15, RT16, RT17> extends InJoinExpectingAnd<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17>,Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17>> {
@@ -70,7 +71,25 @@ public class ExpectingJoin17<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, 
     private <R18> InJoinExpectingOn<ExpectingJoin18<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,R18>, Tuple18<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,R18>> join(JoinType joinType, Alias<R18> alias) {
         SelectStatement<Tuple18<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,R18>> select18 = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple18<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,R18>>() {},
+            new TypeToken<Tuple18<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,RT17,R18>>() {}
+                .where(new TypeParameter<RT1>() {}, Tuple17.type1(type()))
+                .where(new TypeParameter<RT2>() {}, Tuple17.type2(type()))
+                .where(new TypeParameter<RT3>() {}, Tuple17.type3(type()))
+                .where(new TypeParameter<RT4>() {}, Tuple17.type4(type()))
+                .where(new TypeParameter<RT5>() {}, Tuple17.type5(type()))
+                .where(new TypeParameter<RT6>() {}, Tuple17.type6(type()))
+                .where(new TypeParameter<RT7>() {}, Tuple17.type7(type()))
+                .where(new TypeParameter<RT8>() {}, Tuple17.type8(type()))
+                .where(new TypeParameter<RT9>() {}, Tuple17.type9(type()))
+                .where(new TypeParameter<RT10>() {}, Tuple17.type10(type()))
+                .where(new TypeParameter<RT11>() {}, Tuple17.type11(type()))
+                .where(new TypeParameter<RT12>() {}, Tuple17.type12(type()))
+                .where(new TypeParameter<RT13>() {}, Tuple17.type13(type()))
+                .where(new TypeParameter<RT14>() {}, Tuple17.type14(type()))
+                .where(new TypeParameter<RT15>() {}, Tuple17.type15(type()))
+                .where(new TypeParameter<RT16>() {}, Tuple17.type16(type()))
+                .where(new TypeParameter<RT17>() {}, Tuple17.type17(type()))
+                .where(new TypeParameter<R18>() {}, alias.type()),
             statement.from().join(joinType, alias),
             RowMappers.add18th(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

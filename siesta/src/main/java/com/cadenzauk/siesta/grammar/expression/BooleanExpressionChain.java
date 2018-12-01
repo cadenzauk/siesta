@@ -44,10 +44,6 @@ public class BooleanExpressionChain extends BooleanExpression {
         this.first = Optional.of(ParenthesisedBooleanExpression.wrapIfNecessary(first));
     }
 
-    public boolean isEmpty() {
-        return !first.isPresent();
-    }
-
     public void start(BooleanExpression expression) {
         first.ifPresent(booleanExpression -> {
             throw new IllegalStateException("Expression chain has already been started");

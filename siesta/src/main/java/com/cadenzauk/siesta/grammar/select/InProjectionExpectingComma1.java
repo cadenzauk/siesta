@@ -32,9 +32,12 @@ import com.cadenzauk.siesta.RowMappers;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
+
+import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
 
 public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
     public InProjectionExpectingComma1(SelectStatement<T1> statement) {
@@ -110,7 +113,9 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
     public <T> InProjectionExpectingComma2<T1,T> comma(Alias<T> alias) {
         SelectStatement<Tuple2<T1,T>> select = new SelectStatement<>(
             scope(),
-            new TypeToken<Tuple2<T1,T>>() {},
+            new TypeToken<Tuple2<T1,T>>(getClass()) {}
+                .where(new TypeParameter<T1>() {}, boxedType(type()))
+                .where(new TypeParameter<T>() {}, boxedType(alias.type())),
             statement.from(),
             RowMappers.of(
                 statement.rowMapper(),
@@ -122,7 +127,9 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
     private <T> InProjectionExpectingComma2<T1,T> comma(TypedExpression<T> col, Optional<String> label) {
         SelectStatement<Tuple2<T1,T>> select = new SelectStatement<>(
             scope(),
-            new TypeToken<Tuple2<T1,T>>() {},
+            new TypeToken<Tuple2<T1,T>>(getClass()) {}
+                .where(new TypeParameter<T1>() {}, boxedType(type()))
+                .where(new TypeParameter<T>() {}, boxedType(col.type())),
             statement.from(),
             RowMappers.of(
                 statement.rowMapper(),

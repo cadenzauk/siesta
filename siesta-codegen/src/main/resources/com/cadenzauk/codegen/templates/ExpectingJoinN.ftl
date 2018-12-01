@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${year} Cadenza United Kingdom Limited
+ * Copyright (c) 2017, ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RowMappers;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 </#if>
 
@@ -76,7 +77,11 @@ public class ExpectingJoin${n}<${typelist_space}> extends InJoinExpectingAnd<Exp
     private <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> join(JoinType joinType, Alias<R${n+1}> alias) {
         SelectStatement<Tuple${n+1}<${typelist},R${n+1}>> select${n+1} = new SelectStatement<>(
             scope().plus(alias),
-            new TypeToken<Tuple${n+1}<${typelist},R${n+1}>>() {},
+            new TypeToken<Tuple${n+1}<${typelist},R${n+1}>>() {}
+<#list 1..n as i>
+                .where(new TypeParameter<RT${i}>() {}, Tuple${n}.type${i}(type()))
+</#list>
+                .where(new TypeParameter<R${n+1}>() {}, alias.type()),
             statement.from().join(joinType, alias),
             RowMappers.add${n+1}${nth}(statement.rowMapper(), alias.rowMapper()),
             Projection.of(statement.projection(), Projection.of(alias)));

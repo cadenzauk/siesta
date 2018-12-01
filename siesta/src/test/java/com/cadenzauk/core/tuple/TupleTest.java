@@ -184,7 +184,7 @@ class TupleTest {
         );
     }
 
-    @SuppressWarnings("EqualsWithItself")
+    @SuppressWarnings({"EqualsWithItself", "ConstantConditions"})
     @ParameterizedTest
     @MethodSource("parametersForEquals")
     void equalsIsCorrect(Tuple sut, Tuple rhs, boolean areEqual) {

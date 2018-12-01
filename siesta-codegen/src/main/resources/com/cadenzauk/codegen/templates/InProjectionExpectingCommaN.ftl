@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
+* Copyright (c) 2017, ${year} Cadenza United Kingdom Limited
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,8 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.tuple.Tuple4;
-import com.cadenzauk.core.tuple.Tuple5;
+import com.cadenzauk.core.tuple.Tuple${n};
+import com.cadenzauk.core.tuple.Tuple${n+1};
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
@@ -41,109 +41,111 @@ import java.util.Optional;
 
 import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
 
-public class InProjectionExpectingComma4<T1, T2, T3, T4> extends ExpectingWhere<Tuple4<T1,T2,T3,T4>> {
-    public InProjectionExpectingComma4(SelectStatement<Tuple4<T1,T2,T3,T4>> statement) {
+<#assign typelist_space><#if n = 1>T<#else>T1<#list 2..n as i>, T${i}</#list></#if></#assign>
+<#assign typelist><#if n = 1>T<#else>T1<#list 2..n as i>,T${i}</#list></#if></#assign>
+<#assign nth><#if n = 1>nd<#elseif n = 2>rd<#else>th</#if></#assign>
+<#assign result><#if n < max>InProjectionExpectingComma${n+1}<${typelist},T><#else>ExpectingWhere<Tuple${n+1}<${typelist},T>></#if></#assign>
+public class InProjectionExpectingComma${n}<${typelist_space}> extends ExpectingWhere<Tuple${n}<${typelist}>> {
+    public InProjectionExpectingComma${n}(SelectStatement<Tuple${n}<${typelist}>> statement) {
         super(statement);
     }
 
-    public <T> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(TypedExpression<T> expression) {
+    public <T> ${result} comma(TypedExpression<T> expression) {
         return comma(expression, Optional.empty());
     }
 
-    public <T> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(TypedExpression<T> expression, String label) {
+    public <T> ${result} comma(TypedExpression<T> expression, String label) {
         return comma(expression, OptionalUtil.ofBlankable(label));
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Function1<R,T> methodReference) {
+    public <T, R> ${result} comma(Function1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(methodReference), Optional.empty());
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Function1<R,T> methodReference, String label) {
+    public <T, R> ${result} comma(Function1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label));
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(FunctionOptional1<R,T> methodReference) {
+    public <T, R> ${result} comma(FunctionOptional1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(methodReference), Optional.empty());
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(FunctionOptional1<R,T> methodReference, String label) {
+    public <T, R> ${result} comma(FunctionOptional1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label));
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(String alias, Function1<R,T> methodReference) {
+    public <T, R> ${result} comma(String alias, Function1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(String alias, Function1<R,T> methodReference, String label) {
+    public <T, R> ${result} comma(String alias, Function1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(String alias, FunctionOptional1<R,T> methodReference) {
+    public <T, R> ${result} comma(String alias, FunctionOptional1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(String alias, FunctionOptional1<R,T> methodReference, String label) {
+    public <T, R> ${result} comma(String alias, FunctionOptional1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Alias<R> alias, Function1<R,T> methodReference) {
+    public <T, R> ${result} comma(Alias<R> alias, Function1<R,T> methodReference) {
         return comma(ResolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Alias<R> alias, Function1<R,T> methodReference, String label) {
+    public <T, R> ${result} comma(Alias<R> alias, Function1<R,T> methodReference, String label) {
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+    public <T, R> ${result} comma(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
         return comma(ResolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
-    public <T, R> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
+    public <T, R> ${result} comma(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
-    public <T> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Class<T> rowClass) {
+    public <T> ${result} comma(Class<T> rowClass) {
         Alias<T> alias = scope().findAlias(rowClass);
         return comma(alias);
     }
 
-    public <T> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Class<T> rowClass, String aliasName) {
+    public <T> ${result} comma(Class<T> rowClass, String aliasName) {
         Alias<T> alias = scope().findAlias(rowClass, aliasName);
         return comma(alias);
     }
 
-    public <T> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(Alias<T> alias) {
-        SelectStatement<Tuple5<T1,T2,T3,T4,T>> select = new SelectStatement<>(
+    public <T> ${result} comma(Alias<T> alias) {
+        SelectStatement<Tuple${n+1}<${typelist},T>> select = new SelectStatement<>(
             scope(),
-            new TypeToken<Tuple5<T1,T2,T3,T4,T>>() {}
-                .where(new TypeParameter<T1>() {}, Tuple4.type1(type()))
-                .where(new TypeParameter<T2>() {}, Tuple4.type2(type()))
-                .where(new TypeParameter<T3>() {}, Tuple4.type3(type()))
-                .where(new TypeParameter<T4>() {}, Tuple4.type4(type()))
+            new TypeToken<Tuple${n+1}<${typelist},T>>() {}
+<#list 1..n as i>
+                .where(new TypeParameter<T${i}>() {}, Tuple${n}.type${i}(type()))
+</#list>
                 .where(new TypeParameter<T>() {}, boxedType(alias.type())),
             statement.from(),
-            RowMappers.add5th(
+            RowMappers.add${n+1}${nth}(
                 statement.rowMapper(),
                 alias.rowMapper()),
                 Projection.of(statement.projection(), Projection.of(alias)));
-        return new InProjectionExpectingComma5<>(select);
+        return new <#if n < max>InProjectionExpectingComma${n+1}<#else>ExpectingWhere</#if><>(select);
     }
 
     @NotNull
-    private <T> InProjectionExpectingComma5<T1,T2,T3,T4,T> comma(TypedExpression<T> col, Optional<String> label) {
-        SelectStatement<Tuple5<T1,T2,T3,T4,T>> select = new SelectStatement<>(
+    private <T> ${result} comma(TypedExpression<T> col, Optional<String> label) {
+        SelectStatement<Tuple${n+1}<${typelist},T>> select = new SelectStatement<>(
             scope(),
-            new TypeToken<Tuple5<T1,T2,T3,T4,T>>() {}
-                .where(new TypeParameter<T1>() {}, Tuple4.type1(type()))
-                .where(new TypeParameter<T2>() {}, Tuple4.type2(type()))
-                .where(new TypeParameter<T3>() {}, Tuple4.type3(type()))
-                .where(new TypeParameter<T4>() {}, Tuple4.type4(type()))
+            new TypeToken<Tuple${n+1}<${typelist},T>>() {}
+<#list 1..n as i>
+                .where(new TypeParameter<T${i}>() {}, Tuple${n}.type${i}(type()))
+</#list>
                 .where(new TypeParameter<T>() {}, boxedType(col.type())),
             statement.from(),
-            RowMappers.add5th(
+            RowMappers.add${n+1}${nth}(
                 statement.rowMapper(),
                 col.rowMapper(scope(), label)),
                 Projection.of(statement.projection(), Projection.of(col, label)));
-        return new InProjectionExpectingComma5<>(select);
+        return new <#if n < max>InProjectionExpectingComma${n+1}<#else>ExpectingWhere</#if><>(select);
     }
 }

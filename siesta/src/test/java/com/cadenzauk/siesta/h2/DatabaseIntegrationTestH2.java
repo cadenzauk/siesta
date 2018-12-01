@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.h2;
 
-import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.siesta.Database;
@@ -37,6 +36,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static com.cadenzauk.core.RandomValues.randomBigDecimal;
+import static com.cadenzauk.core.RandomValues.randomOf;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
@@ -121,8 +122,8 @@ class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
     void embeddedInsertedAndReadBack() {
         Database database = testDatabase(dataSource);
         long partId = newId();
-        MoneyAmount purchasePrice = new MoneyAmount(RandomValues.randomBigDecimal(10, 2), "USD");
-        MoneyAmount retailPrice = new MoneyAmount(RandomValues.randomBigDecimal(10, 2), "NZD");
+        MoneyAmount purchasePrice = new MoneyAmount(randomBigDecimal(10, 2), randomOf("USD", "GBP", "EUR"));
+        MoneyAmount retailPrice = new MoneyAmount(randomBigDecimal(10, 2), randomOf("NZD", "AUD", "SAR"));
         database.insert(PartRow.newBuilder()
             .partId(partId)
             .description("ABC")
@@ -144,8 +145,8 @@ class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
         assertThat(result.item1().retailPrice(), is(Optional.of(retailPrice)));
         assertThat(result.item2(), is(purchasePrice));
         assertThat(result.item3(), is(retailPrice));
-        assertThat(result.item4(), is("USD"));
-        assertThat(result.item5(), is("NZD"));
+        assertThat(result.item4(), is(purchasePrice.currency()));
+        assertThat(result.item5(), is(retailPrice.currency()));
     }
 
     @Test

@@ -1,24 +1,24 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+* Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 
 package com.cadenzauk.siesta.grammar.select;
 
@@ -33,10 +33,13 @@ import com.cadenzauk.siesta.RowMappers;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+
+import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
 
 public class InProjectionExpectingComma3<T1, T2, T3> extends ExpectingWhere<Tuple3<T1,T2,T3>> {
     public InProjectionExpectingComma3(SelectStatement<Tuple3<T1,T2,T3>> statement) {
@@ -112,12 +115,16 @@ public class InProjectionExpectingComma3<T1, T2, T3> extends ExpectingWhere<Tupl
     public <T> InProjectionExpectingComma4<T1,T2,T3,T> comma(Alias<T> alias) {
         SelectStatement<Tuple4<T1,T2,T3,T>> select = new SelectStatement<>(
             scope(),
-            new TypeToken<Tuple4<T1,T2,T3,T>>() {},
+            new TypeToken<Tuple4<T1,T2,T3,T>>() {}
+                .where(new TypeParameter<T1>() {}, Tuple3.type1(type()))
+                .where(new TypeParameter<T2>() {}, Tuple3.type2(type()))
+                .where(new TypeParameter<T3>() {}, Tuple3.type3(type()))
+                .where(new TypeParameter<T>() {}, boxedType(alias.type())),
             statement.from(),
             RowMappers.add4th(
                 statement.rowMapper(),
                 alias.rowMapper()),
-            Projection.of(statement.projection(), Projection.of(alias)));
+                Projection.of(statement.projection(), Projection.of(alias)));
         return new InProjectionExpectingComma4<>(select);
     }
 
@@ -125,12 +132,16 @@ public class InProjectionExpectingComma3<T1, T2, T3> extends ExpectingWhere<Tupl
     private <T> InProjectionExpectingComma4<T1,T2,T3,T> comma(TypedExpression<T> col, Optional<String> label) {
         SelectStatement<Tuple4<T1,T2,T3,T>> select = new SelectStatement<>(
             scope(),
-            new TypeToken<Tuple4<T1,T2,T3,T>>() {},
+            new TypeToken<Tuple4<T1,T2,T3,T>>() {}
+                .where(new TypeParameter<T1>() {}, Tuple3.type1(type()))
+                .where(new TypeParameter<T2>() {}, Tuple3.type2(type()))
+                .where(new TypeParameter<T3>() {}, Tuple3.type3(type()))
+                .where(new TypeParameter<T>() {}, boxedType(col.type())),
             statement.from(),
             RowMappers.add4th(
                 statement.rowMapper(),
                 col.rowMapper(scope(), label)),
-            Projection.of(statement.projection(), Projection.of(col, label)));
+                Projection.of(statement.projection(), Projection.of(col, label)));
         return new InProjectionExpectingComma4<>(select);
     }
 }
