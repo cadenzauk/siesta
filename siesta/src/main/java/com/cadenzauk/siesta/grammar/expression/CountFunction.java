@@ -23,24 +23,41 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class CountFunction implements TypedExpression<Integer> {
+public class CountFunction<T> implements TypedExpression<T> {
     private final LabelGenerator labelGenerator = new LabelGenerator("count_");
+    private final FunctionName name;
+    private final TypeToken<T> type;
+    private final Optional<TypedExpression<?>> arg;
+
+    public CountFunction(FunctionName name, TypeToken<T> type) {
+        this.name = name;
+        this.type = type;
+        arg = Optional.empty();
+    }
+
+    public <U> CountFunction(FunctionName name, TypeToken<T> type, TypedExpression<U> arg) {
+        this.name = name;
+        this.type = type;
+        this.arg = Optional.of(arg);
+    }
 
     @Override
     public String sql(Scope scope) {
-        return "count(*)";
+        return scope.dialect().function(name).sql(scope, arg.map(a -> a.sql(scope)).orElse("*"));
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Stream.empty();
+        return scope.dialect().function(name).args(scope, StreamUtil.of(arg).toArray(TypedExpression[]::new));
     }
 
     @Override
@@ -54,12 +71,12 @@ public class CountFunction implements TypedExpression<Integer> {
     }
 
     @Override
-    public RowMapper<Integer> rowMapper(Scope scope, Optional<String> label) {
-        return rs -> scope.database().getDataTypeOf(Integer.class).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
+        return rs -> scope.database().getDataTypeOf(type).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override
-    public TypeToken<Integer> type() {
-        return TypeToken.of(Integer.class);
+    public TypeToken<T> type() {
+        return type;
     }
 }

@@ -30,6 +30,9 @@ import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 
 import java.util.Optional;
@@ -46,6 +49,10 @@ public class H2Dialect extends AnsiDialect {
         this.defaultLockTimeout = defaultLockTimeout;
 
         DateFunctionSpecs.registerDateAdd(functions());
+
+        functions()
+            .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
+            .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"));
 
         exceptions()
             .register("42.+", SqlSyntaxException::new)

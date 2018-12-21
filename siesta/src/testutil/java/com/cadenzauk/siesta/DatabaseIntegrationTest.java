@@ -30,6 +30,7 @@ import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
+import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -74,6 +75,8 @@ import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static com.cadenzauk.siesta.Order.ASC;
 import static com.cadenzauk.siesta.Order.DESC;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countBig;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countBigDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.min;
@@ -331,19 +334,27 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .build();
         database.insert(aWidget1, aWidget2, aWidget3);
 
-        List<Tuple3<Long,Integer,Integer>> result = database.from(WidgetRow.class)
-            .select(WidgetRow::manufacturerId).comma(countDistinct(WidgetRow::name)).comma(count())
+        List<Tuple5<Long,Integer,Integer,Long,Long>> result = database.from(WidgetRow.class)
+            .select(WidgetRow::manufacturerId)
+            .comma(countDistinct(WidgetRow::name))
+            .comma(count())
+            .comma(countBig())
+            .comma(countBigDistinct(WidgetRow::manufacturerId))
             .where(WidgetRow::widgetId).isIn(aWidget1.widgetId(), aWidget2.widgetId(), aWidget3.widgetId())
             .groupBy(WidgetRow::manufacturerId)
-            .orderBy(WidgetRow::manufacturerId, Order.ASC)
+            .orderBy(WidgetRow::manufacturerId, ASC)
             .list();
 
         assertThat(result.get(0).item1(), is(manufacturer1));
         assertThat(result.get(0).item2(), is(1));
         assertThat(result.get(0).item3(), is(2));
+        assertThat(result.get(0).item4(), is(2L));
+        assertThat(result.get(0).item5(), is(1L));
         assertThat(result.get(1).item1(), is(manufacturer2));
         assertThat(result.get(1).item2(), is(1));
         assertThat(result.get(1).item3(), is(1));
+        assertThat(result.get(1).item4(), is(1L));
+        assertThat(result.get(1).item5(), is(1L));
     }
 
     @Test

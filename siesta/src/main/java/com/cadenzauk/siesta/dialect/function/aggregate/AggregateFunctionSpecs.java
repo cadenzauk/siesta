@@ -31,11 +31,19 @@ public class AggregateFunctionSpecs {
     public static final FunctionName MIN = new FunctionName("min");
     public static final FunctionName SUM = new FunctionName("sum");
     public static final FunctionName AVG = new FunctionName("avg");
+    public static final FunctionName COUNT = new FunctionName("count");
+    public static final FunctionName COUNT_BIG = new FunctionName("count_big");
+    public static final FunctionName COUNT_DISTINCT = new FunctionName("count_distinct");
+    public static final FunctionName COUNT_BIG_DISTINCT = new FunctionName("count_big_distinct");
 
     public static void registerDefaults(FunctionRegistry functions) {
         functions.register(MAX, SimpleFunctionSpec.of("max"));
         functions.register(MIN, SimpleFunctionSpec.of("min"));
         functions.register(SUM, SimpleFunctionSpec.of("sum"));
         functions.register(AVG, SimpleFunctionSpec.of("avg"));
+        functions.register(COUNT, SimpleFunctionSpec.of("count"));
+        functions.register(COUNT_BIG, SimpleFunctionSpec.of("count_big"));
+        functions.register(COUNT_DISTINCT, CountDistinctFunctionSpec.of("count"));
+        functions.register(COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count_big"));
     }
 }

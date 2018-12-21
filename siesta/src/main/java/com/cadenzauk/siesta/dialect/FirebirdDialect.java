@@ -31,6 +31,8 @@ import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
@@ -53,6 +55,8 @@ public class FirebirdDialect extends AnsiDialect {
         DateFunctionSpecs.registerDateAdd(functions());
 
         functions()
+            .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
+            .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
             .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("position") {
                 @Override
                 public String sql(Scope scope, String[] args) {

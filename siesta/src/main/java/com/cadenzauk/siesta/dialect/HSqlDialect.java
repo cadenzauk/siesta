@@ -32,6 +32,9 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
@@ -53,6 +56,8 @@ public class HSqlDialect extends AnsiDialect {
     public HSqlDialect() {
         DateFunctionSpecs.registerDateAdd(functions());
         functions()
+            .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
+            .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, (scope, argsSql) -> "current_timestamp at time zone interval '00:00' hour to minute")
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP, (scope, argsSql) -> currentTimestamp(scope))
             .register(DateFunctionSpecs.CURRENT_DATE, (scope, argsSql) -> String.format("cast(%s as date)", currentTimestamp(scope)));

@@ -26,6 +26,8 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
+import com.google.common.reflect.TypeToken;
 
 import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.AVG;
 import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.MAX;
@@ -163,34 +165,122 @@ public final class Aggregates extends UtilityClass {
     }
 
     public static TypedExpression<Integer> count() {
-        return new CountFunction();
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class));
+    }
+
+    public static <T> TypedExpression<Integer> count(TypedExpression<T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), arg);
+    }
+
+    public static <T, R> TypedExpression<Integer> count(Function1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T, R> TypedExpression<Integer> count(FunctionOptional1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T, R> TypedExpression<Integer> count(String alias, Function1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Integer> count(String alias, FunctionOptional1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Integer> count(Alias<R> alias, Function1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), ResolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Integer> count(Alias<R> alias, FunctionOptional1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), ResolvedColumn.of(alias, arg));
+    }
+
+    public static TypedExpression<Long> countBig() {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class));
+    }
+
+    public static <T> TypedExpression<Long> countBig(TypedExpression<T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), arg);
+    }
+
+    public static <T, R> TypedExpression<Long> countBig(Function1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBig(FunctionOptional1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBig(String alias, Function1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBig(String alias, FunctionOptional1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBig(Alias<R> alias, Function1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), ResolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBig(Alias<R> alias, FunctionOptional1<R,T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), ResolvedColumn.of(alias, arg));
     }
 
     public static <T> TypedExpression<Integer> countDistinct(TypedExpression<T> arg) {
-        return new CountDistinctFunction<>(arg);
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), arg);
     }
 
     public static <T, R> TypedExpression<Integer> countDistinct(Function1<R,T> arg) {
-        return new CountDistinctFunction<>(UnresolvedColumn.of(arg));
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
 
     public static <T, R> TypedExpression<Integer> countDistinct(FunctionOptional1<R,T> arg) {
-        return new CountDistinctFunction<>(UnresolvedColumn.of(arg));
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
 
     public static <T, R> TypedExpression<Integer> countDistinct(String alias, Function1<R,T> arg) {
-        return new CountDistinctFunction<>(UnresolvedColumn.of(alias, arg));
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(alias, arg));
     }
 
     public static <T, R> TypedExpression<Integer> countDistinct(String alias, FunctionOptional1<R,T> arg) {
-        return new CountDistinctFunction<>(UnresolvedColumn.of(alias, arg));
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(alias, arg));
     }
 
     public static <T, R> TypedExpression<Integer> countDistinct(Alias<R> alias, Function1<R,T> arg) {
-        return new CountDistinctFunction<>(ResolvedColumn.of(alias, arg));
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), ResolvedColumn.of(alias, arg));
     }
 
     public static <T, R> TypedExpression<Integer> countDistinct(Alias<R> alias, FunctionOptional1<R,T> arg) {
-        return new CountDistinctFunction<>(ResolvedColumn.of(alias, arg));
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), ResolvedColumn.of(alias, arg));
+    }
+
+    public static <T> TypedExpression<Long> countBigDistinct(TypedExpression<T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), arg);
+    }
+
+    public static <T, R> TypedExpression<Long> countBigDistinct(Function1<R,T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBigDistinct(FunctionOptional1<R,T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBigDistinct(String alias, Function1<R,T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBigDistinct(String alias, FunctionOptional1<R,T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBigDistinct(Alias<R> alias, Function1<R,T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), ResolvedColumn.of(alias, arg));
+    }
+
+    public static <T, R> TypedExpression<Long> countBigDistinct(Alias<R> alias, FunctionOptional1<R,T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), ResolvedColumn.of(alias, arg));
     }
 }
