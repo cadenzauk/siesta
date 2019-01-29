@@ -56,6 +56,7 @@ import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -222,7 +223,7 @@ class SelectTest {
     }
 
     private static Arguments testCaseForWhere(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
-        return Arguments.of(where, expected);
+        return arguments(where, expected);
     }
 
     private static Stream<Arguments> parametersForWhere() {
@@ -252,7 +253,7 @@ class SelectTest {
     }
 
     private static Arguments testCaseForOrderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        return Arguments.of(orderBy, expected);
+        return arguments(orderBy, expected);
     }
 
     private static Stream<Arguments> parametersForOrderByOnSelect() {
@@ -301,7 +302,7 @@ class SelectTest {
 
 
     private static Arguments testCaseForOrderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        return Arguments.of(orderBy, expected);
+        return arguments(orderBy, expected);
     }
 
     private static Stream<Arguments> parametersForOrderByOnWhereClause() {

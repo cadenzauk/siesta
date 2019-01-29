@@ -44,6 +44,7 @@ import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 class ExpectingJoinTest {
@@ -57,7 +58,7 @@ class ExpectingJoinTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments testCase1(BiFunction<ExpectingJoin1<SalespersonRow>,Alias<SalespersonRow>[],ExpectingSelect<?>> method, String expectedSql) {
-        return Arguments.of(method, expectedSql);
+        return arguments(method, expectedSql);
     }
 
     private static Arguments testCase2(BiFunction<ExpectingJoin2<SalespersonRow,SalespersonRow>,Alias<SalespersonRow>[],ExpectingSelect<?>> method, String expectedSql) {

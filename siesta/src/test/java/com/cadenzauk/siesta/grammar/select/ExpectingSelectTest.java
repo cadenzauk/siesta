@@ -45,6 +45,7 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 class ExpectingSelectTest {
@@ -58,7 +59,7 @@ class ExpectingSelectTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments selectTestCase(BiFunction<ExpectingSelect<SalespersonRow>,Alias<SalespersonRow>,Select<?>> method, String expectedSql) {
-        return Arguments.of(method, expectedSql);
+        return arguments(method, expectedSql);
     }
 
     private static Stream<Arguments> argsForSelect() {

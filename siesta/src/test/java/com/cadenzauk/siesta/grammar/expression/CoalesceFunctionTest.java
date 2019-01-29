@@ -46,6 +46,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -133,7 +134,7 @@ class CoalesceFunctionTest {
     }
 
     private static Arguments coalesceTestCase(Function<Alias<WidgetRow>,CoalesceFunction<String>> f, String expected) {
-        return Arguments.of(f, expected);
+        return arguments(f, expected);
     }
 
     private static Stream<Arguments> parametersForCoalesce() {

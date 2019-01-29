@@ -24,9 +24,9 @@ package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.lang.RuntimeInstantiationException;
 import com.cadenzauk.core.reflect.Factory;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -199,7 +199,6 @@ class ClassUtilTest {
         assertThat(result, contains(TestingTarget.class, TestingTargetBase.class, Object.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void superclassesOfObject() {
         List<Class<?>> result = ClassUtil.superclasses(Object.class).collect(toList());
@@ -207,7 +206,6 @@ class ClassUtilTest {
         assertThat(result, contains(Object.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void superclassesOfInterface() {
         List<Class<?>> result = ClassUtil.superclasses(TestingBaseInterface.class).collect(toList());
@@ -215,7 +213,6 @@ class ClassUtilTest {
         assertThat(result, contains(TestingBaseInterface.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void superclassesOfDerivedInterface() {
         List<Class<?>> result = ClassUtil.superclasses(TestingInterface.class).collect(toList());
@@ -225,28 +222,28 @@ class ClassUtilTest {
 
     @Test
     void hasAnnotationThatIsPresent() {
-        boolean result = ClassUtil.hasAnnotation(TestingTarget.class, Ignore.class);
+        boolean result = ClassUtil.hasAnnotation(TestingTarget.class, XmlRootElement.class);
 
         assertThat(result, is(true));
     }
 
     @Test
     void hasAnnotationThatIsNotPresent() {
-        boolean result = ClassUtil.hasAnnotation(TestingTargetBase.class, Ignore.class);
+        boolean result = ClassUtil.hasAnnotation(TestingTargetBase.class, XmlRootElement.class);
 
         assertThat(result, is(false));
     }
 
     @Test
     void annotationThatIsPresent() {
-        Optional<Ignore> result = ClassUtil.annotation(TestingTarget.class, Ignore.class);
+        Optional<XmlRootElement> result = ClassUtil.annotation(TestingTarget.class, XmlRootElement.class);
 
         assertThat(result.isPresent(), is(true));
     }
 
     @Test
     void annotationThatIsNotPresent() {
-        Optional<Ignore> result = ClassUtil.annotation(TestingTargetBase.class, Ignore.class);
+        Optional<XmlRootElement> result = ClassUtil.annotation(TestingTargetBase.class, XmlRootElement.class);
 
         assertThat(result, is(Optional.empty()));
     }
@@ -284,8 +281,8 @@ class ClassUtilTest {
         private Integer baseField;
     }
 
-    @Ignore
     @SuppressWarnings("unused")
+    @XmlRootElement
     private static class TestingTarget extends TestingTargetBase {
         private final String stringField;
 

@@ -48,26 +48,27 @@ import static java.time.Month.OCTOBER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ZonedDateTimeConverterTest {
     private static Stream<Arguments> parameters() {
         return Stream.of(
-            Arguments.of("America/Anchorage", localDate(1, JANUARY, 1900)),
-            Arguments.of("America/New_York", localDate(29, FEBRUARY, 2008)),
-            Arguments.of("America/New_York", localDate(3, NOVEMBER, 2007)),
-            Arguments.of("America/New_York", localDate(4, NOVEMBER, 2007)),
-            Arguments.of("America/New_York", localDate(5, NOVEMBER, 2007)),
-            Arguments.of("UTC", localDate(31, DECEMBER, 2010)),
-            Arguments.of("UTC", localDate(1, JANUARY, 2011)),
-            Arguments.of("UTC", localDate(12, JANUARY, 2014)),
-            Arguments.of("UTC", localDate(31, DECEMBER, 9999)),
-            Arguments.of("UTC", localDate(15, OCTOBER, 1582)),
-            Arguments.of("Europe/London", localDate(25, MARCH, 2017)),
-            Arguments.of("Europe/London", localDate(26, MARCH, 2017)),
-            Arguments.of("Europe/London", localDate(27, MARCH, 2017)),
-            Arguments.of("Europe/Berlin", localDate(15, JANUARY, 2001)),
-            Arguments.of("Pacific/Apia", localDate(31, DECEMBER, 2100)),
-            Arguments.of("Pacific/Apia", null)
+            arguments("America/Anchorage", localDate(1, JANUARY, 1900)),
+            arguments("America/New_York", localDate(29, FEBRUARY, 2008)),
+            arguments("America/New_York", localDate(3, NOVEMBER, 2007)),
+            arguments("America/New_York", localDate(4, NOVEMBER, 2007)),
+            arguments("America/New_York", localDate(5, NOVEMBER, 2007)),
+            arguments("UTC", localDate(31, DECEMBER, 2010)),
+            arguments("UTC", localDate(1, JANUARY, 2011)),
+            arguments("UTC", localDate(12, JANUARY, 2014)),
+            arguments("UTC", localDate(31, DECEMBER, 9999)),
+            arguments("UTC", localDate(15, OCTOBER, 1582)),
+            arguments("Europe/London", localDate(25, MARCH, 2017)),
+            arguments("Europe/London", localDate(26, MARCH, 2017)),
+            arguments("Europe/London", localDate(27, MARCH, 2017)),
+            arguments("Europe/Berlin", localDate(15, JANUARY, 2001)),
+            arguments("Pacific/Apia", localDate(31, DECEMBER, 2100)),
+            arguments("Pacific/Apia", null)
         );
     }
 

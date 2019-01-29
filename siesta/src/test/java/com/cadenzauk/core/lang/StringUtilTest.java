@@ -25,7 +25,7 @@ package com.cadenzauk.core.lang;
 import com.cadenzauk.core.junit.NullValue;
 import com.cadenzauk.core.junit.TestCase;
 import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 

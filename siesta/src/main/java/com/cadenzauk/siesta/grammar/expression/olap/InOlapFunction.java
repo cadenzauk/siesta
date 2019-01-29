@@ -65,6 +65,6 @@ public abstract class InOlapFunction<T> implements TypedExpression<T> {
 
     @Override
     public Precedence precedence() {
-        return Precedence.UNARY;
+        return function.precedence();
     }
 }

@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -70,7 +71,7 @@ class CastExpressionTest {
     private Database database;
 
     private static <T> Arguments testCaseForSql(String type, Function<CastBuilder<String>,TypedExpression<T>> castFunction) {
-        return Arguments.of(type, castFunction);
+        return arguments(type, castFunction);
     }
 
     @SuppressWarnings("unused")

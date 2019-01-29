@@ -41,9 +41,9 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
-import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 class BetweenBuilderTest {
@@ -56,21 +56,21 @@ class BetweenBuilderTest {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private static <T> Object[] testCase(BiFunction<BetweenBuilder<String,T>,Alias<SalespersonRow>,T> method, String expectedSql, Object... expectedArgs) {
-        return toArray(method, expectedSql, expectedArgs);
+    private static <T> Arguments testCase(BiFunction<BetweenBuilder<String,T>,Alias<SalespersonRow>,T> method, String expectedSql, Object... expectedArgs) {
+        return arguments(method, expectedSql, expectedArgs);
     }
 
     @SuppressWarnings("unused")
     private static Stream<Arguments> argsForAnd() {
         return Stream.of(
-            Arguments.of(testCase((b, s) -> b.and("Z"), "?", "Z")),
-            Arguments.of(testCase((b, s) -> b.and(s.column(SalespersonRow::firstName)), "s.FIRST_NAME")),
-            Arguments.of(testCase((b, s) -> b.and(SalespersonRow::firstName), "s.FIRST_NAME")),
-            Arguments.of(testCase((b, s) -> b.and(SalespersonRow::middleNames), "s.MIDDLE_NAMES")),
-            Arguments.of(testCase((b, s) -> b.and("s", SalespersonRow::firstName), "s.FIRST_NAME")),
-            Arguments.of(testCase((b, s) -> b.and("s", SalespersonRow::middleNames), "s.MIDDLE_NAMES")),
-            Arguments.of(testCase((b, s) -> b.and(s, SalespersonRow::firstName), "s.FIRST_NAME")),
-            Arguments.of(testCase((b, s) -> b.and(s, SalespersonRow::middleNames), "s.MIDDLE_NAMES"))
+            testCase((b, s) -> b.and("Z"), "?", "Z"),
+            testCase((b, s) -> b.and(s.column(SalespersonRow::firstName)), "s.FIRST_NAME"),
+            testCase((b, s) -> b.and(SalespersonRow::firstName), "s.FIRST_NAME"),
+            testCase((b, s) -> b.and(SalespersonRow::middleNames), "s.MIDDLE_NAMES"),
+            testCase((b, s) -> b.and("s", SalespersonRow::firstName), "s.FIRST_NAME"),
+            testCase((b, s) -> b.and("s", SalespersonRow::middleNames), "s.MIDDLE_NAMES"),
+            testCase((b, s) -> b.and(s, SalespersonRow::firstName), "s.FIRST_NAME"),
+            testCase((b, s) -> b.and(s, SalespersonRow::middleNames), "s.MIDDLE_NAMES")
         );
     }
 

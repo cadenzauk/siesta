@@ -56,16 +56,15 @@ dependencies {
         exclude group: 'commons-logging'
     }
     testutilCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-    testutilCompile group: 'org.mockito', name: 'mockito-core', version: '2.18.3'
-    testutilCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.18.3'
+    testutilCompile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testutilCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
     testutilCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
-    testutilCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
     testutilCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
 
     testutilRuntime group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
 
-    testCompile group: 'com.h2database', name: 'h2', version: '1.4.196'
-    testCompile group: 'org.hsqldb', name: 'hsqldb', version:'[2,)'
+    testCompile group: 'com.h2database', name: 'h2', version: h2Version
+    testCompile group: 'org.hsqldb', name: 'hsqldb', version: hsqldbVersion
     testCompile group: 'co.unruly', name: 'java-8-matchers', version: '1.5'
 }
 

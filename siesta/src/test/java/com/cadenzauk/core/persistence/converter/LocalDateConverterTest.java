@@ -44,26 +44,27 @@ import static java.time.Month.NOVEMBER;
 import static java.time.Month.OCTOBER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class LocalDateConverterTest {
     private static Stream<Arguments> parameters() {
         return Stream.of(
-            Arguments.of("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),
-            Arguments.of("America/New_York", localDate(29, FEBRUARY, 2008), date(29, FEBRUARY, 2008, "America/New_York")),
-            Arguments.of("America/New_York", localDate(3, NOVEMBER, 2007), date(3, NOVEMBER, 2007, "America/New_York")),
-            Arguments.of("America/New_York", localDate(4, NOVEMBER, 2007), date(4, NOVEMBER, 2007, "America/New_York")),
-            Arguments.of("America/New_York", localDate(5, NOVEMBER, 2007), date(5, NOVEMBER, 2007, "America/New_York")),
-            Arguments.of("UTC", localDate(31, DECEMBER, 2010), date(31, DECEMBER, 2010, "UTC")),
-            Arguments.of("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
-            Arguments.of("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
-            Arguments.of("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
-            Arguments.of("UTC", localDate(16, OCTOBER, 1582), date(16, OCTOBER, 1582, "UTC")),
-            Arguments.of("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
-            Arguments.of("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
-            Arguments.of("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),
-            Arguments.of("Europe/Berlin", localDate(15, JANUARY, 2001), date(15, JANUARY, 2001, "Europe/Berlin")),
-            Arguments.of("Pacific/Apia", localDate(31, DECEMBER, 2100), date(31, DECEMBER, 2100, "Pacific/Apia")),
-            Arguments.of("Pacific/Apia", null, null)
+            arguments("America/Anchorage", localDate(1, JANUARY, 1900), date(1, JANUARY, 1900, "America/Anchorage")),
+            arguments("America/New_York", localDate(29, FEBRUARY, 2008), date(29, FEBRUARY, 2008, "America/New_York")),
+            arguments("America/New_York", localDate(3, NOVEMBER, 2007), date(3, NOVEMBER, 2007, "America/New_York")),
+            arguments("America/New_York", localDate(4, NOVEMBER, 2007), date(4, NOVEMBER, 2007, "America/New_York")),
+            arguments("America/New_York", localDate(5, NOVEMBER, 2007), date(5, NOVEMBER, 2007, "America/New_York")),
+            arguments("UTC", localDate(31, DECEMBER, 2010), date(31, DECEMBER, 2010, "UTC")),
+            arguments("UTC", localDate(1, JANUARY, 2011), date(1, JANUARY, 2011, "UTC")),
+            arguments("UTC", localDate(12, JANUARY, 2014), date(12, JANUARY, 2014, "UTC")),
+            arguments("UTC", localDate(31, DECEMBER, 9999), date(31, DECEMBER, 9999, "UTC")),
+            arguments("UTC", localDate(16, OCTOBER, 1582), date(16, OCTOBER, 1582, "UTC")),
+            arguments("Europe/London", localDate(25, MARCH, 2017), date(25, MARCH, 2017, "Europe/London")),
+            arguments("Europe/London", localDate(26, MARCH, 2017), date(26, MARCH, 2017, "Europe/London")),
+            arguments("Europe/London", localDate(27, MARCH, 2017), date(27, MARCH, 2017, "Europe/London")),
+            arguments("Europe/Berlin", localDate(15, JANUARY, 2001), date(15, JANUARY, 2001, "Europe/Berlin")),
+            arguments("Pacific/Apia", localDate(31, DECEMBER, 2100), date(31, DECEMBER, 2100, "Pacific/Apia")),
+            arguments("Pacific/Apia", null, null)
         );
     }
 

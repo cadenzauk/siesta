@@ -54,6 +54,7 @@ import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -68,18 +69,18 @@ class DataTypeTest {
 
     private static Stream<Arguments> parametersForJavaClass() {
         return Stream.of(
-            Arguments.of(DataType.BIG_DECIMAL, BigDecimal.class),
-            Arguments.of(DataType.BYTE, Byte.class),
-            Arguments.of(DataType.BYTE_ARRAY, byte[].class),
-            Arguments.of(DataType.DOUBLE, Double.class),
-            Arguments.of(DataType.FLOAT, Float.class),
-            Arguments.of(DataType.INTEGER, Integer.class),
-            Arguments.of(DataType.LOCAL_DATE, LocalDate.class),
-            Arguments.of(DataType.LOCAL_DATE_TIME, LocalDateTime.class),
-            Arguments.of(DataType.LONG, Long.class),
-            Arguments.of(DataType.SHORT, Short.class),
-            Arguments.of(DataType.STRING, String.class),
-            Arguments.of(DataType.ZONED_DATE_TIME, ZonedDateTime.class)
+            arguments(DataType.BIG_DECIMAL, BigDecimal.class),
+            arguments(DataType.BYTE, Byte.class),
+            arguments(DataType.BYTE_ARRAY, byte[].class),
+            arguments(DataType.DOUBLE, Double.class),
+            arguments(DataType.FLOAT, Float.class),
+            arguments(DataType.INTEGER, Integer.class),
+            arguments(DataType.LOCAL_DATE, LocalDate.class),
+            arguments(DataType.LOCAL_DATE_TIME, LocalDateTime.class),
+            arguments(DataType.LONG, Long.class),
+            arguments(DataType.SHORT, Short.class),
+            arguments(DataType.STRING, String.class),
+            arguments(DataType.ZONED_DATE_TIME, ZonedDateTime.class)
         );
     }
 
@@ -156,7 +157,7 @@ class DataTypeTest {
     }
 
     private static Stream<Arguments> timeZonePairs() {
-        return timeZones().flatMap(tz1 -> timeZones().map(tz2 -> Arguments.of(tz1, tz2)));
+        return timeZones().flatMap(tz1 -> timeZones().map(tz2 -> arguments(tz1, tz2)));
     }
 
     @ParameterizedTest
@@ -293,7 +294,7 @@ class DataTypeTest {
     }
 
     private static <T> Arguments testCaseForToDatabase(DataType<T> dataType, T value) {
-        return Arguments.of(dataType, value, value);
+        return arguments(dataType, value, value);
     }
 
     private static <T> Arguments testCaseForGet(DataType<T> dataType, ResultSetGet<T> get, T value) {
@@ -305,15 +306,15 @@ class DataTypeTest {
     }
 
     private static <T> Arguments createTestCaseArgs(DataType<T> sut, SqlBiConsumer<ResultSet,String> resultSetConsumer, Optional<ZoneId> dbTimeZone, T expected) {
-        return Arguments.of(sut, resultSetConsumer, dbTimeZone, expected);
+        return arguments(sut, resultSetConsumer, dbTimeZone, expected);
     }
 
     private static <T> Arguments literalTestCase(DataType<T> sut, T value, String expected) {
-        return Arguments.of(sut, value, ZoneId.systemDefault(), expected);
+        return arguments(sut, value, ZoneId.systemDefault(), expected);
     }
 
     private static Arguments literalTestCase(DataType<ZonedDateTime> sut, ZonedDateTime value, ZoneId dbTimeZone, String expected) {
-        return Arguments.of(sut, value, dbTimeZone, expected);
+        return arguments(sut, value, dbTimeZone, expected);
     }
 
 }

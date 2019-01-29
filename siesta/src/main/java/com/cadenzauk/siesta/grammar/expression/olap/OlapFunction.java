@@ -27,6 +27,7 @@ import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
+import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.select.Ordering;
 import com.google.common.reflect.TypeToken;
@@ -85,6 +86,10 @@ class OlapFunction<T> {
             ).flatMap(e -> e.args(scope)),
             orderBy.stream().flatMap(Collection::stream).flatMap(o -> o.args(scope))
         );
+    }
+
+    Precedence precedence() {
+        return Precedence.UNARY;
     }
 
     <V> void addPartitionBy(TypedExpression<V> expression) {

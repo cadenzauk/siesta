@@ -50,6 +50,7 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +68,7 @@ class SelectHavingTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments havingTest(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,Select<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
-        return Arguments.of(having, expectedSql, expectedArgs);
+        return arguments(having, expectedSql, expectedArgs);
     }
 
     private static Stream<Arguments> parametersForHaving() {

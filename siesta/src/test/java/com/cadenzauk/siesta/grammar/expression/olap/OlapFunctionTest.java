@@ -58,6 +58,7 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -146,12 +147,10 @@ class OlapFunctionTest {
     void precedence() {
         OlapFunction<Integer> sut = new OlapFunction<>("bar", TypeToken.of(Integer.class), arg1);
 
-        Precedence result = Precedence.UNARY;
+        Precedence result = sut.precedence();
 
         assertThat(result, is(Precedence.UNARY));
     }
-
-
 
     @ParameterizedTest(name = "{index}: {1}")
     @MethodSource("parametersForRowNumber")
@@ -169,7 +168,7 @@ class OlapFunctionTest {
         assertThat(args.getValue(), is(expectedArgs));}
 
     private static Arguments testCase(BiFunction<InOlapExpectingPartitionBy<Integer>,Alias<SalespersonRow>,TypedExpression<Integer>> f, String expectedSql, Object... expectedArgs) {
-        return Arguments.of(f, expectedSql, expectedArgs);
+        return arguments(f, expectedSql, expectedArgs);
     }
 
     private static Stream<Arguments> parametersForRowNumber() {

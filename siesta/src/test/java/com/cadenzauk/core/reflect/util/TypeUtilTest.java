@@ -41,6 +41,7 @@ import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class TypeUtilTest {
     @Test
@@ -50,14 +51,14 @@ class TypeUtilTest {
 
     private static Stream<Arguments> parametersForBoxedType() {
         return Stream.of(
-            Arguments.of(Long.TYPE, Long.class),
-            Arguments.of(Integer.TYPE, Integer.class),
-            Arguments.of(Short.TYPE, Short.class),
-            Arguments.of(Byte.TYPE, Byte.class),
-            Arguments.of(Double.TYPE, Double.class),
-            Arguments.of(Float.TYPE, Float.class),
-            Arguments.of(Character.TYPE, Character.class),
-            Arguments.of(Boolean.TYPE, Boolean.class)
+            arguments(Long.TYPE, Long.class),
+            arguments(Integer.TYPE, Integer.class),
+            arguments(Short.TYPE, Short.class),
+            arguments(Byte.TYPE, Byte.class),
+            arguments(Double.TYPE, Double.class),
+            arguments(Float.TYPE, Float.class),
+            arguments(Character.TYPE, Character.class),
+            arguments(Boolean.TYPE, Boolean.class)
         );
     }
 
@@ -79,14 +80,14 @@ class TypeUtilTest {
 
     private static Stream<Arguments> parametersForPrimitiveComponentType() {
         return Stream.of(
-            Arguments.of(long[].class, Long.TYPE),
-            Arguments.of(int[].class, Integer.TYPE),
-            Arguments.of(short[].class, Short.TYPE),
-            Arguments.of(byte[].class, Byte.TYPE),
-            Arguments.of(double[].class, Double.TYPE),
-            Arguments.of(float[].class, Float.TYPE),
-            Arguments.of(char[].class, Character.TYPE),
-            Arguments.of(boolean[].class, Boolean.TYPE)
+            arguments(long[].class, Long.TYPE),
+            arguments(int[].class, Integer.TYPE),
+            arguments(short[].class, Short.TYPE),
+            arguments(byte[].class, Byte.TYPE),
+            arguments(double[].class, Double.TYPE),
+            arguments(float[].class, Float.TYPE),
+            arguments(char[].class, Character.TYPE),
+            arguments(boolean[].class, Boolean.TYPE)
         );
     }
 
@@ -114,10 +115,10 @@ class TypeUtilTest {
 
     private static Stream<Arguments> parametersForActualTypeArgument() {
         return Stream.of(
-            Arguments.of(ClassUtil.getDeclaredField(TypeUtilTest.class, "optionalString").getGenericType(), 0, String.class),
-            Arguments.of(ClassUtil.getDeclaredField(TypeUtilTest.class, "integerList").getGenericType(), 0, Integer.class),
-            Arguments.of(ClassUtil.getDeclaredField(TypeUtilTest.class, "longCharacterMap").getGenericType(), 0, Long.class),
-            Arguments.of(ClassUtil.getDeclaredField(TypeUtilTest.class, "longCharacterMap").getGenericType(), 1, Character.class)
+            arguments(ClassUtil.getDeclaredField(TypeUtilTest.class, "optionalString").getGenericType(), 0, String.class),
+            arguments(ClassUtil.getDeclaredField(TypeUtilTest.class, "integerList").getGenericType(), 0, Integer.class),
+            arguments(ClassUtil.getDeclaredField(TypeUtilTest.class, "longCharacterMap").getGenericType(), 0, Long.class),
+            arguments(ClassUtil.getDeclaredField(TypeUtilTest.class, "longCharacterMap").getGenericType(), 1, Character.class)
         );
     }
 
@@ -139,17 +140,17 @@ class TypeUtilTest {
 
     private static Stream<Arguments> parametersForFindPrimitiveArrayType() {
         return Stream.of(
-            Arguments.of(Long.TYPE, Optional.of(long[].class)),
-            Arguments.of(Integer.TYPE, Optional.of(int[].class)),
-            Arguments.of(Short.TYPE, Optional.of(short[].class)),
-            Arguments.of(Byte.TYPE, Optional.of(byte[].class)),
-            Arguments.of(Double.TYPE, Optional.of(double[].class)),
-            Arguments.of(Float.TYPE, Optional.of(float[].class)),
-            Arguments.of(Character.TYPE, Optional.of(char[].class)),
-            Arguments.of(Boolean.TYPE, Optional.of(boolean[].class)),
-            Arguments.of(String.class, Optional.of(String[].class)),
-            Arguments.of(BigDecimal.class, Optional.empty()),
-            Arguments.of(String[].class, Optional.empty())
+            arguments(Long.TYPE, Optional.of(long[].class)),
+            arguments(Integer.TYPE, Optional.of(int[].class)),
+            arguments(Short.TYPE, Optional.of(short[].class)),
+            arguments(Byte.TYPE, Optional.of(byte[].class)),
+            arguments(Double.TYPE, Optional.of(double[].class)),
+            arguments(Float.TYPE, Optional.of(float[].class)),
+            arguments(Character.TYPE, Optional.of(char[].class)),
+            arguments(Boolean.TYPE, Optional.of(boolean[].class)),
+            arguments(String.class, Optional.of(String[].class)),
+            arguments(BigDecimal.class, Optional.empty()),
+            arguments(String[].class, Optional.empty())
         );
     }
 }

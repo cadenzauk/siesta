@@ -32,7 +32,6 @@ import com.cadenzauk.siesta.model.ManufacturerId;
 import com.cadenzauk.siesta.model.WidgetId;
 import com.cadenzauk.siesta.model.WidgetRowWithTypeSafeId;
 import com.cadenzauk.siesta.type.DbTypeId;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -45,9 +44,9 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 class SiestaExample extends IntegrationTest {
     @Test
@@ -230,6 +229,6 @@ class SiestaExample extends IntegrationTest {
             .or(WidgetRowWithTypeSafeId::manufacturerId).isEqualTo(literal(manufacturerId))
             .single();
 
-        MatcherAssert.assertThat(result.name(), is("Safety Gadget"));
+        assertThat(result.name(), is("Safety Gadget"));
     }
 }

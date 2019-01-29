@@ -54,6 +54,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -140,7 +141,7 @@ class ExpressionBuilderTest {
     }
 
     private static <T> Arguments testCase(BiFunction<ExpressionBuilder<String,T>,Alias<SalespersonRow>,T> method, String expectedSql, Object... expectedArgs) {
-        return Arguments.of(method, expectedSql, expectedArgs);
+        return arguments(method, expectedSql, expectedArgs);
     }
 
     @SuppressWarnings("unused")

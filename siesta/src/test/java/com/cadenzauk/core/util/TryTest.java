@@ -22,6 +22,8 @@
 
 package com.cadenzauk.core.util;
 
+import com.cadenzauk.core.lang.AggregateError;
+import com.cadenzauk.core.lang.AggregateException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -38,8 +40,11 @@ import java.util.stream.Stream;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -80,13 +85,13 @@ class TryTest {
     @ParameterizedTest
     @MethodSource({"failuresWithRawException", "successes"})
     void orElseThrowFailure(Try<Integer> candidate) {
-        candidate.throwError();
+        candidate.throwIfError();
     }
 
     @ParameterizedTest
     @MethodSource("failuresWithRawError")
     void orElseThrowFailure(Try<Integer> candidate, Error expectedError) {
-        calling(candidate::throwError)
+        calling(candidate::throwIfError)
             .shouldThrow(expectedError.getClass())
             .withMessage(expectedError.getMessage());
     }
@@ -96,7 +101,7 @@ class TryTest {
     void throwableSuccess(Try<Integer> candidate) {
         calling(candidate::throwable)
             .shouldThrow(IllegalStateException.class)
-            .withMessage("Cannot get an throwable from a successful Try.");
+            .withMessage("Cannot get a throwable from a successful Try.");
     }
 
     @ParameterizedTest
@@ -461,64 +466,64 @@ class TryTest {
 
     private static Stream<Arguments> successesAndFailuresWithBoolean() {
         return Stream.of(
-            Arguments.of(Try.success(5), true),
-            Arguments.of(Try.trySupply(() -> 5), true),
-            Arguments.of(Try.failure(new RuntimeException()), false),
-            Arguments.of(Try.trySupply(TryTest::fail), false)
+            arguments(Try.success(5), true),
+            arguments(Try.trySupply(() -> 5), true),
+            arguments(Try.failure(new RuntimeException()), false),
+            arguments(Try.trySupply(TryTest::fail), false)
         );
     }
 
     private static Stream<Arguments> successesWithValue() {
         return Stream.of(
-            Arguments.of(Try.success(545), 545),
-            Arguments.of(Try.trySupply(() -> 12), 12)
+            arguments(Try.success(545), 545),
+            arguments(Try.trySupply(() -> 12), 12)
         );
     }
 
     private static Stream<Arguments> failuresWithWrappedThrowable() {
         return Stream.of(
-            Arguments.of(Try.failure(new IllegalStateException()), new IllegalStateException()),
-            Arguments.of(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
-            Arguments.of(Try.trySupply(TryTest::failChecked), new RuntimeException(new IOException())),
-            Arguments.of(Try.trySupply(TryTest::failError), new IllegalAccessError())
+            arguments(Try.failure(new IllegalStateException()), new IllegalStateException()),
+            arguments(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
+            arguments(Try.trySupply(TryTest::failChecked), new RuntimeException(new IOException())),
+            arguments(Try.trySupply(TryTest::failError), new IllegalAccessError())
         );
     }
 
     private static Stream<Arguments> successes() {
         return Stream.of(
-            Arguments.of(Try.success(15)),
-            Arguments.of(Try.trySupply(() -> 25))
+            arguments(Try.success(15)),
+            arguments(Try.trySupply(() -> 25))
         );
     }
 
     private static Stream<Arguments> failuresWithRawThrowable() {
         return Stream.of(
-            Arguments.of(Try.failure(new IllegalStateException()), new IllegalStateException()),
-            Arguments.of(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
-            Arguments.of(Try.trySupply(TryTest::failChecked), new IOException()),
-            Arguments.of(Try.trySupply(TryTest::failError), new IllegalAccessError())
+            arguments(Try.failure(new IllegalStateException()), new IllegalStateException()),
+            arguments(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
+            arguments(Try.trySupply(TryTest::failChecked), new IOException()),
+            arguments(Try.trySupply(TryTest::failError), new IllegalAccessError())
         );
     }
 
     private static Stream<Arguments> failuresWithRawException() {
         return Stream.of(
-            Arguments.of(Try.failure(new IllegalStateException()), new IllegalStateException()),
-            Arguments.of(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
-            Arguments.of(Try.trySupply(TryTest::failChecked), new IOException())
+            arguments(Try.failure(new IllegalStateException()), new IllegalStateException()),
+            arguments(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
+            arguments(Try.trySupply(TryTest::failChecked), new IOException())
         );
     }
 
     private static Stream<Arguments> failuresWithRawError() {
         return Stream.of(
-            Arguments.of(Try.failure(new InstantiationError()), new InstantiationError()),
-            Arguments.of(Try.trySupply(TryTest::failError), new IllegalAccessError())
+            arguments(Try.failure(new InstantiationError()), new InstantiationError()),
+            arguments(Try.trySupply(TryTest::failError), new IllegalAccessError())
         );
     }
 
     private static Stream<Arguments> successesWithValuePlus20() {
         return Stream.of(
-            Arguments.of(Try.success(37), 57),
-            Arguments.of(Try.trySupply(() -> 653), 673)
+            arguments(Try.success(37), 57),
+            arguments(Try.trySupply(() -> 653), 673)
         );
     }
 }

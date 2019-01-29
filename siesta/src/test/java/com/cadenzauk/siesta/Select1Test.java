@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +60,7 @@ class Select1Test {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments testCaseForJoin(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> f, String expected) {
-        return Arguments.of(f, expected);
+        return arguments(f, expected);
     }
 
     private static Stream<Arguments> parametersForJoin() {

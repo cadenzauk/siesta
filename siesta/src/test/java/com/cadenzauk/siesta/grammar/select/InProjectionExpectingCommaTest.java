@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 class InProjectionExpectingCommaTest {
@@ -57,7 +58,7 @@ class InProjectionExpectingCommaTest {
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
     private static Arguments testCase1(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {
-        return Arguments.of(method, expectedSql, expectedArgs);
+        return arguments(method, expectedSql, expectedArgs);
     }
 
     private static Arguments testCase2(BiFunction<InProjectionExpectingComma2<?,?>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object... expectedArgs) {

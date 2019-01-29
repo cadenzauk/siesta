@@ -34,10 +34,11 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class TupleTest {
     private static Arguments toStringTestCase(Tuple sut, String expected) {
-        return Arguments.of(sut, expected);
+        return arguments(sut, expected);
     }
 
     @SuppressWarnings("unused")
@@ -90,7 +91,7 @@ class TupleTest {
 
 
     private static Arguments equalsTestCase(Tuple sut, Tuple rhs, boolean areEqual) {
-        return Arguments.of(sut, rhs, areEqual);
+        return arguments(sut, rhs, areEqual);
     }
 
     @SuppressWarnings("unused")
@@ -196,7 +197,7 @@ class TupleTest {
     }
 
     private static Arguments hashCodeTestCase(Tuple sut, Tuple equal, Tuple notEqual) {
-        return Arguments.of(sut, equal, notEqual);
+        return arguments(sut, equal, notEqual);
     }
 
     @SuppressWarnings("unused")
@@ -273,7 +274,7 @@ class TupleTest {
     }
 
     private static <T extends Tuple> Arguments itemTestCase(T sut, Function<T,Integer> getter, int expected) {
-        return Arguments.of(sut, getter, expected);
+        return arguments(sut, getter, expected);
     }
 
     @SuppressWarnings("unused")
@@ -334,7 +335,7 @@ class TupleTest {
     }
 
     private static <T extends Tuple> Arguments mapTestCase(T sut, Function<T,List<Integer>> mapper, List<Integer> expected) {
-        return Arguments.of(sut, mapper, expected);
+        return arguments(sut, mapper, expected);
     }
 
     @SuppressWarnings("unused")

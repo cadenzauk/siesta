@@ -45,6 +45,7 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +60,7 @@ class ExpectingWhereTest {
     private ArgumentCaptor<Object[]> args;
 
     private static Arguments whereTestCase(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
-        return Arguments.of(whereClause, expectedSql, expectedArgs);
+        return arguments(whereClause, expectedSql, expectedArgs);
     }
 
     private static Stream<Arguments> parametersForWhere() {

@@ -117,6 +117,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
@@ -719,16 +720,16 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @SuppressWarnings("unused")
     private static Stream<Arguments> parametersForLiteral() {
         return Stream.of(
-            Arguments.of(new BigDecimal("5001.12")),
-            Arguments.of((byte) 0xff),
-            Arguments.of((Object) new byte[] {(byte) 0xff, 0x1, 0x7f}),
-            Arguments.of(3.1415),
-            Arguments.of(2.71f),
-            Arguments.of(LocalDate.of(2014, 9, 12)),
-            Arguments.of(LocalDateTime.of(2017, 1, 2, 3, 4, 5, 6000000)),
-            Arguments.of(9_223_372_036_854_775_807L),
-            Arguments.of((short) 32767),
-            Arguments.of("Abc'def\"g hi")
+            arguments(new BigDecimal("5001.12")),
+            arguments((byte) 0xff),
+            arguments((Object) new byte[] {(byte) 0xff, 0x1, 0x7f}),
+            arguments(3.1415),
+            arguments(2.71f),
+            arguments(LocalDate.of(2014, 9, 12)),
+            arguments(LocalDateTime.of(2017, 1, 2, 3, 4, 5, 6000000)),
+            arguments(9_223_372_036_854_775_807L),
+            arguments((short) 32767),
+            arguments("Abc'def\"g hi")
         );
     }
 
@@ -744,11 +745,11 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
     private static Stream<Arguments> parametersForZonedDateTimeLiteral() {
         return Stream.of(
-            Arguments.of("UTC", ZonedDateTime.of(2001, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))),
-            Arguments.of("Europe/Berlin", ZonedDateTime.of(2002, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))),
-            Arguments.of("UTC", ZonedDateTime.of(2003, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))),
-            Arguments.of("America/New_York", ZonedDateTime.of(2004, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))),
-            Arguments.of("America/Anchorage", ZonedDateTime.of(2005, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage")))
+            arguments("UTC", ZonedDateTime.of(2001, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))),
+            arguments("Europe/Berlin", ZonedDateTime.of(2002, 6, 7, 1, 2, 3, 4000000, ZoneId.of("UTC"))),
+            arguments("UTC", ZonedDateTime.of(2003, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))),
+            arguments("America/New_York", ZonedDateTime.of(2004, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage"))),
+            arguments("America/Anchorage", ZonedDateTime.of(2005, 6, 7, 1, 2, 3, 4000000, ZoneId.of("America/Anchorage")))
         );
     }
 
@@ -768,9 +769,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @SuppressWarnings("unused")
     private static Stream<Arguments> parametersForLocalDateTimeLiteral() {
         return Stream.of(
-            Arguments.of("UTC", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)),
-            Arguments.of("Europe/Paris", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)),
-            Arguments.of("Pacific/Chatham", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000))
+            arguments("UTC", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)),
+            arguments("Europe/Paris", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000)),
+            arguments("Pacific/Chatham", LocalDateTime.of(2017, 7, 6, 5, 4, 3, 2000000))
         );
     }
 
@@ -790,9 +791,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
     private static Stream<Arguments> parametersForLocalTimeLiteral() {
         return Stream.of(
-            Arguments.of("UTC", LocalTime.of(5, 4, 3)),
-            Arguments.of("Europe/Paris", LocalTime.of(5, 4, 3)),
-            Arguments.of("Pacific/Chatham", LocalTime.of(5, 4, 3))
+            arguments("UTC", LocalTime.of(5, 4, 3)),
+            arguments("Europe/Paris", LocalTime.of(5, 4, 3)),
+            arguments("Pacific/Chatham", LocalTime.of(5, 4, 3))
         );
     }
 
@@ -1021,7 +1022,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     private static <T> Arguments castExpressionTestCase(TypedExpression<T> castExpr, T expectedResult) {
-        return Arguments.of(castExpr, expectedResult);
+        return arguments(castExpr, expectedResult);
     }
 
     private static Stream<Arguments> parametersForCastExpression() {

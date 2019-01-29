@@ -62,9 +62,10 @@ public class H2Dialect extends AnsiDialect {
 
             // VALUE_TOO_LONG_2 = 22001
             // NUMERIC_VALUE_OUT_OF_RANGE_1 = 22003
+            // NUMERIC_VALUE_OUT_OF_RANGE_2 = 22004
             // INVALID_DATETIME_CONSTANT_2 = 22007
             // DATA_CONVERSION_ERROR_1 = 22018
-            .register("2200[137]", InvalidValueException::new)
+            .register("2200[1347]", InvalidValueException::new)
             .register("22018", InvalidValueException::new)
 
             // NULL_NOT_ALLOWED = 23502

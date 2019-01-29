@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.ArrayUtils.toArray;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,7 +51,7 @@ class TypedExpressionTest {
     private TypedExpression<Integer> sut;
 
     private static Arguments testCase(BiFunction<TypedExpression<Integer>,Alias<TestTable>,TypedExpression<Integer>> method, String expectedSql, Object... expectedArgs) {
-        return Arguments.of(method, expectedSql, expectedArgs);
+        return arguments(method, expectedSql, expectedArgs);
     }
 
     private static Stream<Arguments> parametersForArithmeticOperators() {
@@ -110,7 +111,7 @@ class TypedExpressionTest {
     }
 
     private static Arguments testCase(Function<Alias<TestTable>,ExpressionBuilder<Integer,BooleanExpression>> method, String expectedSql, Object... expectedArgs) {
-        return Arguments.of(method, expectedSql, expectedArgs);
+        return arguments(method, expectedSql, expectedArgs);
     }
 
     private static Stream<Arguments> parametersForColumn() {

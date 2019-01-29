@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class DialectTest {
     @SuppressWarnings("unused")
@@ -50,7 +51,7 @@ class DialectTest {
     }
 
     private static Arguments testCase(Dialect dialect, String sql) {
-        return Arguments.of(dialect, sql);
+        return arguments(dialect, sql);
     }
 
     @SuppressWarnings("unused")
@@ -104,7 +105,7 @@ class DialectTest {
     }
 
     private static Arguments isolationLevelTest(Dialect dialect, IsolationLevel level, String expectSql) {
-        return Arguments.of(dialect, level, expectSql);
+        return arguments(dialect, level, expectSql);
     }
 
     @SuppressWarnings("unused")

@@ -44,6 +44,7 @@ import java.util.function.Function;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,6 +77,6 @@ abstract class FunctionTest {
     }
 
     protected static Arguments testCase(Function<Alias<TestRow>,TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
-        return Arguments.of(sutSupplier, expectedSql, expectedArgs);
+        return arguments(sutSupplier, expectedSql, expectedArgs);
     }
 }

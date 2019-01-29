@@ -61,6 +61,7 @@ import java.util.stream.Stream;
 import static co.unruly.matchers.StreamMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -218,61 +219,61 @@ class TupleBuilderTest {
 
     private static Stream<Arguments> argsForSql() {
         return Stream.of(
-            tuples1().map(t -> Arguments.of(t, "(a.SALESPERSON_ID)")),
-            tuples1Opt().map(t -> Arguments.of(t, "(a.MIDDLE_NAMES)")),
-            tuples2(aTuple1()).map(t -> Arguments.of(t, "(a.FIRST_NAME, a.SALESPERSON_ID)")),
-            tuples2Opt(aTuple1()).map(t -> Arguments.of(t, "(a.FIRST_NAME, a.MIDDLE_NAMES)")),
-            tuples3(aTuple2()).map(t -> Arguments.of(t, "(a.FIRST_NAME, a.COMMISSION, a.SALESPERSON_ID)")),
-            tuples3Opt(aTuple2()).map(t -> Arguments.of(t, "(a.FIRST_NAME, a.COMMISSION, a.MIDDLE_NAMES)")),
-            tuples4(aTuple3()).map(t -> Arguments.of(t, "(a.FIRST_NAME, a.COMMISSION, a.SALESPERSON_ID, a.SALESPERSON_ID)")),
-            tuples4Opt(aTuple3()).map(t -> Arguments.of(t, "(a.FIRST_NAME, a.COMMISSION, a.SALESPERSON_ID, a.MIDDLE_NAMES)"))
+            tuples1().map(t -> arguments(t, "(a.SALESPERSON_ID)")),
+            tuples1Opt().map(t -> arguments(t, "(a.MIDDLE_NAMES)")),
+            tuples2(aTuple1()).map(t -> arguments(t, "(a.FIRST_NAME, a.SALESPERSON_ID)")),
+            tuples2Opt(aTuple1()).map(t -> arguments(t, "(a.FIRST_NAME, a.MIDDLE_NAMES)")),
+            tuples3(aTuple2()).map(t -> arguments(t, "(a.FIRST_NAME, a.COMMISSION, a.SALESPERSON_ID)")),
+            tuples3Opt(aTuple2()).map(t -> arguments(t, "(a.FIRST_NAME, a.COMMISSION, a.MIDDLE_NAMES)")),
+            tuples4(aTuple3()).map(t -> arguments(t, "(a.FIRST_NAME, a.COMMISSION, a.SALESPERSON_ID, a.SALESPERSON_ID)")),
+            tuples4Opt(aTuple3()).map(t -> arguments(t, "(a.FIRST_NAME, a.COMMISSION, a.SALESPERSON_ID, a.MIDDLE_NAMES)"))
         ).flatMap(Function.identity());
     }
 
     private static Stream<Arguments> argsForArgs() {
         return Stream.of(
-            tuples1().map(t -> Arguments.of(t, Stream.empty())),
-            tuples1Opt().map(t -> Arguments.of(t, Stream.empty())),
-            tuples2(aTuple1()).map(t -> Arguments.of(t, Stream.empty())),
-            tuples2Opt(aTuple1()).map(t -> Arguments.of(t, Stream.empty())),
-            tuples3(aTuple2()).map(t -> Arguments.of(t, Stream.empty())),
-            tuples3Opt(aTuple2()).map(t -> Arguments.of(t, Stream.empty())),
-            tuples4(aTuple3()).map(t -> Arguments.of(t, Stream.empty())),
-            tuples4Opt(aTuple3()).map(t -> Arguments.of(t, Stream.empty()))
+            tuples1().map(t -> arguments(t, Stream.empty())),
+            tuples1Opt().map(t -> arguments(t, Stream.empty())),
+            tuples2(aTuple1()).map(t -> arguments(t, Stream.empty())),
+            tuples2Opt(aTuple1()).map(t -> arguments(t, Stream.empty())),
+            tuples3(aTuple2()).map(t -> arguments(t, Stream.empty())),
+            tuples3Opt(aTuple2()).map(t -> arguments(t, Stream.empty())),
+            tuples4(aTuple3()).map(t -> arguments(t, Stream.empty())),
+            tuples4Opt(aTuple3()).map(t -> arguments(t, Stream.empty()))
         ).flatMap(Function.identity());
     }
 
     private static Stream<Arguments> argsForPrecedence() {
         return Stream.of(
-            Arguments.of(aTuple1(), Precedence.PARENTHESES),
-            Arguments.of(aTuple2(), Precedence.PARENTHESES),
-            Arguments.of(aTuple3(), Precedence.PARENTHESES),
-            Arguments.of(aTuple4(), Precedence.PARENTHESES),
-            Arguments.of(aTuple5(), Precedence.PARENTHESES),
-            Arguments.of(aTuple6(), Precedence.PARENTHESES),
-            Arguments.of(aTuple7(), Precedence.PARENTHESES),
-            Arguments.of(aTuple8(), Precedence.PARENTHESES)
+            arguments(aTuple1(), Precedence.PARENTHESES),
+            arguments(aTuple2(), Precedence.PARENTHESES),
+            arguments(aTuple3(), Precedence.PARENTHESES),
+            arguments(aTuple4(), Precedence.PARENTHESES),
+            arguments(aTuple5(), Precedence.PARENTHESES),
+            arguments(aTuple6(), Precedence.PARENTHESES),
+            arguments(aTuple7(), Precedence.PARENTHESES),
+            arguments(aTuple8(), Precedence.PARENTHESES)
         );
     }
 
     private static Stream<Arguments> argsForType() {
         return Stream.of(
-            Arguments.of(aTuple1(), TypeToken.of(String.class)),
-            Arguments.of(aTuple2(), new TypeToken<Tuple2<String,BigDecimal>>() {}),
-            Arguments.of(aTuple3(), new TypeToken<Tuple3<String,BigDecimal,Long>>() {}),
-            Arguments.of(aTuple4(), new TypeToken<Tuple4<String,BigDecimal,Long,Long>>() {}),
-            Arguments.of(aTuple5(), new TypeToken<Tuple5<String,BigDecimal,Long,Long,Long>>() {}),
-            Arguments.of(aTuple6(), new TypeToken<Tuple6<String,BigDecimal,Long,Long,Long,Long>>() {}),
-            Arguments.of(aTuple7(), new TypeToken<Tuple7<String,BigDecimal,Long,Long,Long,Long,Long>>() {}),
-            Arguments.of(aTuple8(), new TypeToken<Tuple8<String,BigDecimal,Long,Long,Long,Long,Long,Long>>() {})
+            arguments(aTuple1(), TypeToken.of(String.class)),
+            arguments(aTuple2(), new TypeToken<Tuple2<String,BigDecimal>>() {}),
+            arguments(aTuple3(), new TypeToken<Tuple3<String,BigDecimal,Long>>() {}),
+            arguments(aTuple4(), new TypeToken<Tuple4<String,BigDecimal,Long,Long>>() {}),
+            arguments(aTuple5(), new TypeToken<Tuple5<String,BigDecimal,Long,Long,Long>>() {}),
+            arguments(aTuple6(), new TypeToken<Tuple6<String,BigDecimal,Long,Long,Long,Long>>() {}),
+            arguments(aTuple7(), new TypeToken<Tuple7<String,BigDecimal,Long,Long,Long,Long,Long>>() {}),
+            arguments(aTuple8(), new TypeToken<Tuple8<String,BigDecimal,Long,Long,Long,Long,Long,Long>>() {})
         );
     }
 
     private static Stream<Arguments> argsForRowMapper() {
         return Stream.of(
-            Arguments.of(aTuple1(), "Fred"),
-            Arguments.of(aTuple2(), Tuple.of("Fred", new BigDecimal("1234"))),
-            Arguments.of(aTuple3(), Tuple.of("Fred", new BigDecimal("1234"), 5678L))
+            arguments(aTuple1(), "Fred"),
+            arguments(aTuple2(), Tuple.of("Fred", new BigDecimal("1234"))),
+            arguments(aTuple3(), Tuple.of("Fred", new BigDecimal("1234"), 5678L))
         );
     }
 

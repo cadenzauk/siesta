@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +54,7 @@ class BooleanExpressionTest {
     private ArgumentCaptor<BooleanExpression> appendArg;
 
     private static <T> Arguments testCase(BiFunction<Alias<SalespersonRow>,BooleanExpression,T> method, String expectedSql) {
-        return Arguments.of(method, expectedSql);
+        return arguments(method, expectedSql);
     }
 
     @SuppressWarnings("unused")

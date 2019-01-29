@@ -25,12 +25,12 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RuntimeSqlException;
-import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
-import com.cadenzauk.core.sql.exception.LockingException;
-import com.cadenzauk.core.sql.exception.IllegalNullException;
-import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.model.IncorrectSalesAreaRow;
 import com.cadenzauk.siesta.model.NoSuchTableRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
@@ -55,6 +55,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @Test
@@ -371,9 +372,9 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @SuppressWarnings("unused")
     private static Stream<Arguments> columnNames() {
         return Stream.of(
-            Arguments.of(NoSuchTableRow.class, Function1.of(NoSuchTableRow::column)),
-            Arguments.of(IncorrectSalesAreaRow.class, Function1.of(IncorrectSalesAreaRow::badColumnName)),
-            Arguments.of(IncorrectSalesAreaRow.class, Function1.of(IncorrectSalesAreaRow::nonexistantColumn))
+            arguments(NoSuchTableRow.class, Function1.of(NoSuchTableRow::column)),
+            arguments(IncorrectSalesAreaRow.class, Function1.of(IncorrectSalesAreaRow::badColumnName)),
+            arguments(IncorrectSalesAreaRow.class, Function1.of(IncorrectSalesAreaRow::nonexistantColumn))
         );
     }
 

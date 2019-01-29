@@ -54,6 +54,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -148,7 +149,7 @@ class CaseExpressionTest {
     }
 
     private static Arguments testCase(String expected, Function<Alias<WidgetRow>,CaseExpression<String>> f, Object... args) {
-        return Arguments.of(expected, f, args);
+        return arguments(expected, f, args);
     }
 
     private static Stream<Arguments> parametersForInitialWhen() {
@@ -190,7 +191,7 @@ class CaseExpressionTest {
     }
 
     private static Arguments testCase(String expected, BiFunction<CaseExpression<String>,Alias<WidgetRow>,TypedExpression<String>> f, Object... args) {
-        return Arguments.of(expected, f, args);
+        return arguments(expected, f, args);
     }
 
     @SuppressWarnings("unused")

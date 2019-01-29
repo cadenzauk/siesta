@@ -41,6 +41,7 @@ import static com.cadenzauk.siesta.grammar.expression.StringFunctions.length;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class OlapTest {
     @Test
@@ -75,6 +76,6 @@ class OlapTest {
     }
 
     private static Arguments testCase(Function<Alias<SalespersonRow>,InOlapExpectingPartitionBy<?>> f, String expectedSql) {
-        return Arguments.of(f, expectedSql);
+        return arguments(f, expectedSql);
     }
 }
