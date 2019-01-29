@@ -201,6 +201,83 @@ class TryTest {
     }
 
     @ParameterizedTest
+    @MethodSource("successesWithValuePlus20")
+    void combineOfSuccessAndSuccessAppliesFunction(Try<Integer> candidate, int candidatePlus20) {
+        Try<Integer> result = candidate.combine(Try.success(20), (i, j) -> i + j);
+
+        assertThat(result.orElseThrow(), is(candidatePlus20));
+    }
+
+    @ParameterizedTest
+    @MethodSource("failuresWithRawThrowable")
+    void combineOfSuccessAndFailureReturnsFailure(Try<Integer> failure, Throwable expectedThrowable) {
+        Try<Integer> result = Try.success(123).combine(failure, (i, j) -> i + j);
+
+        assertThat(result.isFailure(), is(true));
+        assertThat(result.throwable(), instanceOf(expectedThrowable.getClass()));
+        assertThat(result.throwable().getMessage(), is(expectedThrowable.getMessage()));
+        assertThat(result.throwable().getCause(), is(expectedThrowable.getCause()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("throwables")
+    void combineOfSuccessWhereFunctionThrowsResultsInFailure(Throwable expectedThrowable) {
+        Try<Integer> result = Try.success(123).combine(Try.success(456), (i, j) -> {
+            throw expectedThrowable;
+        });
+
+        assertThat(result.isFailure(), is(true));
+        assertThat(result.throwable(), sameInstance(expectedThrowable));
+    }
+
+    @ParameterizedTest
+    @MethodSource("failuresWithRawThrowable")
+    void combineOFailureAndSuccessReturnsFailure(Try<Integer> failure, Throwable expectedThrowable) {
+        Try<Integer> result = failure.combine(Try.success(123), (i, j) -> i + j);
+
+        assertThat(result.isFailure(), is(true));
+        assertThat(result.throwable(), instanceOf(expectedThrowable.getClass()));
+        assertThat(result.throwable().getMessage(), is(expectedThrowable.getMessage()));
+        assertThat(result.throwable().getCause(), is(expectedThrowable.getCause()));
+    }
+
+    @Test
+    void combineOfErrorAndExceptionReturnsAggregatedError() {
+        Error error = new InstantiationError();
+        Exception exception = new IllegalArgumentException();
+        Try<Object> result = Try.failure(error).combine(Try.failure(exception), (i, j) -> i);
+
+        assertThat(result.isFailure(), is(true));
+        assertThat(result.throwable(), instanceOf(AggregateError.class));
+        assertThat(result.throwable().getCause(), is(error));
+        assertThat(result.throwable().getSuppressed(), arrayContaining(exception));
+    }
+
+    @Test
+    void combineOfExceptionAndErrorReturnsAggregatedError() {
+        Exception exception = new IllegalArgumentException();
+        Error error = new InstantiationError();
+        Try<Object> result = Try.failure(exception).combine(Try.failure(error), (i, j) -> i);
+
+        assertThat(result.isFailure(), is(true));
+        assertThat(result.throwable(), instanceOf(AggregateError.class));
+        assertThat(result.throwable().getCause(), is(error));
+        assertThat(result.throwable().getSuppressed(), arrayContaining(exception));
+    }
+
+    @Test
+    void combineOfExceptionAndExceptionReturnsAggregatedException() {
+        Exception exception1 = new IllegalArgumentException();
+        Exception exception2 = new IOException();
+        Try<Object> result = Try.failure(exception1).combine(Try.failure(exception2), (i, j) -> i);
+
+        assertThat(result.isFailure(), is(true));
+        assertThat(result.throwable(), instanceOf(AggregateException.class));
+        assertThat(result.throwable().getCause(), is(exception1));
+        assertThat(result.throwable().getSuppressed(), arrayContaining(exception2));
+    }
+
+    @ParameterizedTest
     @MethodSource("successesWithValue")
     void orElseOnSuccess(Try<Integer> candidate, Integer expectedValue) {
         int result = candidate.orElse(expectedValue + 1000);
@@ -502,6 +579,15 @@ class TryTest {
             arguments(Try.trySupply(TryTest::fail), new IllegalArgumentException()),
             arguments(Try.trySupply(TryTest::failChecked), new IOException()),
             arguments(Try.trySupply(TryTest::failError), new IllegalAccessError())
+        );
+    }
+
+    private static Stream<Arguments> throwables() {
+        return Stream.of(
+            arguments(new IllegalStateException()),
+            arguments(new IllegalArgumentException()),
+            arguments(new IOException()),
+            arguments(new IllegalAccessError())
         );
     }
 

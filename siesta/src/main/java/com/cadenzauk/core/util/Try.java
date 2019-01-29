@@ -23,17 +23,20 @@
 package com.cadenzauk.core.util;
 
 import com.cadenzauk.core.function.ThrowingFunction;
+import com.cadenzauk.core.function.ThrowingFunction2;
 import com.cadenzauk.core.function.ThrowingSupplier;
+import com.cadenzauk.core.lang.ThrowableUtil;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.google.common.base.Throwables;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
 
 public abstract class Try<T> {
     public abstract boolean isSuccess();
@@ -48,26 +51,28 @@ public abstract class Try<T> {
 
     public abstract <U, E extends Throwable> Try<U> flatMap(ThrowingFunction<? super T,Try<U>,? extends E> function);
 
+    public abstract <U, R, E extends Throwable> Try<R> combine(Try<U> other, ThrowingFunction2<? super T,? super U,? extends R,? extends E> function);
+
     public abstract T orElse(T alternativeValue);
 
     public abstract T orElseGet(Supplier<T> supplier);
 
-    public abstract <E extends Throwable> Try<T> orElseTry(ThrowingSupplier<T, ? extends E> supplier);
+    public abstract <E extends Throwable> Try<T> orElseTry(ThrowingSupplier<T,? extends E> supplier);
 
     public abstract <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X;
 
-    public abstract Try<T> throwError();
+    public abstract Try<T> throwIfError();
 
-    public abstract void ifSuccess(Consumer<? super T> consumer);
+    public abstract Try<T> ifSuccess(Consumer<? super T> consumer);
 
-    public abstract void ifFailure(Consumer<? super Throwable> consumer);
+    public abstract Try<T> ifFailure(Consumer<? super Throwable> consumer);
 
     public abstract Optional<T> toOptional();
 
     public abstract Stream<T> stream();
 
     public static <T, E extends Throwable> Try<T> trySupply(ThrowingSupplier<? extends T,E> supplier) {
-        Objects.requireNonNull(supplier);
+        requireNonNull(supplier);
         try {
             return success(supplier.get());
         } catch (Throwable e) {
@@ -108,20 +113,30 @@ public abstract class Try<T> {
 
         @Override
         public Throwable throwable() {
-            throw new IllegalStateException("Cannot get an throwable from a successful Try.");
+            throw new IllegalStateException("Cannot get a throwable from a successful Try.");
         }
 
         @Override
         public <U, E extends Throwable> Try<U> map(ThrowingFunction<? super T,? extends U,? extends E> function) {
-            Objects.requireNonNull(function);
+            requireNonNull(function);
             return Try.trySupply(() -> function.apply(value));
         }
 
         @Override
         public <U, E extends Throwable> Try<U> flatMap(ThrowingFunction<? super T,Try<U>,? extends E> function) {
-            Objects.requireNonNull(function);
+            requireNonNull(function);
             try {
                 return function.apply(value);
+            } catch (Throwable e) {
+                return failure(e);
+            }
+        }
+
+        @Override
+        public <U, R, E extends Throwable> Try<R> combine(Try<U> other, ThrowingFunction2<? super T,? super U,? extends R,? extends E> function) {
+            requireNonNull(function);
+            try {
+                return other.map(otherValue -> function.apply(value, otherValue));
             } catch (Throwable e) {
                 return failure(e);
             }
@@ -143,7 +158,7 @@ public abstract class Try<T> {
         }
 
         @Override
-        public Try<T> throwError() {
+        public Try<T> throwIfError() {
             return this;
         }
 
@@ -153,13 +168,15 @@ public abstract class Try<T> {
         }
 
         @Override
-        public void ifSuccess(Consumer<? super T> consumer) {
-            Objects.requireNonNull(consumer);
+        public Try<T> ifSuccess(Consumer<? super T> consumer) {
+            requireNonNull(consumer);
             consumer.accept(value);
+            return this;
         }
 
         @Override
-        public void ifFailure(Consumer<? super Throwable> consumer) {
+        public Try<T> ifFailure(Consumer<? super Throwable> consumer) {
+            return this;
         }
 
         @Override
@@ -232,43 +249,54 @@ public abstract class Try<T> {
         }
 
         @Override
+        public <U, R, E extends Throwable> Try<R> combine(Try<U> other, ThrowingFunction2<? super T,? super U,? extends R,? extends E> function) {
+            return other.isFailure()
+                ? Try.failure(ThrowableUtil.aggregate(throwable, other.throwable()))
+                : Try.failure(throwable);
+        }
+
+        @Override
         public T orElse(T alternativeValue) {
             return alternativeValue;
         }
 
         @Override
         public T orElseGet(Supplier<T> supplier) {
-            Objects.requireNonNull(supplier);
+            requireNonNull(supplier);
             return supplier.get();
         }
 
         @Override
         public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
-            Objects.requireNonNull(exceptionSupplier);
+            requireNonNull(exceptionSupplier);
             throw exceptionSupplier.get();
         }
 
         @Override
-        public Try<T> throwError() {
+        public Try<T> throwIfError() {
             OptionalUtil.as(Error.class, throwable)
-                .ifPresent(e -> { throw e; });
+                .ifPresent(e -> {
+                    throw e;
+                });
             return this;
         }
 
         @Override
         public <E extends Throwable> Try<T> orElseTry(ThrowingSupplier<T,? extends E> supplier) {
-            Objects.requireNonNull(supplier);
+            requireNonNull(supplier);
             return Try.trySupply(supplier);
         }
 
         @Override
-        public void ifSuccess(Consumer<? super T> consumer) {
+        public Try<T> ifSuccess(Consumer<? super T> consumer) {
+            return this;
         }
 
         @Override
-        public void ifFailure(Consumer<? super Throwable> consumer) {
-            Objects.requireNonNull(consumer);
+        public Try<T> ifFailure(Consumer<? super Throwable> consumer) {
+            requireNonNull(consumer);
             consumer.accept(throwable);
+            return this;
         }
 
         @Override
