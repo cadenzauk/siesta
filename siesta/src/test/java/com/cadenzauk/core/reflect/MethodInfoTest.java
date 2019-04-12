@@ -241,30 +241,30 @@ class MethodInfoTest {
     }
 
     @Test
-    void propertyNameForFieldlessGetterWithNoPrefixThrows() {
+    void propertyNameForFieldlessGetterWithNoPrefixReturnsMethodName() {
         MethodInfo<MethodInfoTestClass,String> sut = MethodInfo.of(MethodInfoTestClass::fieldlessNoPrefix);
 
-        calling(sut::propertyName)
-            .shouldThrow(IllegalArgumentException.class)
-            .withMessage("Cannot find field for getter java.lang.String com.cadenzauk.core.reflect.MethodInfoTest$MethodInfoTestClass.fieldlessNoPrefix()");
+        String result = sut.propertyName();
+
+        assertThat(result, is("fieldlessNoPrefix"));
     }
 
     @Test
-    void propertyNameForFieldlessGetterWithGetPrefixThrows() {
+    void propertyNameForFieldlessGetterWithGetPrefixReturnsNameWithoutGet() {
         MethodInfo<MethodInfoTestClass,Integer> sut = MethodInfo.of(MethodInfoTestClass::getFieldlessPrefixedWithGet);
 
-        calling(sut::propertyName)
-            .shouldThrow(IllegalArgumentException.class)
-            .withMessage("Cannot find field for getter java.util.Optional com.cadenzauk.core.reflect.MethodInfoTest$MethodInfoTestClass.getFieldlessPrefixedWithGet()");
+        String result = sut.propertyName();
+
+        assertThat(result, is("fieldlessPrefixedWithGet"));
     }
 
     @Test
-    void propertyNameForFieldlessGetterWithIsPrefixThrows() {
+    void propertyNameForFieldlessGetterWithIsPrefixReturnsMethodName() {
         MethodInfo<MethodInfoTestClass,Boolean> sut = MethodInfo.of(MethodInfoTestClass::isFieldlessPrefixedWithIs);
 
-        calling(sut::propertyName)
-            .shouldThrow(IllegalArgumentException.class)
-            .withMessage("Cannot find field for getter boolean com.cadenzauk.core.reflect.MethodInfoTest$MethodInfoTestClass.isFieldlessPrefixedWithIs()");
+        String result = sut.propertyName();
+
+        assertThat(result, is("isFieldlessPrefixedWithIs"));
     }
 
     private static class MethodInfoSuperClass {

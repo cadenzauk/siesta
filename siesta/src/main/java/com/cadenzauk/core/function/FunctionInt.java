@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2019 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,15 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'com.cadenzauk'
+package com.cadenzauk.core.function;
 
-include ":siesta-codegen", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird", ":siesta-kotlin", ":siesta"
+import java.io.Serializable;
 
+@FunctionalInterface
+public interface FunctionInt<T> extends Serializable {
+    int apply(T arg);
+
+    static <T> FunctionInt<T> of(FunctionInt<T> function) {
+        return function;
+    }
+}

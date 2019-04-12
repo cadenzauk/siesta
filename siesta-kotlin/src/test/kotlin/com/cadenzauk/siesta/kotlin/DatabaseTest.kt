@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2019 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,25 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'com.cadenzauk'
+package com.cadenzauk.siesta.kotlin
 
-include ":siesta-codegen", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird", ":siesta-kotlin", ":siesta"
+import com.cadenzauk.siesta.Database
+import com.cadenzauk.siesta.model.WidgetRow
+import com.natpryce.hamkrest.assertion.assertThat
+import com.natpryce.hamkrest.equalTo
+import org.junit.jupiter.api.Test
 
+class DatabaseTest {
+    @Test
+    fun canSelect() {
+        val database = Database.newBuilder()
+            .build();
+
+        val sql = database.from(WidgetRow::class.java, "w")
+            .select(WidgetRow::description)
+            .where(WidgetRow::manufacturerId).isEqualTo(10)
+            .sql()
+
+        assertThat(sql, equalTo("select w.DESCRIPTION as w_DESCRIPTION from SIESTA.WIDGET w where w.MANUFACTURER_ID = ?"))
+    }
+}

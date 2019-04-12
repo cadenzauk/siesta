@@ -23,12 +23,12 @@
 package com.cadenzauk.core.reflect.util;
 
 import com.cadenzauk.core.function.Function1;
+import com.cadenzauk.core.function.FunctionInt;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.reflect.Factory;
+import com.cadenzauk.core.util.Lazy;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.core.util.UtilityClass;
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import org.objenesis.ObjenesisHelper;
 
 import java.lang.annotation.Annotation;
 import java.lang.invoke.SerializedLambda;
@@ -36,13 +36,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class MethodUtil extends UtilityClass {
+    private static final Lazy<Optional<MethodCracker>> KOTLIN_CRACKER = new Lazy<>(MethodUtil::loadKotlinCracker);
     private static final Pattern INSTANTIATED_METHOD_PATTERN = Pattern.compile("\\(L([^;]+);.*");
 
     public static Object invoke(Method method, Object target, Object... args) {
@@ -54,59 +54,73 @@ public final class MethodUtil extends UtilityClass {
         }
     }
 
-    public static <T, V> Method fromReference(Class<T> c1ass, Function<T,V> methodReference) {
-        AtomicReference<Method> result = new AtomicReference<>();
-        MethodInterceptor interceptor = (obj, method, args, proxy) -> {
-            result.set(method);
-            return null;
-        };
-
-        Enhancer enhancer = new Enhancer();
-        enhancer.setUseCache(false);
-        enhancer.setSuperclass(c1ass);
-        enhancer.setCallbackType(interceptor.getClass());
-
-        Class<?> proxyClass = enhancer.createClass();
-        Enhancer.registerCallbacks(proxyClass, new Callback[] {interceptor});
-        @SuppressWarnings("unchecked") T proxy = (T) ObjenesisHelper.newInstance(proxyClass);
-
-        methodReference.apply(proxy);
-        return result.get();
-    }
-
     public static <A extends Annotation> Stream<A> annotations(Class<A> annotationClass, Method method) {
         A[] annotationsByType = method.getAnnotationsByType(annotationClass);
         return Arrays.stream(annotationsByType);
     }
 
     public static <T, V> Method fromReference(Function1<T,V> methodReference) {
-        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
-            .flatMap(lambda -> ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."))
-                .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())))
+        return OptionalUtil.orGet(fromJavaFunction(methodReference), () -> fromKotlinFunction(methodReference))
+            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+    }
+
+    public static <T> Method fromReference(FunctionInt<T> methodReference) {
+        return OptionalUtil.orGet(fromJavaFunction(methodReference), () -> fromKotlinFunction(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T, V> Method fromReference(FunctionOptional1<T,V> methodReference) {
-        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
-            .flatMap(lambda -> ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."))
-                .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())))
+        return OptionalUtil.orGet(fromJavaFunction(methodReference), () -> fromKotlinFunction(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T, V> Class<?> referringClass(Function1<T,V> methodReference) {
-        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
-            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
-            .flatMap(MethodUtil::fromInstantiatedMethodType)
+        return OptionalUtil.orGet(referringJavaClass(methodReference), () -> referringKotlinClass(methodReference))
+            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+    }
+
+    public static <T> Class<?> referringClass(FunctionInt<T> methodReference) {
+        return OptionalUtil.orGet(referringJavaClass(methodReference), () -> referringKotlinClass(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T, V> Class<?> referringClass(FunctionOptional1<T,V> methodReference) {
+        return OptionalUtil.orGet(referringJavaClass(methodReference), () -> referringKotlinClass(methodReference))
+            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+    }
+
+    private static <T> Optional<Class<?>> referringJavaClass(Object methodReference) {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
             .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
-            .flatMap(MethodUtil::fromInstantiatedMethodType)
-            .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
+            .flatMap(MethodUtil::fromInstantiatedMethodType);
+    }
+
+    private static <T> Optional<Class<?>> referringKotlinClass(Object methodReference) {
+        return kotlinMethodCracker()
+            .flatMap(x -> x.referringClass(methodReference));
+    }
+
+    private static Optional<MethodCracker> kotlinMethodCracker() {
+        return KOTLIN_CRACKER.get();
+    }
+
+    private static Optional<MethodCracker> loadKotlinCracker() {
+        return ClassUtil.forName("com.cadenzauk.siesta.kotlin.KotlinMethodCracker")
+            .map(Factory::forClass)
+            .map(Supplier::get)
+            .map(MethodCracker.class::cast);
+    }
+
+    private static Optional<Method> fromKotlinFunction(Object methodReference) {
+        return kotlinMethodCracker()
+            .flatMap(x -> x.fromReference(methodReference));
+    }
+
+    private static Optional<Method> fromJavaFunction(Object methodReference) {
+        return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
+            .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
+            .flatMap(lambda -> ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."))
+                .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())));
     }
 
     private static Optional<Class<?>> fromInstantiatedMethodType(SerializedLambda lambda) {
@@ -114,5 +128,10 @@ public final class MethodUtil extends UtilityClass {
         return matcher.matches()
             ? ClassUtil.forName(matcher.group(1).replaceAll("/", "."))
             : Optional.empty();
+    }
+
+    public interface MethodCracker {
+        Optional<Method> fromReference(Object methodReference);
+        Optional<Class<?>> referringClass(Object methodReference);
     }
 }

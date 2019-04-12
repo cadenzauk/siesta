@@ -113,6 +113,10 @@ public final class ClassUtil extends UtilityClass {
         return Optional.ofNullable(aClass.getAnnotation(annotationClass));
     }
 
+    public static <A extends Annotation, T> Stream<A> annotations(Class<T> aClass, Class<A> annotationClass) {
+        return Stream.of(aClass.getAnnotationsByType(annotationClass));
+    }
+
     public static <T> Optional<Constructor<T>> constructor(Class<T> aClass, Class<?>... parameterTypes) {
         try {
             return Optional.of(aClass.getDeclaredConstructor(parameterTypes));

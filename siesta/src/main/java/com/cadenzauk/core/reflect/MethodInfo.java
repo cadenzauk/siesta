@@ -24,7 +24,10 @@ package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.core.function.FunctionInt;
+import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.Lazy;
@@ -89,7 +92,14 @@ public class MethodInfo<C, R> {
     public String propertyName() {
         return field()
             .map(FieldInfo::name)
-            .orElseThrow(() -> new IllegalArgumentException("Cannot find field for getter " + method));
+            .orElseGet(this::defaultPropertyName);
+    }
+
+    private String defaultPropertyName() {
+        if (method.getName().startsWith("get")) {
+            return StringUtil.lowercaseFirst(method.getName().substring(3));
+        }
+        return method.getName();
     }
 
     public <A extends Annotation> Optional<A> annotation(Class<A> annotationClass) {
@@ -127,6 +137,17 @@ public class MethodInfo<C, R> {
             method,
             method.getReturnType(),
             (Class<F>) method.getReturnType());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <C> MethodInfo<C,Integer> of(FunctionInt<C> getter) {
+        Method method = MethodUtil.fromReference(getter);
+        return new MethodInfo<>(
+            TypeToken.of((Class<C>) method.getDeclaringClass()),
+            TypeToken.of((Class<C>) MethodUtil.referringClass(getter)),
+            method,
+            method.getReturnType(),
+            Integer.TYPE);
     }
 
     @SuppressWarnings("unchecked")

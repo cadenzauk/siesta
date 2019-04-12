@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2019 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,38 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'com.cadenzauk'
+package com.cadenzauk.siesta.kotlin
 
-include ":siesta-codegen", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird", ":siesta-kotlin", ":siesta"
+import co.unruly.matchers.OptionalMatchers.contains
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import java.util.Optional
 
+open class Widget {
+    fun widgetDescription(): String {
+        return "Widget"
+    }
+}
+
+class SpecialWidget : Widget() {
+}
+
+internal class KotlinMethodCrackerTest {
+    @Test
+    fun fromReference() {
+        val result = KotlinMethodCracker().fromReference(Widget::widgetDescription)
+
+        val resultClass = result.map { it.declaringClass }
+        val resultName = result.map { it.name }
+        assertThat(resultClass, contains(Widget::class.java as Class<*>))
+        assertThat(resultName, contains("widgetDescription"))
+    }
+
+    @Test
+    fun referringClass() {
+        val referringClass = KotlinMethodCracker().referringClass(SpecialWidget::widgetDescription)
+
+        assertThat(referringClass, contains(SpecialWidget::class.java as Class<*>));
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2019 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,8 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
 
-rootProject.name = 'com.cadenzauk'
+version '1.0.0-SNAPSHOT'
 
-include ":siesta-codegen", ":siesta-db2", ":siesta-oracle", ":siesta-postgres", ":siesta-sqlserver", ":siesta-firebird", ":siesta-kotlin", ":siesta"
+dependencies {
+    compile project(":siesta")
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.3.21'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation 'com.natpryce:hamkrest:1.7.0.0'
+    testCompile group: 'co.unruly', name: 'java-8-matchers', version: '1.5'
+    testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+}
 
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}

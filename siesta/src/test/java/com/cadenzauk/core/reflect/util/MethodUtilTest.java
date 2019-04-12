@@ -91,13 +91,6 @@ class MethodUtilTest {
 
     @Test
     void fromReference() {
-        Method method = MethodUtil.fromReference(TestClass.class, TestClass::method2);
-
-        assertThat(method.getName(), is("method2"));
-    }
-
-    @Test
-    void fromReferenceToMethodWithoutClass() {
         Method method = MethodUtil.fromReference(TestDerivedClass::derivedMethod);
 
         assertThat(method.getName(), is("derivedMethod"));
@@ -122,7 +115,7 @@ class MethodUtilTest {
 
     @Test
     void fromReferenceToBaseOptionalMethodGivenDerivedClass() {
-        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+        Method method = MethodUtil.fromReference(TestClass::method2);
 
         assertThat(method.getName(), is("method2"));
         assertThat(method.getDeclaringClass().getCanonicalName(), is(TestClass.class.getCanonicalName()));
@@ -130,7 +123,7 @@ class MethodUtilTest {
 
     @Test
     void annotationsPresent() {
-        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+        Method method = MethodUtil.fromReference(TestClass::method2);
 
         Stream<Transient> annotations = MethodUtil.annotations(Transient.class, method);
 
@@ -139,7 +132,7 @@ class MethodUtilTest {
 
     @Test
     void annotationsNotPresent() {
-        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+        Method method = MethodUtil.fromReference(TestClass::method2);
 
         Stream<Column> annotations = MethodUtil.annotations(Column.class, method);
 
@@ -148,7 +141,7 @@ class MethodUtilTest {
 
     @Test
     void annotationsMultiple() {
-        Method method = MethodUtil.fromReference(TestDerivedClass.class, TestClass::method2);
+        Method method = MethodUtil.fromReference(TestClass::method2);
 
         Stream<TestCase> annotations = MethodUtil.annotations(TestCase.class, method);
 

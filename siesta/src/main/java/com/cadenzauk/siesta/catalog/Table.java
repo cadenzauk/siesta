@@ -204,7 +204,7 @@ public class Table<R> implements ColumnCollection<R> {
     public <F> Optional<Column<F,R>> findColumn(Class<F> fieldClass, String propertyName) {
         return columns()
             .filter(c -> StringUtils.equals(propertyName, c.propertyName()))
-            .map(x -> (Column<F,R>)x)
+            .map(x -> (Column<F,R>) x)
             .findFirst();
     }
 
@@ -331,9 +331,7 @@ public class Table<R> implements ColumnCollection<R> {
             super.finish();
 
             ClassUtil.superclasses(rowType.getRawType())
-                .map(cls -> ClassUtil.annotation(cls, ForeignKeys.class))
-                .flatMap(StreamUtil::of)
-                .flatMap(fk -> Arrays.stream(fk.value()))
+                .flatMap(cls -> ClassUtil.annotations(cls, ForeignKey.class))
                 .forEach(this::buildForeignKey);
         }
 
