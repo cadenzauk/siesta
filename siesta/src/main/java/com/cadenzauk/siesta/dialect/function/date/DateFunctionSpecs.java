@@ -97,6 +97,5 @@ public class DateFunctionSpecs {
 
     public static void registerDateDiff(FunctionRegistry functions) {
         functions.register(DAY_DIFF, new DateDiffFunctionSpec("day"));
-        functions.register(HOUR_DIFF, new DateDiffFunctionSpec("hour"));
     }
 }

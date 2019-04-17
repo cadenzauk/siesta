@@ -25,6 +25,7 @@ package com.cadenzauk.core.sql;
 import com.cadenzauk.core.util.UtilityClass;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PreparedStatementUtil extends UtilityClass {
@@ -47,6 +48,14 @@ public class PreparedStatementUtil extends UtilityClass {
     public static boolean execute(PreparedStatement preparedStatement) {
         try {
             return preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeSqlException(e);
+        }
+    }
+
+    public static ResultSet executeQuery(PreparedStatement preparedStatement) {
+        try {
+            return preparedStatement.executeQuery();
         } catch (SQLException e) {
             throw new RuntimeSqlException(e);
         }

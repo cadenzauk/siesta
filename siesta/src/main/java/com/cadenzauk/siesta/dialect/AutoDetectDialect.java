@@ -22,8 +22,11 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.ConnectionUtil;
 import com.cadenzauk.core.sql.DataSourceUtil;
+import com.cadenzauk.core.sql.PreparedStatementUtil;
+import com.cadenzauk.core.sql.ResultSetUtil;
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
@@ -33,21 +36,23 @@ import com.google.common.collect.ImmutableList;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class AutoDetectDialect {
-    private static final List<Tuple2<Predicate<String>,Supplier<Dialect>>> DIALECTS = ImmutableList.of(
-        Tuple.of(Pattern.compile("^DB2/.*").asPredicate(), Db2Dialect::new),
-        Tuple.of(Pattern.compile("^H2.*").asPredicate(), H2Dialect::new),
-        Tuple.of(Pattern.compile("^HSQL.*").asPredicate(), HSqlDialect::new),
-        Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), FirebirdDialect::new),
-        Tuple.of(Pattern.compile("^Oracle.*").asPredicate(), OracleDialect::new),
-        Tuple.of(Pattern.compile("^PostgreSQL.*").asPredicate(), PostgresDialect::new),
-        Tuple.of(Pattern.compile("^Microsoft SQL\\s*Server.*").asPredicate(), SqlServerDialect::new)
+    private static final List<Tuple2<Predicate<String>,Function<Connection,Dialect>>> DIALECTS = ImmutableList.of(
+        Tuple.of(Pattern.compile("^DB2/.*").asPredicate(), conn -> new Db2Dialect()),
+        Tuple.of(Pattern.compile("^H2.*").asPredicate(), AutoDetectDialect::createH2Dialect),
+        Tuple.of(Pattern.compile("^HSQL.*").asPredicate(), conn -> new HSqlDialect()),
+        Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), conn -> new FirebirdDialect()),
+        Tuple.of(Pattern.compile("^Oracle.*").asPredicate(), conn -> new OracleDialect()),
+        Tuple.of(Pattern.compile("^PostgreSQL.*").asPredicate(), conn -> new PostgresDialect()),
+        Tuple.of(Pattern.compile("^Microsoft SQL\\s*Server.*").asPredicate(), conn -> new SqlServerDialect())
     );
 
     public static Dialect from(DataSource dataSource) {
@@ -57,11 +62,23 @@ public class AutoDetectDialect {
             return DIALECTS
                 .stream()
                 .filter(x -> x.item1().test(productName))
-                .map(x -> x.item2().get())
+                .map(x -> x.item2().apply(connection))
                 .findFirst()
                 .orElseGet(AnsiDialect::new);
         } catch (SQLException e) {
             throw new RuntimeSqlException(e);
+        }
+    }
+
+    private static H2Dialect createH2Dialect(Connection connection) {
+        try (CompositeAutoCloseable closer = new CompositeAutoCloseable()) {
+            PreparedStatement preparedStatement = closer.add(ConnectionUtil.prepare(connection, "SELECT H2VERSION() as H2VERSION FROM DUAL"));
+            ResultSet resultSet = closer.add(PreparedStatementUtil.executeQuery(preparedStatement));
+            return closer.add(ResultSetUtil.stream(resultSet, rs -> ResultSetUtil.getString(rs, "H2VERSION")))
+                .limit(1)
+                .map(versionNo -> new H2Dialect(new VersionNo(versionNo)))
+                .findFirst()
+                .orElseGet(H2Dialect::new);
         }
     }
 }

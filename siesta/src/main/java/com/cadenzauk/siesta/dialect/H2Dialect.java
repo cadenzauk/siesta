@@ -39,16 +39,35 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class H2Dialect extends AnsiDialect {
+    private static final int DEFAULT_LOCK_TIMEOUT = 1000;
+    private static final VersionNo CURRENT_VERSION = new VersionNo("1.4.199");
+    private static final VersionNo WINDOW_FUNCTIONS = new VersionNo("1.4.198");
+    private static final VersionNo TUPLES_IN = new VersionNo("1.4.198");
+    private final VersionNo versionNo;
     private final int defaultLockTimeout;
 
     public H2Dialect() {
-        this(1000);
+        this(CURRENT_VERSION, DEFAULT_LOCK_TIMEOUT);
+    }
+
+    public H2Dialect(VersionNo versionNo) {
+        this(versionNo, DEFAULT_LOCK_TIMEOUT);
+    }
+
+    public H2Dialect(String versionNo) {
+        this(new VersionNo(versionNo), DEFAULT_LOCK_TIMEOUT);
     }
 
     public H2Dialect(int defaultLockTimeout) {
+        this(CURRENT_VERSION, defaultLockTimeout);
+    }
+
+    public H2Dialect(VersionNo versionNo, int defaultLockTimeout) {
+        this.versionNo = versionNo;
         this.defaultLockTimeout = defaultLockTimeout;
 
         DateFunctionSpecs.registerDateAdd(functions());
+        DateFunctionSpecs.registerDateDiff(functions());
 
         functions()
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
@@ -78,7 +97,9 @@ public class H2Dialect extends AnsiDialect {
             .register("2350[367]", ReferentialIntegrityException::new)
             .register("23513", ReferentialIntegrityException::new)
 
+            // DEADLOCK_1 = 40001
             // LOCK_TIMEOUT_1 = 50200
+            .register("40001", LockingException::new)
             .register("HYT00", 50200, LockingException::new);
     }
 
@@ -117,16 +138,16 @@ public class H2Dialect extends AnsiDialect {
 
     @Override
     public boolean supportsPartitionByInOlap() {
-        return false;
+        return versionNo.isAtLeast(WINDOW_FUNCTIONS);
     }
 
     @Override
     public boolean supportsOrderByInOlap() {
-        return false;
+        return versionNo.isAtLeast(WINDOW_FUNCTIONS);
     }
 
     @Override
     public boolean supportsMultipleValueIn() {
-        return false;
+        return versionNo.isAtLeast(TUPLES_IN);
     }
 }

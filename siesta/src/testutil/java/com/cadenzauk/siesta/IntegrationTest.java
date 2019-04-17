@@ -25,6 +25,7 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.ddl.TestSchema;
+import com.cadenzauk.siesta.dialect.AutoDetectDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestDatabase;
@@ -108,7 +109,7 @@ public abstract class IntegrationTest {
 
         @Bean
         public Dialect dialect() {
-            return new H2Dialect(100);
+            return AutoDetectDialect.from(dataSource());
         }
     }
 }
