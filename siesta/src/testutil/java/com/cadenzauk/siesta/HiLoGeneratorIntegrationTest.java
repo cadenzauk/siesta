@@ -35,7 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class HiLoGeneratorIntegrationTest extends IntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(HiLoGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HiLoGenerator.class);
 
     @Test
     void hiLoGenerationLoad() {

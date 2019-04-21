@@ -44,6 +44,7 @@ import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.PartType;
 import com.cadenzauk.siesta.model.PartWithTypeRow;
+import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
@@ -696,7 +697,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(result, hasSize(5));
         assertThat(result.get(0), is(Tuple.of(inserted.item1(), 5, inserted.item1())));
-        assertThat(result.get(4), is(Tuple.of(inserted.item2(), 1, LongStream.range(inserted.item1(), inserted.item2() + 1).reduce((x, y) -> x + y).orElse(0))));
+        assertThat(result.get(4), is(Tuple.of(inserted.item2(), 1, LongStream.range(inserted.item1(), inserted.item2() + 1).reduce(Long::sum).orElse(0))));
     }
 
     @Test
@@ -1311,5 +1312,47 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .list();
 
         assertThat(result, containsInAnyOrder(salespersonRow1, salespersonRow2));
+    }
+
+    @Test
+    void selectDistinctOnSingleTableDoesNotReturnDuplicatesWhereasOrdinarySelectDoes() {
+        Database database = testDatabase(dataSource, dialect);
+        SaleRow saleRow1 = aRandomSale();
+        SaleRow saleRow2 = aRandomSale();
+        database.insert(saleRow1, saleRow1, saleRow1, saleRow2, saleRow2);
+
+        List<SaleRow> resultDistinct = database.from(SaleRow.class, "s")
+            .selectDistinct()
+            .where(SaleRow::salespersonId).isIn(saleRow1.salespersonId(), saleRow2.salespersonId())
+            .list();
+        List<SaleRow> resultOrdinary = database.from(SaleRow.class, "s")
+            .where(SaleRow::salespersonId).isIn(saleRow1.salespersonId(), saleRow2.salespersonId())
+            .list();
+
+        assertThat(resultDistinct, hasSize(2));
+        assertThat(resultOrdinary, hasSize(5));
+    }
+
+    @Test
+    void selectDistinctOnColumnDoesNotReturnDuplicatesWhereasOrdinarySelectDoes() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson(s -> s.firstName("Fred"));
+        SalespersonRow salespersonRow2 = aRandomSalesperson(s -> s.firstName("Fred"));
+        SalespersonRow salespersonRow3 = aRandomSalesperson(s -> s.firstName("Joe"));
+        database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
+
+        List<String> resultDistinct = database.from(SalespersonRow.class, "s")
+            .selectDistinct(SalespersonRow::firstName)
+            .where(SalespersonRow::salespersonId).isIn(salespersonRow1.salespersonId(), salespersonRow2.salespersonId(), salespersonRow3.salespersonId())
+            .list();
+        List<String> resultOrdinary = database.from(SalespersonRow.class, "s")
+            .select(SalespersonRow::firstName)
+            .where(SalespersonRow::salespersonId).isIn(salespersonRow1.salespersonId(), salespersonRow2.salespersonId(), salespersonRow3.salespersonId())
+            .list();
+
+        assertThat(resultDistinct, containsInAnyOrder("Fred", "Joe"));
+        assertThat(resultOrdinary, containsInAnyOrder("Fred", "Fred", "Joe"));
+        assertThat(resultDistinct, hasSize(2));
+        assertThat(resultOrdinary, hasSize(3));
     }
 }

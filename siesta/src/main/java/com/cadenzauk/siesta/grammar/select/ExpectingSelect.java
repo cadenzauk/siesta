@@ -42,18 +42,18 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     }
 
     public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression) {
-        return select(expression, Optional.empty());
+        return select(false, expression, Optional.empty());
     }
 
     public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression, String label) {
-        return select(expression, OptionalUtil.ofBlankable(label));
+        return select(false, expression, OptionalUtil.ofBlankable(label));
     }
 
     public <T, R> InProjectionExpectingComma1<T> select(Function1<R,T> methodReference) {
         return select(UnresolvedColumn.of(methodReference));
     }
 
-    public <T, R> InProjectionExpectingComma1<T> select(FunctionOptional1<R, T> methodReference) {
+    public <T, R> InProjectionExpectingComma1<T> select(FunctionOptional1<R,T> methodReference) {
         return select(UnresolvedColumn.of(methodReference));
     }
 
@@ -116,6 +116,90 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return new InProjectionExpectingComma1<>(select);
     }
 
+    public ExpectingWhere<RT> selectDistinct() {
+        SelectStatement<RT> select = new SelectStatement<>(scope(),
+            statement.rowType(),
+            statement.from(),
+            statement.rowMapper(),
+            statement.projection().distinct());
+        return new ExpectingWhere<>(select);
+    }
+
+    public <T> InProjectionExpectingComma1<T> selectDistinct(TypedExpression<T> expression) {
+        return select(true, expression, Optional.empty());
+    }
+
+    public <T> InProjectionExpectingComma1<T> selectDistinct(TypedExpression<T> expression, String label) {
+        return select(true, expression, OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Function1<R,T> methodReference) {
+        return selectDistinct(UnresolvedColumn.of(methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(FunctionOptional1<R,T> methodReference) {
+        return selectDistinct(UnresolvedColumn.of(methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(String alias, Function1<R,T> methodReference) {
+        return selectDistinct(UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(String alias, FunctionOptional1<R,T> methodReference) {
+        return selectDistinct(UnresolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, Function1<R,T> methodReference) {
+        return selectDistinct(ResolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
+        return selectDistinct(ResolvedColumn.of(alias, methodReference));
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Function1<R,T> methodReference, String label) {
+        return selectDistinct(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(FunctionOptional1<R,T> methodReference, String label) {
+        return selectDistinct(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(String alias, Function1<R,T> methodReference, String label) {
+        return selectDistinct(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(String alias, FunctionOptional1<R,T> methodReference, String label) {
+        return selectDistinct(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, Function1<R,T> methodReference, String label) {
+        return selectDistinct(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
+        return selectDistinct(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <R> InProjectionExpectingComma1<R> selectDistinct(Class<R> rowClass) {
+        Alias<R> alias = scope().findAlias(rowClass);
+        return selectDistinct(alias);
+    }
+
+    public <R> InProjectionExpectingComma1<R> selectDistinct(Class<R> rowClass, String aliasName) {
+        Alias<R> alias = scope().findAlias(rowClass, aliasName);
+        return selectDistinct(alias);
+    }
+
+    public <R> InProjectionExpectingComma1<R> selectDistinct(Alias<R> alias) {
+        SelectStatement<R> select = new SelectStatement<>(scope(),
+            alias.type(),
+            statement.from(),
+            alias.rowMapper(),
+            Projection.of(true, alias));
+        return new InProjectionExpectingComma1<>(select);
+    }
+
     public <R> InSelectIntoExpectingWith<R> selectInto(Class<R> rowClass) {
         Table<R> table = database().table(rowClass);
         return selectInto(table.as(table.tableName()));
@@ -127,7 +211,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     public <R> InSelectIntoExpectingWith<R> selectInto(Alias<R> alias) {
         DynamicRowMapper<R> rowMapper = alias.dynamicRowMapper();
-        DynamicProjection projection = new DynamicProjection();
+        DynamicProjection projection = new DynamicProjection(false);
         SelectStatement<R> select = new SelectStatement<>(scope().plus(alias),
             alias.type(),
             statement.from(),
@@ -136,12 +220,17 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return new InSelectIntoExpectingWith<>(select, rowMapper, projection);
     }
 
-    private <T> InProjectionExpectingComma1<T> select(TypedExpression<T> column, Optional<String> label) {
+    private <T> InProjectionExpectingComma1<T> select(boolean distinct, TypedExpression<T> column, Optional<String> label) {
+        Projection projection = Projection.of(column, label);
+        if (distinct) {
+            projection = projection.distinct();
+        }
         SelectStatement<T> select = new SelectStatement<>(scope(),
             column.type(),
             statement.from(),
             column.rowMapper(scope(), label),
-            Projection.of(column, label));
+            projection);
         return new InProjectionExpectingComma1<>(select);
     }
 }
+

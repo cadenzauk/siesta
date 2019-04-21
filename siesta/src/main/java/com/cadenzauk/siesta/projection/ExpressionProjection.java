@@ -30,17 +30,19 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ExpressionProjection<T> implements Projection {
+    private final boolean distinct;
     private final TypedExpression<T> expression;
     private final Optional<String> label;
 
-    public ExpressionProjection(TypedExpression<T> expression, Optional<String> label) {
+    public ExpressionProjection(boolean distinct, TypedExpression<T> expression, Optional<String> label) {
+        this.distinct = distinct;
         this.expression = expression;
         this.label = label;
     }
 
     @Override
     public String sql(Scope scope) {
-        return expression.sqlWithLabel(scope, label);
+        return (distinct ? "distinct " : "") + expression.sqlWithLabel(scope, label);
     }
 
     @Override
@@ -51,6 +53,11 @@ public class ExpressionProjection<T> implements Projection {
     @Override
     public String labelList(Scope scope) {
         return label(scope);
+    }
+
+    @Override
+    public Projection distinct() {
+        return new ExpressionProjection<>(true, expression, label);
     }
 
     private String label(Scope scope) {

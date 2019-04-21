@@ -37,23 +37,25 @@ public interface Projection {
 
     String labelList(Scope scope);
 
-    static <T> Projection of(TypedExpression<T> column) {
-        return new ExpressionProjection<>(column, Optional.empty());
+    Projection distinct();
+
+    static <T> Projection of(boolean distinct, TypedExpression<T> column, Optional<String> label) {
+        return new ExpressionProjection<>(distinct, column, label);
     }
 
     static <T> Projection of(TypedExpression<T> column, Optional<String> label) {
-        return new ExpressionProjection<>(column, label);
+        return new ExpressionProjection<>(false, column, label);
     }
 
-    static <T> Projection of(TypedExpression<T> column, String label) {
-        return new ExpressionProjection<>(column, Optional.of(label));
+    static <R1> Projection of(boolean distinct, Alias<R1> alias) {
+        return new AliasColumns<>(distinct, alias);
     }
 
     static <R1> Projection of(Alias<R1> alias) {
-        return new AliasColumns<>(alias);
+        return new AliasColumns<>(false, alias);
     }
 
     static Projection of(Projection... p) {
-        return new ProjectionList(p);
+        return new ProjectionList(false, p);
     }
 }

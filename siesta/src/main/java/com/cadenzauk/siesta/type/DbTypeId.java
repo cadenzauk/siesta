@@ -34,32 +34,31 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class DbTypeId<T> {
-    public final static DbTypeId<Byte> TINYINT = new DbTypeId<>("tinyint", Types.TINYINT, Byte.class);
-    public final static DbTypeId<Short> SMALLINT = new DbTypeId<>("smallint", Types.SMALLINT, Short.class);
-    public final static DbTypeId<Integer> INTEGER = new DbTypeId<>("integer", Types.INTEGER, Integer.class);
-    public final static DbTypeId<Long> BIGINT = new DbTypeId<>("bigint", Types.BIGINT, Long.class);
+    public static final DbTypeId<Byte> TINYINT = new DbTypeId<>("tinyint", Types.TINYINT, Byte.class);
+    public static final DbTypeId<Short> SMALLINT = new DbTypeId<>("smallint", Types.SMALLINT, Short.class);
+    public static final DbTypeId<Integer> INTEGER = new DbTypeId<>("integer", Types.INTEGER, Integer.class);
+    public static final DbTypeId<Long> BIGINT = new DbTypeId<>("bigint", Types.BIGINT, Long.class);
 
-    public final static DbTypeId<byte[]> BINARY = new DbTypeId<>("binary", Types.BINARY, byte[].class);
-    public final static DbTypeId<byte[]> VARBINARY = new DbTypeId<>("varbinary", Types.VARBINARY, byte[].class);
+    public static final DbTypeId<byte[]> BINARY = new DbTypeId<>("binary", Types.BINARY, byte[].class);
+    public static final DbTypeId<byte[]> VARBINARY = new DbTypeId<>("varbinary", Types.VARBINARY, byte[].class);
 
-    public final static DbTypeId<Double> DOUBLE = new DbTypeId<>("double precision", Types.DOUBLE, Double.class);
-    public final static DbTypeId<Float> REAL = new DbTypeId<>("real", Types.FLOAT, Float.class);
-    public final static DbTypeId<BigDecimal> DECIMAL = new DbTypeId<>("decimal", Types.DECIMAL, BigDecimal.class);
+    public static final DbTypeId<Double> DOUBLE = new DbTypeId<>("double precision", Types.DOUBLE, Double.class);
+    public static final DbTypeId<Float> REAL = new DbTypeId<>("real", Types.FLOAT, Float.class);
+    public static final DbTypeId<BigDecimal> DECIMAL = new DbTypeId<>("decimal", Types.DECIMAL, BigDecimal.class);
 
-    public final static DbTypeId<LocalDate> DATE = new DbTypeId<>("date", Types.DATE, LocalDate.class);
-    public final static DbTypeId<LocalTime> TIME = new DbTypeId<>("time", Types.TIME, LocalTime.class);
-    public final static DbTypeId<LocalDateTime> TIMESTAMP = new DbTypeId<>("timestamp", Types.TIMESTAMP, LocalDateTime.class);
-    public final static DbTypeId<UUID> UUID = new DbTypeId<>("guid", Types.BINARY, UUID.class);
-    public final static DbTypeId<ZonedDateTime> UTC_TIMESTAMP = new DbTypeId<>("utctimestamp", Types.TIMESTAMP, ZonedDateTime.class);
+    public static final DbTypeId<LocalDate> DATE = new DbTypeId<>("date", Types.DATE, LocalDate.class);
+    public static final DbTypeId<LocalTime> TIME = new DbTypeId<>("time", Types.TIME, LocalTime.class);
+    public static final DbTypeId<LocalDateTime> TIMESTAMP = new DbTypeId<>("timestamp", Types.TIMESTAMP, LocalDateTime.class);
+    public static final DbTypeId<UUID> UUID = new DbTypeId<>("guid", Types.BINARY, UUID.class);
+    public static final DbTypeId<ZonedDateTime> UTC_TIMESTAMP = new DbTypeId<>("utctimestamp", Types.TIMESTAMP, ZonedDateTime.class);
 
-    public final static DbTypeId<String> CHAR = new DbTypeId<>("char", Types.CHAR, String.class);
-    public final static DbTypeId<String> VARCHAR = new DbTypeId<>("varchar", Types.VARCHAR, String.class);
+    public static final DbTypeId<String> CHAR = new DbTypeId<>("char", Types.CHAR, String.class);
+    public static final DbTypeId<String> VARCHAR = new DbTypeId<>("varchar", Types.VARCHAR, String.class);
 
     private final String name;
     private final int typeCode;
     private final Class<T> javaClass;
 
-    @SuppressWarnings("WeakerAccess")
     public DbTypeId(String name, int typeCode, Class<T> javaClass) {
         this.name = name;
         this.typeCode = typeCode;

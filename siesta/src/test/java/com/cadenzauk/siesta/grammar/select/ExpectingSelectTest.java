@@ -84,6 +84,28 @@ class ExpectingSelectTest {
             selectTestCase((s, a) -> s.select(SalespersonRow.class, "s"), "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
             selectTestCase(ExpectingSelect::select, "s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
+            selectTestCase((s, a) -> s.selectDistinct(), "distinct s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+
+            selectTestCase((s, a) -> s.selectDistinct(upper(SalespersonRow::surname)), "distinct upper(s.SURNAME) as upper_s_SURNAME"),
+
+            selectTestCase((s, a) -> s.selectDistinct(SalespersonRow::surname), "distinct s.SURNAME as s_SURNAME"),
+            selectTestCase((s, a) -> s.selectDistinct(SalespersonRow::middleNames), "distinct s.MIDDLE_NAMES as s_MIDDLE_NAMES"),
+            selectTestCase((s, a) -> s.selectDistinct("s", SalespersonRow::surname), "distinct s.SURNAME as s_SURNAME"),
+            selectTestCase((s, a) -> s.selectDistinct("s", SalespersonRow::middleNames), "distinct s.MIDDLE_NAMES as s_MIDDLE_NAMES"),
+            selectTestCase((s, a) -> s.selectDistinct(a, SalespersonRow::surname), "distinct s.SURNAME as s_SURNAME"),
+            selectTestCase((s, a) -> s.selectDistinct(a, SalespersonRow::middleNames), "distinct s.MIDDLE_NAMES as s_MIDDLE_NAMES"),
+
+            selectTestCase((s, a) -> s.selectDistinct(SalespersonRow::surname, "sname"), "distinct s.SURNAME as sname"),
+            selectTestCase((s, a) -> s.selectDistinct(SalespersonRow::middleNames, "mnames"), "distinct s.MIDDLE_NAMES as mnames"),
+            selectTestCase((s, a) -> s.selectDistinct("s", SalespersonRow::surname, "sname"), "distinct s.SURNAME as sname"),
+            selectTestCase((s, a) -> s.selectDistinct("s", SalespersonRow::middleNames, "mnames"), "distinct s.MIDDLE_NAMES as mnames"),
+            selectTestCase((s, a) -> s.selectDistinct(a, SalespersonRow::surname, "sname"), "distinct s.SURNAME as sname"),
+            selectTestCase((s, a) -> s.selectDistinct(a, SalespersonRow::middleNames, "mnames"), "distinct s.MIDDLE_NAMES as mnames"),
+
+            selectTestCase((s, a) -> s.selectDistinct(SalespersonRow.class), "distinct s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            selectTestCase((s, a) -> s.selectDistinct(SalespersonRow.class, "s"), "distinct s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+            selectTestCase(ExpectingSelect::selectDistinct, "distinct s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
+
             selectTestCase((s, a) -> s.selectInto(SalespersonRow.class).with(TypedExpression.literal("Smith")).as(SalespersonRow::surname), "'Smith' as SALESPERSON_SURNAME"),
             selectTestCase((s, a) -> s.selectInto(SalespersonRow.class, "v").with(TypedExpression.literal("Smith")).as(SalespersonRow::surname), "'Smith' as v_SURNAME"),
             selectTestCase((s, a) -> s.selectInto(a.table().as("v")).with(TypedExpression.literal("Smith")).as(SalespersonRow::surname), "'Smith' as v_SURNAME")

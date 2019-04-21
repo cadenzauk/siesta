@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Sequence<T> {
-    private final static Logger LOG = LoggerFactory.getLogger(Sequence.class);
     private final Database database;
     private final String catalog;
     private final String schema;

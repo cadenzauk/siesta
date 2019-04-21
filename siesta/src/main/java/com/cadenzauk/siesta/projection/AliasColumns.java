@@ -33,15 +33,17 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class AliasColumns<R> implements Projection {
+    private final boolean distinct;
     private final Alias<R> alias;
 
-    public AliasColumns(Alias<R> alias) {
+    public AliasColumns(boolean distinct, Alias<R> alias) {
+        this.distinct = distinct;
         this.alias = alias;
     }
 
     @Override
     public String sql(Scope outer) {
-        return alias
+        return (distinct ? "distinct " : "") + alias
             .table()
             .columns()
             .map(c -> c.sqlWithLabel(alias, Optional.empty()))
@@ -61,5 +63,10 @@ public class AliasColumns<R> implements Projection {
             .map(Column::columnName)
             .map(alias::inSelectClauseLabel)
             .collect(joining(", "));
+    }
+
+    @Override
+    public Projection distinct() {
+        return new AliasColumns<>(true, alias);
     }
 }

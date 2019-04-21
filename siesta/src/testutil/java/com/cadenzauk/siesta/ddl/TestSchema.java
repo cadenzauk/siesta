@@ -144,6 +144,16 @@ public class TestSchema {
                     foreignKey("FK_SALES_AREA_SALESPERSON").references("SALESPERSON").column("SALESPERSON_ID"))
                 .column("SALES_COUNT", smallint())
             )
+            .createTable(t -> t
+                .id("create a table with no primary key")
+                .author("mark")
+                .schemaName("SIESTA")
+                .tableName("SALE")
+                .column("SALESPERSON_ID", bigint(), notNull())
+                .column("WIDGET_ID", bigint(), notNull())
+                .column("QUANTITY", bigint(), notNull())
+                .column("PRICE", decimal(15, 2), notNull())
+            )
             .build();
     }
 }

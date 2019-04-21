@@ -39,7 +39,7 @@ import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 
 @ContextConfiguration(classes = Db2Config.class)
 class StatementCachingPerformanceTestDb2 extends IntegrationTest {
-    private final static Logger LOG = LoggerFactory.getLogger(StatementCachingPerformanceTestDb2.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StatementCachingPerformanceTestDb2.class);
 
     @Test
     void cachingIsFaster() {

@@ -35,11 +35,16 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class DynamicProjection implements Projection {
+    private final boolean distinct;
     private final List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
+
+    public DynamicProjection(boolean distinct) {
+        this.distinct = distinct;
+    }
 
     @Override
     public String sql(Scope scope) {
-        return columns.stream()
+        return (distinct ? "distinct " : "") + columns.stream()
             .map(p -> p.map((s, t) -> s.sql(scope) + " as " + t.label(scope)))
             .collect(joining(", "));
     }
@@ -54,6 +59,13 @@ public class DynamicProjection implements Projection {
         return columns.stream()
             .map(p -> p.map((s, t) -> t.label(scope)))
             .collect(joining(", "));
+    }
+
+    @Override
+    public Projection distinct() {
+        DynamicProjection projection = new DynamicProjection(true);
+        projection.columns.addAll(columns);
+        return projection;
     }
 
     public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {

@@ -22,14 +22,16 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.RandomValues;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.ddl.TestSchema;
 import com.cadenzauk.siesta.dialect.AutoDetectDialect;
-import com.cadenzauk.siesta.dialect.H2Dialect;
+import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestDatabase;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +44,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 @ContextConfiguration
@@ -75,6 +78,24 @@ public abstract class IntegrationTest {
             .salespersonId(newId())
             .firstName(RandomStringUtils.randomAlphabetic(3, 12))
             .surname(RandomStringUtils.randomAlphabetic(5, 15))
+            .build();
+    }
+
+    public static SalespersonRow aRandomSalesperson(Function<SalespersonRow.Builder,SalespersonRow.Builder> init) {
+        return init.apply(
+            SalespersonRow.newBuilder()
+                .salespersonId(newId())
+                .firstName(RandomStringUtils.randomAlphabetic(3, 12))
+                .surname(RandomStringUtils.randomAlphabetic(5, 15)))
+            .build();
+    }
+
+    public static SaleRow aRandomSale() {
+        return SaleRow.newBuilder()
+            .salespersonId(newId())
+            .widgetId(newId())
+            .quantity(RandomUtils.nextLong(10, 400))
+            .price(RandomValues.randomBigDecimal(12, 2))
             .build();
     }
 

@@ -31,15 +31,17 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class ProjectionList implements Projection {
+    private final boolean distinct;
     private final Projection[] p;
 
-    public ProjectionList(Projection[] p) {
+    public ProjectionList(boolean distinct, Projection[] p) {
+        this.distinct = distinct;
         this.p = p;
     }
 
     @Override
     public String sql(Scope scope) {
-        return Arrays.stream(p)
+        return (distinct ? "distinct " : "") + Arrays.stream(p)
             .map(x -> x.sql(scope))
             .collect(joining(", "));
     }
@@ -54,5 +56,10 @@ public class ProjectionList implements Projection {
         return Arrays.stream(p)
             .map(x -> x.labelList(scope))
             .collect(joining(", "));
+    }
+
+    @Override
+    public Projection distinct() {
+        return new ProjectionList(true, p);
     }
 }
