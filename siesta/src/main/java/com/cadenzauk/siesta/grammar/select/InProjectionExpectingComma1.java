@@ -28,7 +28,7 @@ import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMappers;
+import com.cadenzauk.siesta.Projections;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -117,10 +117,7 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
                 .where(new TypeParameter<T1>() {}, boxedType(type()))
                 .where(new TypeParameter<T>() {}, boxedType(alias.type())),
             statement.from(),
-            RowMappers.of(
-                statement.rowMapper(),
-                alias.rowMapper()),
-            Projection.of(statement.projection(), Projection.of(alias)));
+            Projections.of2(statement.projection(), Projection.of(alias)));
         return new InProjectionExpectingComma2<>(select);
     }
 
@@ -131,10 +128,7 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
                 .where(new TypeParameter<T1>() {}, boxedType(type()))
                 .where(new TypeParameter<T>() {}, boxedType(col.type())),
             statement.from(),
-            RowMappers.of(
-                statement.rowMapper(),
-                col.rowMapper(scope(), label)),
-            Projection.of(statement.projection(), Projection.of(col, label)));
+            Projections.of2(statement.projection(), Projection.of(col, label)));
         return new InProjectionExpectingComma2<>(select);
     }
 }

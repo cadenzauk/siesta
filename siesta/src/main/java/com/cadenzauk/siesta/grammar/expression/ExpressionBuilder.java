@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Condition;
@@ -80,8 +81,8 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return lhs.rowMapper(scope, label);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return lhs.rowMapperFactory(scope);
     }
 
     @Override

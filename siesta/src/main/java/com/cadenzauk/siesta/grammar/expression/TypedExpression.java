@@ -24,7 +24,8 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
@@ -35,7 +36,11 @@ import java.util.function.Function;
 public interface TypedExpression<T> extends Expression {
     String label(Scope scope);
 
-    RowMapper<T> rowMapper(Scope scope, Optional<String> label);
+    RowMapperFactory<T> rowMapperFactory(Scope scope);
+
+    default RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
+        return label -> rowMapperFactory(scope).rowMapper(OptionalUtil.or(label, defaultLabel));
+    }
 
     TypeToken<T> type();
 

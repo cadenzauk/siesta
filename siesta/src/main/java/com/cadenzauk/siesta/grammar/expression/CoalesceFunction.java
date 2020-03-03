@@ -24,7 +24,7 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
@@ -67,8 +67,8 @@ public class CoalesceFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return terms.get(0).rowMapper(scope, Optional.of(label.orElseGet(() -> label(scope))));
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return label -> terms.get(0).rowMapperFactory(scope).rowMapper(Optional.of(label.orElseGet(() -> label(scope))));
     }
 
     @Override

@@ -73,8 +73,16 @@ public class SiestaCodeGenerator {
         generate("Tuple.ftl", n, max, CORE + "/tuple/Tuple.java");
     }
 
+    private void generateProjections(int n) {
+        generate("Projections.ftl", n, n, SIESTA + "/Projections.java");
+    }
+
     private void generateRowMappers(int n) {
         generate("RowMappers.ftl", n, n, SIESTA + "/RowMappers.java");
+    }
+
+    private void generateRowMapperFactories(int n) {
+        generate("RowMapperFactories.ftl", n, n, SIESTA + "/RowMapperFactories.java");
     }
 
     private void generateExpectingJoin(int n, int max) {
@@ -114,6 +122,8 @@ public class SiestaCodeGenerator {
         generateFunctions(20);
         generateTuples(20);
         generateRowMappers(20);
+        generateRowMapperFactories(20);
+        generateProjections(20);
         generateExpectingJoins(20);
         generateInProjectionExpectingCommas(19);
         generateTupleBuilders(20);

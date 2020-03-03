@@ -23,21 +23,23 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.function.FunctionInt;
+import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.lang.StringUtil;
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.Lazy;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 public class MethodInfo<C, R> {
@@ -54,6 +56,34 @@ public class MethodInfo<C, R> {
         this.method = method;
         this.actualType = actualType;
         this.effectiveType = effectiveType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MethodInfo<?,?> that = (MethodInfo<?,?>) o;
+
+        return new EqualsBuilder()
+            .append(declaringType, that.declaringType)
+            .append(referringType, that.referringType)
+            .append(method, that.method)
+            .append(actualType, that.actualType)
+            .append(effectiveType, that.effectiveType)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(declaringType)
+            .append(referringType)
+            .append(method)
+            .append(actualType)
+            .append(effectiveType)
+            .toHashCode();
     }
 
     public TypeToken<? super C> declaringType() {
@@ -87,6 +117,20 @@ public class MethodInfo<C, R> {
 
     public Optional<FieldInfo<C, ?>> field() {
         return field.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C2> Optional<MethodInfo<C2,R>> asReferring(TypeToken<C2> typeToken) {
+        return referringType.equals(typeToken)
+            ? Optional.of((MethodInfo<C2,R>)this)
+            : Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R2> Optional<MethodInfo<C,R2>> asEffective(TypeToken<R2> typeToken) {
+        return effectiveType.equals(typeToken.getRawType())
+            ? Optional.of((MethodInfo<C,R2>)this)
+            : Optional.empty();
     }
 
     public String propertyName() {

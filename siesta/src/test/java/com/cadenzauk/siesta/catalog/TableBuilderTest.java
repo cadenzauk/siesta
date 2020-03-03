@@ -26,6 +26,7 @@ import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import org.junit.jupiter.api.Test;
 
@@ -235,7 +236,7 @@ class TableBuilderTest {
             .table(NoAnnotations.class,
                 t -> t.column(NoAnnotations::id, c -> c.identifier(true)))
             .build();
-        Alias<NoAnnotations> alias = Alias.of(database.table(NoAnnotations.class));
+        Alias<NoAnnotations> alias = TableAlias.of(database.table(NoAnnotations.class));
 
         String idSql = database.table(NoAnnotations.class)
             .columns()
@@ -267,7 +268,7 @@ class TableBuilderTest {
         Database database = Database.newBuilder()
             .defaultSchema("DEFAULT_SCHEMA")
             .build();
-        Alias<IdAnnotation> alias = Alias.of(database.table(IdAnnotation.class));
+        Alias<IdAnnotation> alias = TableAlias.of(database.table(IdAnnotation.class));
 
         String idSql = database.table(IdAnnotation.class)
             .columns()
@@ -285,7 +286,7 @@ class TableBuilderTest {
                 .embedded(Key.class, EmbeddedIdNoAnnotation::key, c -> c
                     .identifier(true)))
             .build();
-        Alias<EmbeddedIdNoAnnotation> alias = Alias.of(database.table(EmbeddedIdNoAnnotation.class));
+        Alias<EmbeddedIdNoAnnotation> alias = TableAlias.of(database.table(EmbeddedIdNoAnnotation.class));
 
         String idSql = database.table(EmbeddedIdNoAnnotation.class)
             .columns()
@@ -470,9 +471,9 @@ class TableBuilderTest {
         Database database = Database.newBuilder()
             .defaultSchema("DEFAULT_SCHEMA")
             .table(EmbeddedColumnsNoAnnotations.class, t -> t
-                .embedded(EmbeddableNoAnnotations.class, EmbeddedColumnsNoAnnotations::gross, c -> c
-                    .column(EmbeddableNoAnnotations::amount, o -> o.updatable(false)))
-                .embedded(EmbeddableNoAnnotations.class, EmbeddedColumnsNoAnnotations::net))
+                .embedded(EmbeddableNoAnnotations.class, EmbeddedColumnsNoAnnotations::gross)
+                .embedded(EmbeddableNoAnnotations.class, EmbeddedColumnsNoAnnotations::net, c -> c
+                    .column(EmbeddableNoAnnotations::amount, o -> o.updatable(false))))
             .build();
 
         Table<EmbeddedColumnsNoAnnotations> table = database.table(EmbeddedColumnsNoAnnotations.class);
@@ -483,11 +484,11 @@ class TableBuilderTest {
 
         assertThat(table.column(EmbeddedColumnsNoAnnotations::gross).updatable(), is(true));
         assertThat(table.column(EmbeddedColumnsNoAnnotations::net).updatable(), is(true));
-        assertThat(table.embedded(EmbeddedColumnsNoAnnotations::gross).column(EmbeddableNoAnnotations::amount).updatable(), is(false));
+        assertThat(table.embedded(EmbeddedColumnsNoAnnotations::gross).column(EmbeddableNoAnnotations::amount).updatable(), is(true));
         assertThat(table.embedded(EmbeddedColumnsNoAnnotations::gross).column(EmbeddableNoAnnotations::unit).updatable(), is(true));
-        assertThat(table.embedded(EmbeddedColumnsNoAnnotations::net).column(EmbeddableNoAnnotations::amount).updatable(), is(true));
+        assertThat(table.embedded(EmbeddedColumnsNoAnnotations::net).column(EmbeddableNoAnnotations::amount).updatable(), is(false));
         assertThat(table.embedded(EmbeddedColumnsNoAnnotations::net).column(EmbeddableNoAnnotations::unit).updatable(), is(true));
-        assertThat(updateSql, is("GROSS_UNIT = ?, NET_AMOUNT = ?, NET_UNIT = ?"));
+        assertThat(updateSql, is("GROSS_AMOUNT = ?, GROSS_UNIT = ?, NET_UNIT = ?"));
     }
 
     @Test

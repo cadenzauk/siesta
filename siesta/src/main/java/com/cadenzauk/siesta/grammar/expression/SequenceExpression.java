@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.Sequence;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
@@ -45,8 +46,8 @@ public class SequenceExpression<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return sequence.rowMapper(label.orElseGet(() -> label(scope)));
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return sequence.rowMapperFactory(label(scope));
     }
 
     @Override

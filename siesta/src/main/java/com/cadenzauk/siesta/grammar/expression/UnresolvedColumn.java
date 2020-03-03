@@ -25,16 +25,17 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
+public class UnresolvedColumn<T,R> implements ColumnExpression<T> {
     private final Optional<String> alias;
     private final MethodInfo<R,T> getterMethod;
 
@@ -50,22 +51,19 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
 
     @Override
     public String sql(Scope scope) {
-        Column<T,R> column = scope.database().column(getterMethod);
-        Alias<R> resolvedAlias = resolve(scope);
-        return column.sql(resolvedAlias);
+        Alias<?> resolvedAlias = resolve(scope);
+        return resolvedAlias.columnSql(getterMethod);
     }
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
-        Column<T,R> column = scope.database().column(getterMethod);
-        Alias<R> resolvedAlias = resolve(scope);
-        return column.sqlWithLabel(resolvedAlias, label);
+        Alias<?> resolvedAlias = resolve(scope);
+        return resolvedAlias.columnSqlWithLabel(getterMethod, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        Column<T,R> column = scope.database().column(getterMethod);
-        return column.columnName();
+        return scope.database().columnNameFor(getterMethod);
     }
 
     @Override
@@ -80,16 +78,20 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
 
     @Override
     public String label(Scope scope) {
-        Column<T,R> column = scope.database().column(getterMethod);
-        return resolve(scope).inSelectClauseLabel(column.columnName());
+        String columnName = scope.database().columnNameFor(getterMethod);
+        return resolve(scope).inSelectClauseLabel(columnName);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        Column<T,R> column = scope.database().column(getterMethod);
-        Alias<R> resolvedAlias = resolve(scope);
-        return column.rowMapper(resolvedAlias, label);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        Alias<?> resolvedAlias = resolve(scope);
+        return resolvedAlias.rowMapperFactoryFor(getterMethod, Optional.empty());
+    }
+
+    @Override
+    public RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
+        Alias<?> resolvedAlias = resolve(scope);
+        return resolvedAlias.rowMapperFactoryFor(getterMethod, defaultLabel);
     }
 
     @Override
@@ -97,19 +99,20 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T,R> {
         return TypeToken.of(getterMethod.effectiveClass());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Alias<R> resolve(Scope scope) {
-        Class<R> rowClass = getterMethod.referringClass();
-        return this.alias
-            .map(a -> scope.findAlias(rowClass, a))
-            .orElseGet(() -> scope.findAlias(rowClass));
+    public Alias<?> resolve(Scope scope) {
+        return scope.findAlias(getterMethod, alias);
     }
 
     @Override
     public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
         Column<T,R> column = scope.database().column(getterMethod);
         return column.findColumn(type, propertyName);
+    }
+
+    @Override
+    public <R2, X> boolean includes(MethodInfo<R2,X> getter) {
+        return Objects.equals(getterMethod.method(), getter.method());
     }
 
     public static <T, R> UnresolvedColumn<T,R> of(Function1<R,T> getter) {

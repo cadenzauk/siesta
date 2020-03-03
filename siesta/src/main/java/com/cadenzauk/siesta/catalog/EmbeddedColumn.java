@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.NamingStrategy;
@@ -178,20 +178,15 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
         return columnMapping.embedded(methodInfo);
     }
 
-    @Override
-    public RowMapper<T> rowMapper(Alias<?> alias) {
-        return columnMapping.rowMapper(alias);
-    }
-
-    private String label(Alias<?> alias, Optional<String> label, Column<?,T> c) {
-        NamingStrategy naming = alias.table().database().namingStrategy();
+    public static <T> String label(Alias<?> alias, Optional<String> label, Column<?,T> c) {
+        NamingStrategy naming = alias.database().namingStrategy();
         return label.map(l -> naming.embeddedName(l, c.columnName()))
             .orElseGet(() -> alias.inSelectClauseLabel(c.columnName()));
     }
 
     @Override
-    public RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label) {
-        return columnMapping.rowMapper(alias);
+    public RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
+        return columnMapping.rowMapperFactory(alias, defaultLabel);
     }
 
     @SuppressWarnings("unchecked")
@@ -219,7 +214,7 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
 
     @Override
     public ResultSetValue<RB> extract(Alias<?> alias, ResultSet rs, Optional<String> label) {
-        Optional<T> value = Optional.ofNullable(rowMapper(alias, label).mapRow(rs));
+        Optional<T> value = Optional.ofNullable(rowMapperFactory(alias, label).rowMapper(Optional.empty()).mapRow(rs));
         return new ResultSetValue<RB>() {
             @Override
             public boolean isPresent() {

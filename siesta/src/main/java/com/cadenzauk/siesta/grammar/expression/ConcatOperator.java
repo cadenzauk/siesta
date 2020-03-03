@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
@@ -61,8 +62,8 @@ public class ConcatOperator  implements TypedExpression<String> {
     }
 
     @Override
-    public RowMapper<String> rowMapper(Scope scope, Optional<String> label) {
-        return Scope.makeMapper(String.class).apply(scope, label.orElseGet(() -> label(scope)));
+    public RowMapperFactory<String> rowMapperFactory(Scope scope) {
+        return Scope.makeMapperFactory(String.class).apply(scope, label(scope));
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,14 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.tuple.Tuple13;
-import com.cadenzauk.siesta.RowMappers;
+import com.cadenzauk.siesta.RowMapperFactories;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
@@ -84,21 +83,21 @@ public class TupleBuilder13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T
     }
 
     @Override
-    public RowMapper<Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>> rowMapper(Scope scope, Optional<String> label) {
-        return RowMappers.of(
-            item1.rowMapper(scope, Optional.empty()),
-            item2.rowMapper(scope, Optional.empty()),
-            item3.rowMapper(scope, Optional.empty()),
-            item4.rowMapper(scope, Optional.empty()),
-            item5.rowMapper(scope, Optional.empty()),
-            item6.rowMapper(scope, Optional.empty()),
-            item7.rowMapper(scope, Optional.empty()),
-            item8.rowMapper(scope, Optional.empty()),
-            item9.rowMapper(scope, Optional.empty()),
-            item10.rowMapper(scope, Optional.empty()),
-            item11.rowMapper(scope, Optional.empty()),
-            item12.rowMapper(scope, Optional.empty()),
-            item13.rowMapper(scope, Optional.empty())
+    public RowMapperFactory<Tuple13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>> rowMapperFactory(Scope scope) {
+        return RowMapperFactories.of(
+            item1.rowMapperFactory(scope),
+            item2.rowMapperFactory(scope),
+            item3.rowMapperFactory(scope),
+            item4.rowMapperFactory(scope),
+            item5.rowMapperFactory(scope),
+            item6.rowMapperFactory(scope),
+            item7.rowMapperFactory(scope),
+            item8.rowMapperFactory(scope),
+            item9.rowMapperFactory(scope),
+            item10.rowMapperFactory(scope),
+            item11.rowMapperFactory(scope),
+            item12.rowMapperFactory(scope),
+            item13.rowMapperFactory(scope)
         );
     }
 

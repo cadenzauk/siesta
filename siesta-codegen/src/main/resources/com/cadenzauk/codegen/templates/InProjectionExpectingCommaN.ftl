@@ -29,7 +29,7 @@ import com.cadenzauk.core.tuple.Tuple${n+1};
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMappers;
+import com.cadenzauk.siesta.Projections;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -125,10 +125,7 @@ public class InProjectionExpectingComma${n}<${typelist_space}> extends Expecting
 </#list>
                 .where(new TypeParameter<T>() {}, boxedType(alias.type())),
             statement.from(),
-            RowMappers.add${n+1}${nth}(
-                statement.rowMapper(),
-                alias.rowMapper()),
-                Projection.of(statement.projection(), Projection.of(alias)));
+            Projections.of${n+1}(statement.projection(), Projection.of(alias)));
         return new <#if n < max>InProjectionExpectingComma${n+1}<#else>ExpectingWhere</#if><>(select);
     }
 
@@ -142,10 +139,7 @@ public class InProjectionExpectingComma${n}<${typelist_space}> extends Expecting
 </#list>
                 .where(new TypeParameter<T>() {}, boxedType(col.type())),
             statement.from(),
-            RowMappers.add${n+1}${nth}(
-                statement.rowMapper(),
-                col.rowMapper(scope(), label)),
-                Projection.of(statement.projection(), Projection.of(col, label)));
+            Projections.of${n+1}(statement.projection(), Projection.of(col, label)));
         return new <#if n < max>InProjectionExpectingComma${n+1}<#else>ExpectingWhere</#if><>(select);
     }
 }

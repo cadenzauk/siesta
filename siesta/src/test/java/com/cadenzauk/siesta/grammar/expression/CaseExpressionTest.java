@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
@@ -73,6 +74,9 @@ class CaseExpressionTest {
 
     @Mock
     private TypedExpression<String> expression2;
+
+    @Mock
+    private RowMapperFactory<String> rowMapperFactory;
 
     @Mock
     private RowMapper<String> rowMapper;
@@ -140,9 +144,11 @@ class CaseExpressionTest {
     @Test
     void rowMapper() {
         CaseExpression<String> sut = new CaseExpression<>(condition, expression1);
-        when(expression1.rowMapper(scope, Optional.of("test_case"))).thenReturn(rowMapper);
+        when(expression1.rowMapperFactory(scope)).thenReturn(rowMapperFactory);
+        when(scope.newLabel()).thenReturn(123L);
+        when(rowMapperFactory.rowMapper(Optional.of("case_123"))).thenReturn(rowMapper);
 
-        RowMapper<String> result = sut.rowMapper(scope, Optional.of("test_case"));
+        RowMapper<String> result = sut.rowMapperFactory(scope).rowMapper(Optional.empty());
 
         assertThat(result, sameInstance(rowMapper));
         verifyNoMoreInteractions(condition, expression1, scope);

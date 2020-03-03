@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
@@ -32,7 +33,6 @@ import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -65,8 +65,8 @@ public class SqlFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return rowMapperFactory.apply(scope, label.orElseGet(() -> label(scope)));
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return label -> rowMapperFactory.apply(scope, label.orElseGet(() -> label(scope)));
     }
 
     @Override

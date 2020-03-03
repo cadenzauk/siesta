@@ -26,6 +26,7 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Assignment;
 import com.cadenzauk.siesta.grammar.expression.ParenthesisedArithmeticExpression;
@@ -41,10 +42,10 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 public class Update<U> extends ExecutableStatement {
-    private final Alias<U> alias;
+    private final TableAlias<U> alias;
     private final List<Assignment<?>> sets = new ArrayList<>();
 
-    private Update(Database database, Alias<U> alias) {
+    private Update(Database database, TableAlias<U> alias) {
         super(new Scope(database, alias));
         this.alias = alias;
     }
@@ -95,10 +96,12 @@ public class Update<U> extends ExecutableStatement {
     }
 
     public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
-        return update(database, Alias.of(table));
+        return update(database, TableAlias.of(table));
     }
 
     public static <U> InSetExpectingWhere<U> update(Database database, Alias<U> alias) {
-        return new Update<>(database, alias).setClause();
+        TableAlias<U> tableAlias = OptionalUtil.as(new TypeToken<TableAlias<U>>() {}, alias)
+            .orElseThrow(() -> new IllegalArgumentException("Can only use table aliases in UPDATE."));
+        return new Update<>(database, tableAlias).setClause();
     }
 }

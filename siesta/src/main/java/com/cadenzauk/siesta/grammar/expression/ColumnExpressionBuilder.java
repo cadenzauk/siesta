@@ -31,9 +31,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
-    private final ColumnExpression<T,R> lhs;
+    private final ColumnExpression<T> lhs;
 
-    private ColumnExpressionBuilder(ColumnExpression<T,R> lhs, Function<BooleanExpression,N> onComplete) {
+    private ColumnExpressionBuilder(ColumnExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         super(lhs, onComplete);
         this.lhs = lhs;
     }
@@ -51,7 +51,7 @@ public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
         return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
     }
 
-    public static <T, R, N> ColumnExpressionBuilder<T,R,N> of(ColumnExpression<T,R> column, Function<BooleanExpression,N> onComplete) {
+    public static <T, R, N> ColumnExpressionBuilder<T,R,N> of(ColumnExpression<T> column, Function<BooleanExpression,N> onComplete) {
         return new ColumnExpressionBuilder<>(column, onComplete);
     }
 }

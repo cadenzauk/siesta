@@ -31,12 +31,14 @@ import com.cadenzauk.core.reflect.Setter;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.DynamicRowMapper;
+import com.cadenzauk.siesta.DynamicRowMapperFactory;
+import com.cadenzauk.siesta.NamingStrategy;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +53,6 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -66,6 +67,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.reflect.util.ClassUtil.hasAnnotation;
+import static com.cadenzauk.core.util.OptionalUtil.or;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
@@ -109,10 +111,10 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     }
 
     @Override
-    public RowMapper<R> rowMapper(Alias<?> alias) {
-        return rs -> {
+    public RowMapperFactory<R> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
+        return label -> rs -> {
             List<TableColumn.ResultSetValue<B>> values = columns.stream()
-                .map(c -> c.extract(alias, rs, Optional.empty()))
+                .map(c -> c.extract(alias, rs, computeLabel(alias, label, defaultLabel, c)))
                 .collect(toList());
             return values.stream().noneMatch(TableColumn.ResultSetValue::isPresent)
                 ? null
@@ -120,8 +122,22 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         };
     }
 
-    DynamicRowMapper<R> dynamicRowMapper(Alias<?> alias) {
-        return new DynamicRowMapper<R>() {
+    private Optional<String> computeLabel(Alias<?> alias, Optional<String> prefix, Optional<String> defaultLabel, TableColumn<?,R,B> col) {
+        return or(
+            prefix.map(p ->
+                p + defaultLabel
+                    .map(l -> labelOf(alias, l, col))
+                    .orElseGet(() -> alias.inSelectClauseLabel(col.columnName()))),
+            defaultLabel.map(l -> labelOf(alias, l, col)));
+    }
+
+    private String labelOf(Alias<?> alias, String defaultLabel, TableColumn<?,R,B> c) {
+        NamingStrategy naming = alias.database().namingStrategy();
+        return naming.embeddedName(defaultLabel, c.columnName());
+    }
+
+    DynamicRowMapperFactory<R> dynamicRowMapperFactoryFactory(Alias<?> alias) {
+        return new DynamicRowMapperFactory<R>() {
             private final Set<String> labels = new HashSet<>();
 
             @Override
@@ -130,14 +146,16 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
             }
 
             @Override
-            public R mapRow(ResultSet rs) {
-                List<TableColumn.ResultSetValue<B>> values = columns.stream()
-                    .filter(c -> labels.contains(alias.inSelectClauseLabel(c.columnName())))
-                    .map(c -> c.extract(alias, rs, Optional.empty()))
-                    .collect(toList());
-                return values.stream().noneMatch(TableColumn.ResultSetValue::isPresent)
-                    ? null
-                    : buildRow(values);
+            public RowMapper<R> rowMapper(Optional<String> label) {
+                return rs -> {
+                    List<TableColumn.ResultSetValue<B>> values = columns.stream()
+                        .filter(c -> labels.contains(alias.inSelectClauseLabel(c.columnName())))
+                        .map(c -> c.extract(alias, rs, label))
+                        .collect(toList());
+                    return values.stream().noneMatch(TableColumn.ResultSetValue::isPresent)
+                        ? null
+                        : buildRow(values);
+                };
             }
         };
     }
@@ -277,12 +295,10 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
             return optional(getter, setter, Optional.of(init));
         }
 
-        @SuppressWarnings("WeakerAccess")
         public <T> S column(Function1<R,T> getter, BiConsumer<B,T> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
             return mandatory(getter, setter, Optional.of(init));
         }
 
-        @SuppressWarnings("WeakerAccess")
         public <T> S column(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Consumer<PrimitiveColumn.Builder<T,R,B>> init) {
             return optional(getter, setter, Optional.of(init));
         }
@@ -406,43 +422,46 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         private <T> S mandatory(Function1<R,T> getter, BiConsumer<B,T> setter, Optional<Consumer<PrimitiveColumn.Builder<T,R,B>>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.propertyName();
-            excludedFields.add(name);
             PrimitiveColumn.Builder<T,R,B> columnBuilder = PrimitiveColumn.mandatory(database, name, database.getDataTypeOf(getterInfo), getter, setter);
-            setColumnName(columnBuilder, getterInfo);
-            init.ifPresent(x -> x.accept(columnBuilder));
-            columns.add(columnBuilder.build());
+            addPrimitive(init, getterInfo, name, columnBuilder);
             return self();
         }
 
         private <T> S optional(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Optional<Consumer<PrimitiveColumn.Builder<T,R,B>>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.propertyName();
-            excludedFields.add(name);
             PrimitiveColumn.Builder<T,R,B> columnBuilder = PrimitiveColumn.optional(database, name, database.getDataTypeOf(getterInfo), getter, setter);
+            addPrimitive(init, getterInfo, name, columnBuilder);
+            return self();
+        }
+
+        private <T> void addPrimitive(Optional<Consumer<PrimitiveColumn.Builder<T,R,B>>> init, MethodInfo<R,T> getterInfo, String name, PrimitiveColumn.Builder<T,R,B> columnBuilder) {
+            excludedFields.add(name);
             setColumnName(columnBuilder, getterInfo);
             init.ifPresent(x -> x.accept(columnBuilder));
             columns.add(columnBuilder.build());
-            return self();
         }
 
         private <T, TB> S embedded(Function1<R,T> getter, BiConsumer<B,T> setter, Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.propertyName();
-            excludedFields.add(name);
             EmbeddedColumn.Builder<T,T,R,B> columnBuilder = EmbeddedColumn.mandatory(database, name, getterInfo.effectiveType(), getter, setter);
-            setColumnName(columnBuilder, getterInfo);
-            columns.add(init.apply(columnBuilder).build());
+            addEmbedded(init, getterInfo, name, columnBuilder);
             return self();
         }
 
         private <T, TB> S embedded(FunctionOptional1<R,T> getter, BiConsumer<B,Optional<T>> setter, Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init) {
             MethodInfo<R,T> getterInfo = MethodInfo.of(getter);
             String name = getterInfo.propertyName();
-            excludedFields.add(name);
             EmbeddedColumn.Builder<T,T,R,B> columnBuilder = EmbeddedColumn.optional(database, name, getterInfo.effectiveType(), getter, setter);
+            addEmbedded(init, getterInfo, name, columnBuilder);
+            return self();
+        }
+
+        private <T, TB> void addEmbedded(Function<EmbeddedColumn.Builder<T,T,R,B>,EmbeddedColumn.Builder<T,TB,R,B>> init, MethodInfo<R,T> getterInfo, String name, EmbeddedColumn.Builder<T,T,R,B> columnBuilder) {
+            excludedFields.add(name);
             setColumnName(columnBuilder, getterInfo);
             columns.add(init.apply(columnBuilder).build());
-            return self();
         }
 
         private <T> void addPrimitive(FieldInfo<R,T> fieldInfo) {

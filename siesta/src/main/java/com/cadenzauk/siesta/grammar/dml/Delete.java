@@ -22,17 +22,20 @@
 
 package com.cadenzauk.siesta.grammar.dml;
 
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.catalog.Table;
+import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
 
 public class Delete<D> extends ExecutableStatement {
-    private final Alias<D> alias;
+    private final TableAlias<D> alias;
 
-    private Delete(Database database, Alias<D> alias) {
+    private Delete(Database database, TableAlias<D> alias) {
         super(new Scope(database, alias));
         this.alias = alias;
     }
@@ -55,10 +58,12 @@ public class Delete<D> extends ExecutableStatement {
     }
 
     public static <U> ExpectingWhere delete(Database database, Table<U> table) {
-        return delete(database, Alias.of(table));
+        return delete(database, TableAlias.of(table));
     }
 
     public static <U> ExpectingWhere delete(Database database, Alias<U> alias) {
-        return new Delete<>(database, alias).start();
+        TableAlias<U> tableAlias = OptionalUtil.as(new TypeToken<TableAlias<U>>() {}, alias)
+            .orElseThrow(() -> new IllegalArgumentException("Can only use table aliases in DELETE."));
+        return new Delete<>(database, tableAlias).start();
     }
 }

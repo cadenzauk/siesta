@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
@@ -32,7 +32,6 @@ import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -56,8 +55,8 @@ public class CastExpression<F, T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return rs -> to.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return label -> rs -> to.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

@@ -22,14 +22,13 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class LiteralExpression<T> implements TypedExpression<T> {
@@ -62,8 +61,8 @@ public class LiteralExpression<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return rs -> scope.database().getDataTypeOf(value).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return label -> rs -> scope.database().getDataTypeOf(value).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @SuppressWarnings("unchecked")

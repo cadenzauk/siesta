@@ -22,17 +22,19 @@
 
 package com.cadenzauk.siesta.projection;
 
+import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.catalog.Column;
+import com.google.common.collect.ImmutableList;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
-
-public class AliasColumns<R> implements Projection {
+public class AliasColumns<R> implements Projection<R> {
     private final boolean distinct;
     private final Alias<R> alias;
 
@@ -43,11 +45,7 @@ public class AliasColumns<R> implements Projection {
 
     @Override
     public String sql(Scope outer) {
-        return (distinct ? "distinct " : "") + alias
-            .table()
-            .columns()
-            .map(c -> c.sqlWithLabel(alias, Optional.empty()))
-            .collect(joining(", "));
+        return (distinct ? "distinct " : "") + alias.inSelectClauseSql(outer);
     }
 
     @Override
@@ -56,17 +54,32 @@ public class AliasColumns<R> implements Projection {
     }
 
     @Override
-    public String labelList(Scope scope) {
-        return alias
-            .table()
-            .columns()
-            .map(Column::columnName)
-            .map(alias::inSelectClauseLabel)
-            .collect(joining(", "));
+    public Stream<ProjectionColumn<?>> columns(Scope scope) {
+        return alias.projectionColumns(scope);
     }
 
     @Override
-    public Projection distinct() {
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod) {
+        return alias.findColumn(getterMethod);
+    }
+
+    @Override
+    public RowMapperFactory<R> rowMapperFactory(Scope scope) {
+        return alias.rowMapperFactory();
+    }
+
+    @Override
+    public Projection<R> distinct() {
         return new AliasColumns<>(true, alias);
+    }
+
+    @Override
+    public List<Projection<?>> components() {
+        return ImmutableList.of(this);
+    }
+
+    @Override
+    public boolean includes(MethodInfo<?,?> getter) {
+        return getter.referringClass().isAssignableFrom(alias.type().getRawType());
     }
 }

@@ -22,24 +22,33 @@
 
 package com.cadenzauk.siesta.projection;
 
+import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class DynamicProjection implements Projection {
+public class DynamicProjection<R> implements Projection<R> {
     private final boolean distinct;
+    private final TableAlias<R> alias;
     private final List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
 
-    public DynamicProjection(boolean distinct) {
+    public DynamicProjection(boolean distinct, TableAlias<R> alias) {
         this.distinct = distinct;
+        this.alias = alias;
     }
 
     @Override
@@ -55,17 +64,40 @@ public class DynamicProjection implements Projection {
     }
 
     @Override
-    public String labelList(Scope scope) {
-        return columns.stream()
-            .map(p -> p.map((s, t) -> t.label(scope)))
-            .collect(joining(", "));
+    public Stream<ProjectionColumn<?>> columns(Scope scope) {
+        return columns.stream().map(p -> p.map((s, t) -> new ProjectionColumn<>(s.sql(scope), t.label(scope), t.rowMapperFactory(scope))));
     }
 
     @Override
-    public Projection distinct() {
-        DynamicProjection projection = new DynamicProjection(true);
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod) {
+        return Optional.empty();
+    }
+
+    @Override
+    public RowMapperFactory<R> rowMapperFactory(Scope scope) {
+        DynamicRowMapperFactory<R> rowMapperFactory = alias.dynamicRowMapperFactory();
+        columns
+            .stream()
+            .map(p -> p.map((s, t) -> t.label(scope)))
+            .forEach(rowMapperFactory::add);
+        return rowMapperFactory;
+    }
+
+    @Override
+    public Projection<R> distinct() {
+        DynamicProjection<R> projection = new DynamicProjection<>(true, alias);
         projection.columns.addAll(columns);
         return projection;
+    }
+
+    @Override
+    public List<Projection<?>> components() {
+        return ImmutableList.of(this);
+    }
+
+    @Override
+    public boolean includes(MethodInfo<?,?> getter) {
+        return false;
     }
 
     public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {

@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
@@ -71,8 +71,8 @@ public class CountFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return rs -> scope.database().getDataTypeOf(type).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return label -> rs -> scope.database().getDataTypeOf(type).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

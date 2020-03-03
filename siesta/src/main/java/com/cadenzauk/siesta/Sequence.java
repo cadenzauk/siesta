@@ -22,11 +22,9 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.grammar.expression.SequenceExpression;
 import com.google.common.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Sequence<T> {
     private final Database database;
@@ -55,8 +53,8 @@ public class Sequence<T> {
         return TypeToken.of(dataType.javaClass());
     }
 
-    public RowMapper<T> rowMapper(String label) {
-        return rs -> dataType.get(rs, label, database).orElse(null);
+    public RowMapperFactory<T> rowMapperFactory(String defaultLabel) {
+        return label -> rs -> dataType.get(rs, label.orElse(defaultLabel), database).orElse(null);
     }
 
     public String name() {

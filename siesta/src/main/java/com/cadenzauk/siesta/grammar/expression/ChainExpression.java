@@ -23,33 +23,34 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
-    private final ColumnExpression<P,R> lhs;
+public class ChainExpression<P, T> implements ColumnExpression<T> {
+    private final ColumnExpression<P> lhs;
     private final MethodInfo<P,T> field;
 
-    public ChainExpression(ColumnExpression<P,R> lhs, MethodInfo<P,T> field) {
+    public ChainExpression(ColumnExpression<P> lhs, MethodInfo<P,T> field) {
         this.lhs = lhs;
         this.field = field;
     }
 
     @Override
     public String label(Scope scope) {
-        Alias<R> alias = resolve(scope);
+        Alias<?> alias = resolve(scope);
         return alias.inSelectClauseLabel(column(scope).columnName());
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return rs -> scope.database().getDataTypeOf(field).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return label -> rs -> scope.database().getDataTypeOf(field).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override
@@ -59,13 +60,13 @@ public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
-        Alias<R> alias = resolve(scope);
+        Alias<?> alias = resolve(scope);
         return String.format("%s as %s", alias.inSelectClauseSql(columnName(scope)), label.orElseGet(() -> label(scope)));
     }
 
     @Override
     public String sql(Scope scope) {
-        Alias<R> alias = resolve(scope);
+        Alias<?> alias = resolve(scope);
         return alias.inSelectClauseSql(columnName(scope));
     }
 
@@ -91,7 +92,7 @@ public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
     }
 
     @Override
-    public Alias<R> resolve(Scope scope) {
+    public Alias<?> resolve(Scope scope) {
         return lhs.resolve(scope);
     }
 
@@ -99,5 +100,10 @@ public class ChainExpression<P, T, R> implements ColumnExpression<T,R> {
     public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
         Column<T,P> parent = column(scope);
         return parent.findColumn(type, propertyName);
+    }
+
+    @Override
+    public <R, X> boolean includes(MethodInfo<R,X> getter) {
+        return Objects.equals(field.method(), getter.method());
     }
 }

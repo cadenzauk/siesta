@@ -1318,7 +1318,7 @@ class SelectTest {
         Database database = database();
         Select<Long> sut = database.from(SalespersonRow.class, "p").select(SalespersonRow::salespersonId);
 
-        RowMapper<Long> result = sut.rowMapper(new Scope(database), Optional.of("FOO"));
+        RowMapper<Long> result = sut.rowMapperFactory(new Scope(database), Optional.of("FOO")).rowMapper(Optional.empty());
 
         assertThat(result, isLongMapperFor("FOO"));
     }
@@ -1328,7 +1328,7 @@ class SelectTest {
         Database database = database();
         Select<Long> sut = database.from(SalespersonRow.class, "p").select(SalespersonRow::salespersonId);
 
-        RowMapper<Long> result = sut.rowMapper(new Scope(database), Optional.empty());
+        RowMapper<Long> result = sut.rowMapperFactory(new Scope(database), Optional.empty()).rowMapper(Optional.empty());
 
         assertThat(result, isLongMapperFor("select_1"));
     }

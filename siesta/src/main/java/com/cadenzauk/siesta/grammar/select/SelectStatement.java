@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.util.IterableUtil;
@@ -62,8 +63,7 @@ class SelectStatement<RT> {
     private final List<CommonTableExpression<?>> commonTableExpressions = new ArrayList<>();
     private final TypeToken<RT> rowType;
     private final From from;
-    private final RowMapper<RT> rowMapper;
-    private final Projection projection;
+    private final Projection<RT> projection;
     private final BooleanExpressionChain whereClause = new BooleanExpressionChain();
     private final List<TypedExpression<?>> groupByClauses = new ArrayList<>();
     private final BooleanExpressionChain havingClause = new BooleanExpressionChain();
@@ -73,11 +73,10 @@ class SelectStatement<RT> {
     private IsolationLevel isolationLevel = IsolationLevel.UNSPECIFIED;
     private Optional<LockLevel> keepLocks = Optional.empty();
 
-    SelectStatement(Scope scope, TypeToken<RT> rowType, From from, RowMapper<RT> rowMapper, Projection projection) {
+    SelectStatement(Scope scope, TypeToken<RT> rowType, From from, Projection<RT> projection) {
         this.scope = scope;
         this.rowType = rowType;
         this.from = from;
-        this.rowMapper = rowMapper;
         this.projection = projection;
     }
 
@@ -120,7 +119,7 @@ class SelectStatement<RT> {
         ).flatMap(Function.identity());
     }
 
-    Projection projection() {
+    Projection<RT> projection() {
         return projection;
     }
 
@@ -235,7 +234,11 @@ class SelectStatement<RT> {
     }
 
     RowMapper<RT> rowMapper() {
-        return rowMapper;
+        return projection.rowMapperFactory(scope).rowMapper(Optional.empty());
+    }
+
+    RowMapperFactory<RT> rowMapperFactory() {
+        return projection.rowMapperFactory(scope);
     }
 
     <T> void addGroupBy(TypedExpression<T> expression) {

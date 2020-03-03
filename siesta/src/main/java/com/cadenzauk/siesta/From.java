@@ -58,13 +58,13 @@ public abstract class From {
         @Override
         public String sql(Scope scope) {
             return scope.dialect().requiresFromDual() || !alias.isDual()
-                ? " from " + alias.inWhereClause()
+                ? " from " + alias.inFromClauseSql()
                 : "";
         }
 
         @Override
         public Stream<Object> args(Scope scope) {
-            return Stream.empty();
+            return alias.args(scope);
         }
 
         @Override
@@ -112,7 +112,7 @@ public abstract class From {
             String sql = String.format("%s %s %s on %s",
                 lhs.sql(scope),
                 join.sql(),
-                next.inWhereClause(),
+                next.inFromClauseSql(),
                 onClause.sql(scope.tracker(next, used)));
             if (validate && !used.get()) {
                 throw new InvalidJoinException(next);

@@ -23,7 +23,7 @@
 package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.reflect.util.TypeUtil;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static com.cadenzauk.core.util.OptionalUtil.or;
 
 public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     private final String propertyName;
@@ -167,8 +169,8 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label) {
-        return rs -> dataType.get(rs, label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.table().database()).orElse(null);
+    public RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
+        return label -> rs -> dataType.get(rs, or(label, defaultLabel).orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.database()).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,7 +185,7 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
 
     @Override
     public ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, Optional<String> label) {
-        Optional<T> value = dataType.get(rs, label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.table().database());
+        Optional<T> value = dataType.get(rs, label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.database());
         return new ResultSetValue<B>() {
             @Override
             public boolean isPresent() {

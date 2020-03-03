@@ -45,6 +45,7 @@ import com.cadenzauk.siesta.grammar.select.CommonTableExpressionBuilder;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
+import com.cadenzauk.siesta.grammar.select.SubselectAlias;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeAdapter;
@@ -308,6 +309,10 @@ public class Database {
 
     public <R> ExpectingJoin1<R> from(Class<R> rowClass, String alias) {
         return Select.from(this, table(rowClass).as(alias));
+    }
+
+    public <R> ExpectingJoin1<R> from(Select<R> select, String alias) {
+        return Select.from(this, new SubselectAlias<>(select, alias));
     }
 
     @SuppressWarnings("unchecked")

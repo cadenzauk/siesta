@@ -25,31 +25,31 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
+public class ResolvedColumn<T,R> implements ColumnExpression<T> {
     private final Alias<R> alias;
-    private final Column<T,R> column;
+    private final MethodInfo<R,T> getterMethod;
     private final TypeToken<T> type;
 
-    @SuppressWarnings("unchecked")
-    private ResolvedColumn(Alias<R> alias, MethodInfo<R,T> method) {
+    private ResolvedColumn(Alias<R> alias, MethodInfo<R,T> getterMethod) {
         this.alias = alias;
-        this.column = alias.column(method);
-        this.type = TypeToken.of(method.effectiveClass());
+        this.getterMethod = getterMethod;
+        this.type = TypeToken.of(getterMethod.effectiveClass());
     }
 
     @Override
     public String sql(Scope scope) {
         scope.findAlias(alias.type().getRawType(), alias.aliasName().orElse(""));
-        return alias.inSelectClauseSql(column.columnName());
+        return alias.columnSql(getterMethod);
     }
 
     @Override
@@ -64,12 +64,18 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
 
     @Override
     public String label(Scope scope) {
-        return alias.inSelectClauseLabel(column.columnName());
+        String columnName = scope.database().columnNameFor(getterMethod);
+        return alias.inSelectClauseLabel(columnName);
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return column.rowMapper(alias, label);
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return alias.rowMapperFactoryFor(getterMethod, Optional.empty());
+    }
+
+    @Override
+    public RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
+        return alias.rowMapperFactoryFor(getterMethod, defaultLabel);
     }
 
     @Override
@@ -79,22 +85,28 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T,R> {
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
-        return column.sqlWithLabel(alias, label);
+        return alias.columnSqlWithLabel(getterMethod, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        return column.columnName();
+        return scope.database().columnNameFor(getterMethod);
     }
 
     @Override
-    public Alias<R> resolve(Scope scope) {
+    public Alias<?> resolve(Scope scope) {
         return alias;
     }
 
     @Override
     public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        Column<T,R> column = scope.database().column(getterMethod);
         return column.findColumn(type, propertyName);
+    }
+
+    @Override
+    public <R2, X> boolean includes(MethodInfo<R2,X> getter) {
+        return Objects.equals(getterMethod.method(), getter.method());
     }
 
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, Function1<R,T> getterReference) {

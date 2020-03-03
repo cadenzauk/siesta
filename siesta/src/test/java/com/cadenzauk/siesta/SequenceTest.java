@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -100,7 +101,7 @@ class SequenceTest {
         when(resultSet.getInt("bob")).thenReturn(1034);
         Sequence<Integer> sut = createSut();
 
-        RowMapper<Integer> result = sut.rowMapper("bob");
+        RowMapper<Integer> result = sut.rowMapperFactory("bob").rowMapper(Optional.empty());
 
         assertThat(result, notNullValue());
         assertThat(result.mapRow(resultSet), is(1034));

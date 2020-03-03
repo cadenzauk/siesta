@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2019 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +20,10 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.core.sql;
 
-import com.cadenzauk.core.sql.RowMapper;
+import java.util.Optional;
 
-public interface DynamicRowMapper<R> extends RowMapper<R> {
-    void add(String label);
+public interface RowMapperFactory<T> {
+    RowMapper<T> rowMapper(Optional<String> label);
 }

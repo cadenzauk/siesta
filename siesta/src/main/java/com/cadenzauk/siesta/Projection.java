@@ -22,40 +22,46 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.projection.AliasColumns;
 import com.cadenzauk.siesta.projection.ExpressionProjection;
-import com.cadenzauk.siesta.projection.ProjectionList;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface Projection {
+public interface Projection<R> {
     String sql(Scope scope);
 
     Stream<Object> args(Scope scope);
 
-    String labelList(Scope scope);
+    Stream<ProjectionColumn<?>> columns(Scope scope);
 
-    Projection distinct();
+    <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod);
 
-    static <T> Projection of(boolean distinct, TypedExpression<T> column, Optional<String> label) {
+    RowMapperFactory<R> rowMapperFactory(Scope scope);
+
+    Projection<R> distinct();
+
+    List<Projection<?>> components();
+
+    boolean includes(MethodInfo<?,?> getter);
+
+    static <T> Projection<T> of(boolean distinct, TypedExpression<T> column, Optional<String> label) {
         return new ExpressionProjection<>(distinct, column, label);
     }
 
-    static <T> Projection of(TypedExpression<T> column, Optional<String> label) {
+    static <T> Projection<T> of(TypedExpression<T> column, Optional<String> label) {
         return new ExpressionProjection<>(false, column, label);
     }
 
-    static <R1> Projection of(boolean distinct, Alias<R1> alias) {
+    static <R1> Projection<R1> of(boolean distinct, Alias<R1> alias) {
         return new AliasColumns<>(distinct, alias);
     }
 
-    static <R1> Projection of(Alias<R1> alias) {
+    static <R1> Projection<R1> of(Alias<R1> alias) {
         return new AliasColumns<>(false, alias);
-    }
-
-    static Projection of(Projection... p) {
-        return new ProjectionList(false, p);
     }
 }

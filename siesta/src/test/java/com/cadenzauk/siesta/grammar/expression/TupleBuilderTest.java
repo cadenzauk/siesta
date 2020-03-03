@@ -118,14 +118,14 @@ class TupleBuilderTest {
     }
 
     @ParameterizedTest(name = "{index}: {0}")
-    @MethodSource("argsForRowMapper")
+    @MethodSource("argsForRowMapperFactory")
     @MockitoSettings(strictness = Strictness.LENIENT)
-    <T extends TupleBuilder & TypedExpression<?>> void rowMapper(T sut, Object expectedRow) throws SQLException {
+    <T extends TupleBuilder & TypedExpression<?>> void rowMapperFactory(T sut, Object expectedRow) throws SQLException {
         when(rs.getString("a_FIRST_NAME")).thenReturn("Fred");
         when(rs.getBigDecimal("a_COMMISSION")).thenReturn(new BigDecimal("1234"));
         when(rs.getLong("a_SALESPERSON_ID")).thenReturn(5678L);
 
-        RowMapper<?> result = sut.rowMapper(new Scope(database, alias()), Optional.empty());
+        RowMapper<?> result = sut.rowMapperFactory(new Scope(database, alias()), Optional.empty()).rowMapper(Optional.empty());
         Object row = result.mapRow(rs);
 
         assertThat(row, is(expectedRow));
@@ -269,7 +269,7 @@ class TupleBuilderTest {
         );
     }
 
-    private static Stream<Arguments> argsForRowMapper() {
+    private static Stream<Arguments> argsForRowMapperFactory() {
         return Stream.of(
             arguments(aTuple1(), "Fred"),
             arguments(aTuple2(), Tuple.of("Fred", new BigDecimal("1234"))),

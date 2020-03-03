@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.arrayWithSize;
@@ -66,6 +67,7 @@ class Select1Test {
     private static Stream<Arguments> parametersForJoin() {
         return Stream.of(
             testCaseForJoin((c, s) -> s.join(c).on(Parent::id).isEqualTo(Child::parentId), "join SIESTA.CHILD c on p.ID = c.PARENT_ID"),
+            testCaseForJoin((c, s) -> s.join(Child.class, "c").on(column(Parent::id)).isEqualTo(Child::parentId), "join SIESTA.CHILD c on p.ID = c.PARENT_ID"),
             testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Parent::id).isEqualTo(Child::parentId), "join SIESTA.CHILD c on p.ID = c.PARENT_ID"),
             testCaseForJoin((c, s) -> s.join(Child.class, "c").on(Child::aliasId).isEqualTo(Parent::id), "join SIESTA.CHILD c on c.ALIAS_ID = p.ID"),
             testCaseForJoin((c, s) -> s.join(Child.class, "c").on(c, Child::parentId).isEqualTo(Parent::id), "join SIESTA.CHILD c on c.PARENT_ID = p.ID"),
@@ -84,6 +86,15 @@ class Select1Test {
         );
     }
 
+    private static Stream<Arguments> parametersForJoinToSubselect() {
+        return Stream.of(
+            testCaseForJoin((c, s) -> s.join(c.database().from(Child.class), "c").on(Child::aliasId).isEqualTo(Parent::id), "join (select CHILD.PARENT_ID as CHILD_PARENT_ID, CHILD.ALIAS_ID as CHILD_ALIAS_ID from SIESTA.CHILD CHILD) c on c.CHILD_ALIAS_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.leftJoin(c.database().from(Child.class), "c").on(Child::aliasId).isEqualTo(Parent::id), "left join (select CHILD.PARENT_ID as CHILD_PARENT_ID, CHILD.ALIAS_ID as CHILD_ALIAS_ID from SIESTA.CHILD CHILD) c on c.CHILD_ALIAS_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.rightJoin(c.database().from(Child.class), "c").on(Child::aliasId).isEqualTo(Parent::id), "right join (select CHILD.PARENT_ID as CHILD_PARENT_ID, CHILD.ALIAS_ID as CHILD_ALIAS_ID from SIESTA.CHILD CHILD) c on c.CHILD_ALIAS_ID = p.ID"),
+            testCaseForJoin((c, s) -> s.fullOuterJoin(c.database().from(Child.class), "c").on(Child::aliasId).isEqualTo(Parent::id), "full outer join (select CHILD.PARENT_ID as CHILD_PARENT_ID, CHILD.ALIAS_ID as CHILD_ALIAS_ID from SIESTA.CHILD CHILD) c on c.CHILD_ALIAS_ID = p.ID")
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("parametersForJoin")
     void join(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
@@ -97,6 +108,22 @@ class Select1Test {
 
         verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
         assertThat(sql.getValue(), is("select p.ID as p_ID, c.PARENT_ID as c_PARENT_ID, c.ALIAS_ID as c_ALIAS_ID from SIESTA.PARENT p " + expected));
+        assertThat(args.getValue(), arrayWithSize(0));
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForJoinToSubselect")
+    void joinToSubselect(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
+        MockitoAnnotations.initMocks(this);
+
+        Database database = Database.newBuilder().defaultSchema("SIESTA").build();
+        Alias<Parent> p = database.table(Parent.class).as("p");
+        Alias<Child> c = database.table(Child.class).as("c");
+
+        join.apply(c, database.from(p)).optional(transaction);
+
+        verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
+        assertThat(sql.getValue(), is("select p.ID as p_ID, c.CHILD_PARENT_ID c_CHILD_PARENT_ID, c.CHILD_ALIAS_ID c_CHILD_ALIAS_ID from SIESTA.PARENT p " + expected));
         assertThat(args.getValue(), arrayWithSize(0));
     }
 

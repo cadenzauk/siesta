@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
@@ -42,7 +42,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -69,7 +68,7 @@ class ExpressionBuilderTest {
     private Scope scope;
 
     @Mock
-    private RowMapper<String> rowMapper;
+    private RowMapperFactory<String> rowMapperFactory;
 
     @Mock
     private Transaction transaction;
@@ -130,13 +129,13 @@ class ExpressionBuilderTest {
 
     @Test
     void rowMapper() {
-        when(expression1.rowMapper(scope, Optional.of("label"))).thenReturn(rowMapper);
+        when(expression1.rowMapperFactory(scope)).thenReturn(rowMapperFactory);
         ExpressionBuilder<String,BooleanExpression> sut = ExpressionBuilder.of(expression1, e -> e);
 
-        RowMapper<String> result = sut.rowMapper(scope, Optional.of("label"));
+        RowMapperFactory<String> result = sut.rowMapperFactory(scope);
 
-        assertThat(result, sameInstance(rowMapper));
-        verify(expression1).rowMapper(scope, Optional.of("label"));
+        assertThat(result, sameInstance(rowMapperFactory));
+        verify(expression1).rowMapperFactory(scope);
         verifyNoMoreInteractions(expression1, scope);
     }
 

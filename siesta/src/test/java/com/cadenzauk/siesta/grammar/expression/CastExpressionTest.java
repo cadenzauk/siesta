@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
@@ -119,7 +119,7 @@ class CastExpressionTest {
     }
 
     @Test
-    void rowMapper() throws SQLException {
+    void rowMapperFactory() throws SQLException {
         when(resultSet.getInt("bob")).thenReturn(44);
         when(resultSet.wasNull()).thenReturn(false);
         when(scope.database()).thenReturn(database);
@@ -128,9 +128,9 @@ class CastExpressionTest {
         CastBuilder<String> builder = new CastBuilder<>(expression);
         TypedExpression<Integer> sut = builder.asInteger();
 
-        RowMapper<Integer> result = sut.rowMapper(scope, Optional.of("bob"));
+        RowMapperFactory<Integer> result = sut.rowMapperFactory(scope, Optional.of("bob"));
 
-        assertThat(result.mapRow(resultSet), is(44));
+        assertThat(result.rowMapper(Optional.empty()).mapRow(resultSet), is(44));
         verifyNoMoreInteractions(expression, scope, dialect, database, resultSet);
     }
 

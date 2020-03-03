@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
@@ -58,7 +59,7 @@ class ExpectingSelectTest {
     @Captor
     private ArgumentCaptor<RowMapper<?>> rowMapper;
 
-    private static Arguments selectTestCase(BiFunction<ExpectingSelect<SalespersonRow>,Alias<SalespersonRow>,Select<?>> method, String expectedSql) {
+    private static Arguments selectTestCase(BiFunction<ExpectingSelect<SalespersonRow>,TableAlias<SalespersonRow>,Select<?>> method, String expectedSql) {
         return arguments(method, expectedSql);
     }
 
@@ -87,6 +88,7 @@ class ExpectingSelectTest {
             selectTestCase((s, a) -> s.selectDistinct(), "distinct s.SALESPERSON_ID as s_SALESPERSON_ID, s.FIRST_NAME as s_FIRST_NAME, s.MIDDLE_NAMES as s_MIDDLE_NAMES, s.SURNAME as s_SURNAME, s.NUMBER_OF_SALES as s_NUMBER_OF_SALES, s.COMMISSION as s_COMMISSION"),
 
             selectTestCase((s, a) -> s.selectDistinct(upper(SalespersonRow::surname)), "distinct upper(s.SURNAME) as upper_s_SURNAME"),
+            selectTestCase((s, a) -> s.selectDistinct(upper(SalespersonRow::surname), "sname"), "distinct upper(s.SURNAME) as sname"),
 
             selectTestCase((s, a) -> s.selectDistinct(SalespersonRow::surname), "distinct s.SURNAME as s_SURNAME"),
             selectTestCase((s, a) -> s.selectDistinct(SalespersonRow::middleNames), "distinct s.MIDDLE_NAMES as s_MIDDLE_NAMES"),

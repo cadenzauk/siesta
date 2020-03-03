@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,11 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class TupleBuilder1<T1> extends TupleBuilder implements TypedExpression<T1> {
@@ -40,8 +39,8 @@ public class TupleBuilder1<T1> extends TupleBuilder implements TypedExpression<T
     }
 
     @Override
-    public RowMapper<T1> rowMapper(Scope scope, Optional<String> label) {
-        return item1.rowMapper(scope, label);
+    public RowMapperFactory<T1> rowMapperFactory(Scope scope) {
+        return item1.rowMapperFactory(scope);
     }
 
     @Override

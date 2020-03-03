@@ -143,6 +143,7 @@ public class TestSchema {
                 .column("SALESPERSON_ID", bigint(),
                     foreignKey("FK_SALES_AREA_SALESPERSON").references("SALESPERSON").column("SALESPERSON_ID"))
                 .column("SALES_COUNT", smallint())
+                .column("INSERT_TIME", timestamp())
             )
             .createTable(t -> t
                 .id("create a table with no primary key")

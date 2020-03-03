@@ -25,17 +25,17 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.DynamicRowMapper;
+import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.projection.DynamicProjection;
 
 public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
-    private final DynamicRowMapper<RT> rowMapper;
-    private final DynamicProjection projection;
+    private final DynamicRowMapperFactory<RT> rowMapper;
+    private final DynamicProjection<RT> projection;
 
-    public InSelectIntoExpectingWith(SelectStatement<RT> statement, DynamicRowMapper<RT> rowMapper, DynamicProjection projection) {
+    public InSelectIntoExpectingWith(SelectStatement<RT> statement, DynamicRowMapperFactory<RT> rowMapper, DynamicProjection<RT> projection) {
         super(statement);
         this.rowMapper = rowMapper;
         this.projection = projection;

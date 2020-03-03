@@ -1355,4 +1355,46 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(resultDistinct, hasSize(2));
         assertThat(resultOrdinary, hasSize(3));
     }
+
+    @Test
+    void canJoinToSubselect() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+        SalesAreaRow salesAreaRow = SalesAreaRow.newBuilder()
+            .salesAreaId(newId())
+            .salesAreaName(RandomStringUtils.randomAlphabetic(10))
+            .salespersonId(Optional.of(salespersonRow1.salespersonId()))
+            .build();
+        database.insert(salesAreaRow);
+
+        List<Tuple2<String,Long>> result = database.from(SalespersonRow.class, "s")
+            .leftJoin(database.from(SalesAreaRow.class, "sa"), "sa2")
+            .on("sa2", SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
+            .select("sa2", SalesAreaRow::salesAreaName, "area_name")
+            .comma("sa2", SalesAreaRow::salesAreaId)
+            .where(SalespersonRow::salespersonId).isIn(salespersonRow1.salespersonId(), salespersonRow2.salespersonId())
+            .orderBy(SalespersonRow::salespersonId)
+            .list();
+
+        assertThat(result.get(0), is(Tuple.of(salesAreaRow.salesAreaName(), salesAreaRow.salesAreaId())));
+        assertThat(result.get(1), is(Tuple.of(null, null)));
+    }
+
+    @Test
+    void canSelectFromSubselect() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+
+        SalespersonRow result = database.from(
+           database.from(SalespersonRow.class, "i")
+            .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId()),
+            "o")
+            .single();
+
+        assertThat(result, is(salespersonRow2));
+    }
 }

@@ -23,19 +23,31 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.cadenzauk.core.sql.QualifiedName;
 import com.google.common.reflect.TypeToken;
+import com.google.common.testing.EqualsTester;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 class MethodInfoTest {
+    @Test
+    void equalsAndHashCode() {
+        new EqualsTester()
+            .addEqualityGroup(MethodInfo.of(String::trim), MethodInfo.of(String::trim))
+            .addEqualityGroup(MethodInfo.of(String::length), MethodInfo.of(String::length))
+            .addEqualityGroup(MethodInfo.of(ZonedDateTime::toLocalDate), MethodInfo.of(ZonedDateTime::toLocalDate))
+            .addEqualityGroup(MethodInfo.of(QualifiedName::catalog), MethodInfo.of(QualifiedName::catalog))
+            .testEquals();
+    }
+
     @Test
     void annotationPresent() {
         MethodInfo<MethodInfoTestClass,String> methodInfo = MethodInfo.of(MethodInfoTestClass::methodWithAnnotation);
@@ -212,6 +224,61 @@ class MethodInfoTest {
 
         assertThat(result, is(Optional.empty()));
     }
+
+    @Test
+    void asReferringForReferringClassReturnsValue() {
+        MethodInfo<?,?> sut = MethodInfo.of(MethodInfoTestClass::isFieldlessPrefixedWithIs);
+
+        Optional<? extends MethodInfo<MethodInfoTestClass,?>> result = sut.asReferring(TypeToken.of(MethodInfoTestClass.class));
+
+        assertThat(result, is(Optional.of(sut)));
+    }
+
+    @Test
+    void asReferringForReferringClassOnMethodInfoForSuperclassMethodReturnsValue() {
+        MethodInfo<?,String> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        Optional<MethodInfo<MethodInfoTestClass,String>> result = sut.asReferring(TypeToken.of(MethodInfoTestClass.class));
+
+        assertThat(result, is(Optional.of(sut)));
+    }
+
+    @Test
+    void asReferringForSuperClassOfReferringClassReturnsEmpty() {
+        MethodInfo<?,String> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        Optional<MethodInfo<MethodInfoSuperClass,String>> result = sut.asReferring(TypeToken.of(MethodInfoSuperClass.class));
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void asReferringForUnrelatedClassReturnsEmpty() {
+        MethodInfo<?,String> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        Optional<MethodInfo<String,String>> result = sut.asReferring(new TypeToken<String>() {});
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void asEffectiveForCorrectEffectiveTypeReturnsValue() {
+        MethodInfo<MethodInfoTestClass,?> sut = MethodInfo.of(MethodInfoTestClass::optionalName);
+
+        Optional<MethodInfo<MethodInfoTestClass,String>> result = sut.asEffective(new TypeToken<String>() {});
+
+        assertThat(result, is(Optional.of(sut)));
+    }
+
+    @Test
+    void asEffectiveForIncorrectEffectiveTypeReturnsEmpty() {
+        MethodInfo<MethodInfoTestClass,?> sut = MethodInfo.of(MethodInfoTestClass::optionalInteger);
+
+        Optional<MethodInfo<MethodInfoTestClass,String>> result = sut.asEffective(new TypeToken<String>() {});
+
+        assertThat(result, is(Optional.empty()));
+    }
+
 
     @Test
     void propertyNameForGetterWithNoPrefixReturnsFieldName() {

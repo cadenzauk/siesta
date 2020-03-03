@@ -25,79 +25,51 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.RowMapper;
-import com.cadenzauk.siesta.catalog.Column;
-import com.cadenzauk.siesta.catalog.Table;
+import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class Alias<R> {
-    private final Table<R> table;
-    private final Optional<String> aliasName;
+public abstract class Alias<R> {
+    public abstract TypeToken<R> type();
 
-    protected Alias(Table<R> table, Optional<String> aliasName) {
-        this.table = table;
-        this.aliasName = aliasName;
-    }
+    public abstract Database database();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
+    public abstract <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> method);
 
-        if (o == null || getClass() != o.getClass()) return false;
+    public abstract <P> Optional<ForeignKeyReference<R, P>> foreignKey(Alias<P> parent, Optional<String> name);
 
-        Alias<?> alias = (Alias<?>) o;
+    public abstract Stream<ProjectionColumn<?>> projectionColumns(Scope scope);
 
-        return new EqualsBuilder()
-            .append(table.qualifiedName(), alias.table.qualifiedName())
-            .append(aliasName, alias.aliasName)
-            .isEquals();
-    }
+    public abstract Stream<Object> args(Scope scope);
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-            .append(table.qualifiedName())
-            .append(aliasName)
-            .toHashCode();
-    }
+    protected abstract boolean isDual();
 
-    public TypeToken<R> type() {
-        return table.rowType();
-    }
+    public abstract String withoutAlias();
 
-    boolean isDual() {
-        return table.rowType().getRawType() == Dual.class;
-    }
+    public abstract String inFromClauseSql();
 
-    public String inWhereClause() {
-        if (isDual()) {
-            return table.database().dialect().dual();
-        }
-        return aliasName
-            .map(a -> String.format("%s %s", table.qualifiedName(), a))
-            .orElseGet(table::qualifiedName);
-    }
+    public abstract <T> String columnSql(MethodInfo<?, T> getterMethod);
 
-    public String inSelectClauseSql(String columnName) {
-        return String.format("%s.%s", aliasName.orElseGet(table::qualifiedName), columnName);
-    }
+    public abstract  <T> String columnSqlWithLabel(MethodInfo<?,T> getterMethod, Optional<String> label);
+
+    public abstract String inSelectClauseSql(Scope scope);
+
+    public abstract String inSelectClauseSql(String columnName);
+
+    public abstract String inSelectClauseSql(String columnName, Optional<String> label);
 
     public String inSelectClauseLabel(String columnName) {
         return String.format("%s_%s", columnLabelPrefix(), columnName);
     }
 
-    protected String columnLabelPrefix() {
-        return aliasName.orElseGet(table::tableName);
-    }
+    protected abstract String columnLabelPrefix();
 
     public <T> ExpressionBuilder<T,BooleanExpression> column(Function1<R,T> getter) {
         return TypedExpression.column(this, getter);
@@ -107,50 +79,30 @@ public class Alias<R> {
         return TypedExpression.column(this, getter);
     }
 
-    public Table<R> table() {
-        return table;
-    }
+    public abstract Optional<String> aliasName();
 
-    public Optional<String> aliasName() {
-        return aliasName;
-    }
+    public abstract RowMapperFactory<R> rowMapperFactory();
 
-    public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
-        return table().column(methodInfo);
-    }
+    public abstract <T> RowMapperFactory<T> rowMapperFactoryFor(MethodInfo<?,T> getterMethod, Optional<String> defaultLabel);
 
-    public RowMapper<R> rowMapper() {
-        return table.rowMapper(this);
-    }
-
-    public DynamicRowMapper<R> dynamicRowMapper() {
-        return table.dynamicRowMapper(this);
-    }
+    public abstract Stream<Alias<?>> as(MethodInfo<?,?> getter, Optional<String> requiredAlias);
 
     @SuppressWarnings("unchecked")
-    <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {
-        if (Objects.equals(Optional.of(requiredAlias), aliasName)) {
-            if (requiredRowClass.isAssignableFrom(table.rowType().getRawType())) {
+    protected <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {
+        if (Objects.equals(Optional.of(requiredAlias), aliasName())) {
+            if (requiredRowClass.isAssignableFrom(type().getRawType())) {
                 return Stream.of((Alias<R2>) this);
             }
-            throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + table().rowType() + " and not " + requiredRowClass);
+            throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + requiredRowClass);
         }
         return Stream.empty();
     }
 
     @SuppressWarnings("unchecked")
-    <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass) {
-        if (requiredRowClass.isAssignableFrom(table.rowType().getRawType())) {
+    protected <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass) {
+        if (requiredRowClass.isAssignableFrom(type().getRawType())) {
             return Stream.of((Alias<R2>) this);
         }
         return Stream.empty();
-    }
-
-    public static <U> Alias<U> of(Table<U> table) {
-        return new Alias<>(table, Optional.empty());
-    }
-
-    public static <U> Alias<U> of(Table<U> table, String aliasName) {
-        return new Alias<>(table, Optional.of(aliasName));
     }
 }

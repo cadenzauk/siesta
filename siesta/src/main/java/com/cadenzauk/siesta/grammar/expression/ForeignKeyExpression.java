@@ -70,8 +70,8 @@ public class ForeignKeyExpression<L, R> extends BooleanExpression {
     }
 
     private <C,P> ForeignKeyReference<C,P> foreignKey(Alias<C> child, Alias<P> parent) {
-        return child.table().foreignKey(parent.table(), name)
-            .orElseThrow(() -> new InvalidForeignKeyException(child.table(), parent.table(), name));
+        return child.foreignKey(parent, name)
+            .orElseThrow(() -> new InvalidForeignKeyException(child, parent, name));
     }
 
     @Override

@@ -70,7 +70,7 @@ public class SqlStateExceptionTranslator implements SqlExceptionTranslator {
 
         private ExceptionMapping(String sqlState, SqlExceptionConstructor constructor) {
             Predicate<String> sqlStateMatches = Pattern.compile("^" + sqlState + "$").asPredicate();
-            this.applies = e -> sqlStateMatches.test(e.getSQLState());
+            this.applies = e -> e.getSQLState() != null && sqlStateMatches.test(e.getSQLState());
             this.constructor = constructor;
             priority = 1;
         }

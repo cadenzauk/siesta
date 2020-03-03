@@ -26,10 +26,10 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 </#if>
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 <#if n != 1>
 import com.cadenzauk.core.tuple.Tuple${n};
-import com.cadenzauk.siesta.RowMappers;
+import com.cadenzauk.siesta.RowMapperFactories;
 </#if>
 <#if n != max>
 import com.cadenzauk.siesta.Alias;
@@ -40,7 +40,6 @@ import com.google.common.reflect.TypeParameter;
 </#if>
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 <#if n != 1>
 
@@ -71,13 +70,13 @@ public class TupleBuilder${n}<${typelist_space}> extends TupleBuilder implements
     }
 
     @Override
-    public RowMapper<${type}> rowMapper(Scope scope, Optional<String> label) {
+    public RowMapperFactory<${type}> rowMapperFactory(Scope scope) {
 <#if n = 1>
-        return item1.rowMapper(scope, label);
+        return item1.rowMapperFactory(scope);
 <#else>
-        return RowMappers.of(
+        return RowMapperFactories.of(
 <#list 1..n as i>
-            item${i}.rowMapper(scope, Optional.empty())<#if i < n>,</#if>
+            item${i}.rowMapperFactory(scope)<#if i < n>,</#if>
 </#list>
         );
 </#if>

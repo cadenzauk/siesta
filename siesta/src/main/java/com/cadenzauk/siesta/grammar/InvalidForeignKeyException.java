@@ -23,15 +23,15 @@
 package com.cadenzauk.siesta.grammar;
 
 import com.cadenzauk.core.sql.RuntimeSqlException;
-import com.cadenzauk.siesta.catalog.Table;
+import com.cadenzauk.siesta.Alias;
 
 import java.util.Optional;
 
 public class InvalidForeignKeyException extends RuntimeSqlException {
-    public InvalidForeignKeyException(Table<?> childTable, Table<?> parentTable, Optional<String> name) {
+    public InvalidForeignKeyException(Alias<?> childTable, Alias<?> parentTable, Optional<String> name) {
         super(name
-            .map(n -> String.format("No foreign key called %s defined from %s to %s.", n, childTable.qualifiedName(), parentTable.qualifiedName()))
-            .orElseGet(() -> String.format("No foreign keys defined from %s to %s.", childTable.qualifiedName(), parentTable.qualifiedName())));
+            .map(n -> String.format("No foreign key called %s defined from %s to %s.", n, childTable.withoutAlias(), parentTable.withoutAlias()))
+            .orElseGet(() -> String.format("No foreign keys defined from %s to %s.", childTable.withoutAlias(), parentTable.withoutAlias())));
     }
 
     public InvalidForeignKeyException(String message) {

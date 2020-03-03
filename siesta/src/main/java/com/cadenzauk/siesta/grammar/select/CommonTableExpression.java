@@ -22,8 +22,10 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.CteAlias;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
@@ -71,6 +73,10 @@ public class CommonTableExpression<RT> {
 
     public Table<RT> table() {
         return table;
+    }
+
+    public <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> method) {
+        return select.projection().findColumn(select.scope, method);
     }
 
     public Stream<CommonTableExpression<?>> commonTableExpressions() {

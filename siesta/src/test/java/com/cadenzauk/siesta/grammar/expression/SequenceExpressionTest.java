@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.Sequence;
 import com.google.common.reflect.TypeToken;
@@ -50,7 +51,7 @@ class SequenceExpressionTest {
     private Scope scope;
 
     @Mock
-    private RowMapper<Integer> rowMapper;
+    private RowMapperFactory<Integer> rowMapperFactory;
 
     @Test
     void label() {
@@ -69,12 +70,12 @@ class SequenceExpressionTest {
 
     @Test
     void rowMapper() {
-        when(intSequence.rowMapper("fred")).thenReturn(rowMapper);
+        when(intSequence.rowMapperFactory("sequence_0")).thenReturn(rowMapperFactory);
         SequenceExpression<Integer> sut = new SequenceExpression<>(intSequence);
 
-        RowMapper<Integer> result = sut.rowMapper(scope, Optional.of("fred"));
+        RowMapperFactory<Integer> result = sut.rowMapperFactory(scope);
 
-        assertThat(result, sameInstance(rowMapper));
+        assertThat(result, sameInstance(rowMapperFactory));
     }
 
     @Test

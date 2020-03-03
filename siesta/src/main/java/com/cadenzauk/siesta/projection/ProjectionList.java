@@ -22,44 +22,76 @@
 
 package com.cadenzauk.siesta.projection;
 
+import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.collect.ImmutableList;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class ProjectionList implements Projection {
+public class ProjectionList<R> implements Projection<R> {
     private final boolean distinct;
-    private final Projection[] p;
+    private final List<Projection<?>> components;
+    private final Function<Scope,RowMapperFactory<R>> rowMapperFactory;
 
-    public ProjectionList(boolean distinct, Projection[] p) {
+    public ProjectionList(boolean distinct, List<Projection<?>> components, Function<Scope,RowMapperFactory<R>> rowMapperFactory) {
         this.distinct = distinct;
-        this.p = p;
+        this.components = ImmutableList.copyOf(components);
+        this.rowMapperFactory = rowMapperFactory;
     }
 
     @Override
     public String sql(Scope scope) {
-        return (distinct ? "distinct " : "") + Arrays.stream(p)
+        return (distinct ? "distinct " : "") + components.stream()
             .map(x -> x.sql(scope))
             .collect(joining(", "));
     }
 
     @Override
     public Stream<Object> args(Scope scope) {
-        return Arrays.stream(p).flatMap(x -> x.args(scope));
+        return components.stream().flatMap(x -> x.args(scope));
     }
 
     @Override
-    public String labelList(Scope scope) {
-        return Arrays.stream(p)
-            .map(x -> x.labelList(scope))
-            .collect(joining(", "));
+    public Stream<ProjectionColumn<?>> columns(Scope scope) {
+        return components
+            .stream()
+            .flatMap(c -> c.columns(scope));
     }
 
     @Override
-    public Projection distinct() {
-        return new ProjectionList(true, p);
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod) {
+        return components
+            .stream()
+            .flatMap(x -> StreamUtil.of(x.findColumn(scope, getterMethod)))
+            .findFirst();
+    }
+
+    @Override
+    public RowMapperFactory<R> rowMapperFactory(Scope scope) {
+        return rowMapperFactory.apply(scope);
+    }
+
+    @Override
+    public Projection<R> distinct() {
+        return new ProjectionList<>(true, components, rowMapperFactory);
+    }
+
+    @Override
+    public List<Projection<?>> components() {
+        return components;
+    }
+
+    @Override
+    public boolean includes(MethodInfo<?,?> getter) {
+        return components.stream().anyMatch(x -> x.includes(getter));
     }
 }

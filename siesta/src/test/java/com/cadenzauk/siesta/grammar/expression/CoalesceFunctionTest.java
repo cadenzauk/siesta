@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
@@ -61,6 +62,9 @@ class CoalesceFunctionTest {
 
     @Mock
     private TypedExpression<String> expression2;
+
+    @Mock
+    private RowMapperFactory<String> rowMapperFactory;
 
     @Mock
     private RowMapper<String> rowMapper;
@@ -124,12 +128,14 @@ class CoalesceFunctionTest {
     @Test
     void rowMapper() {
         CoalesceFunction<String> sut = coalesce(expression1).orElse(expression2);
-        when(expression1.rowMapper(scope, Optional.of("custom_label"))).thenReturn(rowMapper);
+        when(expression1.rowMapperFactory(scope)).thenReturn(rowMapperFactory);
+        when(scope.newLabel()).thenReturn(123L);
+        when(rowMapperFactory.rowMapper(Optional.of("coalesce_123"))).thenReturn(rowMapper);
 
-        RowMapper<String> result = sut.rowMapper(scope, Optional.of("custom_label"));
+        RowMapper<String> result = sut.rowMapperFactory(scope).rowMapper(Optional.empty());
 
         assertThat(result, sameInstance(rowMapper));
-        verify(expression1).rowMapper(scope, Optional.of("custom_label"));
+        verify(expression1).rowMapperFactory(scope);
         verifyNoMoreInteractions(expression1, expression2);
     }
 

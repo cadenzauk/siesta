@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression.olap;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Scope;
@@ -63,6 +64,11 @@ class OlapFunction<T> {
     RowMapper<T> rowMapper(Scope scope, String label) {
         DataType<T> dataType = scope.database().getDataTypeOf(type);
         return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+    }
+
+    RowMapperFactory<T> rowMapperFactory(Scope scope, String defaultLabel) {
+        DataType<T> dataType = scope.database().getDataTypeOf(type);
+        return label -> rs -> dataType.get(rs, label.orElse(defaultLabel), scope.database()).orElse(null);
     }
 
     TypeToken<T> type() {

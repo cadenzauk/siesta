@@ -25,10 +25,11 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface ColumnCollection<R> {
@@ -40,7 +41,7 @@ public interface ColumnCollection<R> {
 
     <T> ColumnCollection<T> embedded(MethodInfo<R,T> methodInfo);
 
-    RowMapper<R> rowMapper(Alias<?> alias);
+    RowMapperFactory<R> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel);
 
     default <T> Column<T,R> column(FunctionOptional1<R, T> getter) {
         return column(MethodInfo.of(getter));

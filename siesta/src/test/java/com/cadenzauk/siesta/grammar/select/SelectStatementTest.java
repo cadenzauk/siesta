@@ -26,6 +26,7 @@ import com.cadenzauk.core.junit.TestCase;
 import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.From;
 import com.cadenzauk.siesta.IsolationLevel;
@@ -75,10 +76,13 @@ class SelectStatementTest {
     private From from;
 
     @Mock
+    private RowMapperFactory<Integer> rowMapperFactory;
+
+    @Mock
     private RowMapper<Integer> rowMapper;
 
     @Mock
-    private Projection projection;
+    private Projection<Integer> projection;
 
     @Mock
     private CommonTableExpression<?> cte;
@@ -110,7 +114,7 @@ class SelectStatementTest {
     @Test
     void rowType() {
         TypeToken<Integer> typeToken = TypeToken.of(Integer.class);
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), typeToken, from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), typeToken, from, projection);
 
         TypeToken<Integer> result = sut.rowType();
 
@@ -119,7 +123,7 @@ class SelectStatementTest {
 
     @Test
     void commonTableExpressions() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
 
         sut.addCommonTableExpression(cte);
         Stream<CommonTableExpression<?>> result = sut.commonTableExpressions();
@@ -129,7 +133,7 @@ class SelectStatementTest {
 
     @Test
     void commonTableExpressionsSql() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(cte.sql(any())).thenReturn("(cte query)");
@@ -146,7 +150,7 @@ class SelectStatementTest {
     @TestCase({"UNION", "union"})
     @TestCase({"UNION_ALL", "union all"})
     void addUnion(UnionType unionType, String unionSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(union.sqlImpl(any())).thenReturn("select * from bar");
@@ -159,7 +163,7 @@ class SelectStatementTest {
 
     @Test
     void label() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
 
         String result = sut.label(sut.scope());
 
@@ -168,7 +172,7 @@ class SelectStatementTest {
 
     @Test
     void args() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.args(any())).thenReturn(Stream.of("ABC"));
         when(from.args(any())).thenReturn(Stream.of(1, 2.4));
 
@@ -179,7 +183,7 @@ class SelectStatementTest {
 
     @Test
     void cteArgs() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.args(any())).thenReturn(Stream.of("ABC"));
         when(from.args(any())).thenReturn(Stream.of(1, 2.4));
         when(cte.args(any())).thenReturn(Stream.of("Foo", "Bar"));
@@ -192,7 +196,7 @@ class SelectStatementTest {
 
     @Test
     void cteArgsInnerScope() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.args(any())).thenReturn(Stream.of("ABC"));
         when(from.args(any())).thenReturn(Stream.of(1, 2.4));
         sut.addCommonTableExpression(cte);
@@ -205,16 +209,16 @@ class SelectStatementTest {
 
     @Test
     void projection() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
 
-        Projection result = sut.projection();
+        Projection<Integer> result = sut.projection();
 
         assertThat(result, sameInstance(projection));
     }
 
     @Test
     void fetchFirst() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from bob");
 
@@ -231,7 +235,7 @@ class SelectStatementTest {
     @TestCase({"REPEATABLE_READ", " with rs"})
     @TestCase({"SERIALIZABLE", " with rr"})
     void withIsolation(IsolationLevel isolation, String isolationSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
 
         sut.withIsolation(isolation);
 
@@ -246,7 +250,7 @@ class SelectStatementTest {
     @TestCase({"UPDATE", " for read only with rs use and keep UPDATE locks"})
     @TestCase({"EXCLUSIVE", " for read only with rs use and keep EXCLUSIVE locks"})
     void keepLocks(LockLevel level, String lockSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
 
         sut.keepLocks(level);
 
@@ -257,9 +261,11 @@ class SelectStatementTest {
 
     @Test
     void listSqlExecutor() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(sqlExecutor.query(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(ImmutableList.of(1, 2, 3));
 
         List<Integer> list = sut.list(sqlExecutor);
@@ -269,9 +275,11 @@ class SelectStatementTest {
 
     @Test
     void listTransaction() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columns");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.query(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(ImmutableList.of(1, 2, 3));
 
         List<Integer> list = sut.list(transaction);
@@ -281,10 +289,12 @@ class SelectStatementTest {
 
     @Test
     void listAsyncSqlExecutor() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
         when(sqlExecutor.beginTransaction()).thenReturn(transaction);
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.queryAsync(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(completedFuture(ImmutableList.of(1, 2, 3)));
 
         List<Integer> list = sut.listAsync(sqlExecutor).join();
@@ -298,9 +308,11 @@ class SelectStatementTest {
     @TestCase({"1"})
     @TestCase({"1,2"})
     void listAsyncTransaction(List<Integer> expected) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.queryAsync(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(completedFuture(expected));
 
         List<Integer> list = sut.listAsync(transaction).join();
@@ -314,9 +326,11 @@ class SelectStatementTest {
     @TestCase("1")
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "expected one element but was: <1, 2>"})
     void optionalSqlExecutor(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(sqlExecutor.query(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(result);
 
         with(expectedException)
@@ -337,9 +351,11 @@ class SelectStatementTest {
     @TestCase("1")
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "expected one element but was: <1, 2>"})
     void optionalTransaction(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columns");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.query(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(result);
 
         with(expectedException)
@@ -360,10 +376,12 @@ class SelectStatementTest {
     @TestCase("1")
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "expected one element but was: <1, 2>"})
     void optionalAsyncSqlExecutor(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
         when(sqlExecutor.beginTransaction()).thenReturn(transaction);
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.queryAsync(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(completedFuture(result));
 
         with(expectedException)
@@ -385,9 +403,11 @@ class SelectStatementTest {
     @TestCase({"1"})
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "expected one element but was: <1, 2>"})
     void optionalAsyncTransaction(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.queryAsync(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(completedFuture(result));
 
         with(expectedException)
@@ -405,9 +425,11 @@ class SelectStatementTest {
 
     @Test
     void streamSqlExecutor() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(sqlExecutor.stream(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(Stream.of(1, 2, 3));
 
         Stream<Integer> stream = sut.stream(sqlExecutor);
@@ -417,9 +439,11 @@ class SelectStatementTest {
 
     @Test
     void streamTransaction() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columns");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.stream(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(Stream.of(1, 2, 3));
 
         Stream<Integer> stream = sut.stream(transaction);
@@ -429,11 +453,13 @@ class SelectStatementTest {
 
     @Test
     void streamSqlExecutorAndAutoCloseable() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
         Stream<Integer> stream = Stream.of(1, 2, 3);
         when(autoCloseable.add(stream)).thenReturn(stream);
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(sqlExecutor.stream(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(stream);
 
         Stream<Integer> result = sut.stream(sqlExecutor, autoCloseable);
@@ -444,11 +470,13 @@ class SelectStatementTest {
 
     @Test
     void streamTransactionAndAutoCloseable() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columns");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
         Stream<Integer> stream = Stream.of(1, 2, 3);
         when(autoCloseable.add(stream)).thenReturn(stream);
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.stream(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(stream);
 
         Stream<Integer> result = sut.stream(transaction, autoCloseable);
@@ -464,9 +492,11 @@ class SelectStatementTest {
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2>."})
     @TestCase({"1,2,3,4,5", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2, 3, ...>."})
     void singleSqlExecutor(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columns");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(sqlExecutor.query(eq("select columns from table"), any(), eq(rowMapper))).thenReturn(result);
 
         with(expectedException)
@@ -488,9 +518,11 @@ class SelectStatementTest {
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2>."})
     @TestCase({"1,2,3,4,5", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2, 3, ...>."})
     void singleTransaction(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.query(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(result);
 
         with(expectedException)
@@ -512,9 +544,11 @@ class SelectStatementTest {
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2>."})
     @TestCase({"1,2,3,4,5", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2, 3, ...>."})
     void singleAsyncSqlExecutor(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(sqlExecutor.beginTransaction()).thenReturn(transaction);
         when(transaction.queryAsync(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(completedFuture(result));
 
@@ -538,9 +572,11 @@ class SelectStatementTest {
     @TestCase({"1,2", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2>."})
     @TestCase({"1,2,3,4,5", "java.lang.IllegalArgumentException", "Expected a single element but was <1, 2, 3, ...>."})
     void singleAsyncTransaction(List<Integer> result, Optional<Class<Exception>> expectedException, String exceptionMessage) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("columnlist");
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
         when(from.sql(any())).thenReturn(" from table");
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
         when(transaction.queryAsync(eq("select columnlist from table"), any(), eq(rowMapper))).thenReturn(completedFuture(result));
 
         with(expectedException)
@@ -558,7 +594,7 @@ class SelectStatementTest {
 
     @Test
     void from() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
 
         From result = sut.from();
 
@@ -568,7 +604,7 @@ class SelectStatementTest {
     @Test
     void scope() {
         Scope scope = createScope();
-        SelectStatement<Integer> sut = new SelectStatement<>(scope, TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(scope, TypeToken.of(Integer.class), from, projection);
 
         Scope result = sut.scope();
 
@@ -577,7 +613,7 @@ class SelectStatementTest {
 
     @Test
     void sql() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("1 = 2");
@@ -593,7 +629,7 @@ class SelectStatementTest {
 
     @Test
     void sqlWithOuterScope() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("1 = 2");
@@ -609,7 +645,9 @@ class SelectStatementTest {
 
     @Test
     void rowMapper() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
+        when(projection.rowMapperFactory(any())).thenReturn(rowMapperFactory);
+        when(rowMapperFactory.rowMapper(any())).thenReturn(rowMapper);
 
         RowMapper<Integer> result = sut.rowMapper();
 
@@ -618,7 +656,7 @@ class SelectStatementTest {
 
     @Test
     void addGroupBy1() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(typedExpression1.sql(any())).thenReturn("COL1");
@@ -630,7 +668,7 @@ class SelectStatementTest {
 
     @Test
     void addGroupBy2() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(typedExpression1.sql(any())).thenReturn("COL1");
@@ -647,7 +685,7 @@ class SelectStatementTest {
     @TestCase({"ASC", "select * from foo order by COL1 asc"})
     @TestCase({"DESC", "select * from foo order by COL1 desc"})
     void addOrderByExpression(Order order, String expectedSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(typedExpression1.sql(any())).thenReturn("COL1");
@@ -664,7 +702,7 @@ class SelectStatementTest {
     @TestCase({"DESC", "ASC", "select * from foo order by COL1 desc, COL2 asc"})
     @TestCase({"DESC", "DESC", "select * from foo order by COL1 desc, COL2 desc"})
     void addOrderByExpressions(Order order1, Order order2, String expectedSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(typedExpression1.sql(any())).thenReturn("COL1");
@@ -681,7 +719,7 @@ class SelectStatementTest {
     @TestCase({"1", "ASC", "select * from foo order by 1 asc"})
     @TestCase({"2", "DESC", "select * from foo order by 2 desc"})
     void addOrderByInt(int col1, Order order1, String expectedSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
 
@@ -696,7 +734,7 @@ class SelectStatementTest {
     @TestCase({"2", "ASC", "DESC", "select * from foo order by 2 asc, COL2 desc"})
     @TestCase({"3", "DESC", "ASC", "select * from foo order by 3 desc, COL2 asc"})
     void addOrderByIntAndCol(int col1, Order order1, Order order2, String expectedSql) {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(typedExpression2.sql(any())).thenReturn("COL2");
@@ -709,7 +747,7 @@ class SelectStatementTest {
 
     @Test
     void setWhereClause() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -722,7 +760,7 @@ class SelectStatementTest {
 
     @Test
     void andWhere() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -738,7 +776,7 @@ class SelectStatementTest {
 
     @Test
     void orWhere() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -754,7 +792,7 @@ class SelectStatementTest {
 
     @Test
     void orWhereAndWhere() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -771,7 +809,7 @@ class SelectStatementTest {
 
     @Test
     void setHavingClause() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -784,7 +822,7 @@ class SelectStatementTest {
 
     @Test
     void andHaving() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -800,7 +838,7 @@ class SelectStatementTest {
 
     @Test
     void orHaving() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");
@@ -816,7 +854,7 @@ class SelectStatementTest {
 
     @Test
     void andHavingOrHaving() {
-        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, rowMapper, projection);
+        SelectStatement<Integer> sut = new SelectStatement<>(createScope(), TypeToken.of(Integer.class), from, projection);
         when(projection.sql(any())).thenReturn("*");
         when(from.sql(any())).thenReturn(" from foo");
         when(booleanExpression1.sql(any())).thenReturn("a = b");

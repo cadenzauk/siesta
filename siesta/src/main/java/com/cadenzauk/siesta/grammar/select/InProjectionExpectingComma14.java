@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
+* Copyright (c) 2017, 2020 Cadenza United Kingdom Limited
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import com.cadenzauk.core.tuple.Tuple15;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMappers;
+import com.cadenzauk.siesta.Projections;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -132,10 +132,7 @@ public class InProjectionExpectingComma14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
                 .where(new TypeParameter<T14>() {}, Tuple14.type14(type()))
                 .where(new TypeParameter<T>() {}, boxedType(alias.type())),
             statement.from(),
-            RowMappers.add15th(
-                statement.rowMapper(),
-                alias.rowMapper()),
-                Projection.of(statement.projection(), Projection.of(alias)));
+            Projections.of15(statement.projection(), Projection.of(alias)));
         return new InProjectionExpectingComma15<>(select);
     }
 
@@ -160,10 +157,7 @@ public class InProjectionExpectingComma14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
                 .where(new TypeParameter<T14>() {}, Tuple14.type14(type()))
                 .where(new TypeParameter<T>() {}, boxedType(col.type())),
             statement.from(),
-            RowMappers.add15th(
-                statement.rowMapper(),
-                col.rowMapper(scope(), label)),
-                Projection.of(statement.projection(), Projection.of(col, label)));
+            Projections.of15(statement.projection(), Projection.of(col, label)));
         return new InProjectionExpectingComma15<>(select);
     }
 }

@@ -22,7 +22,10 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
@@ -32,7 +35,10 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.cadenzauk.core.lang.StringUtil.prepend;
 import static java.util.stream.Collectors.toList;
 
 public class Scope {
@@ -53,12 +59,32 @@ public class Scope {
         this.aliases = ImmutableList.copyOf(aliases);
     }
 
+    @Override
+    public String toString() {
+        return lines()
+            .collect(Collectors.joining("\n"));
+    }
+
+    private Stream<String> lines() {
+        return Stream.concat(
+            aliases.stream().map(Alias::inFromClauseSql),
+            StreamUtil.of(outer)
+                .flatMap(s -> s.lines().map(prepend("  "))));
+    }
+
     public Database database() {
         return database;
     }
 
     public Scope empty() {
         return new Scope(database());
+    }
+
+    public  Alias<?> findAlias(MethodInfo<?, ?> getter, Optional<String> requiredAlias) {
+        Optional<Alias<?>> found = aliases.stream().flatMap(a -> a.as(getter, requiredAlias)).findFirst();
+        return found
+            .orElseGet(() -> outer.map(o -> o.findAlias(getter, requiredAlias))
+                .orElseThrow(() -> new IllegalArgumentException("No such alias as " + requiredAlias + " in scope.")));
     }
 
     public <R> Alias<R> findAlias(Class<R> requiredRowClass, String requiredAlias) {
@@ -87,7 +113,7 @@ public class Scope {
     public Scope plus(Scope inner) {
         return inner.outer
             .map(o -> new Scope(this.plus(o), inner.aliases))
-            .orElseGet(() ->new Scope(this, inner.aliases));
+            .orElseGet(() -> new Scope(this, inner.aliases));
     }
 
     public Dialect dialect() {
@@ -106,6 +132,15 @@ public class Scope {
 
     public Scope tracker(Alias<?> lookingFor, AtomicBoolean result) {
         return new Scope(this, ImmutableList.of()) {
+
+            @Override
+            public Alias<?> findAlias(MethodInfo<?,?> getter, Optional<String> requiredAlias) {
+                Alias<?> found = super.findAlias(getter, requiredAlias);
+                if (Objects.equals(lookingFor, found)) {
+                    result.set(true);
+                }
+                return found;
+            }
 
             @Override
             public <R> Alias<R> findAlias(Class<R> requiredRowClass, String requiredAlias) {
@@ -131,6 +166,13 @@ public class Scope {
         return (scope, label) -> {
             final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
             return rs -> dataType.get(rs, label, scope.database()).orElse(null);
+        };
+    }
+
+    public static <S> BiFunction<Scope,String,RowMapperFactory<S>> makeMapperFactory(Class<S> resultClass) {
+        return (scope, defaultLabel) -> {
+            final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
+            return label -> rs -> dataType.get(rs, label.orElseGet(() -> defaultLabel), scope.database()).orElse(null);
         };
     }
 

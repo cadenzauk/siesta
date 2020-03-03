@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.grammar.expression.olap;
 
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
@@ -44,8 +45,8 @@ public abstract class InOlapFunction<T> implements TypedExpression<T> {
     }
 
     @Override
-    public RowMapper<T> rowMapper(Scope scope, Optional<String> label) {
-        return function.rowMapper(scope, label.orElseGet(() -> label(scope)));
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return function.rowMapperFactory(scope, label(scope));
     }
 
     @Override

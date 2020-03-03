@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 Cadenza United Kingdom Limited
+ * Copyright (c) 2017, 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import com.cadenzauk.core.tuple.Tuple17;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.RowMappers;
+import com.cadenzauk.siesta.Projections;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
@@ -44,12 +44,20 @@ public class ExpectingJoin16<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, 
         return join(JoinType.INNER, scope().database().table(rowClass).as(alias));
     }
 
+    public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> join(Select<R17> select, String alias) {
+        return join(JoinType.INNER, new SubselectAlias<>(select, alias));
+    }
+
     public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> leftJoin(Alias<R17> alias) {
         return join(JoinType.LEFT_OUTER, alias);
     }
 
     public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> leftJoin(Class<R17> rowClass, String alias) {
         return join(JoinType.LEFT_OUTER, scope().database().table(rowClass).as(alias));
+    }
+
+    public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> leftJoin(Select<R17> select, String alias) {
+        return join(JoinType.LEFT_OUTER, new SubselectAlias<>(select, alias));
     }
 
     public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> rightJoin(Alias<R17> alias) {
@@ -60,12 +68,20 @@ public class ExpectingJoin16<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, 
         return join(JoinType.RIGHT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
+    public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> rightJoin(Select<R17> select, String alias) {
+        return join(JoinType.RIGHT_OUTER, new SubselectAlias<>(select, alias));
+    }
+
     public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> fullOuterJoin(Alias<R17> alias) {
         return join(JoinType.FULL_OUTER, alias);
     }
 
     public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> fullOuterJoin(Class<R17> rowClass, String alias) {
         return join(JoinType.FULL_OUTER, scope().database().table(rowClass).as(alias));
+    }
+
+    public <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> fullOuterJoin(Select<R17> select, String alias) {
+        return join(JoinType.FULL_OUTER, new SubselectAlias<>(select, alias));
     }
 
     private <R17> InJoinExpectingOn<ExpectingJoin17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>, Tuple17<RT1,RT2,RT3,RT4,RT5,RT6,RT7,RT8,RT9,RT10,RT11,RT12,RT13,RT14,RT15,RT16,R17>> join(JoinType joinType, Alias<R17> alias) {
@@ -90,8 +106,7 @@ public class ExpectingJoin16<RT1, RT2, RT3, RT4, RT5, RT6, RT7, RT8, RT9, RT10, 
                 .where(new TypeParameter<RT16>() {}, Tuple16.type16(type()))
                 .where(new TypeParameter<R17>() {}, alias.type()),
             statement.from().join(joinType, alias),
-            RowMappers.add17th(statement.rowMapper(), alias.rowMapper()),
-            Projection.of(statement.projection(), Projection.of(alias)));
+            Projections.of17(statement.projection(), Projection.of(alias)));
         return new InJoinExpectingOn<>(select17, ExpectingJoin17::new);
     }
 }

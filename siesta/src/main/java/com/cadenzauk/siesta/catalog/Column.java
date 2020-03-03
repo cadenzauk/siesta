@@ -22,7 +22,7 @@
 
 package com.cadenzauk.siesta.catalog;
 
-import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
 import com.google.common.reflect.TypeToken;
@@ -64,7 +64,7 @@ public interface Column<T, R> {
 
     Stream<Object> updateArgs(Database database, R row);
 
-    RowMapper<T> rowMapper(Alias<?> alias, Optional<String> label);
+    RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel);
 
     <U> Stream<Column<U,R>> as(TypeToken<U> requiredDataType);
 

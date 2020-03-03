@@ -26,13 +26,15 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.DynamicRowMapper;
+import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import com.cadenzauk.siesta.projection.DynamicProjection;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 
@@ -111,7 +113,6 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         SelectStatement<R> select = new SelectStatement<>(scope(),
             alias.type(),
             statement.from(),
-            alias.rowMapper(),
             Projection.of(alias));
         return new InProjectionExpectingComma1<>(select);
     }
@@ -120,7 +121,6 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         SelectStatement<RT> select = new SelectStatement<>(scope(),
             statement.rowType(),
             statement.from(),
-            statement.rowMapper(),
             statement.projection().distinct());
         return new ExpectingWhere<>(select);
     }
@@ -195,7 +195,6 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         SelectStatement<R> select = new SelectStatement<>(scope(),
             alias.type(),
             statement.from(),
-            alias.rowMapper(),
             Projection.of(true, alias));
         return new InProjectionExpectingComma1<>(select);
     }
@@ -210,25 +209,25 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     }
 
     public <R> InSelectIntoExpectingWith<R> selectInto(Alias<R> alias) {
-        DynamicRowMapper<R> rowMapper = alias.dynamicRowMapper();
-        DynamicProjection projection = new DynamicProjection(false);
+        TableAlias<R> tableAlias = OptionalUtil.as(new TypeToken<TableAlias<R>>() {}, alias)
+            .orElseThrow(() -> new IllegalArgumentException("Can only selectInto a TableAlias."));
+        DynamicRowMapperFactory<R> rowMapper = tableAlias.dynamicRowMapperFactory();
+        DynamicProjection<R> projection = new DynamicProjection<>(false, tableAlias);
         SelectStatement<R> select = new SelectStatement<>(scope().plus(alias),
             alias.type(),
             statement.from(),
-            rowMapper,
             projection);
         return new InSelectIntoExpectingWith<>(select, rowMapper, projection);
     }
 
     private <T> InProjectionExpectingComma1<T> select(boolean distinct, TypedExpression<T> column, Optional<String> label) {
-        Projection projection = Projection.of(column, label);
+        Projection<T> projection = Projection.of(column, label);
         if (distinct) {
             projection = projection.distinct();
         }
         SelectStatement<T> select = new SelectStatement<>(scope(),
             column.type(),
             statement.from(),
-            column.rowMapper(scope(), label),
             projection);
         return new InProjectionExpectingComma1<>(select);
     }

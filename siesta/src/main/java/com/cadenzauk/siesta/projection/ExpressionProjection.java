@@ -22,14 +22,21 @@
 
 package com.cadenzauk.siesta.projection;
 
+import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Projection;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.ColumnExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.collect.ImmutableList;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ExpressionProjection<T> implements Projection {
+public class ExpressionProjection<T> implements Projection<T> {
     private final boolean distinct;
     private final TypedExpression<T> expression;
     private final Optional<String> label;
@@ -51,16 +58,35 @@ public class ExpressionProjection<T> implements Projection {
     }
 
     @Override
-    public String labelList(Scope scope) {
-        return label(scope);
+    public Stream<ProjectionColumn<?>> columns(Scope scope) {
+        return Stream.of(new ProjectionColumn<>(expression.sql(scope), label.orElseGet(() -> expression.label(scope)), expression.rowMapperFactory(scope, label)));
     }
 
     @Override
-    public Projection distinct() {
+    public <T2> Optional<ProjectionColumn<T2>> findColumn(Scope scope, MethodInfo<?,T2> getterMethod) {
+        return Optional.empty();
+    }
+
+    @Override
+    public RowMapperFactory<T> rowMapperFactory(Scope scope) {
+        return expression.rowMapperFactory(scope, label);
+    }
+
+    @Override
+    public Projection<T> distinct() {
         return new ExpressionProjection<>(true, expression, label);
     }
 
-    private String label(Scope scope) {
-        return label.orElseGet(() -> expression.label(scope));
+    @Override
+    public List<Projection<?>> components() {
+        return ImmutableList.of(this);
+    }
+
+    @Override
+    public boolean includes(MethodInfo<?,?> getter) {
+        return getter.asEffective(expression.type())
+            .flatMap(g -> OptionalUtil.as(ColumnExpression.class, expression)
+                .map(c -> c.includes(g)))
+            .orElse(false);
     }
 }
