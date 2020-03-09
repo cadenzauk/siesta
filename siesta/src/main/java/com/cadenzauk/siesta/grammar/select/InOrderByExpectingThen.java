@@ -26,6 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Order;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -42,6 +43,11 @@ public class InOrderByExpectingThen<RT> extends Select<RT> {
 
     public <T> InOrderByExpectingThen<RT> then(TypedExpression<T> column) {
         statement.addOrderBy(column, Order.ASC);
+        return this;
+    }
+
+    public <T> InOrderByExpectingThen<RT> then(Label<T> column) {
+        statement.addOrderBy(UnresolvedColumn.of(column), Order.ASC);
         return this;
     }
 
@@ -77,6 +83,11 @@ public class InOrderByExpectingThen<RT> extends Select<RT> {
 
     public <T> InOrderByExpectingThen<RT> then(TypedExpression<T> column, Order order) {
         statement.addOrderBy(column, order);
+        return this;
+    }
+
+    public <T> InOrderByExpectingThen<RT> then(Label<T> column, Order order) {
+        statement.addOrderBy(UnresolvedColumn.of(column), order);
         return this;
     }
 

@@ -26,6 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Order;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -38,6 +39,11 @@ public class InOlapExpectingOrderBy<T> extends InOlapFunction<T> {
 
     public <V> InOlapOrderBy<T> orderBy(TypedExpression<V> expression) {
         function.addOrderBy(new Ordering<>(expression, Order.ASC));
+        return new InOlapOrderBy<>(function);
+    }
+
+    public <V> InOlapOrderBy<T> orderBy(Label<V> label) {
+        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(label), Order.ASC));
         return new InOlapOrderBy<>(function);
     }
 
@@ -73,6 +79,11 @@ public class InOlapExpectingOrderBy<T> extends InOlapFunction<T> {
 
     public <V> InOlapOrderBy<T> orderBy(TypedExpression<V> expression, Order order) {
         function.addOrderBy(new Ordering<>(expression, order));
+        return new InOlapOrderBy<>(function);
+    }
+
+    public <V> InOlapOrderBy<T> orderBy(Label<V> label, Order order) {
+        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(label), order));
         return new InOlapOrderBy<>(function);
     }
 

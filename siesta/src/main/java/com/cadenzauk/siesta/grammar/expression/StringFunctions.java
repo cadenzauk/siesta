@@ -44,6 +44,10 @@ public final class StringFunctions extends UtilityClass {
         return SqlFunction.of(UPPER, arg);
     }
 
+    public static TypedExpression<String> upper(Label<String> arg) {
+        return SqlFunction.of(UPPER, arg);
+    }
+
     public static <R> TypedExpression<String> upper(Function1<R,String> arg) {
         return SqlFunction.of(UPPER, arg);
     }
@@ -75,6 +79,10 @@ public final class StringFunctions extends UtilityClass {
     }
 
     public static TypedExpression<String> lower(TypedExpression<String> arg) {
+        return SqlFunction.of(LOWER, arg);
+    }
+
+    public static TypedExpression<String> lower(Label<String> arg) {
         return SqlFunction.of(LOWER, arg);
     }
 
@@ -112,6 +120,10 @@ public final class StringFunctions extends UtilityClass {
         return SqlFunction.of(LENGTH, Integer.class, arg);
     }
 
+    public static TypedExpression<Integer> length(Label<String> arg) {
+        return SqlFunction.of(LENGTH, Integer.class, UnresolvedColumn.of(arg));
+    }
+
     public static <R> TypedExpression<Integer> length(Function1<R,String> arg) {
         return SqlFunction.of(LENGTH, Integer.class, arg);
     }
@@ -144,6 +156,10 @@ public final class StringFunctions extends UtilityClass {
 
     public static TypedExpression<String> substr(TypedExpression<String> str, int start) {
         return SqlFunction.of(SUBSTR, String.class, str, ValueExpression.of(start));
+    }
+
+    public static TypedExpression<String> substr(Label<String> str, int start) {
+        return SqlFunction.of(SUBSTR, String.class, UnresolvedColumn.of(str), ValueExpression.of(start));
     }
 
     public static <R> TypedExpression<String> substr(Function1<R,String> str, int start) {
@@ -180,6 +196,10 @@ public final class StringFunctions extends UtilityClass {
 
     public static TypedExpression<String> substr(TypedExpression<String> str, int start, int len) {
         return SqlFunction.of(SUBSTR, String.class, str, ValueExpression.of(start), ValueExpression.of(len));
+    }
+
+    public static TypedExpression<String> substr(Label<String> str, int start, int len) {
+        return SqlFunction.of(SUBSTR, String.class, UnresolvedColumn.of(str), ValueExpression.of(start), ValueExpression.of(len));
     }
 
     public static <R> TypedExpression<String> substr(Function1<R,String> str, int start, int len) {

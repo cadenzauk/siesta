@@ -35,11 +35,11 @@ import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ExpectingTo<U, T, N> {
-    private final UnresolvedColumn<T,U> lhs;
+public class ExpectingTo<T, N> {
+    private final UnresolvedColumn<T> lhs;
     private final Function<Assignment<T>,N> onComplete;
 
-    private ExpectingTo(UnresolvedColumn<T,U> lhs, Function<Assignment<T>,N> onComplete) {
+    private ExpectingTo(UnresolvedColumn<T> lhs, Function<Assignment<T>,N> onComplete) {
         this.lhs = lhs;
         this.onComplete = onComplete;
     }
@@ -90,7 +90,7 @@ public class ExpectingTo<U, T, N> {
         return onComplete.apply(new Assignment<>(lhs, rhs));
     }
 
-    public static <U, T, N> ExpectingTo<U,T,N> of(UnresolvedColumn<T,U> lhs, Function<Assignment<T>,N> onComplete) {
+    public static <T, N> ExpectingTo<T,N> of(UnresolvedColumn<T> lhs, Function<Assignment<T>,N> onComplete) {
         return new ExpectingTo<>(lhs, onComplete);
     }
 }

@@ -30,6 +30,7 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Projections;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -54,12 +55,20 @@ public class InProjectionExpectingComma11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
         return comma(expression, OptionalUtil.ofBlankable(label));
     }
 
+    public <T> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(TypedExpression<T> expression, Label<T> label) {
+        return comma(expression, OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Function1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(methodReference), Optional.empty());
     }
 
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Function1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Function1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(FunctionOptional1<R,T> methodReference) {
@@ -70,12 +79,20 @@ public class InProjectionExpectingComma11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
         return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(String alias, Function1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(String alias, Function1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(String alias, Function1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(String alias, FunctionOptional1<R,T> methodReference) {
@@ -86,6 +103,10 @@ public class InProjectionExpectingComma11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
         return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(String alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Alias<R> alias, Function1<R,T> methodReference) {
         return comma(ResolvedColumn.of(alias, methodReference), Optional.empty());
     }
@@ -94,12 +115,20 @@ public class InProjectionExpectingComma11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Alias<R> alias, Function1<R,T> methodReference, Label<T> label) {
+        return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
         return comma(ResolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
     public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Alias<R> alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T> InProjectionExpectingComma12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T> comma(Class<T> rowClass) {

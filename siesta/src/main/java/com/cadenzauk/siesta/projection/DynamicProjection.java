@@ -22,10 +22,10 @@
 
 package com.cadenzauk.siesta.projection;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.ProjectionColumn;
@@ -65,11 +65,15 @@ public class DynamicProjection<R> implements Projection<R> {
 
     @Override
     public Stream<ProjectionColumn<?>> columns(Scope scope) {
-        return columns.stream().map(p -> p.map((s, t) -> new ProjectionColumn<>(s.sql(scope), t.label(scope), t.rowMapperFactory(scope))));
+        return columns.stream().map(p -> p.map((s, t) -> projectionColumn(scope, s, t)));
+    }
+
+    private <T> ProjectionColumn<T> projectionColumn(Scope scope, TypedExpression<?> s, TypedExpression<T> t) {
+        return new ProjectionColumn<T>(t.type(), s.sql(scope), t.label(scope), t.rowMapperFactory(scope));
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod) {
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> getterMethod) {
         return Optional.empty();
     }
 
@@ -96,8 +100,10 @@ public class DynamicProjection<R> implements Projection<R> {
     }
 
     @Override
-    public boolean includes(MethodInfo<?,?> getter) {
-        return false;
+    public boolean includes(ColumnSpecifier<?> getter) {
+        return components()
+            .stream()
+            .anyMatch(c -> c.includes(getter));
     }
 
     public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {

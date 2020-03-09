@@ -27,10 +27,10 @@ import com.cadenzauk.siesta.Scope;
 import java.util.stream.Stream;
 
 public class Assignment<T> {
-    private final UnresolvedColumn<T,?> lhs;
+    private final UnresolvedColumn<T> lhs;
     private TypedExpression<T> rhs;
 
-    public Assignment(UnresolvedColumn<T,?> lhs, TypedExpression<T> rhs) {
+    public Assignment(UnresolvedColumn<T> lhs, TypedExpression<T> rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }

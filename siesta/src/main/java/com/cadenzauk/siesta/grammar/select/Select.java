@@ -26,6 +26,7 @@ import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.From;
@@ -211,12 +212,12 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return statement.projection();
     }
 
-    boolean projectionIncludes(MethodInfo<?,?> getter) {
-        return statement.projection().includes(getter);
+    boolean projectionIncludes(ColumnSpecifier<?> columnSpecifier) {
+        return statement.projection().includes(columnSpecifier);
     }
 
-    <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> getterMethod) {
-        return statement.projection().findColumn(scope(), getterMethod);
+    <T> Optional<ProjectionColumn<T>> findColumn(ColumnSpecifier<T> columnSpecifier) {
+        return statement.projection().findColumn(scope(), columnSpecifier);
     }
 
     RowMapperFactory<RT> rowMapperFactory() {

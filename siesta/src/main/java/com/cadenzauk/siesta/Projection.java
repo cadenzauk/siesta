@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.projection.AliasColumns;
@@ -39,7 +38,7 @@ public interface Projection<R> {
 
     Stream<ProjectionColumn<?>> columns(Scope scope);
 
-    <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod);
+    <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier);
 
     RowMapperFactory<R> rowMapperFactory(Scope scope);
 
@@ -47,7 +46,7 @@ public interface Projection<R> {
 
     List<Projection<?>> components();
 
-    boolean includes(MethodInfo<?,?> getter);
+    boolean includes(ColumnSpecifier<?> columnSpecifier);
 
     static <T> Projection<T> of(boolean distinct, TypedExpression<T> column, Optional<String> label) {
         return new ExpressionProjection<>(distinct, column, label);

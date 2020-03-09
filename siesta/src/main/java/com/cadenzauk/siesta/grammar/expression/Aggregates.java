@@ -44,6 +44,10 @@ public final class Aggregates extends UtilityClass {
         return SqlFunction.of(MAX, arg);
     }
 
+    public static <T> TypedExpression<T> max(Label<T> arg) {
+        return SqlFunction.of(MAX, arg);
+    }
+
     public static <T, R> TypedExpression<T> max(Function1<R,T> arg) {
         return SqlFunction.of(MAX, arg);
     }
@@ -73,6 +77,10 @@ public final class Aggregates extends UtilityClass {
     }
 
     public static <T> TypedExpression<T> min(TypedExpression<T> arg) {
+        return SqlFunction.of(MIN, arg);
+    }
+
+    public static <T> TypedExpression<T> min(Label<T> arg) {
         return SqlFunction.of(MIN, arg);
     }
 
@@ -108,6 +116,10 @@ public final class Aggregates extends UtilityClass {
         return SqlFunction.of(SUM, arg);
     }
 
+    public static <T extends Number> TypedExpression<T> sum(Label<T> arg) {
+        return SqlFunction.of(SUM, arg);
+    }
+
     public static <T extends Number, R> TypedExpression<T> sum(Function1<R,T> arg) {
         return SqlFunction.of(SUM, arg);
     }
@@ -137,6 +149,10 @@ public final class Aggregates extends UtilityClass {
     }
 
     public static <T extends Number> TypedExpression<T> avg(TypedExpression<T> arg) {
+        return SqlFunction.of(AVG, arg);
+    }
+
+    public static <T extends Number> TypedExpression<T> avg(Label<T> arg) {
         return SqlFunction.of(AVG, arg);
     }
 
@@ -172,6 +188,10 @@ public final class Aggregates extends UtilityClass {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), arg);
     }
 
+    public static <T> TypedExpression<Integer> count(Label<T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
+    }
+
     public static <T, R> TypedExpression<Integer> count(Function1<R,T> arg) {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
@@ -204,6 +224,10 @@ public final class Aggregates extends UtilityClass {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), arg);
     }
 
+    public static <T> TypedExpression<Long> countBig(Label<T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
+    }
+
     public static <T, R> TypedExpression<Long> countBig(Function1<R,T> arg) {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
     }
@@ -232,6 +256,10 @@ public final class Aggregates extends UtilityClass {
         return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), arg);
     }
 
+    public static <T> TypedExpression<Integer> countDistinct(Label<T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
+    }
+
     public static <T, R> TypedExpression<Integer> countDistinct(Function1<R,T> arg) {
         return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
@@ -258,6 +286,10 @@ public final class Aggregates extends UtilityClass {
 
     public static <T> TypedExpression<Long> countBigDistinct(TypedExpression<T> arg) {
         return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), arg);
+    }
+
+    public static <T> TypedExpression<Long> countBigDistinct(Label<T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
     }
 
     public static <T, R> TypedExpression<Long> countBigDistinct(Function1<R,T> arg) {

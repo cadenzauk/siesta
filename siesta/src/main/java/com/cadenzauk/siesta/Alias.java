@@ -24,7 +24,6 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
@@ -41,7 +40,7 @@ public abstract class Alias<R> {
 
     public abstract Database database();
 
-    public abstract <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> method);
+    public abstract <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier);
 
     public abstract <P> Optional<ForeignKeyReference<R, P>> foreignKey(Alias<P> parent, Optional<String> name);
 
@@ -55,9 +54,9 @@ public abstract class Alias<R> {
 
     public abstract String inFromClauseSql();
 
-    public abstract <T> String columnSql(MethodInfo<?, T> getterMethod);
+    public abstract <T> String columnSql(Scope scope, ColumnSpecifier<T> getterMethod);
 
-    public abstract  <T> String columnSqlWithLabel(MethodInfo<?,T> getterMethod, Optional<String> label);
+    public abstract <T> String columnSqlWithLabel(ColumnSpecifier<T> getterMethod, Optional<String> label);
 
     public abstract String inSelectClauseSql(Scope scope);
 
@@ -83,9 +82,9 @@ public abstract class Alias<R> {
 
     public abstract RowMapperFactory<R> rowMapperFactory();
 
-    public abstract <T> RowMapperFactory<T> rowMapperFactoryFor(MethodInfo<?,T> getterMethod, Optional<String> defaultLabel);
+    public abstract <T> RowMapperFactory<T> rowMapperFactoryFor(ColumnSpecifier<T> getterMethod, Optional<String> defaultLabel);
 
-    public abstract Stream<Alias<?>> as(MethodInfo<?,?> getter, Optional<String> requiredAlias);
+    public abstract Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias);
 
     @SuppressWarnings("unchecked")
     protected <R2> Stream<Alias<R2>> as(Class<R2> requiredRowClass, String requiredAlias) {

@@ -25,9 +25,12 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.util.NoSuchElementException;
@@ -75,8 +78,18 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
+    public boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier) {
+        return StringUtils.equals(columnSpecifier.columnName(scope), columnName);
+    }
+
+    @Override
     public String propertyName() {
         return propertyName;
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return TypeToken.of(dataType.javaClass());
     }
 
     @Override

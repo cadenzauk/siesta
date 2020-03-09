@@ -47,9 +47,11 @@ class AggregatesTest extends FunctionTest {
 
     @SuppressWarnings("unused")
     static Stream<Arguments> parametersForFunctionTest() {
+        //Label<String> stringLabel = Label.of("STRING_REQ", String.class);
         return Stream.of(
             testCase(s -> max("ABC"), "max(?)", toArray("ABC")),
             testCase(s -> max(lower("ABC")), "max(lower(?))", toArray("ABC")),
+            //testCase(s -> max(stringLabel), "max(s.STRING_REQ)", toArray()),
             testCase(s -> max(TestRow::stringReq), "max(s.STRING_REQ)", toArray()),
             testCase(s -> max(TestRow::stringOpt), "max(s.STRING_OPT)", toArray()),
             testCase(s -> max("s", TestRow::stringReq), "max(s.STRING_REQ)", toArray()),

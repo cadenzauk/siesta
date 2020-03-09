@@ -35,11 +35,13 @@ import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.expression.DateFunctions;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.LiteralExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.grammar.expression.olap.Olap;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
+import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.PartType;
@@ -106,6 +108,7 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.cast;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
+import static com.cadenzauk.siesta.grammar.expression.olap.Olap.rowNumber;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -642,7 +645,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
-            .comma(Olap.rowNumber()
+            .comma(rowNumber()
                 .partitionBy(SalespersonRow::salespersonId)
                 .orderBy(SalespersonRow::salespersonId, DESC).then(SalespersonRow::surname, ASC))
             .comma(Olap.sum(SalespersonRow::salespersonId)
@@ -666,8 +669,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         TypedExpression<Integer> rowNumber =
             dialect.requiresOrderByInRowNumber()
-                ? Olap.rowNumber().partitionBy(column(SalespersonRow::salespersonId)).orderBy(SalespersonRow::salespersonId, ASC)
-                : Olap.rowNumber().partitionBy(column(SalespersonRow::salespersonId));
+                ? rowNumber().partitionBy(column(SalespersonRow::salespersonId)).orderBy(SalespersonRow::salespersonId, ASC)
+                : rowNumber().partitionBy(column(SalespersonRow::salespersonId));
         List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber)
@@ -689,7 +692,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
-            .comma(Olap.rowNumber().orderBy(SalespersonRow::salespersonId, DESC))
+            .comma(rowNumber().orderBy(SalespersonRow::salespersonId, DESC))
             .comma(Olap.sum(SalespersonRow::salespersonId).orderBy(SalespersonRow::salespersonId, ASC))
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
             .orderBy(SalespersonRow::salespersonId)
@@ -708,7 +711,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         List<Tuple2<Long,Integer>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
-            .comma(Olap.rowNumber())
+            .comma(rowNumber())
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
             .orderBy(SalespersonRow::salespersonId)
             .list();
@@ -1387,14 +1390,43 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         SalespersonRow salespersonRow1 = aRandomSalesperson();
         SalespersonRow salespersonRow2 = aRandomSalesperson();
-        database.insert(salespersonRow1, salespersonRow2);
+        SalespersonRow salespersonRow3 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
 
-        SalespersonRow result = database.from(
-           database.from(SalespersonRow.class, "i")
-            .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId()),
-            "o")
+        Select<SalespersonRow> subselect = database
+            .from(SalespersonRow.class, "i")
+            .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId());
+        SalespersonRow result = database
+            .from(subselect, "o" )
             .single();
 
         assertThat(result, is(salespersonRow2));
+    }
+
+    @Test
+    void selectUsingColumnLabel() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson(s -> s.numberOfSales(100));
+        SalespersonRow salespersonRow2 = aRandomSalesperson(s -> s.numberOfSales(200));
+        SalespersonRow salespersonRow3 = aRandomSalesperson(s -> s.numberOfSales(300));
+        database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
+        Label<Integer> rowNum = Label.of("rown", Integer.class);
+
+        Select<Tuple2<Long,Integer>> subselect = database
+            .from(SalespersonRow.class, "i")
+            .select(SalespersonRow::salespersonId)
+            .comma(rowNumber().orderBy(SalespersonRow::numberOfSales), rowNum)
+            .where("i", SalespersonRow::salespersonId).isIn(
+                salespersonRow1.salespersonId(),
+                salespersonRow2.salespersonId(),
+                salespersonRow3.salespersonId()
+            );
+        long result = database
+            .from(subselect, "o" )
+            .select(SalespersonRow::salespersonId)
+            .where(rowNum).isEqualTo(3)
+            .single();
+
+        assertThat(result, is(salespersonRow3.salespersonId()));
     }
 }

@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ColumnExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -43,6 +44,10 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, this::andWhere);
+    }
+
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
 
     public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(Function1<R,T> lhs) {
@@ -75,6 +80,10 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, this::orWhere);
+    }
+
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
     }
 
     public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(Function1<R,T> lhs) {

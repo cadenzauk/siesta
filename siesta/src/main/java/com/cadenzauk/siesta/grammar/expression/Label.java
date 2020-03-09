@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,25 +20,26 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.dml;
+package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.function.Function1;
-import com.cadenzauk.core.function.FunctionOptional1;
-import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
+public class Label<T> {
+    private final String label;
+    private final Class<T> effectiveClass;
 
-public class InSetExpectingWhere<U> extends ExpectingWhere {
-    private final Update<U> statement;
-
-    InSetExpectingWhere(Update<U> statement) {
-        super(statement);
-        this.statement = statement;
+    private Label(String label, Class<T> effectiveClass) {
+        this.label = label;
+        this.effectiveClass = effectiveClass;
     }
 
-    public <T> ExpectingTo<T,SetExpressionBuilder<U,T>> set(Function1<U,T> lhs) {
-        return ExpectingTo.of(UnresolvedColumn.of(lhs), statement::addSet);
+    public String label() {
+        return label;
     }
 
-    public <T> ExpectingTo<T,SetExpressionBuilder<U,T>> set(FunctionOptional1<U,T> lhs) {
-        return ExpectingTo.of(UnresolvedColumn.of(lhs), statement::addSet);
+    public Class<T> effectiveClass() {
+        return effectiveClass;
+    }
+
+    public static <T> Label<T> of(String label, Class<T> effectiveClass) {
+        return new Label<>(label, effectiveClass);
     }
 }

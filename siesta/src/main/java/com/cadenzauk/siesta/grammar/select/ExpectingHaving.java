@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -42,6 +43,10 @@ public class ExpectingHaving<RT> extends ExpectingUnion<RT> {
 
     public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> having(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, statement::setHavingClause);
+    }
+
+    public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> having(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setHavingClause);
     }
 
     public <T, R> ExpressionBuilder<T,InHavingExpectingAnd<RT>> having(Function1<R,T> lhs) {

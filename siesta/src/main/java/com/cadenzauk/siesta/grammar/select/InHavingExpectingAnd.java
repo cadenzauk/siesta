@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -42,6 +43,10 @@ public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
 
     public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> and(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, this::andHaving);
+    }
+
+    public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> and(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andHaving);
     }
 
     public <T, R> ExpressionBuilder<T,InHavingExpectingAnd<RT>> and(Function1<R,T> lhs) {
@@ -74,6 +79,10 @@ public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
 
     public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, this::orHaving);
+    }
+
+    public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orHaving);
     }
 
     public <T, R> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(Function1<R,T> lhs) {

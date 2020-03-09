@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -66,6 +67,10 @@ public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
 
     public <T> ExpressionBuilder<T,J> on(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, this::setOnClause);
+    }
+
+    public <T> ExpressionBuilder<T,J> on(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setOnClause);
     }
 
     public <T, R> ExpressionBuilder<T,J> on(Function1<R,T> lhs) {

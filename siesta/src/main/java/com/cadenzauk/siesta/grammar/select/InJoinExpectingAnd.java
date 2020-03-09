@@ -27,12 +27,26 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
 public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT> extends ExpectingSelect<RT> {
     protected InJoinExpectingAnd(SelectStatement<RT> statement) {
         super(statement);
+    }
+
+    public S and(BooleanExpression expression) {
+        return onAnd(expression);
+    }
+
+    public <T> ExpressionBuilder<T,S> and(TypedExpression<T> lhs) {
+        return ExpressionBuilder.of(lhs, this::onAnd);
+    }
+
+    public <T> ExpressionBuilder<T,S> and(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onAnd);
     }
 
     public <T, R> ExpressionBuilder<T,S> and(Function1<R,T> lhs) {
@@ -57,6 +71,18 @@ public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT>
 
     public <T, R> ExpressionBuilder<T,S> and(Alias<R> alias, FunctionOptional1<R,T> lhs) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, lhs), this::onAnd);
+    }
+
+    public S or(BooleanExpression expression) {
+        return onOr(expression);
+    }
+
+    public <T> ExpressionBuilder<T,S> or(TypedExpression<T> lhs) {
+        return ExpressionBuilder.of(lhs, this::onOr);
+    }
+
+    public <T> ExpressionBuilder<T,S> or(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onOr);
     }
 
     public <T, R> ExpressionBuilder<T,S> or(Function1<R,T> lhs) {

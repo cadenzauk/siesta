@@ -22,13 +22,12 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.google.common.reflect.TypeToken;
 
@@ -58,8 +57,8 @@ public class SubselectAlias<T> extends Alias<T> {
     }
 
     @Override
-    public <T1> Optional<ProjectionColumn<T1>> findColumn(MethodInfo<?,T1> method) {
-        return select.findColumn(method);
+    public <T1> Optional<ProjectionColumn<T1>> findColumn(Scope scope, ColumnSpecifier<T1> columnSpecifier) {
+        return select.findColumn(columnSpecifier);
     }
 
     @Override
@@ -70,7 +69,11 @@ public class SubselectAlias<T> extends Alias<T> {
     @Override
     public Stream<ProjectionColumn<?>> projectionColumns(Scope scope) {
         return select.projectionColumns(scope)
-            .map(c -> new ProjectionColumn<>(c.label(), inSelectClauseLabel(c.label()), label -> c.rowMapperFactory().rowMapper(label)));
+            .map(this::adaptColumn);
+    }
+
+    private <C> ProjectionColumn<C> adaptColumn(ProjectionColumn<C> c) {
+        return new ProjectionColumn<>(c.type(), c.label(), inSelectClauseLabel(c.label()), label -> c.rowMapperFactory().rowMapper(label));
     }
 
     @Override
@@ -94,15 +97,15 @@ public class SubselectAlias<T> extends Alias<T> {
     }
 
     @Override
-    public <T1> String columnSql(MethodInfo<?,T1> getterMethod) {
-        ProjectionColumn<T1> projectionColumn = select.findColumn(getterMethod)
+    public <T1> String columnSql(Scope scope, ColumnSpecifier<T1> columnSpecifier) {
+        ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
             .orElseThrow(IllegalArgumentException::new);
         return inSelectClauseSql(projectionColumn.label());
     }
 
     @Override
-    public <T1> String columnSqlWithLabel(MethodInfo<?,T1> getterMethod, Optional<String> label) {
-        ProjectionColumn<T1> projectionColumn = select.findColumn(getterMethod)
+    public <T1> String columnSqlWithLabel(ColumnSpecifier<T1> columnSpecifier, Optional<String> label) {
+        ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
             .orElseThrow(IllegalArgumentException::new);
         return inSelectClauseSql(projectionColumn.label(), label);
     }
@@ -140,25 +143,25 @@ public class SubselectAlias<T> extends Alias<T> {
     }
 
     @Override
-    public <T1> RowMapperFactory<T1> rowMapperFactoryFor(MethodInfo<?,T1> getterMethod, Optional<String> defaultLabel) {
-        ProjectionColumn<T1> projectionColumn = select.findColumn(getterMethod)
+    public <T1> RowMapperFactory<T1> rowMapperFactoryFor(ColumnSpecifier<T1> columnSpecifier, Optional<String> defaultLabel) {
+        ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
             .orElseThrow(IllegalArgumentException::new);
         return label -> projectionColumn.rowMapperFactory().rowMapper(or(or(label, defaultLabel), Optional.of(aliasName + "_" + projectionColumn.label())));
     }
 
     @Override
-    public Stream<Alias<?>> as(MethodInfo<?,?> getter, Optional<String> requiredAlias) {
+    public Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
         if (requiredAlias.isPresent()) {
             if (requiredAlias.equals(aliasName())) {
-                if (select.projectionIncludes(getter)) {
+                if (select.projectionIncludes(columnSpecifier)) {
                     return Stream.of(this);
                 }
-                throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + getter.referringClass());
+                throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A"));
             } else {
                 return Stream.empty();
             }
         }
-        if (select.projectionIncludes(getter)) {
+        if (select.projectionIncludes(columnSpecifier)) {
             return Stream.of(this);
         }
         return Stream.empty();

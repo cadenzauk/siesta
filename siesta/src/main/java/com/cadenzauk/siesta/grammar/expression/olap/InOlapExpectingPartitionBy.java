@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression.olap;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -36,6 +37,11 @@ public class InOlapExpectingPartitionBy<T> extends InOlapExpectingOrderBy<T> {
 
     public <V> InOlapPartitionBy<T> partitionBy(TypedExpression<V> expression) {
         function.addPartitionBy(expression);
+        return new InOlapPartitionBy<>(function);
+    }
+
+    public <V> InOlapPartitionBy<T> partitionBy(Label<V> label) {
+        function.addPartitionBy(UnresolvedColumn.of(label));
         return new InOlapPartitionBy<>(function);
     }
 

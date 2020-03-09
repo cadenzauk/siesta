@@ -22,9 +22,9 @@
 
 package com.cadenzauk.siesta.projection;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
@@ -59,8 +59,8 @@ public class AliasColumns<R> implements Projection<R> {
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod) {
-        return alias.findColumn(getterMethod);
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
+        return alias.findColumn(scope, columnSpecifier);
     }
 
     @Override
@@ -79,7 +79,9 @@ public class AliasColumns<R> implements Projection<R> {
     }
 
     @Override
-    public boolean includes(MethodInfo<?,?> getter) {
-        return getter.referringClass().isAssignableFrom(alias.type().getRawType());
+    public boolean includes(ColumnSpecifier<?> columnSpecifier) {
+        return columnSpecifier.referringClass()
+            .map(r -> r.isAssignableFrom(alias.type().getRawType()))
+            .orElse(false);
     }
 }

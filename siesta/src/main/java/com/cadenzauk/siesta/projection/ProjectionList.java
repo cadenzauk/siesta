@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.projection;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
@@ -68,10 +69,10 @@ public class ProjectionList<R> implements Projection<R> {
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, MethodInfo<?,T> getterMethod) {
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
         return components
             .stream()
-            .flatMap(x -> StreamUtil.of(x.findColumn(scope, getterMethod)))
+            .flatMap(x -> StreamUtil.of(x.findColumn(scope, columnSpecifier)))
             .findFirst();
     }
 
@@ -91,7 +92,7 @@ public class ProjectionList<R> implements Projection<R> {
     }
 
     @Override
-    public boolean includes(MethodInfo<?,?> getter) {
-        return components.stream().anyMatch(x -> x.includes(getter));
+    public boolean includes(ColumnSpecifier<?> columnSpecifier) {
+        return components.stream().anyMatch(x -> x.includes(columnSpecifier));
     }
 }

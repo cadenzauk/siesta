@@ -24,7 +24,9 @@ package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
@@ -33,6 +35,8 @@ import java.util.stream.Stream;
 
 public interface Column<T, R> {
     String propertyName();
+
+    TypeToken<T> type();
 
     String columnName();
 
@@ -77,4 +81,6 @@ public interface Column<T, R> {
     }
 
     <V> Optional<Column<V,T>> findColumn(TypeToken<V> type, String propertyName);
+
+    boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier);
 }

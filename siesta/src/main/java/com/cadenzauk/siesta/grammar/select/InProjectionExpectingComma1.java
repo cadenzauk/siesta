@@ -29,6 +29,7 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Projections;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -50,6 +51,10 @@ public class InProjectionExpectingComma1<T1> extends ExpectingWhere<T1> {
 
     public <T> InProjectionExpectingComma2<T1,T> comma(TypedExpression<T> expression, String label) {
         return comma(expression, OptionalUtil.ofBlankable(label));
+    }
+
+    public <T> InProjectionExpectingComma2<T1,T> comma(TypedExpression<T> expression, Label<T> label) {
+        return comma(expression, OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> InProjectionExpectingComma2<T1,T> comma(Function1<R,T> methodReference) {

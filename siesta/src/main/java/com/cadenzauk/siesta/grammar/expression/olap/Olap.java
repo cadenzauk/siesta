@@ -41,22 +41,22 @@ public final class Olap extends UtilityClass {
     }
 
     public static <R,T> InOlapExpectingPartitionBy<T> sum(Function1<R,T> method) {
-        UnresolvedColumn<T,R> argument = UnresolvedColumn.of(method);
+        UnresolvedColumn<T> argument = UnresolvedColumn.of(method);
         return function("sum", argument.type(), argument);
     }
 
     public static <R,T> InOlapExpectingPartitionBy<T> sum(FunctionOptional1<R,T> method) {
-        UnresolvedColumn<T,R> argument = UnresolvedColumn.of(method);
+        UnresolvedColumn<T> argument = UnresolvedColumn.of(method);
         return function("sum", argument.type(), argument);
     }
 
     public static <R,T> InOlapExpectingPartitionBy<T> sum(String alias, Function1<R,T> method) {
-        UnresolvedColumn<T,R> argument = UnresolvedColumn.of(alias, method);
+        UnresolvedColumn<T> argument = UnresolvedColumn.of(alias, method);
         return function("sum", argument.type(), argument);
     }
 
     public static <R,T> InOlapExpectingPartitionBy<T> sum(String alias, FunctionOptional1<R,T> method) {
-        UnresolvedColumn<T,R> argument = UnresolvedColumn.of(alias, method);
+        UnresolvedColumn<T> argument = UnresolvedColumn.of(alias, method);
         return function("sum", argument.type(), argument);
     }
 

@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.catalog.Table;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -49,6 +50,10 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression, String label) {
         return select(false, expression, OptionalUtil.ofBlankable(label));
+    }
+
+    public <T> InProjectionExpectingComma1<T> select(TypedExpression<T> expression, Label<T> label) {
+        return select(false, expression, OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> InProjectionExpectingComma1<T> select(Function1<R,T> methodReference) {
@@ -99,6 +104,30 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
         return select(ResolvedColumn.of(alias, methodReference), label);
     }
 
+    public <T, R> InProjectionExpectingComma1<T> select(Function1<R,T> methodReference, Label<T> label) {
+        return select(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return select(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(String alias, Function1<R,T> methodReference, Label<T> label) {
+        return select(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(String alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return select(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, Function1<R,T> methodReference, Label<T> label) {
+        return select(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> select(Alias<R> alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return select(ResolvedColumn.of(alias, methodReference), label);
+    }
+
     public <R> InProjectionExpectingComma1<R> select(Class<R> rowClass) {
         Alias<R> alias = scope().findAlias(rowClass);
         return select(alias);
@@ -131,6 +160,10 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
 
     public <T> InProjectionExpectingComma1<T> selectDistinct(TypedExpression<T> expression, String label) {
         return select(true, expression, OptionalUtil.ofBlankable(label));
+    }
+
+    public <T> InProjectionExpectingComma1<T> selectDistinct(TypedExpression<T> expression, Label<T> label) {
+        return select(true, expression, OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> InProjectionExpectingComma1<T> selectDistinct(Function1<R,T> methodReference) {
@@ -178,6 +211,30 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     }
 
     public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
+        return selectDistinct(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Function1<R,T> methodReference, Label<T> label) {
+        return selectDistinct(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return selectDistinct(UnresolvedColumn.of(methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(String alias, Function1<R,T> methodReference, Label<T> label) {
+        return selectDistinct(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(String alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return selectDistinct(UnresolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, Function1<R,T> methodReference, Label<T> label) {
+        return selectDistinct(ResolvedColumn.of(alias, methodReference), label);
+    }
+
+    public <T, R> InProjectionExpectingComma1<T> selectDistinct(Alias<R> alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
         return selectDistinct(ResolvedColumn.of(alias, methodReference), label);
     }
 

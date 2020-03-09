@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
@@ -103,7 +104,9 @@ public class ChainExpression<P, T> implements ColumnExpression<T> {
     }
 
     @Override
-    public <R, X> boolean includes(MethodInfo<R,X> getter) {
-        return Objects.equals(field.method(), getter.method());
+    public <X> boolean includes(ColumnSpecifier<X> getter) {
+        return getter.method()
+            .map(m -> Objects.equals(field.method(), m))
+            .orElse(false);
     }
 }

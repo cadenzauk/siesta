@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.CteAlias;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
@@ -75,8 +76,8 @@ public class CommonTableExpression<RT> {
         return table;
     }
 
-    public <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> method) {
-        return select.projection().findColumn(select.scope, method);
+    public <T> Optional<ProjectionColumn<T>> findColumn(ColumnSpecifier<T> columnSpecifier) {
+        return select.projection().findColumn(select.scope, columnSpecifier);
     }
 
     public Stream<CommonTableExpression<?>> commonTableExpressions() {

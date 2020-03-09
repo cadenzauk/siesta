@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.expression;
 
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
@@ -37,5 +38,5 @@ public interface ColumnExpression<T> extends TypedExpression<T> {
 
     <V> Optional<Column<V, T>> findColumn(Scope scope, TypeToken<V> type, String propertyName);
 
-    <R, X> boolean includes(MethodInfo<R, X> getter);
+    <X> boolean includes(ColumnSpecifier<X> getter);
 }

@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
@@ -78,19 +79,21 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     @Override
-    public <T> RowMapperFactory<T> rowMapperFactoryFor(MethodInfo<?,T> getterMethod, Optional<String> defaultLabel) {
-        Column<T,RT> column = getterMethod.asReferring(type())
+    public <T> RowMapperFactory<T> rowMapperFactoryFor(ColumnSpecifier<T> columnSpecifier, Optional<String> defaultLabel) {
+        Column<T,RT> column = columnSpecifier.asReferringMethodInfo(type())
             .map(this::column)
             .orElseThrow(IllegalArgumentException::new);
         return column.rowMapperFactory(this, defaultLabel);
     }
 
     @Override
-    public Stream<Alias<?>> as(MethodInfo<?,?> getter, Optional<String> requiredAlias) {
+    public Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
         Stream<CteAlias<RT>> aliasStream = requiredAlias
-            .map(a -> as(getter.referringClass(), a)
+            .map(a -> StreamUtil.of(columnSpecifier.referringClass())
+                .flatMap(r -> as(r, a))
                 .map(x -> this))
-            .orElseGet(() -> as(getter.referringClass())
+            .orElseGet(() -> StreamUtil.of(columnSpecifier.referringClass())
+                .flatMap(this::as)
                 .map(x -> this));
         return aliasStream.map(Function.identity());
     }
@@ -106,7 +109,7 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> method) {
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> method) {
         return Optional.empty();
     }
 
@@ -128,7 +131,7 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     private <T> ProjectionColumn<T> makeColumn(Column<T,RT> c) {
-        return new ProjectionColumn<>(c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty()));
+        return new ProjectionColumn<>(c.type(), c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty()));
     }
 
     private <T> Column<T,RT> column(MethodInfo<RT,T> method) {
@@ -153,16 +156,16 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     @Override
-    public <T> String columnSql(MethodInfo<?,T> getterMethod) {
-        Column<T,RT> column = getterMethod.asReferring(type())
+    public <T> String columnSql(Scope scope, ColumnSpecifier<T> columnSpecifier) {
+        Column<T,RT> column = columnSpecifier.asReferringMethodInfo(type())
             .map(this::column)
             .orElseThrow(IllegalArgumentException::new);
         return column.sql(this);
     }
 
     @Override
-    public <T> String columnSqlWithLabel(MethodInfo<?,T> getterMethod, Optional<String> label) {
-        Column<T,RT> column = getterMethod.asReferring(type())
+    public <T> String columnSqlWithLabel(ColumnSpecifier<T> columnSpecifier, Optional<String> label) {
+        Column<T,RT> column = columnSpecifier.asReferringMethodInfo(type())
             .map(this::column)
             .orElseThrow(IllegalArgumentException::new);
         return column.sqlWithLabel(this, label);

@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.ColumnExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.ExpressionBuilder;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -43,6 +44,10 @@ public class ExpectingWhere<RT> extends ExpectingGroupBy<RT> {
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(TypedExpression<T> lhs) {
         return ExpressionBuilder.of(lhs, statement::setWhereClause);
+    }
+
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
     }
 
     public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> where(Function1<R,T> lhs) {

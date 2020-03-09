@@ -26,6 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Order;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 public abstract class ExpectingOrderBy<RT> extends Select<RT> {
@@ -39,6 +40,10 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
 
     public <T> InOrderByExpectingThen<RT> orderBy(TypedExpression<T> expression) {
         return new InOrderByExpectingThen<>(statement).then(expression);
+    }
+
+    public <T> InOrderByExpectingThen<RT> orderBy(Label<T> label) {
+        return new InOrderByExpectingThen<>(statement).then(label);
     }
 
     public <T, R> InOrderByExpectingThen<RT> orderBy(Function1<R,T> columnGetter) {
@@ -67,6 +72,10 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
 
     public <T> InOrderByExpectingThen<RT> orderBy(TypedExpression<T> expression, Order order) {
         return new InOrderByExpectingThen<>(statement).then(expression, order);
+    }
+
+    public <T> InOrderByExpectingThen<RT> orderBy(Label<T> label, Order order) {
+        return new InOrderByExpectingThen<>(statement).then(label, order);
     }
 
     public <T, R> InOrderByExpectingThen<RT> orderBy(Function1<R,T> columnGetter, Order order) {

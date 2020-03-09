@@ -52,6 +52,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -76,10 +77,7 @@ class TableAliasTest {
     private MethodInfo<WidgetRow,Long> methodInfo;
 
     @Mock
-    private MethodInfo<ManufacturerRow,Long> manufacturerMethodInfo;
-
-    @Mock
-    private MethodInfo<Object,Long> objectMethodInfo;
+    private ColumnSpecifier<Long> columnSpecifier;
 
     @Mock
     private Column<Long,WidgetRow> widgetRowId;
@@ -218,7 +216,7 @@ class TableAliasTest {
         when(widgetTable.column(MethodInfo.of(WidgetRow::name))).thenReturn(column);
         when(column.sql(sut)).thenReturn("colname");
 
-        String result = sut.columnSql(MethodInfo.of(WidgetRow::name));
+        String result = sut.columnSql(scope, ColumnSpecifier.of(WidgetRow::name));
 
         assertThat(result, is("colname"));
     }
@@ -230,7 +228,7 @@ class TableAliasTest {
         when(widgetTable.column(MethodInfo.of(WidgetRow::name))).thenReturn(column);
         when(column.sqlWithLabel(sut, Optional.of("fred"))).thenReturn("colname as foo");
 
-        String result = sut.columnSqlWithLabel(MethodInfo.of(WidgetRow::name), Optional.of("fred"));
+        String result = sut.columnSqlWithLabel(ColumnSpecifier.of(WidgetRow::name), Optional.of("fred"));
 
         assertThat(result, is("colname as foo"));
     }
@@ -292,13 +290,14 @@ class TableAliasTest {
 
     @Test
     void findColumnOfCorrectTypeReturnsColumn() {
-        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        when(methodInfo.asReferring(TypeToken.of(WidgetRow.class))).thenReturn(Optional.of(methodInfo));
-        when(widgetTable.column(methodInfo)).thenReturn(widgetRowId);
+        when(columnSpecifier.effectiveClass()).thenReturn(Long.class);
+        when(columnSpecifier.specifies(any(), any())).thenReturn(true);
+        when(widgetTable.columns()).thenReturn(Stream.of(widgetRowId));
+        when(widgetRowId.type()).thenReturn(TypeToken.of(long.class));
         when(widgetRowId.columnName()).thenReturn("bob");
         Alias<?> sut = TableAlias.of(widgetTable, "joe");
 
-        Optional<ProjectionColumn<Long>> result = sut.findColumn(methodInfo);
+        Optional<ProjectionColumn<Long>> result = sut.findColumn(scope, columnSpecifier);
 
         assertThat(result.map(ProjectionColumn::columnSql), is(Optional.of("bob")));
         assertThat(result.map(ProjectionColumn::label), is(Optional.of("joe_bob")));
@@ -306,11 +305,12 @@ class TableAliasTest {
 
     @Test
     void findColumnOfIncorrectTypeReturnsEmpty() {
-        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        when(methodInfo.asReferring(TypeToken.of(WidgetRow.class))).thenReturn(Optional.empty());
+        when(widgetTable.columns()).thenReturn(Stream.of(column));
+        when(column.type()).thenReturn(TypeToken.of(String.class));
+        when(columnSpecifier.effectiveClass()).thenReturn(Long.class);
         Alias<?> sut = TableAlias.of(widgetTable, "joe");
 
-        Optional<ProjectionColumn<Long>> result = sut.findColumn(methodInfo);
+        Optional<ProjectionColumn<Long>> result = sut.findColumn(scope, columnSpecifier);
 
         assertThat(result, OptionalMatchers.empty());
     }
@@ -328,10 +328,10 @@ class TableAliasTest {
 
     @Test
     void projectionColumnsHaveTheRightColumnSql() {
-        Alias<?> sut = TableAlias.of(widgetTable, "band");
         when(widgetTable.columns()).thenReturn(Stream.of(column, column2));
         when(column.columnName()).thenReturn("axl");
         when(column2.columnName()).thenReturn("slash");
+        Alias<?> sut = TableAlias.of(widgetTable, "band");
 
         Stream<ProjectionColumn<?>> result = sut.projectionColumns(scope);
 
@@ -365,12 +365,12 @@ class TableAliasTest {
     @Test
     void rowMapperFactoryForDelegatesToColumn()  {
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        when(methodInfo.asReferring(TypeToken.of(WidgetRow.class))).thenReturn(Optional.of(methodInfo));
+        when(columnSpecifier.asReferringMethodInfo(TypeToken.of(WidgetRow.class))).thenReturn(Optional.of(methodInfo));
         when(widgetTable.column(methodInfo)).thenReturn(widgetRowId);
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
         when(widgetRowId.rowMapperFactory(sut, Optional.of("foo"))).thenReturn(rowMapperFactoryForColumn);
 
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(methodInfo, Optional.of("foo"));
+        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("foo"));
 
         assertThat(result, sameInstance(rowMapperFactoryForColumn));
         verify(widgetRowId).rowMapperFactory(sut, Optional.of("foo"));
@@ -452,22 +452,22 @@ class TableAliasTest {
 
     @Test
     void asMethodInfoFromSameClassWithRightNameReturnsAlias()  {
-        when(methodInfo.referringClass()).thenReturn(WidgetRow.class);
+        when(columnSpecifier.referringClass()).thenReturn(Optional.of(WidgetRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.of("wilma")).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("wilma")).collect(toList());
 
         assertThat(result, containsInAnyOrder(sut));
     }
 
     @Test
     void asMethodInfoForDifferentClassWithWrongNameThrowsException()  {
-        when(manufacturerMethodInfo.referringClass()).thenReturn(ManufacturerRow.class);
+        when(columnSpecifier.referringClass()).thenReturn(Optional.of(ManufacturerRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
 
-        calling(() -> sut.as(manufacturerMethodInfo, Optional.of("wilma")))
+        calling(() -> sut.as(scope, columnSpecifier, Optional.of("wilma")))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Alias wilma is an alias for " +
                 "com.cadenzauk.siesta.model.WidgetRow and not " +
@@ -478,7 +478,7 @@ class TableAliasTest {
     void asMethodInfoForRightClassWithDifferentNameReturnsEmpty()  {
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "pebbles");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.of("dino")).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("dino")).collect(toList());
 
         assertThat(result, Matchers.empty());
     }
@@ -487,40 +487,40 @@ class TableAliasTest {
     void asMethodInfoForDifferentClassWithDifferentNameReturnsEmpty()  {
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "dino");
 
-        List<Alias<?>> result = sut.as(manufacturerMethodInfo, Optional.of("burt")).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("burt")).collect(toList());
 
         assertThat(result, Matchers.empty());
     }
 
     @Test
     void asMethodInfoWithWrongClassReturnsEmpty()  {
-        when(manufacturerMethodInfo.referringClass()).thenReturn(ManufacturerRow.class);
+        when(columnSpecifier.referringClass()).thenReturn(Optional.of(ManufacturerRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "dino");
 
-        List<Alias<?>> result = sut.as(manufacturerMethodInfo, Optional.empty()).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
         assertThat(result, Matchers.empty());
     }
 
     @Test
     void asMethodInfoWithSameClassReturnsAlias()  {
-        when(methodInfo.referringClass()).thenReturn(WidgetRow.class);
+        when(columnSpecifier.referringClass()).thenReturn(Optional.of(WidgetRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.empty()).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
         assertThat(result, containsInAnyOrder(sut));
     }
 
     @Test
     void asMethodInfoWithSuperClassReturnsAlias()  {
-        when(objectMethodInfo.referringClass()).thenReturn(Object.class);
+        when(columnSpecifier.referringClass()).thenReturn(Optional.of(Object.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
 
-        List<Alias<?>> result = sut.as(objectMethodInfo, Optional.empty()).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
         assertThat(result, containsInAnyOrder(sut));
     }

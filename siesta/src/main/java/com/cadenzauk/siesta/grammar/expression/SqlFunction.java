@@ -92,6 +92,10 @@ public class SqlFunction<T> implements TypedExpression<T> {
         return of(name, arg.type(), arg);
     }
 
+    public static <T> SqlFunction<T> of(FunctionName name, Label<T> arg) {
+        return of(name, UnresolvedColumn.of(arg));
+    }
+
     public static <R,T> SqlFunction<T> of(FunctionName name, Function1<R,T> methodReference) {
         return of(name, UnresolvedColumn.of(methodReference));
     }

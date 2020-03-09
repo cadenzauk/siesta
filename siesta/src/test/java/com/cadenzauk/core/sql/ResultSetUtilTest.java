@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -85,9 +86,7 @@ class ResultSetUtilTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(TestCaseArgumentsProvider.class)
-    @TestCase("true")
-    @TestCase("false")
+    @CsvSource({"true", "false"})
     void stream(boolean close) throws SQLException {
         int count = RandomUtils.nextInt(5, 10);
         String[] mappedRows = Stream.generate(() -> RandomStringUtils.randomAlphabetic(30)).limit(count).toArray(String[]::new);

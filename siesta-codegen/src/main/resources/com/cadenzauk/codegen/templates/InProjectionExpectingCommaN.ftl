@@ -30,6 +30,7 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Projections;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -58,12 +59,20 @@ public class InProjectionExpectingComma${n}<${typelist_space}> extends Expecting
         return comma(expression, OptionalUtil.ofBlankable(label));
     }
 
+    public <T> ${result} comma(TypedExpression<T> expression, Label<T> label) {
+        return comma(expression, OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> ${result} comma(Function1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(methodReference), Optional.empty());
     }
 
     public <T, R> ${result} comma(Function1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> ${result} comma(Function1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> ${result} comma(FunctionOptional1<R,T> methodReference) {
@@ -74,12 +83,20 @@ public class InProjectionExpectingComma${n}<${typelist_space}> extends Expecting
         return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T, R> ${result} comma(FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(methodReference), OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> ${result} comma(String alias, Function1<R,T> methodReference) {
         return comma(UnresolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
     public <T, R> ${result} comma(String alias, Function1<R,T> methodReference, String label) {
         return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> ${result} comma(String alias, Function1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T, R> ${result} comma(String alias, FunctionOptional1<R,T> methodReference) {
@@ -90,6 +107,10 @@ public class InProjectionExpectingComma${n}<${typelist_space}> extends Expecting
         return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T, R> ${result} comma(String alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return comma(UnresolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> ${result} comma(Alias<R> alias, Function1<R,T> methodReference) {
         return comma(ResolvedColumn.of(alias, methodReference), Optional.empty());
     }
@@ -98,12 +119,20 @@ public class InProjectionExpectingComma${n}<${typelist_space}> extends Expecting
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
     }
 
+    public <T, R> ${result} comma(Alias<R> alias, Function1<R,T> methodReference, Label<T> label) {
+        return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
+    }
+
     public <T, R> ${result} comma(Alias<R> alias, FunctionOptional1<R,T> methodReference) {
         return comma(ResolvedColumn.of(alias, methodReference), Optional.empty());
     }
 
     public <T, R> ${result} comma(Alias<R> alias, FunctionOptional1<R,T> methodReference, String label) {
         return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label));
+    }
+
+    public <T, R> ${result} comma(Alias<R> alias, FunctionOptional1<R,T> methodReference, Label<T> label) {
+        return comma(ResolvedColumn.of(alias, methodReference), OptionalUtil.ofBlankable(label.label()));
     }
 
     public <T> ${result} comma(Class<T> rowClass) {

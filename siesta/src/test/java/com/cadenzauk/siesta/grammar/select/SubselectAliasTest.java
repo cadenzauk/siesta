@@ -24,10 +24,10 @@ package com.cadenzauk.siesta.grammar.select;
 
 import co.unruly.matchers.OptionalMatchers;
 import co.unruly.matchers.StreamMatchers;
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
@@ -65,10 +65,7 @@ class SubselectAliasTest {
     private Database database;
 
     @Mock
-    private MethodInfo<WidgetRow,Long> methodInfo;
-
-    @Mock
-    private MethodInfo<ManufacturerRow,Long> manufacturerMethodInfo;
+    private ColumnSpecifier<Long> columnSpecifier;
 
     @Mock
     private Alias<ManufacturerRow> manufacturerAlias;
@@ -117,10 +114,10 @@ class SubselectAliasTest {
 
     @Test
     void findColumnDelegatesToSelect() {
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "ernie");
 
-        Optional<ProjectionColumn<Long>> result = sut.findColumn(methodInfo);
+        Optional<ProjectionColumn<Long>> result = sut.findColumn(scope, columnSpecifier);
 
         assertThat(result, is(Optional.of(projectionColumn)));
     }
@@ -200,10 +197,10 @@ class SubselectAliasTest {
     @Test
     void columnSql() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "barney");
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.label()).thenReturn("rubble");
 
-        String result = sut.columnSql(methodInfo);
+        String result = sut.columnSql(scope, columnSpecifier);
 
         assertThat(result, is("barney.rubble"));
     }
@@ -211,10 +208,10 @@ class SubselectAliasTest {
     @Test
     void columnSqlWithLabelGivenEmptyLabel() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "fred");
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.label()).thenReturn("flintstone");
 
-        String result = sut.columnSqlWithLabel(methodInfo, Optional.empty());
+        String result = sut.columnSqlWithLabel(columnSpecifier, Optional.empty());
 
         assertThat(result, is("fred.flintstone fred_flintstone"));
     }
@@ -222,10 +219,10 @@ class SubselectAliasTest {
     @Test
     void columnSqlWithLabelGivenNonEmptyLabel() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "fred");
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.label()).thenReturn("flintstone");
 
-        String result = sut.columnSqlWithLabel(methodInfo, Optional.of("caveman"));
+        String result = sut.columnSqlWithLabel(columnSpecifier, Optional.of("caveman"));
 
         assertThat(result, is("fred.flintstone caveman"));
     }
@@ -301,11 +298,11 @@ class SubselectAliasTest {
 
     @Test
     void rowMapperFactoryForReturnsRowMapperFactoryThatUsesLabelIfGiven() {
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
 
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(methodInfo, Optional.of("burt"));
+        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("burt"));
 
         verifyZeroInteractions(columnRowMapperFactory);
         result.rowMapper(Optional.of("foo"));
@@ -314,11 +311,11 @@ class SubselectAliasTest {
 
     @Test
     void rowMapperFactoryForReturnsRowMapperFactoryThatUsesDefaultLabelIfNoLabelGiven() {
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
 
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(methodInfo, Optional.of("burt"));
+        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("burt"));
 
         verifyZeroInteractions(columnRowMapperFactory);
         result.rowMapper(Optional.empty());
@@ -327,12 +324,12 @@ class SubselectAliasTest {
 
     @Test
     void rowMapperFactoryForReturnsRowMapperFactoryThatUsesCalculatedLabelIfNoLabelOrDefaultGiven() {
-        when(select.findColumn(methodInfo)).thenReturn(Optional.of(projectionColumn));
+        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
         when(projectionColumn.label()).thenReturn("col");
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
 
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(methodInfo, Optional.empty());
+        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.empty());
 
         verifyZeroInteractions(columnRowMapperFactory);
         result.rowMapper(Optional.empty());
@@ -341,22 +338,22 @@ class SubselectAliasTest {
 
     @Test
     void asMethodInfoFromSameClassWithRightNameReturnsAlias()  {
-        when(select.projectionIncludes(methodInfo)).thenReturn(true);
+        when(select.projectionIncludes(columnSpecifier)).thenReturn(true);
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "wilma");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.of("wilma")).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("wilma")).collect(toList());
 
         assertThat(result, containsInAnyOrder(sut));
     }
 
     @Test
     void asMethodInfoForDifferentClassWithWrongNameThrowsException()  {
-        when(select.projectionIncludes(manufacturerMethodInfo)).thenReturn(false);
-        when(manufacturerMethodInfo.referringClass()).thenReturn(ManufacturerRow.class);
+        when(select.projectionIncludes(columnSpecifier)).thenReturn(false);
+        when(columnSpecifier.referringClass()).thenReturn(Optional.of(ManufacturerRow.class));
         when(select.type()).thenReturn(TypeToken.of(WidgetRow.class));
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "wilma");
 
-        calling(() -> sut.as(manufacturerMethodInfo, Optional.of("wilma")))
+        calling(() -> sut.as(scope, columnSpecifier, Optional.of("wilma")))
             .shouldThrow(IllegalArgumentException.class)
             .withMessage(is("Alias wilma is an alias for " +
                 "com.cadenzauk.siesta.model.WidgetRow and not " +
@@ -367,7 +364,7 @@ class SubselectAliasTest {
     void asMethodInfoForRightClassWithDifferentNameReturnsEmpty()  {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "wilma");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.of("dino")).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("dino")).collect(toList());
 
         assertThat(result, Matchers.empty());
     }
@@ -376,27 +373,27 @@ class SubselectAliasTest {
     void asMethodInfoForDifferentClassWithDifferentNameReturnsEmpty()  {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "dino");
 
-        List<Alias<?>> result = sut.as(manufacturerMethodInfo, Optional.of("burt")).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("burt")).collect(toList());
 
         assertThat(result, Matchers.empty());
     }
 
     @Test
     void asMethodInfoWithWrongClassReturnsEmpty()  {
-        when(select.projectionIncludes(methodInfo)).thenReturn(false);
+        when(select.projectionIncludes(columnSpecifier)).thenReturn(false);
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "dino");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.empty()).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
         assertThat(result, Matchers.empty());
     }
 
     @Test
     void asMethodInfoWithSameClassReturnsAlias()  {
-        when(select.projectionIncludes(methodInfo)).thenReturn(true);
+        when(select.projectionIncludes(columnSpecifier)).thenReturn(true);
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "wilma");
 
-        List<Alias<?>> result = sut.as(methodInfo, Optional.empty()).collect(toList());
+        List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
         assertThat(result, containsInAnyOrder(sut));
     }

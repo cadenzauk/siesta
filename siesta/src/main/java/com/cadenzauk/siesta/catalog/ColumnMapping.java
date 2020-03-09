@@ -507,6 +507,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
                 fieldInfo.optionalGetter(),
                 Setter.forField(builderType, fieldInfo.effectiveClass(), builderField))
                 .overrides(overrides)
+                .type(fieldInfo.effectiveType())
                 .identifier(idAnnotation.isPresent() || embeddedIdAnnotation.isPresent())
                 .insertable(determineInsertableFor(fieldInfo))
                 .updatable(determineUpdateableFor(fieldInfo))

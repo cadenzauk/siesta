@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
@@ -80,10 +79,10 @@ public class Scope {
         return new Scope(database());
     }
 
-    public  Alias<?> findAlias(MethodInfo<?, ?> getter, Optional<String> requiredAlias) {
-        Optional<Alias<?>> found = aliases.stream().flatMap(a -> a.as(getter, requiredAlias)).findFirst();
+    public Alias<?> findAlias(ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
+        Optional<Alias<?>> found = aliases.stream().flatMap(a -> a.as(this, columnSpecifier, requiredAlias)).findFirst();
         return found
-            .orElseGet(() -> outer.map(o -> o.findAlias(getter, requiredAlias))
+            .orElseGet(() -> outer.map(o -> o.findAlias(columnSpecifier, requiredAlias))
                 .orElseThrow(() -> new IllegalArgumentException("No such alias as " + requiredAlias + " in scope.")));
     }
 
@@ -134,8 +133,8 @@ public class Scope {
         return new Scope(this, ImmutableList.of()) {
 
             @Override
-            public Alias<?> findAlias(MethodInfo<?,?> getter, Optional<String> requiredAlias) {
-                Alias<?> found = super.findAlias(getter, requiredAlias);
+            public Alias<?> findAlias(ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
+                Alias<?> found = super.findAlias(columnSpecifier, requiredAlias);
                 if (Objects.equals(lookingFor, found)) {
                     result.set(true);
                 }
@@ -159,13 +158,6 @@ public class Scope {
                 }
                 return found;
             }
-        };
-    }
-
-    public static <S> BiFunction<Scope,String,RowMapper<S>> makeMapper(Class<S> resultClass) {
-        return (scope, label) -> {
-            final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
-            return rs -> dataType.get(rs, label, scope.database()).orElse(null);
         };
     }
 

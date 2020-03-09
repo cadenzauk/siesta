@@ -27,8 +27,10 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.NamingStrategy;
+import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
 import java.sql.ResultSet;
@@ -41,6 +43,7 @@ import static java.util.stream.Collectors.joining;
 
 public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, ColumnCollection<T> {
     private final String propertyName;
+    private final TypeToken<T> type;
     private final String columnName;
     private final boolean identifier;
     private final boolean insertable;
@@ -51,6 +54,7 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
 
     private EmbeddedColumn(Builder<T,TB,R,RB> builder) {
         propertyName = builder.propertyName;
+        type = builder.type;
         identifier = builder.identifier;
         insertable = builder.insertable;
         updatable = builder.updatable;
@@ -63,6 +67,11 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     @Override
     public String propertyName() {
         return propertyName;
+    }
+
+    @Override
+    public TypeToken<T> type() {
+        return type;
     }
 
     @Override
@@ -208,6 +217,11 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
+    public boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier) {
+        return false;
+    }
+
+    @Override
     public Stream<Object> toDatabase(Database database, Optional<T> v) {
         return columns().flatMap(c -> c.rowToDatabase(database, v));
     }
@@ -245,6 +259,7 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
         private final String propertyName;
         private final Function<R,Optional<T>> getter;
         private final BiConsumer<RB,Optional<T>> setter;
+        public TypeToken<T> type;
         private boolean identifier = false;
         private boolean insertable = true;
         private boolean updatable = true;
@@ -261,10 +276,16 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
         public <BB> Builder<T,BB,R,RB> builder(Function1<BB,T> buildRow) {
             MethodInfo<BB,T> buildMethod = MethodInfo.of(buildRow);
             return new Builder<>(database, propertyName, rowType, buildMethod.referringType(), getter, setter, buildRow)
+                .type(type)
                 .identifier(identifier)
                 .insertable(insertable)
                 .updatable(updatable)
                 .columnName(columnName);
+        }
+
+        public Builder<T,TB,R,RB> type(TypeToken<T> val) {
+            this.type = val;
+            return this;
         }
 
         public Builder<T,TB,R,RB> identifier(boolean val) {

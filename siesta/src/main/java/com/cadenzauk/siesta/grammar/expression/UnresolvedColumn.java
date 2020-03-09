@@ -27,6 +27,7 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
@@ -35,35 +36,45 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class UnresolvedColumn<T,R> implements ColumnExpression<T> {
+public class UnresolvedColumn<T> implements ColumnExpression<T> {
     private final Optional<String> alias;
-    private final MethodInfo<R,T> getterMethod;
+    private final ColumnSpecifier<T> columnSpec;
 
-    private UnresolvedColumn(MethodInfo<R,T> getterMethod) {
-        this.getterMethod = getterMethod;
+    private UnresolvedColumn(MethodInfo<?,T> getterMethod) {
         this.alias = Optional.empty();
+        columnSpec = ColumnSpecifier.of(getterMethod);
     }
 
-    private UnresolvedColumn(String alias, MethodInfo<R,T> getterMethod) {
+    private UnresolvedColumn(String alias, MethodInfo<?,T> getterMethod) {
         this.alias = Optional.of(alias);
-        this.getterMethod = getterMethod;
+        columnSpec = ColumnSpecifier.of(getterMethod);
+    }
+
+    private UnresolvedColumn(Class<T> effectiveClass, String name) {
+        this.alias = Optional.empty();
+        columnSpec = ColumnSpecifier.of(effectiveClass, name);
+    }
+
+    private UnresolvedColumn(String alias, Class<T> effectiveClass, String name) {
+        this.alias = Optional.of(alias);
+        columnSpec = ColumnSpecifier.of(effectiveClass, name);
     }
 
     @Override
     public String sql(Scope scope) {
         Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.columnSql(getterMethod);
+        return resolvedAlias.columnSql(scope, columnSpec);
     }
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
         Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.columnSqlWithLabel(getterMethod, label);
+        return resolvedAlias.columnSqlWithLabel(columnSpec, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        return scope.database().columnNameFor(getterMethod);
+        return columnSpec.columnName(scope);
     }
 
     @Override
@@ -78,60 +89,69 @@ public class UnresolvedColumn<T,R> implements ColumnExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        String columnName = scope.database().columnNameFor(getterMethod);
+        String columnName = columnSpec.columnName(scope);
         return resolve(scope).inSelectClauseLabel(columnName);
     }
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
         Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.rowMapperFactoryFor(getterMethod, Optional.empty());
+        return resolvedAlias.rowMapperFactoryFor(columnSpec, Optional.empty());
     }
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
         Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.rowMapperFactoryFor(getterMethod, defaultLabel);
+        return resolvedAlias.rowMapperFactoryFor(columnSpec, defaultLabel);
     }
 
     @Override
     public TypeToken<T> type() {
-        return TypeToken.of(getterMethod.effectiveClass());
+        return TypeToken.of(columnSpec.effectiveClass());
     }
 
     @Override
     public Alias<?> resolve(Scope scope) {
-        return scope.findAlias(getterMethod, alias);
+        return scope.findAlias(columnSpec, alias);
     }
 
     @Override
     public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
-        Column<T,R> column = scope.database().column(getterMethod);
-        return column.findColumn(type, propertyName);
+        return columnSpec
+            .column(scope)
+            .flatMap(c -> c.findColumn(type, propertyName));
     }
 
     @Override
-    public <R2, X> boolean includes(MethodInfo<R2,X> getter) {
-        return Objects.equals(getterMethod.method(), getter.method());
+    public <X> boolean includes(ColumnSpecifier<X> columnSpecifier) {
+        return Objects.equals(columnSpec, columnSpecifier);
     }
 
-    public static <T, R> UnresolvedColumn<T,R> of(Function1<R,T> getter) {
+    public static <T, R> UnresolvedColumn<T> of(Function1<R,T> getter) {
         MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(method);
     }
 
-    public static <T, R> UnresolvedColumn<T,R> of(FunctionOptional1<R,T> getter) {
+    public static <T, R> UnresolvedColumn<T> of(FunctionOptional1<R,T> getter) {
         MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(method);
     }
 
-    public static <T, R> UnresolvedColumn<T,R> of(String alias, Function1<R,T> getter) {
+    public static <T, R> UnresolvedColumn<T> of(String alias, Function1<R,T> getter) {
         MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(alias, method);
     }
 
-    public static <T, R> UnresolvedColumn<T,R> of(String alias, FunctionOptional1<R,T> getter) {
+    public static <T, R> UnresolvedColumn<T> of(String alias, FunctionOptional1<R,T> getter) {
         MethodInfo<R,T> method = MethodInfo.of(getter);
         return new UnresolvedColumn<>(alias, method);
+    }
+
+    public static <T> UnresolvedColumn<T> of(Label<T> label) {
+        return new UnresolvedColumn<>(label.effectiveClass(), label.label());
+    }
+
+    public static <T> UnresolvedColumn<T> of(String alias, Label<T> label) {
+        return new UnresolvedColumn<>(alias, label.effectiveClass(), label.label());
     }
 }

@@ -22,13 +22,11 @@
 
 package com.cadenzauk.siesta.projection;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
-import com.cadenzauk.core.util.OptionalUtil;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.expression.ColumnExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.ImmutableList;
 
@@ -59,12 +57,19 @@ public class ExpressionProjection<T> implements Projection<T> {
 
     @Override
     public Stream<ProjectionColumn<?>> columns(Scope scope) {
-        return Stream.of(new ProjectionColumn<>(expression.sql(scope), label.orElseGet(() -> expression.label(scope)), expression.rowMapperFactory(scope, label)));
+        return Stream.of(projectionColumn(scope));
+    }
+
+    private ProjectionColumn<T> projectionColumn(Scope scope) {
+        return new ProjectionColumn<>(expression.type(), expression.sql(scope), label.orElseGet(() -> expression.label(scope)), expression.rowMapperFactory(scope, label));
     }
 
     @Override
-    public <T2> Optional<ProjectionColumn<T2>> findColumn(Scope scope, MethodInfo<?,T2> getterMethod) {
-        return Optional.empty();
+    public <T2> Optional<ProjectionColumn<T2>> findColumn(Scope scope, ColumnSpecifier<T2> columnSpecifier) {
+        return projectionColumn(scope)
+            .as(columnSpecifier.effectiveClass())
+            .filter(x -> includes(columnSpecifier))
+            .findAny();
     }
 
     @Override
@@ -83,10 +88,9 @@ public class ExpressionProjection<T> implements Projection<T> {
     }
 
     @Override
-    public boolean includes(MethodInfo<?,?> getter) {
-        return getter.asEffective(expression.type())
-            .flatMap(g -> OptionalUtil.as(ColumnExpression.class, expression)
-                .map(c -> c.includes(g)))
+    public boolean includes(ColumnSpecifier<?> columnSpecifier) {
+        return columnSpecifier.asEffective(expression.type())
+            .map(cs -> cs.isSpecificationFor(expression, label))
             .orElse(false);
     }
 }

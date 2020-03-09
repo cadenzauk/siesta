@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.select;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
 public abstract class ExpectingGroupBy<RT> extends ExpectingUnion<RT> {
@@ -33,6 +34,10 @@ public abstract class ExpectingGroupBy<RT> extends ExpectingUnion<RT> {
     }
 
     public <T> InGroupByExpectingComma<RT> groupBy(TypedExpression<T> expression) {
+        return new InGroupByExpectingComma<>(statement).comma(expression);
+    }
+
+    public <T> InGroupByExpectingComma<RT> groupBy(Label<T> expression) {
         return new InGroupByExpectingComma<>(statement).comma(expression);
     }
 

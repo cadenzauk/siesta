@@ -99,6 +99,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return complete(new OperatorExpressionCondition<>("=", expression, selectivity));
     }
 
+    public N isEqualTo(Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(label), selectivity));
+    }
+
     public <R> N isEqualTo(Function1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(getter), selectivity));
     }
@@ -130,6 +134,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     public N isNotEqualTo(TypedExpression<T> expression) {
         return complete(new OperatorExpressionCondition<>("<>", expression, selectivity));
+    }
+
+    public N isNotEqualTo(Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(label), selectivity));
     }
 
     public <R> N isNotEqualTo(Function1<R,T> getter) {
@@ -165,6 +173,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return complete(new OperatorExpressionCondition<>(">", expression, selectivity));
     }
 
+    public N isGreaterThan(Label<T> label) {
+        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(label), selectivity));
+    }
+
     public <R> N isGreaterThan(Function1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(getter), selectivity));
     }
@@ -196,6 +208,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     public N isLessThan(TypedExpression<T> expression) {
         return complete(new OperatorExpressionCondition<>("<", expression, selectivity));
+    }
+
+    public N isLessThan(Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(label), selectivity));
     }
 
     public <R> N isLessThan(Function1<R,T> getter) {
@@ -231,6 +247,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return complete(new OperatorExpressionCondition<>(">=", expression, selectivity));
     }
 
+    public N isGreaterThanOrEqualTo(Label<T> label) {
+        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(label), selectivity));
+    }
+
     public <R> N isGreaterThanOrEqualTo(Function1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(getter), selectivity));
     }
@@ -262,6 +282,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     public N isLessThanOrEqualTo(TypedExpression<T> expression) {
         return complete(new OperatorExpressionCondition<>("<=", expression, selectivity));
+    }
+
+    public N isLessThanOrEqualTo(Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(label), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(Function1<R,T> getter) {

@@ -26,6 +26,7 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
@@ -43,6 +44,10 @@ public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
 
     public <T> InSelectIntoExpectingAs<RT,T> with(TypedExpression<T> expression) {
         return new InSelectIntoExpectingAs<>(this, expression);
+    }
+
+    public <T> InSelectIntoExpectingAs<RT,T> with(Label<T> label) {
+        return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(label));
     }
 
     public <T, R> InSelectIntoExpectingAs<RT,T> with(Function1<R,T> methodReference) {

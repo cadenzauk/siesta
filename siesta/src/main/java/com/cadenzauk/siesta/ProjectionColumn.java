@@ -23,13 +23,20 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.sql.RowMapperFactory;
+import com.google.common.reflect.TypeToken;
+
+import java.util.stream.Stream;
+
+import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
 
 public class ProjectionColumn<T> {
+    private final TypeToken<T> type;
     private final String columnSql;
     private final String label;
     private final RowMapperFactory<T> rowMapperFactory;
 
-    public ProjectionColumn(String columnSql, String label, RowMapperFactory<T> rowMapperFactory) {
+    public ProjectionColumn(TypeToken<T> type, String columnSql, String label, RowMapperFactory<T> rowMapperFactory) {
+        this.type = type;
         this.columnSql = columnSql;
         this.label = label;
         this.rowMapperFactory = rowMapperFactory;
@@ -43,7 +50,18 @@ public class ProjectionColumn<T> {
         return label;
     }
 
+    public TypeToken<T> type() {
+        return type;
+    }
+
     public RowMapperFactory<T> rowMapperFactory() {
         return rowMapperFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T2> Stream<ProjectionColumn<T2>> as(Class<T2> type) {
+        return boxedType(type).isAssignableFrom(boxedType(this.type.getRawType()))
+            ? Stream.of((ProjectionColumn<T2>)this)
+            : Stream.empty();
     }
 }

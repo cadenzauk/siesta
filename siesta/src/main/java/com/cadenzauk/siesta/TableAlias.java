@@ -22,8 +22,8 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
@@ -32,18 +32,31 @@ import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class TableAlias<R> extends Alias<R> {
     private final Table<R> table;
     private final Optional<String> aliasName;
+    private final Lazy<List<ProjectionColumn<?>>> projectionColumns = new Lazy<>(this::computeProjectionColumns);
 
     private TableAlias(Table<R> table, Optional<String> aliasName) {
         this.table = table;
         this.aliasName = aliasName;
+    }
+
+    private List<ProjectionColumn<?>> computeProjectionColumns() {
+        return table.columns()
+            .map(this::projectionColumn)
+            .collect(toList());
+    }
+
+    private <T> ProjectionColumn<T> projectionColumn(Column<T,R> c) {
+        return new ProjectionColumn<>(c.type(), c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty()));
     }
 
     @Override
@@ -99,16 +112,16 @@ public class TableAlias<R> extends Alias<R> {
     }
 
     @Override
-    public <T> String columnSql(MethodInfo<?,T> getterMethod) {
-        Column<T,R> column = getterMethod.asReferring(type())
+    public <T> String columnSql(Scope scope, ColumnSpecifier<T> columnSpecifier) {
+        Column<T,R> column = columnSpecifier.asReferringMethodInfo(type())
             .map(table::column)
             .orElseThrow(IllegalArgumentException::new);
         return column.sql(this);
     }
 
     @Override
-    public <T> String columnSqlWithLabel(MethodInfo<?,T> getterMethod, Optional<String> label) {
-        Column<T,R> column = getterMethod.asReferring(type())
+    public <T> String columnSqlWithLabel(ColumnSpecifier<T> columnSpecifier, Optional<String> label) {
+        Column<T,R> column = columnSpecifier.asReferringMethodInfo(type())
             .map(table::column)
             .orElseThrow(IllegalArgumentException::new);
         return column.sqlWithLabel(this, label);
@@ -145,14 +158,13 @@ public class TableAlias<R> extends Alias<R> {
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(MethodInfo<?,T> method) {
-        return method.asReferring(type())
-            .map(this::column)
-            .map(c -> new ProjectionColumn<>(c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty())));
-    }
-
-    private <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
-        return table().column(methodInfo);
+    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
+        return projectionColumns
+            .get()
+            .stream()
+            .flatMap(pc -> pc.as(columnSpecifier.effectiveClass()))
+            .filter(x -> columnSpecifier.specifies(scope, x))
+            .findFirst();
     }
 
     @Override
@@ -164,8 +176,7 @@ public class TableAlias<R> extends Alias<R> {
 
     @Override
     public Stream<ProjectionColumn<?>> projectionColumns(Scope scope) {
-        return table.columns()
-            .map(c -> new ProjectionColumn<>(c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty())));
+        return projectionColumns.get().stream();
     }
 
     @Override
@@ -179,26 +190,33 @@ public class TableAlias<R> extends Alias<R> {
     }
 
     @Override
-    public <T> RowMapperFactory<T> rowMapperFactoryFor(MethodInfo<?,T> getterMethod, Optional<String> defaultLabel) {
-        Column<T,R> column = getterMethod.asReferring(type())
+    public <T> RowMapperFactory<T> rowMapperFactoryFor(ColumnSpecifier<T> getterMethod, Optional<String> defaultLabel) {
+        Column<T,R> column = getterMethod.asReferringMethodInfo(type())
             .map(table::column)
             .orElseThrow(IllegalArgumentException::new);
         return column.rowMapperFactory(this, defaultLabel);
     }
 
+    private boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier) {
+        return table.columns()
+            .anyMatch(c -> c.includes(scope, columnSpecifier));
+    }
+
     @Override
-    public Stream<Alias<?>> as(MethodInfo<?,?> getter, Optional<String> requiredAlias) {
+    public Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
         if (requiredAlias.isPresent()) {
             if (requiredAlias.equals(aliasName)) {
-                if (getter.referringClass().isAssignableFrom(type().getRawType())) {
+                if (columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
+                //if (includes(scope, columnSpecifier)) {
                     return Stream.of(this);
                 }
-                throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + getter.referringClass());
+                throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A"));
             } else {
                 return Stream.empty();
             }
         }
-        if (getter.referringClass().isAssignableFrom(type().getRawType())) {
+        if (columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
+        //if (includes(scope, columnSpecifier)) {
             return Stream.of(this);
         }
         return Stream.empty();
