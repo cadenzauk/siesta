@@ -25,7 +25,6 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.tuple.Tuple;
@@ -204,12 +203,12 @@ public class Table<R> implements ColumnCollection<R> {
     @SuppressWarnings("unchecked")
     public <F> Optional<Column<F,R>> findColumn(Class<F> fieldClass, String propertyName) {
         return columns()
+            .filter(c -> fieldClass.isAssignableFrom(c.type().getRawType()))
             .filter(c -> StringUtils.equals(propertyName, c.propertyName()))
             .map(x -> (Column<F,R>) x)
             .findFirst();
     }
 
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     private final int performInsert(SqlExecutor sqlExecutor, R... rows) {
         if (rows.length == 0) {
@@ -220,7 +219,6 @@ public class Table<R> implements ColumnCollection<R> {
         return database.execute(sql, () -> sqlExecutor.update(sql, args));
     }
 
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     private final int performInsert(Transaction transaction, R... rows) {
         if (rows.length == 0) {

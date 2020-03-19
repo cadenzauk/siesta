@@ -27,9 +27,9 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
@@ -100,7 +100,7 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T> {
     }
 
     @Override
-    public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+    public <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
         return columnSpec
             .column(scope)
             .flatMap(c -> c.findColumn(type, propertyName));

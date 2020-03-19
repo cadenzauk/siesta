@@ -22,8 +22,10 @@
 
 package com.cadenzauk.siesta.catalog;
 
+import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
@@ -33,13 +35,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public interface Column<T, R> {
-    String propertyName();
-
-    TypeToken<T> type();
-
-    String columnName();
-
+public interface Column<T, R> extends AliasColumn<T> {
     boolean identifier();
 
     boolean insertable();
@@ -47,12 +43,6 @@ public interface Column<T, R> {
     boolean updatable();
 
     int count();
-
-    String sql();
-
-    String sql(Alias<?> alias);
-
-    String sqlWithLabel(Alias<?> alias, Optional<String> label);
 
     Stream<String> idSql(Alias<?> alias);
 
@@ -68,19 +58,22 @@ public interface Column<T, R> {
 
     Stream<Object> updateArgs(Database database, R row);
 
-    RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel);
-
-    <U> Stream<Column<U,R>> as(TypeToken<U> requiredDataType);
-
     Function<R,Optional<T>> getter();
 
     Stream<Object> toDatabase(Database database, Optional<T> v);
 
+    @SuppressWarnings("unchecked")
+    default <U> Stream<Column<U,R>> asColumn(TypeToken<U> requiredDataType) {
+        Class<? super U> requiredBoxed = TypeUtil.boxedType(requiredDataType.getRawType());
+        Class<? super T> boxedDatatype = TypeUtil.boxedType(type().getRawType());
+        return requiredBoxed.isAssignableFrom(boxedDatatype)
+            ? Stream.of((Column<U,R>) this)
+            : Stream.empty();
+    }
+
     default Stream<Object> rowToDatabase(Database database, Optional<R> row) {
         return toDatabase(database, row.flatMap(r -> getter().apply(r)));
     }
-
-    <V> Optional<Column<V,T>> findColumn(TypeToken<V> type, String propertyName);
 
     boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier);
 }

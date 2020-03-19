@@ -27,16 +27,20 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.NamingStrategy;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
 import java.sql.ResultSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -121,6 +125,14 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
+    public ProjectionColumn<T> toProjection(Alias<?> alias, Optional<String> label) {
+        List<ProjectionColumn<?>> components = columns()
+            .map(c -> c.toProjection(alias, Optional.of(label(alias, label, c))))
+            .collect(Collectors.toList());
+        return new ProjectionColumn<>(type, propertyName, columnName, sql(alias), label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), rowMapperFactory(alias, label), components);
+    }
+
+    @Override
     public Stream<String> idSql(Alias<?> alias) {
         return identifier
             ? columns().map(c -> String.format("%s = ?", alias.inSelectClauseSql(c.columnName())))
@@ -198,9 +210,14 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
         return columnMapping.rowMapperFactory(alias, defaultLabel);
     }
 
+    @Override
+    public <U> Stream<AliasColumn<U>> as(TypeToken<U> requiredDataType) {
+        return asColumn(requiredDataType).map(Function.identity());
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    public <U> Stream<Column<U,R>> as(TypeToken<U> requiredDataType) {
+    public <U> Stream<Column<U,R>> asColumn(TypeToken<U> requiredDataType) {
         return requiredDataType.getRawType().isAssignableFrom(rowType().getRawType())
             ? Stream.of((Column<U,R>) this)
             : Stream.empty();
@@ -212,8 +229,8 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
-    public <V> Optional<Column<V,T>> findColumn(TypeToken<V> type, String propertyName) {
-        return columnMapping.findColumn(type, propertyName);
+    public <V> Optional<AliasColumn<V>> findColumn(TypeToken<V> type, String propertyName) {
+        return columnMapping.findColumn(type, propertyName).map(Function.identity());
     }
 
     @Override

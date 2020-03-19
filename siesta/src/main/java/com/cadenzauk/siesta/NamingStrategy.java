@@ -26,4 +26,7 @@ public interface NamingStrategy {
     String tableName(String rowClass);
     String columnName(String fieldName);
     String embeddedName(String parentFieldColumnName, String childFieldColumnName);
+    default String propertyName(String label) {
+        return label;
+    }
 }

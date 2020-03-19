@@ -56,6 +56,17 @@ public final class StringUtil extends UtilityClass {
             .collect(joining("_"));
     }
 
+    public static String upperToCamel(String uppercaseName) {
+        if (StringUtils.isEmpty(uppercaseName)) {
+            return "";
+        }
+        return lowercaseFirst(Arrays.stream(uppercaseName.split("_"))
+            .filter(StringUtils::isNotBlank)
+            .map(String::toLowerCase)
+            .map(StringUtil::uppercaseFirst)
+            .collect(joining()));
+    }
+
     public static String hex(byte... bytes) {
         if (bytes == null) {
             return "";

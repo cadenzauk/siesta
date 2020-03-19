@@ -22,14 +22,16 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.CteAlias;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -76,8 +78,54 @@ public class CommonTableExpression<RT> {
         return table;
     }
 
-    public <T> Optional<ProjectionColumn<T>> findColumn(ColumnSpecifier<T> columnSpecifier) {
-        return select.projection().findColumn(select.scope, columnSpecifier);
+    public <T> Optional<AliasColumn<T>> findColumn(ColumnSpecifier<T> columnSpecifier) {
+        return select.projection().findColumn(select.scope, columnSpecifier)
+            .map(x -> new AliasColumn<T>() {
+                @Override
+                public TypeToken<T> type() {
+                    return x.type();
+                }
+
+                @Override
+                public String propertyName() {
+                    return select.scope.database().namingStrategy().propertyName(x.label());
+                }
+
+                @Override
+                public String columnName() {
+                    return x.columnName();
+                }
+
+                @Override
+                public RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
+                    return x.rowMapperFactory().withDefaultLabel(defaultLabel);
+                }
+
+                @Override
+                public String sql() {
+                    return columnName();
+                }
+
+                @Override
+                public String sql(Alias<?> alias) {
+                    return alias.inSelectClauseSql(columnName());
+                }
+
+                @Override
+                public String sqlWithLabel(Alias<?> alias, Optional<String> label) {
+                    return alias.inSelectClauseSql(columnName(), label);
+                }
+
+                @Override
+                public ProjectionColumn<T> toProjection(Alias<?> alias, Optional<String> label) {
+                    return null;
+                }
+
+                @Override
+                public <V> Optional<AliasColumn<V>> findColumn(TypeToken<V> type, String propertyName) {
+                    return Optional.empty();
+                }
+            });
     }
 
     public Stream<CommonTableExpression<?>> commonTableExpressions() {

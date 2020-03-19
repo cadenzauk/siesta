@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 
 import java.util.Optional;
@@ -36,6 +37,11 @@ public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
     private ColumnExpressionBuilder(ColumnExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         super(lhs, onComplete);
         this.lhs = lhs;
+    }
+
+    @Override
+    public ProjectionColumn<T> toProjectionColumn(Scope scope, Optional<String> label) {
+        return lhs.toProjectionColumn(scope, label);
     }
 
     @Override

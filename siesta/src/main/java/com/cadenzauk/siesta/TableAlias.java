@@ -56,7 +56,7 @@ public class TableAlias<R> extends Alias<R> {
     }
 
     private <T> ProjectionColumn<T> projectionColumn(Column<T,R> c) {
-        return new ProjectionColumn<>(c.type(), c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty()));
+        return c.toProjection(this, Optional.empty());
     }
 
     @Override
@@ -158,12 +158,11 @@ public class TableAlias<R> extends Alias<R> {
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
-        return projectionColumns
-            .get()
-            .stream()
-            .flatMap(pc -> pc.as(columnSpecifier.effectiveClass()))
-            .filter(x -> columnSpecifier.specifies(scope, x))
+    public <T> Optional<AliasColumn<T>> findAliasColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
+        return table
+            .columns()
+            .flatMap(ac -> ac.as(columnSpecifier.effectiveType()))
+            .filter(ac -> columnSpecifier.specifies(scope, ac))
             .findFirst();
     }
 
@@ -197,17 +196,11 @@ public class TableAlias<R> extends Alias<R> {
         return column.rowMapperFactory(this, defaultLabel);
     }
 
-    private boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier) {
-        return table.columns()
-            .anyMatch(c -> c.includes(scope, columnSpecifier));
-    }
-
     @Override
     public Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
         if (requiredAlias.isPresent()) {
             if (requiredAlias.equals(aliasName)) {
                 if (columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
-                //if (includes(scope, columnSpecifier)) {
                     return Stream.of(this);
                 }
                 throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A"));
@@ -216,7 +209,6 @@ public class TableAlias<R> extends Alias<R> {
             }
         }
         if (columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
-        //if (includes(scope, columnSpecifier)) {
             return Stream.of(this);
         }
         return Stream.empty();

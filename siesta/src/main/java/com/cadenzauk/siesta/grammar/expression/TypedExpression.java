@@ -25,8 +25,8 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.sql.RowMapperFactory;
-import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
@@ -38,8 +38,12 @@ public interface TypedExpression<T> extends Expression {
 
     RowMapperFactory<T> rowMapperFactory(Scope scope);
 
+    default ProjectionColumn<T> toProjectionColumn(Scope scope, Optional<String> label) {
+        return new ProjectionColumn<>(type(), sql(scope), sql(scope), sql(scope), label.orElseGet(() -> label(scope)), rowMapperFactory(scope, label));
+    }
+
     default RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
-        return label -> rowMapperFactory(scope).rowMapper(OptionalUtil.or(label, defaultLabel));
+        return rowMapperFactory(scope).withDefaultLabel(defaultLabel);
     }
 
     TypeToken<T> type();

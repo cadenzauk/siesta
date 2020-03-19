@@ -40,7 +40,7 @@ public abstract class Alias<R> {
 
     public abstract Database database();
 
-    public abstract <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier);
+    public abstract <T> Optional<AliasColumn<T>> findAliasColumn(Scope scope, ColumnSpecifier<T> columnSpecifier);
 
     public abstract <P> Optional<ForeignKeyReference<R, P>> foreignKey(Alias<P> parent, Optional<String> name);
 

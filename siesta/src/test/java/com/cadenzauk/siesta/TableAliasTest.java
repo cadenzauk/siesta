@@ -101,7 +101,13 @@ class TableAliasTest {
     private Column<String,WidgetRow> column;
 
     @Mock
-    private Column<?,WidgetRow> column2;
+    private Column<String,WidgetRow> column2;
+
+    @Mock
+    private ProjectionColumn<String> projectionColumn;
+
+    @Mock
+    private ProjectionColumn<String> projectionColumn2;
 
     @Mock
     private Scope scope;
@@ -290,27 +296,26 @@ class TableAliasTest {
 
     @Test
     void findColumnOfCorrectTypeReturnsColumn() {
-        when(columnSpecifier.effectiveClass()).thenReturn(Long.class);
+        when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
         when(columnSpecifier.specifies(any(), any())).thenReturn(true);
         when(widgetTable.columns()).thenReturn(Stream.of(widgetRowId));
-        when(widgetRowId.type()).thenReturn(TypeToken.of(long.class));
         when(widgetRowId.columnName()).thenReturn("bob");
+        when(widgetRowId.as(TypeToken.of(Long.class))).thenReturn(Stream.of(widgetRowId));
         Alias<?> sut = TableAlias.of(widgetTable, "joe");
 
-        Optional<ProjectionColumn<Long>> result = sut.findColumn(scope, columnSpecifier);
+        Optional<AliasColumn<Long>> result = sut.findAliasColumn(scope, columnSpecifier);
 
-        assertThat(result.map(ProjectionColumn::columnSql), is(Optional.of("bob")));
-        assertThat(result.map(ProjectionColumn::label), is(Optional.of("joe_bob")));
+        assertThat(result.map(AliasColumn::columnName), is(Optional.of("bob")));
     }
 
     @Test
     void findColumnOfIncorrectTypeReturnsEmpty() {
+        when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
         when(widgetTable.columns()).thenReturn(Stream.of(column));
-        when(column.type()).thenReturn(TypeToken.of(String.class));
-        when(columnSpecifier.effectiveClass()).thenReturn(Long.class);
+        when(column.as(TypeToken.of(Long.class))).thenReturn(Stream.empty());
         Alias<?> sut = TableAlias.of(widgetTable, "joe");
 
-        Optional<ProjectionColumn<Long>> result = sut.findColumn(scope, columnSpecifier);
+        Optional<AliasColumn<Long>> result = sut.findAliasColumn(scope, columnSpecifier);
 
         assertThat(result, OptionalMatchers.empty());
     }
@@ -327,27 +332,15 @@ class TableAliasTest {
     }
 
     @Test
-    void projectionColumnsHaveTheRightColumnSql() {
+    void projectionColumnsAreGeneratedByColumns() {
         when(widgetTable.columns()).thenReturn(Stream.of(column, column2));
-        when(column.columnName()).thenReturn("axl");
-        when(column2.columnName()).thenReturn("slash");
         Alias<?> sut = TableAlias.of(widgetTable, "band");
+        when(column.toProjection(sut, Optional.empty())).thenReturn(projectionColumn);
+        when(column2.toProjection(sut, Optional.empty())).thenReturn(projectionColumn2);
 
         Stream<ProjectionColumn<?>> result = sut.projectionColumns(scope);
 
-        assertThat(result.map(ProjectionColumn::columnSql), StreamMatchers.contains("axl", "slash"));
-    }
-
-    @Test
-    void projectionColumnsHaveTheRightLabels() {
-        Alias<?> sut = TableAlias.of(widgetTable, "band");
-        when(widgetTable.columns()).thenReturn(Stream.of(column, column2));
-        when(column.columnName()).thenReturn("duff");
-        when(column2.columnName()).thenReturn("izzy");
-
-        Stream<ProjectionColumn<?>> result = sut.projectionColumns(scope);
-
-        assertThat(result.map(ProjectionColumn::label), StreamMatchers.contains("band_duff", "band_izzy"));
+        assertThat(result, StreamMatchers.contains(projectionColumn, projectionColumn2));
     }
 
     @Test

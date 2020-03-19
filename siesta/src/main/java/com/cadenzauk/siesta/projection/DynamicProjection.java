@@ -69,7 +69,7 @@ public class DynamicProjection<R> implements Projection<R> {
     }
 
     private <T> ProjectionColumn<T> projectionColumn(Scope scope, TypedExpression<?> s, TypedExpression<T> t) {
-        return new ProjectionColumn<T>(t.type(), s.sql(scope), t.label(scope), t.rowMapperFactory(scope));
+        return new ProjectionColumn<>(t.type(), s.sql(scope), s.sql(scope), s.sql(scope), t.label(scope), t.rowMapperFactory(scope));
     }
 
     @Override

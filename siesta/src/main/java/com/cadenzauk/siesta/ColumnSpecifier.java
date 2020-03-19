@@ -41,6 +41,10 @@ import java.util.Optional;
 public interface ColumnSpecifier<T> {
     Optional<Class<?>> referringClass();
 
+    default TypeToken<T> effectiveType() {
+        return TypeToken.of(effectiveClass());
+    }
+
     Class<T> effectiveClass();
 
     <E> Optional<ColumnSpecifier<E>> asEffective(TypeToken<E> type);
@@ -55,13 +59,18 @@ public interface ColumnSpecifier<T> {
 
     Optional<Column<T,?>> column(Scope scope);
 
-    boolean specifies(Scope scope, ProjectionColumn<?> x);
+    boolean specifies(Scope scope, AliasColumn<T> x);
 
     class MethodInfoColumnSpecifier<T> implements ColumnSpecifier<T> {
         private final MethodInfo<?, T> getterMethod;
 
         public MethodInfoColumnSpecifier(MethodInfo<?,T> getterMethod) {
             this.getterMethod = getterMethod;
+        }
+
+        @Override
+        public String toString() {
+            return getterMethod.propertyName();
         }
 
         @Override
@@ -129,8 +138,8 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
-        public boolean specifies(Scope scope, ProjectionColumn<?> x) {
-            return StringUtils.equals(x.columnSql(), columnName(scope));
+        public boolean specifies(Scope scope, AliasColumn<T> x) {
+            return StringUtils.equals(x.propertyName(), getterMethod.propertyName());
         }
     }
 
@@ -185,8 +194,8 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
-        public boolean specifies(Scope scope, ProjectionColumn<?> x) {
-            return StringUtils.equals(x.columnSql(), columnLabel);
+        public boolean specifies(Scope scope, AliasColumn<T> x) {
+            return StringUtils.equals(x.columnName(), columnLabel);
         }
     }
 

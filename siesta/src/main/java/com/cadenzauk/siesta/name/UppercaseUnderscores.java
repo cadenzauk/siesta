@@ -40,4 +40,11 @@ public class UppercaseUnderscores implements NamingStrategy {
     public String embeddedName(String parentFieldColumnName, String childFieldColumnName) {
         return parentFieldColumnName + "_" + childFieldColumnName;
     }
+
+    @Override
+    public String propertyName(String columnName) {
+        return columnName.contains("_")
+            ? StringUtil.upperToCamel(columnName)
+            : StringUtil.lowercaseFirst(columnName);
+    }
 }

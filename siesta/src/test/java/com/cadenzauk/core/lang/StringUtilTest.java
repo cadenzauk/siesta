@@ -86,6 +86,20 @@ class StringUtilTest {
 
     @ParameterizedTest
     @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"ABC", "abc"})
+    @TestCase({"A_B_C", "aBC"})
+    @TestCase({"A__B___C___", "aBC"})
+    @TestCase({"AB_CD", "abCd"})
+    @TestCase({"_AB_CD", "abCd"})
+    @TestCase({"1_23", "123"})
+    @TestCase({"A1_B2_C3", "a1B2C3"})
+    @TestCase({"TRADE_ID_1", "tradeId1"})
+    void upperToCamel(String input, String expectedResult) {
+        assertThat(StringUtil.upperToCamel(input), is(expectedResult));
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
     @TestCase({"null", ""})
     @TestCase({"", ""})
     @TestCase({"-128", "80"})

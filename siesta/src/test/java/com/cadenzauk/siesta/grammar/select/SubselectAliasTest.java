@@ -27,6 +27,7 @@ import co.unruly.matchers.StreamMatchers;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ProjectionColumn;
@@ -51,6 +52,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -115,11 +117,12 @@ class SubselectAliasTest {
     @Test
     void findColumnDelegatesToSelect() {
         when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
+        when(projectionColumn.label()).thenReturn("bert");
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "ernie");
 
-        Optional<ProjectionColumn<Long>> result = sut.findColumn(scope, columnSpecifier);
+        Optional<AliasColumn<Long>> result = sut.findAliasColumn(scope, columnSpecifier);
 
-        assertThat(result, is(Optional.of(projectionColumn)));
+        assertThat(result.map(AliasColumn::columnName), is(Optional.of("bert")));
     }
 
     @Test
@@ -140,7 +143,7 @@ class SubselectAliasTest {
 
         Stream<ProjectionColumn<?>> result = sut.projectionColumns(scope);
 
-        assertThat(result.map(ProjectionColumn::columnSql), StreamMatchers.contains("axl", "slash"));
+        assertThat(result.map(ProjectionColumn::columnSql), StreamMatchers.contains("band.axl as band_axl", "band.slash as band_slash"));
     }
 
     @Test
@@ -236,7 +239,7 @@ class SubselectAliasTest {
 
         String result = sut.inSelectClauseSql(scope);
 
-        assertThat(result, is("t.foo_col1 t_foo_col1, t.foo_col2 t_foo_col2"));
+        assertThat(result, is("t.foo_col1 as t_foo_col1, t.foo_col2 as t_foo_col2"));
     }
 
     @Test
@@ -289,6 +292,7 @@ class SubselectAliasTest {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
         when(select.rowMapperFactory()).thenReturn(rowMapperFactory);
         when(rowMapperFactory.rowMapper(Optional.of("bruce"))).thenReturn(rowMapper);
+        when(rowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
 
         RowMapper<WidgetRow> result = sut.rowMapperFactory().rowMapper(Optional.of("bruce"));
 
@@ -300,6 +304,7 @@ class SubselectAliasTest {
     void rowMapperFactoryForReturnsRowMapperFactoryThatUsesLabelIfGiven() {
         when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
+        when(columnRowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
 
         RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("burt"));
@@ -313,6 +318,7 @@ class SubselectAliasTest {
     void rowMapperFactoryForReturnsRowMapperFactoryThatUsesDefaultLabelIfNoLabelGiven() {
         when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
+        when(columnRowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
 
         RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("burt"));
@@ -326,6 +332,7 @@ class SubselectAliasTest {
     void rowMapperFactoryForReturnsRowMapperFactoryThatUsesCalculatedLabelIfNoLabelOrDefaultGiven() {
         when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
         when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
+        when(columnRowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
         when(projectionColumn.label()).thenReturn("col");
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
 

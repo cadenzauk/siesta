@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,22 +20,40 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.grammar.expression;
+package com.cadenzauk.siesta;
 
-import com.cadenzauk.siesta.Alias;
-import com.cadenzauk.siesta.AliasColumn;
-import com.cadenzauk.siesta.ColumnSpecifier;
-import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.core.reflect.util.TypeUtil;
+import com.cadenzauk.core.sql.RowMapperFactory;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public interface ColumnExpression<T> extends TypedExpression<T> {
-    String columnName(Scope scope);
+public interface AliasColumn<T> {
+    TypeToken<T> type();
 
-    Alias<?> resolve(Scope scope);
+    String propertyName();
 
-    <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName);
+    String columnName();
 
-    <X> boolean includes(ColumnSpecifier<X> getter);
+    RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel);
+
+    String sql();
+
+    String sql(Alias<?> alias);
+
+    String sqlWithLabel(Alias<?> alias, Optional<String> label);
+
+    ProjectionColumn<T> toProjection(Alias<?> alias, Optional<String> label);
+
+    <V> Optional<AliasColumn<V>> findColumn(TypeToken<V> type, String propertyName);
+
+    @SuppressWarnings("unchecked")
+    default <U> Stream<AliasColumn<U>> as(TypeToken<U> requiredDataType) {
+        Class<? super U> requiredBoxed = TypeUtil.boxedType(requiredDataType.getRawType());
+        Class<? super T> boxedDatatype = TypeUtil.boxedType(type().getRawType());
+        return requiredBoxed.isAssignableFrom(boxedDatatype)
+            ? Stream.of((AliasColumn<U>) this)
+            : Stream.empty();
+    }
 }

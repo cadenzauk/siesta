@@ -24,6 +24,13 @@ package com.cadenzauk.core.sql;
 
 import java.util.Optional;
 
+import static com.cadenzauk.core.util.OptionalUtil.or;
+
+@FunctionalInterface
 public interface RowMapperFactory<T> {
     RowMapper<T> rowMapper(Optional<String> label);
+
+    default RowMapperFactory<T> withDefaultLabel(Optional<String> defaultLabel) {
+        return label -> rowMapper(or(label, defaultLabel));
+    }
 }

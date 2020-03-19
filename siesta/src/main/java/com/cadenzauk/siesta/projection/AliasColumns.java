@@ -60,7 +60,8 @@ public class AliasColumns<R> implements Projection<R> {
 
     @Override
     public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
-        return alias.findColumn(scope, columnSpecifier);
+        return alias.findAliasColumn(scope, columnSpecifier)
+            .map(ac -> ac.toProjection(alias, Optional.empty()));
     }
 
     @Override

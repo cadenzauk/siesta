@@ -25,9 +25,10 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
@@ -52,6 +53,13 @@ public class ChainExpression<P, T> implements ColumnExpression<T> {
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
         return label -> rs -> scope.database().getDataTypeOf(field).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+    }
+
+    @Override
+    public ProjectionColumn<T> toProjectionColumn(Scope scope, Optional<String> label) {
+        Alias<?> alias = resolve(scope);
+        AliasColumn<T> column = column(scope);
+        return column.toProjection(alias, label);
     }
 
     @Override
@@ -83,11 +91,11 @@ public class ChainExpression<P, T> implements ColumnExpression<T> {
 
     @Override
     public String columnName(Scope scope) {
-        Column<T,P> column = column(scope);
+        AliasColumn<T> column = column(scope);
         return column.columnName();
     }
 
-    private Column<T,P> column(Scope scope) {
+    private AliasColumn<T> column(Scope scope) {
         return lhs.findColumn(scope, field.effectiveType(), field.propertyName())
             .orElseThrow(() -> new IllegalArgumentException("Unable to find field " + field.propertyName() + " in " + field.effectiveType()));
     }
@@ -98,8 +106,8 @@ public class ChainExpression<P, T> implements ColumnExpression<T> {
     }
 
     @Override
-    public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
-        Column<T,P> parent = column(scope);
+    public <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        AliasColumn<T> parent = column(scope);
         return parent.findColumn(type, propertyName);
     }
 

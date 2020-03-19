@@ -44,6 +44,8 @@ import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
+import com.cadenzauk.siesta.model.MoneyAmount;
+import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.PartType;
 import com.cadenzauk.siesta.model.PartWithTypeRow;
 import com.cadenzauk.siesta.model.SaleRow;
@@ -1428,5 +1430,19 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .single();
 
         assertThat(result, is(salespersonRow3.salespersonId()));
+    }
+
+    @Test
+    void canSelectEmbededColumnFromSubselect() {
+        Database database = testDatabase(dataSource, dialect);
+        PartRow part1 = aRandomPart();
+        database.insert(part1);
+        Select<PartRow> subselect = database.from(PartRow.class, "p2").where(PartRow::partId).isEqualTo(part1.partId());
+
+        String result = database.from(subselect, "p")
+            .select(column(PartRow::purchasePrice).dot(MoneyAmount::currency))
+            .single();
+
+        assertThat(result, is(part1.purchasePrice().currency()));
     }
 }

@@ -27,6 +27,8 @@ import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.ddl.TestSchema;
 import com.cadenzauk.siesta.dialect.AutoDetectDialect;
+import com.cadenzauk.siesta.model.MoneyAmount;
+import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestDatabase;
@@ -43,9 +45,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAscii;
 
 @ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -96,6 +101,16 @@ public abstract class IntegrationTest {
             .widgetId(newId())
             .quantity(RandomUtils.nextLong(10, 400))
             .price(RandomValues.randomBigDecimal(12, 2))
+            .build();
+    }
+
+    public static PartRow aRandomPart() {
+        return PartRow.newBuilder()
+            .partId(newId())
+            .description(RandomStringUtils.randomAlphabetic(10, 30))
+            .purchasePrice(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), randomAscii(3)))
+            .retailPrice(Optional.of(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), randomAscii(3))))
+            .widgetId(newId())
             .build();
     }
 

@@ -91,7 +91,9 @@ public class ColumnReference<C, P, F> {
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         public Builder<C, P, F> childColumn(Column<F,C> val) {
+            fieldClass = (Class<F>) val.type().getRawType();
             childColumnGetter = fk -> val;
             return this;
         }

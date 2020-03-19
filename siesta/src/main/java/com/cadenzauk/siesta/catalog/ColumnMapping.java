@@ -163,21 +163,21 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     Object[] insertArgs(R[] rows) {
         return Arrays.stream(rows)
             .map(Optional::ofNullable)
-            .flatMap(r -> columns().flatMap(c -> c.insertArgs(database, r)))
+            .flatMap(r -> columns.stream().flatMap(c -> c.insertArgs(database, r)))
             .toArray();
     }
 
     Object[] updateArgs(R row) {
         return StreamUtil.ofNullable(row)
             .flatMap(r -> Stream.concat(
-                columns().flatMap(c -> c.updateArgs(database, r)),
-                columns().flatMap(c -> c.idArgs(database, r))))
+                columns.stream().flatMap(c -> c.updateArgs(database, r)),
+                columns.stream().flatMap(c -> c.idArgs(database, r))))
             .toArray();
     }
 
     Object[] deleteArgs(R row) {
         return StreamUtil.ofNullable(row)
-            .flatMap(r -> columns().flatMap(c -> c.idArgs(database, r)))
+            .flatMap(r -> columns.stream().flatMap(c -> c.idArgs(database, r)))
             .toArray();
     }
 
@@ -188,7 +188,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     }
 
     private <T> Stream<Column<T,R>> columnsOfType(TypeToken<T> dataType) {
-        return columns().flatMap(c -> c.as(dataType));
+        return columns.stream().flatMap(c -> c.asColumn(dataType));
     }
 
     private R buildRow(List<TableColumn.ResultSetValue<B>> values) {

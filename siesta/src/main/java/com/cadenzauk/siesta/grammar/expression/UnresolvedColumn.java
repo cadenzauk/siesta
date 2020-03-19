@@ -27,9 +27,10 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.catalog.Column;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
@@ -63,18 +64,21 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
     @Override
     public String sql(Scope scope) {
         Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.columnSql(scope, columnSpec);
+        AliasColumn<T> column = column(scope, resolvedAlias);
+        return column.sql(resolvedAlias);
     }
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
         Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.columnSqlWithLabel(columnSpec, label);
+        AliasColumn<T> column = column(scope, resolvedAlias);
+        return column.sqlWithLabel(resolvedAlias, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        return columnSpec.columnName(scope);
+        Alias<?> resolvedAlias = resolve(scope);
+        return column(scope, resolvedAlias).columnName();
     }
 
     @Override
@@ -87,9 +91,14 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
         return Precedence.COLUMN;
     }
 
+    private AliasColumn<T> column(Scope scope, Alias<?> resolvedAlias) {
+        return resolvedAlias.findAliasColumn(scope, columnSpec)
+            .orElseThrow(() -> new RuntimeException("No column " + columnSpec + " in " + resolvedAlias.aliasName()));
+    }
+
     @Override
     public String label(Scope scope) {
-        String columnName = columnSpec.columnName(scope);
+        String columnName = columnName(scope);
         return resolve(scope).inSelectClauseLabel(columnName);
     }
 
@@ -97,6 +106,13 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
         Alias<?> resolvedAlias = resolve(scope);
         return resolvedAlias.rowMapperFactoryFor(columnSpec, Optional.empty());
+    }
+
+    @Override
+    public ProjectionColumn<T> toProjectionColumn(Scope scope, Optional<String> label) {
+        Alias<?> resolve = resolve(scope);
+        AliasColumn<T> column = column(scope, resolve);
+        return column.toProjection(resolve, label);
     }
 
     @Override
@@ -116,10 +132,10 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
     }
 
     @Override
-    public <V> Optional<Column<V,T>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
-        return columnSpec
-            .column(scope)
-            .flatMap(c -> c.findColumn(type, propertyName));
+    public <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        Alias<?> resolve = resolve(scope);
+        AliasColumn<T> column = column(scope, resolve);
+        return column.findColumn(type, propertyName);
     }
 
     @Override

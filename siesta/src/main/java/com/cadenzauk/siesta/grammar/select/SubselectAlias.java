@@ -24,18 +24,19 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.cadenzauk.core.util.OptionalUtil.or;
 
 public class SubselectAlias<T> extends Alias<T> {
     private final Select<T> select;
@@ -57,8 +58,9 @@ public class SubselectAlias<T> extends Alias<T> {
     }
 
     @Override
-    public <T1> Optional<ProjectionColumn<T1>> findColumn(Scope scope, ColumnSpecifier<T1> columnSpecifier) {
-        return select.findColumn(columnSpecifier);
+    public <T1> Optional<AliasColumn<T1>> findAliasColumn(Scope scope, ColumnSpecifier<T1> columnSpecifier) {
+        return select.findColumn(columnSpecifier)
+            .map(column -> new SubselectAliasColumn<>(scope, column));
     }
 
     @Override
@@ -69,11 +71,7 @@ public class SubselectAlias<T> extends Alias<T> {
     @Override
     public Stream<ProjectionColumn<?>> projectionColumns(Scope scope) {
         return select.projectionColumns(scope)
-            .map(this::adaptColumn);
-    }
-
-    private <C> ProjectionColumn<C> adaptColumn(ProjectionColumn<C> c) {
-        return new ProjectionColumn<>(c.type(), c.label(), inSelectClauseLabel(c.label()), label -> c.rowMapperFactory().rowMapper(label));
+            .map(c -> ProjectionColumn.usingLabelAsColumnName(this, c, Optional.empty()));
     }
 
     @Override
@@ -113,7 +111,7 @@ public class SubselectAlias<T> extends Alias<T> {
     @Override
     public String inSelectClauseSql(Scope scope) {
         return projectionColumns(scope)
-            .map(c -> String.format("%s %s", inSelectClauseSql(c.columnSql()), c.label()))
+            .map(ProjectionColumn::columnSql)
             .collect(Collectors.joining(", "));
     }
 
@@ -139,14 +137,17 @@ public class SubselectAlias<T> extends Alias<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory() {
-        return label -> select.rowMapperFactory().rowMapper(or(label, Optional.of(aliasName + "_")));
+        return select.rowMapperFactory().withDefaultLabel(Optional.of(aliasName + "_"));
     }
 
     @Override
     public <T1> RowMapperFactory<T1> rowMapperFactoryFor(ColumnSpecifier<T1> columnSpecifier, Optional<String> defaultLabel) {
         ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
             .orElseThrow(IllegalArgumentException::new);
-        return label -> projectionColumn.rowMapperFactory().rowMapper(or(or(label, defaultLabel), Optional.of(aliasName + "_" + projectionColumn.label())));
+        return projectionColumn
+            .rowMapperFactory()
+            .withDefaultLabel(Optional.of(inSelectClauseLabel(projectionColumn.label())))
+            .withDefaultLabel(defaultLabel);
     }
 
     @Override
@@ -165,5 +166,67 @@ public class SubselectAlias<T> extends Alias<T> {
             return Stream.of(this);
         }
         return Stream.empty();
+    }
+
+    private static class SubselectAliasColumn<T1> implements AliasColumn<T1> {
+        private final Scope scope;
+        private final ProjectionColumn<T1> column;
+
+        public SubselectAliasColumn(Scope scope, ProjectionColumn<T1> column) {
+            this.scope = scope;
+            this.column = column;
+        }
+
+        @Override
+        public TypeToken<T1> type() {
+            return column.type();
+        }
+
+        @Override
+        public String propertyName() {
+            return column.propertyName();
+        }
+
+        @Override
+        public String columnName() {
+            return column.label();
+        }
+
+        @Override
+        public RowMapperFactory<T1> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
+            return column.rowMapperFactory().withDefaultLabel(defaultLabel);
+        }
+
+        @Override
+        public String sql() {
+            return columnName();
+        }
+
+        @Override
+        public String sql(Alias<?> alias) {
+            return alias.inSelectClauseSql(columnName());
+        }
+
+        @Override
+        public String sqlWithLabel(Alias<?> alias, Optional<String> label) {
+            return alias.inSelectClauseSql(columnName(), label);
+        }
+
+        @Override
+        public ProjectionColumn<T1> toProjection(Alias<?> alias, Optional<String> label) {
+            return ProjectionColumn.usingLabelAsColumnName(alias, column, label);
+        }
+
+        @Override
+        public <V> Optional<AliasColumn<V>> findColumn(TypeToken<V> type, String propertyName) {
+            return column
+                .components()
+                .stream()
+                .flatMap(c -> c.as(type))
+                .filter(c -> StringUtils.equals(c.propertyName(), propertyName))
+                .map(c -> new SubselectAliasColumn<>(scope, c))
+                .findAny()
+                .map(Function.identity());
+        }
     }
 }

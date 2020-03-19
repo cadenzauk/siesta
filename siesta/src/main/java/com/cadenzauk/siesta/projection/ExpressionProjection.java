@@ -47,7 +47,8 @@ public class ExpressionProjection<T> implements Projection<T> {
 
     @Override
     public String sql(Scope scope) {
-        return (distinct ? "distinct " : "") + expression.sqlWithLabel(scope, label);
+        ProjectionColumn<T> projectionColumn = projectionColumn(scope);
+        return (distinct ? "distinct " : "") + projectionColumn.columnSql();
     }
 
     @Override
@@ -61,7 +62,7 @@ public class ExpressionProjection<T> implements Projection<T> {
     }
 
     private ProjectionColumn<T> projectionColumn(Scope scope) {
-        return new ProjectionColumn<>(expression.type(), expression.sql(scope), label.orElseGet(() -> expression.label(scope)), expression.rowMapperFactory(scope, label));
+        return expression.toProjectionColumn(scope, label);
     }
 
     @Override

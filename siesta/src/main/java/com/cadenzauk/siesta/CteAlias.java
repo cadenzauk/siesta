@@ -109,8 +109,8 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     @Override
-    public <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> method) {
-        return Optional.empty();
+    public <T> Optional<AliasColumn<T>> findAliasColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
+        return commonTableExpression.findColumn(columnSpecifier);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     private <T> ProjectionColumn<T> makeColumn(Column<T,RT> c) {
-        return new ProjectionColumn<>(c.type(), c.columnName(), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty()));
+        return new ProjectionColumn<>(c.type(), c.propertyName(), c.columnName(), c.sql(this), inSelectClauseLabel(c.columnName()), c.rowMapperFactory(this, Optional.empty()));
     }
 
     private <T> Column<T,RT> column(MethodInfo<RT,T> method) {

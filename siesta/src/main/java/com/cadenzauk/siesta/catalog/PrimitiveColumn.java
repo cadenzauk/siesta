@@ -25,9 +25,11 @@ package com.cadenzauk.siesta.catalog;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
@@ -70,11 +72,6 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     @Override
     public Stream<Object> toDatabase(Database database, Optional<T> v) {
         return Stream.of(dataType.toDatabase(database, v));
-    }
-
-    @Override
-    public <V> Optional<Column<V,T>> findColumn(TypeToken<V> type, String propertyName) {
-        return Optional.empty();
     }
 
     @Override
@@ -133,6 +130,16 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
+    public ProjectionColumn<T> toProjection(Alias<?> alias, Optional<String> label) {
+        return new ProjectionColumn<>(type(), propertyName, columnName, alias.inSelectClauseSql(columnName), label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), rowMapperFactory(alias, label));
+    }
+
+    @Override
+    public <V> Optional<AliasColumn<V>> findColumn(TypeToken<V> type, String propertyName) {
+        return Optional.empty();
+    }
+
+    @Override
     public Stream<String> idSql(Alias<?> alias) {
         return identifier
             ? Stream.of(sql(alias) + " = ?")
@@ -188,7 +195,7 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <U> Stream<Column<U,R>> as(TypeToken<U> requiredDataType) {
+    public <U> Stream<AliasColumn<U>> as(TypeToken<U> requiredDataType) {
         Class<? super U> requiredBoxed = TypeUtil.boxedType(requiredDataType.getRawType());
         Class<T> boxedDatatype = TypeUtil.boxedType(dataType.javaClass());
         return requiredBoxed.isAssignableFrom(boxedDatatype)

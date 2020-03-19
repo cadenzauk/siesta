@@ -123,7 +123,7 @@ class Select1Test {
         join.apply(c, database.from(p)).optional(transaction);
 
         verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select p.ID as p_ID, c.CHILD_PARENT_ID c_CHILD_PARENT_ID, c.CHILD_ALIAS_ID c_CHILD_ALIAS_ID from SIESTA.PARENT p " + expected));
+        assertThat(sql.getValue(), is("select p.ID as p_ID, c.CHILD_PARENT_ID as c_CHILD_PARENT_ID, c.CHILD_ALIAS_ID as c_CHILD_ALIAS_ID from SIESTA.PARENT p " + expected));
         assertThat(args.getValue(), arrayWithSize(0));
     }
 
