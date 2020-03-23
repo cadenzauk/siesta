@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017,2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,14 +31,24 @@ import java.util.stream.Stream;
 
 public class Lazy<T> {
     private final Object lock = new Object();
-    private final ThrowingSupplier<T,? extends Exception> supplier;
+    private final ThrowingSupplier<T,? extends Exception> defaultSupplier;
     private volatile Try<T> value;
 
+    public Lazy() {
+        defaultSupplier = () -> {
+            throw new IllegalStateException("No supplier was specified at construction time.  Use getOrCompute() or tryGetOrCompute() to retrieve the value of this Lazy.");
+        };
+    }
+
     public <E extends Exception> Lazy(ThrowingSupplier<T,E> supplier) {
-        this.supplier = supplier;
+        defaultSupplier = supplier;
     }
 
     public Try<T> tryGet() {
+        return tryGetOrCompute(defaultSupplier);
+    }
+
+    public Try<T> tryGetOrCompute(ThrowingSupplier<T,? extends Exception> supplier) {
         Try<T> result = value;
         if (result == null) {
             synchronized (lock) {
@@ -53,6 +63,10 @@ public class Lazy<T> {
 
     public T get() {
         return tryGet().orElseThrow();
+    }
+
+    public T getOrCompute(ThrowingSupplier<T,? extends Exception> supplier) {
+        return tryGetOrCompute(supplier).orElseThrow();
     }
 
     public Optional<T> optional() {

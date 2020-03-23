@@ -22,10 +22,17 @@
 
 package com.cadenzauk.core.util;
 
+import co.unruly.matchers.StreamMatchers;
 import com.cadenzauk.core.function.ThrowingFunction;
 import com.cadenzauk.core.function.ThrowingSupplier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,7 +43,23 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class LazyTest {
+    @Mock
+    private ThrowingSupplier<String,RuntimeException> supplier;
+
+    @Mock
+    private ThrowingSupplier<String,RuntimeException> supplier2;
+
+    @Test
+    void tryGetWhenNoSupplierIsFailure() {
+        Lazy<String> sut = new Lazy<>();
+
+        Try<String> result = sut.tryGet();
+
+        assertThat(result, is(Try.failure(new IllegalStateException("No supplier was specified at construction time.  Use getOrCompute() or tryGetOrCompute() to retrieve the value of this Lazy."))));
+    }
+
     @Test
     void tryGetSuccess() {
         Lazy<String> sut = new Lazy<>(() -> "Hello World");
@@ -72,10 +95,8 @@ class LazyTest {
         verify(supplier, times(1)).get();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void tryGetOnlyOnceIfFailed() {
-        ThrowingSupplier<String,RuntimeException> supplier = Mockito.mock(ThrowingSupplier.class);
         when(supplier.get()).thenThrow(new IllegalArgumentException("Bad argument."));
         Lazy<String> sut = new Lazy<>(supplier);
 
@@ -85,6 +106,55 @@ class LazyTest {
         assertThat(result1, is(Try.failure(new IllegalArgumentException("Bad argument."))));
         assertThat(result2, is(Try.failure(new IllegalArgumentException("Bad argument."))));
         verify(supplier, times(1)).get();
+    }
+
+    @Test
+    void tryGetOrComputeUsesSupplierWhenNoValue() {
+        when(supplier2.get()).thenReturn("Computed value");
+        Lazy<String> sut = new Lazy<>(supplier);
+
+        Try<String> result = sut.tryGetOrCompute(supplier2);
+
+        assertThat(result, is(Try.success("Computed value")));
+        verifyZeroInteractions(supplier);
+        verify(supplier2, times(1)).get();
+    }
+
+    @Test
+    void tryGetOrComputeDoesNotCallSupplierWhenValueAlreadyPresent() {
+        when(supplier.get()).thenReturn("Computed value");
+        Lazy<String> sut = new Lazy<>(supplier);
+        sut.get();
+
+        Try<String> result = sut.tryGetOrCompute(supplier2);
+
+        assertThat(result, is(Try.success("Computed value")));
+        verifyZeroInteractions(supplier2);
+    }
+
+    @Test
+    void tryGetOrComputeDoesNotCallSupplierWhenAlreadyFailed() {
+        when(supplier.get()).thenThrow(new IllegalArgumentException("Bad argument."));
+        Lazy<String> sut = new Lazy<>(supplier);
+        sut.tryGet();
+
+        Try<String> result = sut.tryGetOrCompute(supplier2);
+
+        assertThat(result, is(Try.failure(new IllegalArgumentException("Bad argument."))));
+        verifyZeroInteractions(supplier2);
+    }
+
+    @Test
+    void tryGetOrComputeOnlyCallsSupplierOnce() {
+        when(supplier.get()).thenReturn("Computed value");
+        Lazy<String> sut = new Lazy<>();
+
+        Try<String> result1 = sut.tryGetOrCompute(supplier);
+        Try<String> result2 = sut.tryGetOrCompute(supplier2);
+
+        assertThat(result1, is(Try.success("Computed value")));
+        assertThat(result2, is(Try.success("Computed value")));
+        verifyZeroInteractions(supplier2);
     }
 
     @Test
@@ -137,6 +207,135 @@ class LazyTest {
             .withMessage("Bad argument.");
 
         verify(supplier, times(1)).get();
+    }
+
+
+    @Test
+    void getOrComputeUsesSupplierWhenNoValue() {
+        when(supplier2.get()).thenReturn("Computed value");
+        Lazy<String> sut = new Lazy<>(supplier);
+
+        String result = sut.getOrCompute(supplier2);
+
+        assertThat(result, is("Computed value"));
+        verifyZeroInteractions(supplier);
+        verify(supplier2, times(1)).get();
+    }
+
+    @Test
+    void getOrComputeDoesNotCallSupplierWhenValueAlreadyPresent() {
+        when(supplier.get()).thenReturn("Computed value");
+        Lazy<String> sut = new Lazy<>(supplier);
+        sut.get();
+
+        String result = sut.getOrCompute(supplier2);
+
+        assertThat(result, is("Computed value"));
+        verifyZeroInteractions(supplier2);
+    }
+
+    @Test
+    void getOrComputeDoesNotCallSupplierWhenAlreadyFailed() {
+        when(supplier.get()).thenThrow(new IllegalArgumentException("Bad argument."));
+        Lazy<String> sut = new Lazy<>(supplier);
+        sut.tryGet();
+
+        calling(() -> sut.getOrCompute(supplier2))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Bad argument.");
+
+        verifyZeroInteractions(supplier2);
+    }
+
+    @Test
+    void getOrComputeOnlyCallsSupplierOnce() {
+        when(supplier.get()).thenReturn("Computed value");
+        Lazy<String> sut = new Lazy<>();
+
+        String result1 = sut.getOrCompute(supplier);
+        String result2 = sut.getOrCompute(supplier2);
+
+        assertThat(result1, is("Computed value"));
+        assertThat(result2, is("Computed value"));
+        verifyZeroInteractions(supplier2);
+    }
+
+    @Test
+    void optionalOfUnknownIsEmpty() {
+        Lazy<String> sut = new Lazy<>(() -> "Nothing");
+
+        Optional<String> result = sut.optional();
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void optionalOfNullIsEmpty() {
+        Lazy<String> sut = new Lazy<>(() -> null);
+        sut.get();
+
+        Optional<String> result = sut.optional();
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void optionalOfFailureIsEmpty() {
+        Lazy<String> sut = new Lazy<>(() -> { throw new IllegalArgumentException("Boom"); });
+        sut.tryGet();
+
+        Optional<String> result = sut.optional();
+
+        assertThat(result, is(Optional.empty()));
+    }
+
+    @Test
+    void optionalOfKnownIsValue() {
+        Lazy<String> sut = new Lazy<>(() -> "42");
+        sut.get();
+
+        Optional<String> result = sut.optional();
+
+        assertThat(result, is(Optional.of("42")));
+    }
+
+    @Test
+    void streamOfUnknownIsEmpty() {
+        Lazy<String> sut = new Lazy<>(() -> "Nothing");
+
+        Stream<String> result = sut.stream();
+
+        assertThat(result, StreamMatchers.empty());
+    }
+
+    @Test
+    void streamOfNullIsEmpty() {
+        Lazy<String> sut = new Lazy<>(() -> null);
+        sut.get();
+
+        Stream<String> result = sut.stream();
+
+        assertThat(result, StreamMatchers.empty());
+    }
+
+    @Test
+    void streamOfFailureIsEmpty() {
+        Lazy<String> sut = new Lazy<>(() -> { throw new IllegalArgumentException("Boom"); });
+        sut.tryGet();
+
+        Stream<String> result = sut.stream();
+
+        assertThat(result, StreamMatchers.empty());
+    }
+
+    @Test
+    void streamOfKnownIsValue() {
+        Lazy<String> sut = new Lazy<>(() -> "42");
+        sut.get();
+
+        Stream<String> result = sut.stream();
+
+        assertThat(result, StreamMatchers.contains("42"));
     }
 
     @Test
