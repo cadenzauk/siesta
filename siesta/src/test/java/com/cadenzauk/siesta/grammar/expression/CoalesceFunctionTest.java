@@ -130,7 +130,7 @@ class CoalesceFunctionTest {
         CoalesceFunction<String> sut = coalesce(expression1).orElse(expression2);
         when(expression1.rowMapperFactory(scope)).thenReturn(rowMapperFactory);
         when(scope.newLabel()).thenReturn(123L);
-        when(rowMapperFactory.rowMapper(Optional.of("coalesce_123"))).thenReturn(rowMapper);
+        when(rowMapperFactory.rowMapper("", Optional.of("coalesce_123"))).thenReturn(rowMapper);
 
         RowMapper<String> result = sut.rowMapperFactory(scope).rowMapper(Optional.empty());
 

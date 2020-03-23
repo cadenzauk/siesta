@@ -26,9 +26,12 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
+import com.cadenzauk.siesta.InvalidQueryException;
+import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
@@ -36,15 +39,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ResolvedColumn<T,R> implements ColumnExpression<T> {
+public class ResolvedColumn<T, R> implements ColumnExpression<T> {
     private final Alias<R> alias;
     private final TypeToken<T> type;
     private final ColumnSpecifier<T> columnSpec;
+    private final Lazy<AliasColumn<T>> resolvedColumn = new Lazy<>();
 
     private ResolvedColumn(Alias<R> alias, MethodInfo<R,T> getterMethod) {
         this.alias = alias;
         this.type = TypeToken.of(getterMethod.effectiveClass());
         columnSpec = ColumnSpecifier.of(getterMethod);
+    }
+
+    @Override
+    public String toString() {
+        return columnSpec.toString();
     }
 
     @Override
@@ -65,18 +74,23 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T> {
 
     @Override
     public String label(Scope scope) {
-        String columnName = columnSpec.columnName(scope);
+        String columnName = columnName(scope);
         return alias.inSelectClauseLabel(columnName);
     }
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return alias.rowMapperFactoryFor(columnSpec, Optional.empty());
+        return column(scope).rowMapperFactory(alias, Optional.empty());
+    }
+
+    @Override
+    public ProjectionColumn<T> toProjectionColumn(Scope scope, Optional<String> label) {
+        return column(scope).toProjection(alias, label);
     }
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
-        return alias.rowMapperFactoryFor(columnSpec, defaultLabel);
+        return column(scope).rowMapperFactory(alias, defaultLabel);
     }
 
     @Override
@@ -86,12 +100,12 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T> {
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
-        return alias.columnSqlWithLabel(columnSpec, label);
+        return alias.columnSqlWithLabel(scope, columnSpec, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        return columnSpec.columnName(scope);
+        return column(scope).columnName();
     }
 
     @Override
@@ -101,9 +115,13 @@ public class ResolvedColumn<T,R> implements ColumnExpression<T> {
 
     @Override
     public <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
-        return columnSpec
-            .column(scope)
-            .flatMap(c -> c.findColumn(type, propertyName));
+        return column(scope).findColumn(type, propertyName);
+    }
+
+    private AliasColumn<T> column(Scope scope) {
+        return resolvedColumn.getOrCompute(() ->
+            alias.findAliasColumn(scope, columnSpec)
+                .orElseThrow(() -> new InvalidQueryException("There is no column for " + columnSpec + " in " + alias.inFromClauseSql())));
     }
 
     @Override

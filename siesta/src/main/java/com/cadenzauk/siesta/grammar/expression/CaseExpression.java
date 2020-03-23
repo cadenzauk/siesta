@@ -76,7 +76,7 @@ public class CaseExpression<T> implements TypedExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> cases.get(0).item2().rowMapperFactory(scope).rowMapper(Optional.of(label.orElseGet(() -> label(scope))));
+        return (prefix, label) -> cases.get(0).item2().rowMapperFactory(scope).rowMapper(prefix, Optional.of(label.orElseGet(() -> label(scope))));
     }
 
     @Override

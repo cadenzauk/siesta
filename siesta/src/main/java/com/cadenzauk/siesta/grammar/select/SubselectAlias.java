@@ -22,7 +22,9 @@
 
 package com.cadenzauk.siesta.grammar.select;
 
+import com.cadenzauk.core.function.ThrowingSupplier;
 import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
@@ -33,6 +35,7 @@ import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,6 +44,7 @@ import java.util.stream.Stream;
 public class SubselectAlias<T> extends Alias<T> {
     private final Select<T> select;
     private final String aliasName;
+    private final Lazy<List<ProjectionColumn<?>>> projectionColumns = new Lazy<>();
 
     public SubselectAlias(Select<T> select, String aliasName) {
         this.select = select;
@@ -63,6 +67,13 @@ public class SubselectAlias<T> extends Alias<T> {
             .map(column -> new SubselectAliasColumn<>(scope, column));
     }
 
+    private <T1> Optional<ProjectionColumn<T1>> findProjectionColumn(Scope scope, ColumnSpecifier<T1> columnSpecifier) {
+        return projectionColumns(scope)
+            .flatMap(pc -> pc.as(columnSpecifier.effectiveType()))
+            .filter(pc -> columnSpecifier.specifies(scope, pc))
+            .findAny();
+    }
+
     @Override
     public <P> Optional<ForeignKeyReference<T,P>> foreignKey(Alias<P> parent, Optional<String> name) {
         return Optional.empty();
@@ -70,8 +81,13 @@ public class SubselectAlias<T> extends Alias<T> {
 
     @Override
     public Stream<ProjectionColumn<?>> projectionColumns(Scope scope) {
-        return select.projectionColumns(scope)
-            .map(c -> ProjectionColumn.usingLabelAsColumnName(this, c, Optional.empty()));
+        return projectionColumns.getOrCompute(computeProjectionColumns(scope)).stream();
+    }
+
+    private ThrowingSupplier<List<ProjectionColumn<?>>,RuntimeException> computeProjectionColumns(Scope scope) {
+        return () -> select.projectionColumns(scope)
+            .map(c -> ProjectionColumn.usingLabelAsColumnName(this, c, Optional.empty()))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -96,16 +112,16 @@ public class SubselectAlias<T> extends Alias<T> {
 
     @Override
     public <T1> String columnSql(Scope scope, ColumnSpecifier<T1> columnSpecifier) {
-        ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
+        ProjectionColumn<T1> projectionColumn = findProjectionColumn(scope, columnSpecifier)
             .orElseThrow(IllegalArgumentException::new);
-        return inSelectClauseSql(projectionColumn.label());
+        return inSelectClauseSql(projectionColumn.columnName());
     }
 
     @Override
-    public <T1> String columnSqlWithLabel(ColumnSpecifier<T1> columnSpecifier, Optional<String> label) {
-        ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
+    public <T1> String columnSqlWithLabel(Scope scope, ColumnSpecifier<T1> columnSpecifier, Optional<String> label) {
+        ProjectionColumn<T1> projectionColumn = findProjectionColumn(scope, columnSpecifier)
             .orElseThrow(IllegalArgumentException::new);
-        return inSelectClauseSql(projectionColumn.label(), label);
+        return inSelectClauseSql(projectionColumn.columnName(), label);
     }
 
     @Override
@@ -137,17 +153,7 @@ public class SubselectAlias<T> extends Alias<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory() {
-        return select.rowMapperFactory().withDefaultLabel(Optional.of(aliasName + "_"));
-    }
-
-    @Override
-    public <T1> RowMapperFactory<T1> rowMapperFactoryFor(ColumnSpecifier<T1> columnSpecifier, Optional<String> defaultLabel) {
-        ProjectionColumn<T1> projectionColumn = select.findColumn(columnSpecifier)
-            .orElseThrow(IllegalArgumentException::new);
-        return projectionColumn
-            .rowMapperFactory()
-            .withDefaultLabel(Optional.of(inSelectClauseLabel(projectionColumn.label())))
-            .withDefaultLabel(defaultLabel);
+        return select.rowMapperFactory().withPrefix(aliasName + "_");
     }
 
     @Override

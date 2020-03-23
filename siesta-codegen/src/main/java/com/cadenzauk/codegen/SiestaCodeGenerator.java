@@ -122,10 +122,10 @@ public class SiestaCodeGenerator {
 //        generateFunctions(20);
 //        generateTuples(20);
 //        generateRowMappers(20);
-//        generateRowMapperFactories(20);
+        generateRowMapperFactories(20);
 //        generateProjections(20);
 //        generateExpectingJoins(20);
-        generateInProjectionExpectingCommas(19);
+//        generateInProjectionExpectingCommas(19);
 //        generateTupleBuilders(20);
     }
 

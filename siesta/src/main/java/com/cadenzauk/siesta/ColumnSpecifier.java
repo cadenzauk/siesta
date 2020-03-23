@@ -61,6 +61,8 @@ public interface ColumnSpecifier<T> {
 
     boolean specifies(Scope scope, AliasColumn<T> x);
 
+    boolean specifies(Scope scope, ProjectionColumn<T> x);
+
     class MethodInfoColumnSpecifier<T> implements ColumnSpecifier<T> {
         private final MethodInfo<?, T> getterMethod;
 
@@ -141,6 +143,11 @@ public interface ColumnSpecifier<T> {
         public boolean specifies(Scope scope, AliasColumn<T> x) {
             return StringUtils.equals(x.propertyName(), getterMethod.propertyName());
         }
+
+        @Override
+        public boolean specifies(Scope scope, ProjectionColumn<T> x) {
+            return StringUtils.equals(x.propertyName(), getterMethod.propertyName());
+        }
     }
 
     class NamedColumnSpecifier<T> implements ColumnSpecifier<T> {
@@ -195,6 +202,11 @@ public interface ColumnSpecifier<T> {
 
         @Override
         public boolean specifies(Scope scope, AliasColumn<T> x) {
+            return StringUtils.equals(x.columnName(), columnLabel);
+        }
+
+        @Override
+        public boolean specifies(Scope scope, ProjectionColumn<T> x) {
             return StringUtils.equals(x.columnName(), columnLabel);
         }
     }

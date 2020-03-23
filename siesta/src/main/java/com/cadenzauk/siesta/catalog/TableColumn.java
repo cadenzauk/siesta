@@ -28,7 +28,7 @@ import java.sql.ResultSet;
 import java.util.Optional;
 
 public interface TableColumn<T, R, B> extends Column<T,R> {
-    ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, Optional<String> label);
+    ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, String prefix, Optional<String> label);
 
     String label(String labelPrefix);
 

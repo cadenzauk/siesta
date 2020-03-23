@@ -120,7 +120,7 @@ public class TableAlias<R> extends Alias<R> {
     }
 
     @Override
-    public <T> String columnSqlWithLabel(ColumnSpecifier<T> columnSpecifier, Optional<String> label) {
+    public <T> String columnSqlWithLabel(Scope scope, ColumnSpecifier<T> columnSpecifier, Optional<String> label) {
         Column<T,R> column = columnSpecifier.asReferringMethodInfo(type())
             .map(table::column)
             .orElseThrow(IllegalArgumentException::new);
@@ -186,14 +186,6 @@ public class TableAlias<R> extends Alias<R> {
     @Override
     public RowMapperFactory<R> rowMapperFactory() {
         return table.rowMapperFactory(this, Optional.empty());
-    }
-
-    @Override
-    public <T> RowMapperFactory<T> rowMapperFactoryFor(ColumnSpecifier<T> getterMethod, Optional<String> defaultLabel) {
-        Column<T,R> column = getterMethod.asReferringMethodInfo(type())
-            .map(table::column)
-            .orElseThrow(IllegalArgumentException::new);
-        return column.rowMapperFactory(this, defaultLabel);
     }
 
     @Override

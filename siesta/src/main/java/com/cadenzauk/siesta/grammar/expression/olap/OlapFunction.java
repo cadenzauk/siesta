@@ -68,7 +68,7 @@ class OlapFunction<T> {
 
     RowMapperFactory<T> rowMapperFactory(Scope scope, String defaultLabel) {
         DataType<T> dataType = scope.database().getDataTypeOf(type);
-        return label -> rs -> dataType.get(rs, label.orElse(defaultLabel), scope.database()).orElse(null);
+        return (prefix, label) -> rs -> dataType.get(rs, prefix + label.orElse(defaultLabel), scope.database()).orElse(null);
     }
 
     TypeToken<T> type() {

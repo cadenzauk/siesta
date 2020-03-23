@@ -68,7 +68,7 @@ public class ValueExpression<T> implements TypedExpression<T> {
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
         DataType<T> dataType = scope.database().getDataTypeOf(value);
-        return label -> rs -> dataType.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+        return (prefix, label) -> rs -> dataType.get(rs, prefix + label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @SuppressWarnings("unchecked")

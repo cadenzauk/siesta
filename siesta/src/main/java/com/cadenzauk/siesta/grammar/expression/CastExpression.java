@@ -56,7 +56,7 @@ public class CastExpression<F, T> implements TypedExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> rs -> to.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+        return (prefix, label) -> rs -> to.get(rs, prefix + label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

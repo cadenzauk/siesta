@@ -79,14 +79,6 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     @Override
-    public <T> RowMapperFactory<T> rowMapperFactoryFor(ColumnSpecifier<T> columnSpecifier, Optional<String> defaultLabel) {
-        Column<T,RT> column = columnSpecifier.asReferringMethodInfo(type())
-            .map(this::column)
-            .orElseThrow(IllegalArgumentException::new);
-        return column.rowMapperFactory(this, defaultLabel);
-    }
-
-    @Override
     public Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
         Stream<CteAlias<RT>> aliasStream = requiredAlias
             .map(a -> StreamUtil.of(columnSpecifier.referringClass())
@@ -164,7 +156,7 @@ public class CteAlias<RT> extends Alias<RT> {
     }
 
     @Override
-    public <T> String columnSqlWithLabel(ColumnSpecifier<T> columnSpecifier, Optional<String> label) {
+    public <T> String columnSqlWithLabel(Scope scope, ColumnSpecifier<T> columnSpecifier, Optional<String> label) {
         Column<T,RT> column = columnSpecifier.asReferringMethodInfo(type())
             .map(this::column)
             .orElseThrow(IllegalArgumentException::new);

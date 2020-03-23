@@ -62,7 +62,7 @@ public class LiteralExpression<T> implements TypedExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> rs -> scope.database().getDataTypeOf(value).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+        return (prefix, label) -> rs -> scope.database().getDataTypeOf(value).get(rs, prefix + label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @SuppressWarnings("unchecked")

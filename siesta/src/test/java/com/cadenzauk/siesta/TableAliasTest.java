@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.dialect.Db2Dialect;
+import com.cadenzauk.siesta.grammar.expression.ColumnExpressionBuilder;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.WidgetRow;
@@ -50,6 +51,7 @@ import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
@@ -234,7 +236,7 @@ class TableAliasTest {
         when(widgetTable.column(MethodInfo.of(WidgetRow::name))).thenReturn(column);
         when(column.sqlWithLabel(sut, Optional.of("fred"))).thenReturn("colname as foo");
 
-        String result = sut.columnSqlWithLabel(ColumnSpecifier.of(WidgetRow::name), Optional.of("fred"));
+        String result = sut.columnSqlWithLabel(scope, ColumnSpecifier.of(WidgetRow::name), Optional.of("fred"));
 
         assertThat(result, is("colname as foo"));
     }
@@ -263,41 +265,27 @@ class TableAliasTest {
     @Test
     void col()  {
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "fred");
-        Scope scope = mock(Scope.class);
-        when(scope.database()).thenReturn(database);
-        when(database.columnNameFor(Mockito.<MethodInfo<WidgetRow,String>>any())).thenReturn("ROW_ID");
-        when(widgetTable.column(Mockito.<MethodInfo<WidgetRow,Long>>any())).thenReturn(widgetRowId);
-        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        when(widgetRowId.sql(sut)).thenReturn("fred.ROW_ID");
 
-        TypedExpression<Long> col = sut.column(WidgetRow::widgetId);
+        TypedExpression<Long> result = sut.column(WidgetRow::widgetId);
 
-        assertThat(col.sql(scope), is("fred.ROW_ID"));
-        assertThat(col.args(scope).count(), is(0L));
-        assertThat(col.label(scope), is("fred_ROW_ID"));
+        assertThat(result, instanceOf(ColumnExpressionBuilder.class));
+        assertThat(result.toString(), is("widgetId"));
     }
 
     @Test
     void colOptional()  {
         Alias<WidgetRow> sut = TableAlias.of(widgetTable, "fred");
-        Scope scope = mock(Scope.class);
-        when(scope.database()).thenReturn(database);
-        when(database.columnNameFor(Mockito.<MethodInfo<WidgetRow,String>>any())).thenReturn("DESCRIPTION");
-        when(widgetTable.column(Mockito.<MethodInfo<WidgetRow,String>>any())).thenReturn(widgetDescription);
-        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        when(widgetDescription.sql(sut)).thenReturn("fred.DESCRIPTION");
 
-        TypedExpression<String> col = sut.column(WidgetRow::description);
+        TypedExpression<String> result = sut.column(WidgetRow::description);
 
-        assertThat(col.sql(scope), is("fred.DESCRIPTION"));
-        assertThat(col.args(scope).count(), is(0L));
-        assertThat(col.label(scope), is("fred_DESCRIPTION"));
+        assertThat(result, instanceOf(ColumnExpressionBuilder.class));
+        assertThat(result.toString(), is("description"));
     }
 
     @Test
     void findColumnOfCorrectTypeReturnsColumn() {
         when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
-        when(columnSpecifier.specifies(any(), any())).thenReturn(true);
+        when(columnSpecifier.specifies(any(), any(AliasColumn.class))).thenReturn(true);
         when(widgetTable.columns()).thenReturn(Stream.of(widgetRowId));
         when(widgetRowId.columnName()).thenReturn("bob");
         when(widgetRowId.as(TypeToken.of(Long.class))).thenReturn(Stream.of(widgetRowId));
@@ -353,21 +341,6 @@ class TableAliasTest {
         assertThat(result, sameInstance(rowMapperFactory));
         verify(widgetTable).rowMapperFactory(sut, Optional.empty());
         verifyNoMoreInteractions(widgetTable);
-    }
-
-    @Test
-    void rowMapperFactoryForDelegatesToColumn()  {
-        when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        when(columnSpecifier.asReferringMethodInfo(TypeToken.of(WidgetRow.class))).thenReturn(Optional.of(methodInfo));
-        when(widgetTable.column(methodInfo)).thenReturn(widgetRowId);
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
-        when(widgetRowId.rowMapperFactory(sut, Optional.of("foo"))).thenReturn(rowMapperFactoryForColumn);
-
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("foo"));
-
-        assertThat(result, sameInstance(rowMapperFactoryForColumn));
-        verify(widgetRowId).rowMapperFactory(sut, Optional.of("foo"));
-        verifyNoMoreInteractions(widgetRowId);
     }
 
     @SuppressWarnings("unchecked")

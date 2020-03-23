@@ -75,7 +75,7 @@ public class ExpressionProjection<T> implements Projection<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return expression.rowMapperFactory(scope, label);
+        return projectionColumn(scope).rowMapperFactory();
     }
 
     @Override

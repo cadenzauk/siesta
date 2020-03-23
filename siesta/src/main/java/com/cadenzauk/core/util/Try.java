@@ -328,5 +328,12 @@ public abstract class Try<T> {
                 .append(throwable.toString())
                 .toHashCode();
         }
+
+        @Override
+        public String toString() {
+            return "Failure{" +
+                "throwable=" + throwable +
+                '}';
+        }
     }
 }

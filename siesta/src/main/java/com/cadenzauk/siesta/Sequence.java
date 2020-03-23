@@ -54,7 +54,7 @@ public class Sequence<T> {
     }
 
     public RowMapperFactory<T> rowMapperFactory(String defaultLabel) {
-        return label -> rs -> dataType.get(rs, label.orElse(defaultLabel), database).orElse(null);
+        return (prefix, label) -> rs -> dataType.get(rs, prefix + label.orElse(defaultLabel), database).orElse(null);
     }
 
     public String name() {

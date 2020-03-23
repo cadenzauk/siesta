@@ -66,7 +66,7 @@ public class SqlFunction<T> implements TypedExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> rowMapperFactory.apply(scope, label.orElseGet(() -> label(scope)));
+        return (prefix, label) -> rowMapperFactory.apply(scope, prefix + label.orElseGet(() -> label(scope)));
     }
 
     @Override

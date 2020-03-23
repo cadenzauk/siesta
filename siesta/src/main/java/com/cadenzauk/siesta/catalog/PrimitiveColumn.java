@@ -190,7 +190,7 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
-        return label -> rs -> dataType.get(rs, or(label, defaultLabel).orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.database()).orElse(null);
+        return (prefix, label) -> rs -> dataType.get(rs, prefix + or(label, defaultLabel).orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.database()).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -204,8 +204,8 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
-    public ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, Optional<String> label) {
-        Optional<T> value = dataType.get(rs, label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.database());
+    public ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, String prefix, Optional<String> label) {
+        Optional<T> value = dataType.get(rs, prefix + label.orElseGet(() -> alias.inSelectClauseLabel(columnName)), alias.database());
         return new ResultSetValue<B>() {
             @Override
             public boolean isPresent() {

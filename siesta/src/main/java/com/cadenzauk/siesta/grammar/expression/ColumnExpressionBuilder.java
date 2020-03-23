@@ -25,18 +25,30 @@ package com.cadenzauk.siesta.grammar.expression;
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.siesta.Alias;
+import com.cadenzauk.siesta.AliasColumn;
+import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
+public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> implements ColumnExpression<T> {
     private final ColumnExpression<T> lhs;
 
     private ColumnExpressionBuilder(ColumnExpression<T> lhs, Function<BooleanExpression,N> onComplete) {
         super(lhs, onComplete);
         this.lhs = lhs;
+    }
+
+    public <C> ColumnExpressionBuilder<C,R,N> dot(Function1<T,C> field) {
+        return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
+    }
+
+    public <C> ColumnExpressionBuilder<C,R,N> dot(FunctionOptional1<T,C> field) {
+        return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
     }
 
     @Override
@@ -49,12 +61,24 @@ public class ColumnExpressionBuilder<T, R, N> extends ExpressionBuilder<T, N> {
         return lhs.sqlWithLabel(scope, label);
     }
 
-    public <C> ColumnExpressionBuilder<C,R,N> dot(Function1<T,C> field) {
-        return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
+    @Override
+    public String columnName(Scope scope) {
+        return lhs.columnName(scope);
     }
 
-    public <C> ColumnExpressionBuilder<C,R,N> dot(FunctionOptional1<T,C> field) {
-        return new ColumnExpressionBuilder<>(new ChainExpression<>(lhs, MethodInfo.of(field)), onComplete());
+    @Override
+    public Alias<?> resolve(Scope scope) {
+        return lhs.resolve(scope);
+    }
+
+    @Override
+    public <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
+        return lhs.findColumn(scope, type, propertyName);
+    }
+
+    @Override
+    public <X> boolean includes(ColumnSpecifier<X> getter) {
+        return lhs.includes(getter);
     }
 
     public static <T, R, N> ColumnExpressionBuilder<T,R,N> of(ColumnExpression<T> column, Function<BooleanExpression,N> onComplete) {

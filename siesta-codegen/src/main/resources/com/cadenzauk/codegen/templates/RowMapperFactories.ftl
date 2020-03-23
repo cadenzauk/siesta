@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public class RowMapperFactories {
     public static <T1, T2> RowMapperFactory<Tuple2<T1,T2>> of(RowMapperFactory<T1> factory1, RowMapperFactory<T2> factory2) {
-        return label ->RowMappers.of(factory1.rowMapper(Optional.empty()), factory2.rowMapper(Optional.empty()));
+        return (prefix, label) ->RowMappers.of(factory1.rowMapper(prefix, Optional.empty()), factory2.rowMapper(prefix, Optional.empty()));
     }
    <#list 3..n as i>
 
@@ -41,9 +41,9 @@ public class RowMapperFactories {
            RowMapperFactory<T${j}> factory${j}<#if j < i>,</#if>
         </#list>
     ) {
-        return label ->RowMappers.of(
+        return (prefix, label) ->RowMappers.of(
         <#list 1..i as j>
-                factory${j}.rowMapper(Optional.empty())<#if j < i>,</#if>
+                factory${j}.rowMapper(prefix, Optional.empty())<#if j < i>,</#if>
         </#list>
             );
     }
@@ -51,9 +51,9 @@ public class RowMapperFactories {
     <#list 3..n as i>
 
     public static <T1<#list 2..i as j>, T${j}</#list>> RowMapperFactory<Tuple${i}<T1<#list 2..i as j>,T${j}</#list>>> add${i}<#if i = 3>rd<#else>th</#if>(RowMapperFactory<Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>>> factory${i-1}, RowMapperFactory<T${i}> factory) {
-        return label ->{
-            RowMapper<Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>>> tuple = factory${i-1}.rowMapper(Optional.empty());
-            return RowMappers.add${i}<#if i = 3>rd<#else>th</#if>(tuple, factory.rowMapper(Optional.empty()));
+        return (prefix, label) -> {
+            RowMapper<Tuple${i-1}<T1<#list 2..i-1 as j>,T${j}</#list>>> tuple = factory${i-1}.rowMapper(prefix, Optional.empty());
+            return RowMappers.add${i}<#if i = 3>rd<#else>th</#if>(tuple, factory.rowMapper(prefix, Optional.empty()));
         };
     }
     </#list>

@@ -102,6 +102,15 @@ public class ProjectionColumn<T> {
             : Stream.empty();
     }
 
+    public static <T> ProjectionColumn<T> forAliasAndLabel(Alias<?> alias, ProjectionColumn<T> input, Optional<String> label) {
+        List<ProjectionColumn<?>> components = input
+            .components()
+            .stream()
+            .map(c -> ProjectionColumn.forAliasAndLabel(alias, c, label.map(x -> alias.database().namingStrategy().embeddedName(x, c.label))))
+            .collect(toList());
+        String actualLabel = label.orElseGet(() -> alias.inSelectClauseLabel(input.label()));
+        return new ProjectionColumn<>(input.type(), input.propertyName(), input.columnName(), alias.inSelectClauseSql(input.columnName()), actualLabel, (p, x) -> input.rowMapperFactory.rowMapper(p, or(x, Optional.of(actualLabel))), components);
+    }
     public static <T> ProjectionColumn<T> usingLabelAsColumnName(Alias<?> alias, ProjectionColumn<T> input, Optional<String> label) {
         List<ProjectionColumn<?>> components = input
             .components()
@@ -109,6 +118,6 @@ public class ProjectionColumn<T> {
             .map(c -> ProjectionColumn.usingLabelAsColumnName(alias, c, label.map(x -> alias.database().namingStrategy().embeddedName(x, c.label))))
             .collect(toList());
         String actualLabel = label.orElseGet(() -> alias.inSelectClauseLabel(input.label()));
-        return new ProjectionColumn<>(input.type(), input.propertyName(), input.label(), alias.inSelectClauseSql(input.label()), actualLabel, x -> input.rowMapperFactory.rowMapper(or(x, Optional.of(actualLabel))), components);
+        return new ProjectionColumn<>(input.type(), input.propertyName(), input.label(), alias.inSelectClauseSql(input.label()), actualLabel, (p, x) -> input.rowMapperFactory.rowMapper(p, or(x, Optional.of(actualLabel))), components);
     }
 }

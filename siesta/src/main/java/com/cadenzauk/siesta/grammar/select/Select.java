@@ -192,7 +192,7 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     @Override
     public RowMapperFactory<RT> rowMapperFactory(Scope scope) {
         final DataType<RT> dataType = scope.database().getDataTypeOf(type());
-        return label -> rs -> dataType.get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+        return (prefix, label) -> rs -> dataType.get(rs, prefix + label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

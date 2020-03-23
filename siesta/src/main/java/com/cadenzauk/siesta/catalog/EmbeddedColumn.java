@@ -244,8 +244,8 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
-    public ResultSetValue<RB> extract(Alias<?> alias, ResultSet rs, Optional<String> label) {
-        Optional<T> value = Optional.ofNullable(rowMapperFactory(alias, label).rowMapper(Optional.empty()).mapRow(rs));
+    public ResultSetValue<RB> extract(Alias<?> alias, ResultSet rs, String prefix, Optional<String> label) {
+        Optional<T> value = Optional.ofNullable(rowMapperFactory(alias, label).rowMapper(prefix, Optional.empty()).mapRow(rs));
         return new ResultSetValue<RB>() {
             @Override
             public boolean isPresent() {

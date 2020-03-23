@@ -26,9 +26,11 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
+import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
+import com.cadenzauk.siesta.InvalidQueryException;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
@@ -40,6 +42,8 @@ import java.util.stream.Stream;
 public class UnresolvedColumn<T> implements ColumnExpression<T> {
     private final Optional<String> alias;
     private final ColumnSpecifier<T> columnSpec;
+    private final Lazy<Alias<?>> resolvedAlias = new Lazy<>();
+    private final Lazy<AliasColumn<T>> resolvedColumn = new Lazy<>();
 
     private UnresolvedColumn(MethodInfo<?,T> getterMethod) {
         this.alias = Optional.empty();
@@ -64,21 +68,20 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
     @Override
     public String sql(Scope scope) {
         Alias<?> resolvedAlias = resolve(scope);
-        AliasColumn<T> column = column(scope, resolvedAlias);
+        AliasColumn<T> column = column(scope);
         return column.sql(resolvedAlias);
     }
 
     @Override
     public String sqlWithLabel(Scope scope, Optional<String> label) {
         Alias<?> resolvedAlias = resolve(scope);
-        AliasColumn<T> column = column(scope, resolvedAlias);
+        AliasColumn<T> column = column(scope);
         return column.sqlWithLabel(resolvedAlias, label);
     }
 
     @Override
     public String columnName(Scope scope) {
-        Alias<?> resolvedAlias = resolve(scope);
-        return column(scope, resolvedAlias).columnName();
+        return column(scope).columnName();
     }
 
     @Override
@@ -91,11 +94,6 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
         return Precedence.COLUMN;
     }
 
-    private AliasColumn<T> column(Scope scope, Alias<?> resolvedAlias) {
-        return resolvedAlias.findAliasColumn(scope, columnSpec)
-            .orElseThrow(() -> new RuntimeException("No column " + columnSpec + " in " + resolvedAlias.aliasName()));
-    }
-
     @Override
     public String label(Scope scope) {
         String columnName = columnName(scope);
@@ -104,21 +102,17 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.rowMapperFactoryFor(columnSpec, Optional.empty());
+        return column(scope).rowMapperFactory(resolve(scope), Optional.empty());
     }
 
     @Override
     public ProjectionColumn<T> toProjectionColumn(Scope scope, Optional<String> label) {
-        Alias<?> resolve = resolve(scope);
-        AliasColumn<T> column = column(scope, resolve);
-        return column.toProjection(resolve, label);
+        return column(scope).toProjection(resolve(scope), label);
     }
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope, Optional<String> defaultLabel) {
-        Alias<?> resolvedAlias = resolve(scope);
-        return resolvedAlias.rowMapperFactoryFor(columnSpec, defaultLabel);
+        return column(scope).rowMapperFactory(resolve(scope), defaultLabel);
     }
 
     @Override
@@ -128,19 +122,24 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
 
     @Override
     public Alias<?> resolve(Scope scope) {
-        return scope.findAlias(columnSpec, alias);
+        return resolvedAlias.getOrCompute(() -> scope.findAlias(columnSpec, alias));
     }
 
     @Override
     public <V> Optional<AliasColumn<V>> findColumn(Scope scope, TypeToken<V> type, String propertyName) {
-        Alias<?> resolve = resolve(scope);
-        AliasColumn<T> column = column(scope, resolve);
-        return column.findColumn(type, propertyName);
+        return column(scope).findColumn(type, propertyName);
     }
 
     @Override
     public <X> boolean includes(ColumnSpecifier<X> columnSpecifier) {
         return Objects.equals(columnSpec, columnSpecifier);
+    }
+
+    private AliasColumn<T> column(Scope scope) {
+        return resolvedColumn.getOrCompute(() ->
+            resolve(scope)
+                .findAliasColumn(scope, columnSpec)
+                .orElseThrow(() -> new InvalidQueryException("No column " + columnSpec + " in " + resolve(scope).inFromClauseSql())));
     }
 
     public static <T, R> UnresolvedColumn<T> of(Function1<R,T> getter) {

@@ -146,7 +146,7 @@ class CaseExpressionTest {
         CaseExpression<String> sut = new CaseExpression<>(condition, expression1);
         when(expression1.rowMapperFactory(scope)).thenReturn(rowMapperFactory);
         when(scope.newLabel()).thenReturn(123L);
-        when(rowMapperFactory.rowMapper(Optional.of("case_123"))).thenReturn(rowMapper);
+        when(rowMapperFactory.rowMapper("", Optional.of("case_123"))).thenReturn(rowMapper);
 
         RowMapper<String> result = sut.rowMapperFactory(scope).rowMapper(Optional.empty());
 

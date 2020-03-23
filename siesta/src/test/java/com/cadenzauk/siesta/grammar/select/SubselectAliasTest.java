@@ -53,6 +53,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -200,8 +201,11 @@ class SubselectAliasTest {
     @Test
     void columnSql() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "barney");
-        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
+        when(select.projectionColumns(scope)).thenReturn(Stream.of(projectionColumn));
+        when(projectionColumn.type()).thenReturn(TypeToken.of(Long.class));
         when(projectionColumn.label()).thenReturn("rubble");
+        when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
+        when(columnSpecifier.specifies(eq(scope), any(ProjectionColumn.class))).thenReturn(true);
 
         String result = sut.columnSql(scope, columnSpecifier);
 
@@ -211,10 +215,13 @@ class SubselectAliasTest {
     @Test
     void columnSqlWithLabelGivenEmptyLabel() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "fred");
-        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
+        when(select.projectionColumns(scope)).thenReturn(Stream.of(projectionColumn));
+        when(projectionColumn.type()).thenReturn(TypeToken.of(Long.class));
         when(projectionColumn.label()).thenReturn("flintstone");
+        when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
+        when(columnSpecifier.specifies(eq(scope), any(ProjectionColumn.class))).thenReturn(true);
 
-        String result = sut.columnSqlWithLabel(columnSpecifier, Optional.empty());
+        String result = sut.columnSqlWithLabel(scope, columnSpecifier, Optional.empty());
 
         assertThat(result, is("fred.flintstone fred_flintstone"));
     }
@@ -222,10 +229,13 @@ class SubselectAliasTest {
     @Test
     void columnSqlWithLabelGivenNonEmptyLabel() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "fred");
-        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
+        when(select.projectionColumns(scope)).thenReturn(Stream.of(projectionColumn));
+        when(projectionColumn.type()).thenReturn(TypeToken.of(Long.class));
         when(projectionColumn.label()).thenReturn("flintstone");
+        when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
+        when(columnSpecifier.specifies(eq(scope), any(ProjectionColumn.class))).thenReturn(true);
 
-        String result = sut.columnSqlWithLabel(columnSpecifier, Optional.of("caveman"));
+        String result = sut.columnSqlWithLabel(scope, columnSpecifier, Optional.of("caveman"));
 
         assertThat(result, is("fred.flintstone caveman"));
     }
@@ -291,56 +301,13 @@ class SubselectAliasTest {
     void rowMapperFactoryDelegatesToSelect() {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
         when(select.rowMapperFactory()).thenReturn(rowMapperFactory);
-        when(rowMapperFactory.rowMapper(Optional.of("bruce"))).thenReturn(rowMapper);
-        when(rowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
+        when(rowMapperFactory.rowMapper("s_", Optional.of("bruce"))).thenReturn(rowMapper);
+        when(rowMapperFactory.withPrefix(any())).thenCallRealMethod();
 
         RowMapper<WidgetRow> result = sut.rowMapperFactory().rowMapper(Optional.of("bruce"));
 
         verify(select, times(1)).rowMapperFactory();
         assertThat(result, sameInstance(rowMapper));
-    }
-
-    @Test
-    void rowMapperFactoryForReturnsRowMapperFactoryThatUsesLabelIfGiven() {
-        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
-        when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
-        when(columnRowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
-        SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
-
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("burt"));
-
-        verifyZeroInteractions(columnRowMapperFactory);
-        result.rowMapper(Optional.of("foo"));
-        verify(columnRowMapperFactory).rowMapper(Optional.of("foo"));
-    }
-
-    @Test
-    void rowMapperFactoryForReturnsRowMapperFactoryThatUsesDefaultLabelIfNoLabelGiven() {
-        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
-        when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
-        when(columnRowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
-        SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
-
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.of("burt"));
-
-        verifyZeroInteractions(columnRowMapperFactory);
-        result.rowMapper(Optional.empty());
-        verify(columnRowMapperFactory).rowMapper(Optional.of("burt"));
-    }
-
-    @Test
-    void rowMapperFactoryForReturnsRowMapperFactoryThatUsesCalculatedLabelIfNoLabelOrDefaultGiven() {
-        when(select.findColumn(columnSpecifier)).thenReturn(Optional.of(projectionColumn));
-        when(projectionColumn.rowMapperFactory()).thenReturn(columnRowMapperFactory);
-        when(columnRowMapperFactory.withDefaultLabel(any())).thenCallRealMethod();
-        when(projectionColumn.label()).thenReturn("col");
-        SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "s");
-
-        RowMapperFactory<Long> result = sut.rowMapperFactoryFor(columnSpecifier, Optional.empty());
-
-        verifyZeroInteractions(columnRowMapperFactory);
-        result.rowMapper(Optional.empty());
-        verify(columnRowMapperFactory).rowMapper(Optional.of("s_col"));
     }
 
     @Test

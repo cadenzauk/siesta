@@ -54,9 +54,9 @@ public abstract class Alias<R> {
 
     public abstract String inFromClauseSql();
 
-    public abstract <T> String columnSql(Scope scope, ColumnSpecifier<T> getterMethod);
+    public abstract <T> String columnSql(Scope scope, ColumnSpecifier<T> columnSpecifier);
 
-    public abstract <T> String columnSqlWithLabel(ColumnSpecifier<T> getterMethod, Optional<String> label);
+    public abstract <T> String columnSqlWithLabel(Scope scope, ColumnSpecifier<T> columnSpecifier, Optional<String> label);
 
     public abstract String inSelectClauseSql(Scope scope);
 
@@ -81,8 +81,6 @@ public abstract class Alias<R> {
     public abstract Optional<String> aliasName();
 
     public abstract RowMapperFactory<R> rowMapperFactory();
-
-    public abstract <T> RowMapperFactory<T> rowMapperFactoryFor(ColumnSpecifier<T> getterMethod, Optional<String> defaultLabel);
 
     public abstract Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias);
 

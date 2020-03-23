@@ -164,7 +164,7 @@ public class Scope {
     public static <S> BiFunction<Scope,String,RowMapperFactory<S>> makeMapperFactory(Class<S> resultClass) {
         return (scope, defaultLabel) -> {
             final DataType<S> dataType = scope.database().getDataTypeOf(resultClass);
-            return label -> rs -> dataType.get(rs, label.orElseGet(() -> defaultLabel), scope.database()).orElse(null);
+            return (prefix, label) -> rs -> dataType.get(rs, prefix + label.orElse(defaultLabel), scope.database()).orElse(null);
         };
     }
 

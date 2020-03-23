@@ -1388,7 +1388,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    void canSelectFromSubselect() {
+    void canSelectAllFromSubselectOfTable() {
         Database database = testDatabase(dataSource, dialect);
         SalespersonRow salespersonRow1 = aRandomSalesperson();
         SalespersonRow salespersonRow2 = aRandomSalesperson();
@@ -1404,6 +1404,49 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(result, is(salespersonRow2));
     }
+
+    @Test
+    void canSelectAllFromSubselectOfExpression() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        SalespersonRow salespersonRow3 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
+
+        Select<String> subselect = database
+            .from(SalespersonRow.class, "i")
+            .select(SalespersonRow::surname)
+            .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId());
+        String result = database
+            .from(subselect, "o" )
+            .single();
+
+        assertThat(result, is(salespersonRow2.surname()));
+    }
+
+    @Test
+    void canSelectColumnFromJoinedTableInSubselect() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        SalespersonRow salespersonRow3 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
+        SalesAreaRow salesAreaRow = aRandomSalesArea(a -> a.salespersonId(Optional.of(salespersonRow2.salespersonId())));
+        database.insert(salesAreaRow);
+
+        Select<Tuple2<SalespersonRow,SalesAreaRow>> subselect = database
+            .from(SalespersonRow.class, "i")
+            .leftJoin(SalesAreaRow.class, "a")
+            .on(SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
+            .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId());
+        String result = database
+            .from(subselect, "o" )
+            .select(SalesAreaRow::salesAreaName)
+            .single();
+
+        assertThat(result, is(salesAreaRow.salesAreaName()));
+    }
+
 
     @Test
     void selectUsingColumnLabel() {

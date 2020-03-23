@@ -52,7 +52,7 @@ public class ChainExpression<P, T> implements ColumnExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> rs -> scope.database().getDataTypeOf(field).get(rs, label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
+        return (prefix, label) -> rs -> scope.database().getDataTypeOf(field).get(rs, prefix + label.orElseGet(() -> label(scope)), scope.database()).orElse(null);
     }
 
     @Override

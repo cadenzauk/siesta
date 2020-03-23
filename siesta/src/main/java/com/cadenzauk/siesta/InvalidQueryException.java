@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,25 +20,10 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.sql;
+package com.cadenzauk.siesta;
 
-import java.util.Optional;
-
-import static com.cadenzauk.core.util.OptionalUtil.or;
-
-@FunctionalInterface
-public interface RowMapperFactory<T> {
-    RowMapper<T> rowMapper(String prefix, Optional<String> label);
-
-    default RowMapper<T> rowMapper(Optional<String> label) {
-        return rowMapper("", label);
-    }
-
-    default RowMapperFactory<T> withDefaultLabel(Optional<String> defaultLabel) {
-        return (prefix, label) -> rowMapper(prefix, or(label, defaultLabel));
-    }
-
-    default RowMapperFactory<T> withPrefix(String prefix) {
-        return (p, label) -> rowMapper(p + prefix, label);
+public class InvalidQueryException extends RuntimeException {
+    public InvalidQueryException(String message) {
+        super(message);
     }
 }

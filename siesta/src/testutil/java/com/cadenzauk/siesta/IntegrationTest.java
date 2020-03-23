@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.dialect.AutoDetectDialect;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.SaleRow;
+import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestDatabase;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -92,6 +93,15 @@ public abstract class IntegrationTest {
                 .salespersonId(newId())
                 .firstName(RandomStringUtils.randomAlphabetic(3, 12))
                 .surname(RandomStringUtils.randomAlphabetic(5, 15)))
+            .build();
+    }
+
+    public static SalesAreaRow aRandomSalesArea(Function<SalesAreaRow.Builder,SalesAreaRow.Builder> init) {
+        return init.apply(
+            SalesAreaRow.newBuilder()
+                .salesAreaId(newId())
+                .salesAreaName(RandomStringUtils.randomAlphabetic(10, 20))
+                .salesCount(Optional.of(RandomUtils.nextLong(100, 1000))))
             .build();
     }
 

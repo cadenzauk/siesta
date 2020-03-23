@@ -68,7 +68,7 @@ public class CoalesceFunction<T> implements TypedExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> terms.get(0).rowMapperFactory(scope).rowMapper(Optional.of(label.orElseGet(() -> label(scope))));
+        return (prefix, label) -> terms.get(0).rowMapperFactory(scope).rowMapper(prefix, Optional.of(label.orElseGet(() -> label(scope))));
     }
 
     @Override

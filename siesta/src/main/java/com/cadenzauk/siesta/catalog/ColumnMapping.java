@@ -112,9 +112,9 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
 
     @Override
     public RowMapperFactory<R> rowMapperFactory(Alias<?> alias, Optional<String> defaultLabel) {
-        return label -> rs -> {
+        return (prefix, label) -> rs -> {
             List<TableColumn.ResultSetValue<B>> values = columns.stream()
-                .map(c -> c.extract(alias, rs, computeLabel(alias, label, defaultLabel, c)))
+                .map(c -> c.extract(alias, rs, prefix, computeLabel(alias, label, defaultLabel, c)))
                 .collect(toList());
             return values.stream().noneMatch(TableColumn.ResultSetValue::isPresent)
                 ? null
@@ -122,13 +122,13 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         };
     }
 
-    private Optional<String> computeLabel(Alias<?> alias, Optional<String> prefix, Optional<String> defaultLabel, TableColumn<?,R,B> col) {
+    private Optional<String> computeLabel(Alias<?> alias, Optional<String> prefix, Optional<String> label, TableColumn<?,R,B> col) {
         return or(
             prefix.map(p ->
-                p + defaultLabel
+                p + label
                     .map(l -> labelOf(alias, l, col))
                     .orElseGet(() -> alias.inSelectClauseLabel(col.columnName()))),
-            defaultLabel.map(l -> labelOf(alias, l, col)));
+            label.map(l -> labelOf(alias, l, col)));
     }
 
     private String labelOf(Alias<?> alias, String defaultLabel, TableColumn<?,R,B> c) {
@@ -146,11 +146,11 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
             }
 
             @Override
-            public RowMapper<R> rowMapper(Optional<String> label) {
+            public RowMapper<R> rowMapper(String prefix, Optional<String> label) {
                 return rs -> {
                     List<TableColumn.ResultSetValue<B>> values = columns.stream()
                         .filter(c -> labels.contains(alias.inSelectClauseLabel(c.columnName())))
-                        .map(c -> c.extract(alias, rs, label))
+                        .map(c -> c.extract(alias, rs, prefix, label))
                         .collect(toList());
                     return values.stream().noneMatch(TableColumn.ResultSetValue::isPresent)
                         ? null

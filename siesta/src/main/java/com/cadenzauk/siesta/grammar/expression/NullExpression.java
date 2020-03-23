@@ -59,7 +59,7 @@ public class NullExpression<T> implements TypedExpression<T> {
 
     @Override
     public RowMapperFactory<T> rowMapperFactory(Scope scope) {
-        return label -> rs -> null;
+        return (prefix, label) -> rs -> null;
     }
 
     @Override
