@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 public class AutoDetectDialect {
     private static final List<Tuple2<Predicate<String>,Function<Connection,Dialect>>> DIALECTS = ImmutableList.of(
         Tuple.of(Pattern.compile("^DB2/.*").asPredicate(), conn -> new Db2Dialect()),
+        Tuple.of(Pattern.compile("^Apache Derby.*").asPredicate(), conn -> new DerbyDialect()),
         Tuple.of(Pattern.compile("^H2.*").asPredicate(), AutoDetectDialect::createH2Dialect),
         Tuple.of(Pattern.compile("^HSQL.*").asPredicate(), conn -> new HSqlDialect()),
         Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), conn -> new FirebirdDialect()),
@@ -76,7 +77,8 @@ public class AutoDetectDialect {
             ResultSet resultSet = closer.add(PreparedStatementUtil.executeQuery(preparedStatement));
             return closer.add(ResultSetUtil.stream(resultSet, rs -> ResultSetUtil.getString(rs, "H2VERSION")))
                 .limit(1)
-                .map(versionNo -> new H2Dialect(new VersionNo(versionNo)))
+                .map(VersionNo::new)
+                .map(H2Dialect::new)
                 .findFirst()
                 .orElseGet(H2Dialect::new);
         }

@@ -64,6 +64,7 @@ dependencies {
 
     testCompile group: 'com.h2database', name: 'h2', version: h2Version
     testCompile group: 'org.hsqldb', name: 'hsqldb', version: hsqldbVersion
+    testCompile group: 'org.apache.derby', name: 'derby', version: derbyVersion
     testCompile group: 'co.unruly', name: 'java-8-matchers', version: '1.5'
     testCompile group: 'com.google.guava', name: 'guava-testlib', version: '28.1-jre'
 }

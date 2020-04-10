@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,27 +20,32 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect.function;
+package com.cadenzauk.siesta.derby;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.dialect.DerbyDialect;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-public class FunctionRegistry {
-    private final Map<FunctionName, FunctionSpec> functions = new ConcurrentHashMap<>();
+import javax.sql.DataSource;
 
-    public Optional<FunctionSpec> get(FunctionName name) {
-        return Optional.ofNullable(functions.get(name));
+public class DerbyConfig {
+    @Bean
+    public DataSource dataSource() {
+        EmbeddedDatabase database = new EmbeddedDatabaseBuilder()
+            .setName("SIESTA")
+            .setType(EmbeddedDatabaseType.DERBY)
+            .build();
+        new JdbcTemplate(database).execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.locks.deadlockTimeout', '0')");
+        return database;
+
     }
 
-    public FunctionRegistry register(FunctionName name, FunctionSpec function) {
-        functions.put(name, function);
-        return this;
-    }
-
-    public FunctionRegistry register(Consumer<FunctionRegistry> registrar) {
-        registrar.accept(this);
-        return this;
+    @Bean
+    public Dialect dialect() {
+        return new DerbyDialect();
     }
 }

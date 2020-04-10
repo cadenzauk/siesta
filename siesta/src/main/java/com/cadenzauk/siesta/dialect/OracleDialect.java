@@ -63,9 +63,9 @@ import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECON
 
 public class OracleDialect extends AnsiDialect {
     public OracleDialect() {
-        DateFunctionSpecs.registerExtract(functions());
-        DateFunctionSpecs.registerPlusNumToDsInterval(functions());
         functions()
+            .register(DateFunctionSpecs::registerExtract)
+            .register(DateFunctionSpecs::registerPlusNumToDsInterval)
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"))

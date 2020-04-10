@@ -33,6 +33,8 @@ import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
+import com.cadenzauk.core.tuple.Tuple8;
+import com.cadenzauk.siesta.dialect.DerbyDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.expression.DateFunctions;
 import com.cadenzauk.siesta.grammar.expression.Label;
@@ -478,7 +480,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         Alias<SalespersonRow> s = database.table(SalespersonRow.class).as("s");
         String name = database.from(s)
-            .select(upper(s.column(SalespersonRow::firstName).concat(cast(" ").asVarchar(1)).concat(SalespersonRow::surname).concat(cast(1).asInteger())))
+            .select(upper(s.column(SalespersonRow::firstName).concat(cast(" ").asVarchar(1)).concat(SalespersonRow::surname).concat(cast(1).asChar(1))))
             .where(SalespersonRow::salespersonId).isEqualTo(george.salespersonId())
             .single();
         assertThat(name, is("GEORGE JETSON1"));
@@ -493,6 +495,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @TestCase({"Africa/Johannesburg"})
     @TestCase({"Pacific/Chatham"})
     void currentDateTest(String timeZone) {
+        assumeTrue(!(dialect instanceof DerbyDialect) || ZoneId.systemDefault().equals(ZoneId.of(timeZone)));
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             LocalDate before = LocalDate.now(database.databaseTimeZone());
@@ -516,6 +519,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @TestCase({"Africa/Johannesburg"})
     @TestCase({"Pacific/Chatham"})
     void currentTimestampLocalTest(String timeZone) {
+        assumeTrue(!(dialect instanceof DerbyDialect) || ZoneId.systemDefault().equals(ZoneId.of(timeZone)));
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             LocalDateTime before = LocalDateTime.now(database.databaseTimeZone()).minusSeconds(10);
@@ -539,6 +543,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @TestCase({"Africa/Johannesburg"})
     @TestCase({"Pacific/Chatham"})
     void currentTimestampTest(String timeZone) {
+        assumeTrue(!(dialect instanceof DerbyDialect) || ZoneId.systemDefault().equals(ZoneId.of(timeZone)));
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             ZonedDateTime before = ZonedDateTime.now(ZoneId.of("UTC")).minusSeconds(10);
@@ -968,12 +973,12 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     void unionTest() {
         Database database = testDatabase(dataSource, dialect);
 
-        List<Integer> result = database.select(literal(3))
-            .union(database.select(literal(1)))
-            .union(database.select(literal(1))
+        List<Integer> result = database.select(literal(3), "val")
+            .union(database.select(literal(1), "val"))
+            .union(database.select(literal(1), "val")
                 .where(literal(4)).isEqualTo(literal(5)))
-            .union(database.select(literal(2)))
-            .unionAll(database.select(literal(2)))
+            .union(database.select(literal(2), "val"))
+            .unionAll(database.select(literal(2), "val"))
             .orderBy(1)
             .list();
 
@@ -1004,6 +1009,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
     void commonTableExpression() {
         assumeFalse(dialect instanceof H2Dialect, "H2 is buggy");
+        assumeFalse(dialect instanceof DerbyDialect, "Derby does not support CTEs");
         Database database = testDatabase(dataSource, dialect);
         Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
 
@@ -1157,13 +1163,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .localDateReq(localDate)
             .build());
 
-        Tuple6<Integer,Integer,Integer,Integer,Integer,Integer> result = database
+        Tuple8<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer> result = database
             .select(dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 31, 0)), value(LocalDateTime.of(2018, 2, 17, 11, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 15, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
+            .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 0))))
             .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59))))
             .comma(secondDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59))))
+            .comma(secondDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59, 999_999_000))))
             .single();
 
         assertThat(result.item1(), is(9));
@@ -1171,7 +1179,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result.item3(), is(73));
         assertThat(result.item4(), is(-47));
         assertThat(result.item5(), is(250));
-        assertThat(result.item6(), is(14941));
+        assertThat(result.item6(), is(250));
+        assertThat(result.item7(), is(14941));
+        assertThat(result.item8(), is(14941));
     }
 
     @Test

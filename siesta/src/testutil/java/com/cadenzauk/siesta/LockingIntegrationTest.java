@@ -200,7 +200,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
                 .optional(transaction);
             LOG.info("Uncommitted revision = {}", uncommittedRevision);
             if (uncommittedRevision.orElse(0) > currentRevision.orElse(0)) {
-                LOG.info("Updated by another transaction - could bail at this point", currentRevision, uncommittedRevision);
+                LOG.info("Updated by another transaction (current {}, uncommitted {}) - could bail at this point", currentRevision, uncommittedRevision);
             }
 
             synchronization.waitToUpdate();

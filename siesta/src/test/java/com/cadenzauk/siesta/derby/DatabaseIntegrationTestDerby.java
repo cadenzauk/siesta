@@ -20,56 +20,11 @@
  * SOFTWARE.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.21"
-    }
-}
+package com.cadenzauk.siesta.derby;
 
-allprojects {
-    group 'com.cadenzauk'
+import com.cadenzauk.siesta.DatabaseIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-    apply plugin: 'java'
-}
-
-subprojects {
-    project.ext {
-        h2Version = '1.4.199'
-        hsqldbVersion = '2.4.1'
-        derbyVersion = '10.14.2.0'
-        junitJupiterVersion = '5.3.2'
-        mockitoVersion = '2.23.4'
-        springVersion = '5.1.3.RELEASE'
-    }
-
-    apply plugin: 'maven'
-    apply plugin: 'signing'
-
-    test {
-        useJUnitPlatform {
-            excludeEngines 'junit-vintage'
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from tasks.javadoc.destinationDir
-    }
-
-    task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    dependencies {
-        testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-        testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
-    }
+@ContextConfiguration(classes = DerbyConfig.class)
+class DatabaseIntegrationTestDerby extends DatabaseIntegrationTest {
 }

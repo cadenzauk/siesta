@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,27 +20,14 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect.function;
+package com.cadenzauk.siesta.dialect;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import com.cadenzauk.siesta.SequenceInfo;
 
-public class FunctionRegistry {
-    private final Map<FunctionName, FunctionSpec> functions = new ConcurrentHashMap<>();
-
-    public Optional<FunctionSpec> get(FunctionName name) {
-        return Optional.ofNullable(functions.get(name));
-    }
-
-    public FunctionRegistry register(FunctionName name, FunctionSpec function) {
-        functions.put(name, function);
-        return this;
-    }
-
-    public FunctionRegistry register(Consumer<FunctionRegistry> registrar) {
-        registrar.accept(this);
-        return this;
+public class DerbySequenceInfo extends SequenceInfo {
+    public DerbySequenceInfo() {
+        super(SequenceInfo.newBuilder()
+            .listSql("select '' as SEQUENCE_CATALOG, '' as SEQUENCE_SCHEMA, SEQUENCENAME AS SEQUENCE_NAME FROM SYS.SYSSEQUENCES")
+            .supportsStartValue(true));
     }
 }

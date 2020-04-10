@@ -48,24 +48,33 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Optional;
 
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
+
 public class HSqlDialect extends AnsiDialect {
     private static final DateTimeFormatter OFFSET_FORMATTER = new DateTimeFormatterBuilder()
         .appendOffset("+HH:MM", "+00:00")
         .toFormatter();
 
     public HSqlDialect() {
-        DateFunctionSpecs.registerDateAdd(functions());
         functions()
+            .register(DateFunctionSpecs::registerDateAdd)
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, (scope, argsSql) -> "current_timestamp at time zone interval '00:00' hour to minute")
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP, (scope, argsSql) -> currentTimestamp(scope))
-            .register(DateFunctionSpecs.CURRENT_DATE, (scope, argsSql) -> String.format("cast(%s as date)", currentTimestamp(scope)));
+            .register(DateFunctionSpecs.CURRENT_DATE, (scope, argsSql) -> String.format("cast(%s as date)", currentTimestamp(scope)))
+            .register(SECOND_DIFF, (s, a) -> "datediff('second', trunc(" + a[1] + ", 'SS'), trunc(" + a[0] + ", 'SS'))")
+        ;
 
         types()
             .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
                 @Override
                 public LocalDateTime getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+                    Timestamp ts = rs.getTimestamp(col);
+                    return rs.wasNull() ? null : ts.toLocalDateTime();
+                }
+                @Override
+                public LocalDateTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
                     Timestamp ts = rs.getTimestamp(col);
                     return rs.wasNull() ? null : ts.toLocalDateTime();
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2020 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,41 +31,97 @@ import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultDate;
+import com.cadenzauk.siesta.type.DefaultTime;
+import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-import static com.cadenzauk.core.lang.StringUtil.hex;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.ADD_DAYS;
+import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.DAY_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
 
-public class Db2Dialect extends AnsiDialect {
-    public Db2Dialect() {
+public class DerbyDialect extends AnsiDialect {
+    public DerbyDialect() {
         functions()
-            .register(DateFunctionSpecs::registerPlusUnits)
-            .register(HOUR_DIFF, (s, a) -> "TIMESTAMPDIFF(8, char(trunc(" + a[0] + ", 'HH24') - trunc(" + a[1] + ", 'HH24')))")
-            .register(MINUTE_DIFF, (s, a)-> "TIMESTAMPDIFF(4, char(trunc(" + a[0] + ", 'MI') - trunc(" + a[1] + ", 'MI')))")
-            .register(SECOND_DIFF, (s, a) -> "TIMESTAMPDIFF(2, char(trunc(" + a[0] + ", 'SS') - trunc(" + a[1] + ", 'SS')))")
-        ;
+            .register(ADD_DAYS, (s, a) -> "cast({fn timestampadd(SQL_TSI_DAY, " + a[1] + ", " + a[0] + ")} as date)")
+            .register(DAY_DIFF, (s, a) -> "{fn TIMESTAMPDIFF(SQL_TSI_DAY, " + a[1] + ", " + a[0] + ")}")
+            .register(HOUR_DIFF, (s, a) -> "{fn TIMESTAMPDIFF(SQL_TSI_HOUR, " + a[1] + ", " + a[0] + ")}")
+            .register(MINUTE_DIFF, (s, a) -> "{fn TIMESTAMPDIFF(SQL_TSI_MINUTE, timestamp(substr(varchar(" + a[1] + "), 1, 16)||':00'), timestamp(substr(varchar(" + a[0] + "), 1, 16)||':00'))}")
+            .register(SECOND_DIFF, (s, a) -> "{fn TIMESTAMPDIFF(SQL_TSI_SECOND, timestamp(substr(varchar(" + a[1] + "), 1, 19)), timestamp(substr(varchar(" + a[0] + "), 1, 19)))}")
+            .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
+            .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
+            .register(StringFunctionSpecs.INSTR, (s, a) -> String.format("locate(%s, %s)", a[1], a[0]));
 
         types()
-            .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
-            .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
+            .register(DbTypeId.DATE, new DefaultDate() {
                 @Override
-                public String literal(Database database, byte[] value) {
-                    return String.format("HEXTORAW('%s')", hex(value));
+                public String literal(Database database, LocalDate value) {
+                    return String.format("DATE('%s')", value.format(DateTimeFormatter.ISO_DATE));
+                }
+            })
+            .register(DbTypeId.TIME, new DefaultTime() {
+                @Override
+                public String literal(Database database, LocalTime value) {
+                    return String.format("TIME('%s')", value.format(DateTimeFormatter.ISO_TIME));
+                }
+            })
+            .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
+                @Override
+                public String sqlType(Database database, int arg) {
+                    return sqlType(database);
+                }
+
+                @Override
+                public String sqlType(Database database, int arg1, int arg2) {
+                    return sqlType(database);
+                }
+
+                @Override
+                public String literal(Database database, LocalDateTime value) {
+                    return String.format("TIMESTAMP('%s')", value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+                }
+            })
+            .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp() {
+                @Override
+                public String literal(Database database, ZonedDateTime value) {
+                    ZonedDateTime localDateTime = value.withZoneSameInstant(database.databaseTimeZone());
+                    return String.format("TIMESTAMP('%s')", localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")));
+                }
+            })
+            .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.BINARY, new DefaultVarbinary("char") {
+                @Override
+                public String sqlType(Database database, int arg) {
+                    return String.format("%s(%d) for bit data", sqlType(database), arg);
+                }
+            })
+            .register(DbTypeId.VARBINARY, new DefaultVarbinary("varchar") {
+                @Override
+                public String sqlType(Database database, int arg) {
+                    return String.format("%s(%d) for bit data", sqlType(database), arg);
                 }
             });
 
         exceptions()
             .register("07006", SqlSyntaxException::new)
-            .register("42[67]..", SqlSyntaxException::new)
+            .register("42[X67]..", SqlSyntaxException::new)
 
             // -407 23502       Assignment of a NULL value to a NOT NULL column name is not allowed.
             .register("23502", IllegalNullException::new)
@@ -101,13 +157,7 @@ public class Db2Dialect extends AnsiDialect {
             .register("57011", LockingException::new)
             .register("57033", LockingException::new)
         ;
-
-        setSequenceInfo(new Db2SequenceInfo());
-    }
-
-    @Override
-    public String selectivity(double s) {
-        return String.format(" selectivity %f", s);
+        setSequenceInfo(new DerbySequenceInfo());
     }
 
     @Override
@@ -116,13 +166,13 @@ public class Db2Dialect extends AnsiDialect {
     }
 
     @Override
-    public boolean supportsMultiInsert() {
-        return true;
+    public String fetchFirst(String sql, long n) {
+        return String.format("%s fetch first %d rows only", sql, n);
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s fetch first %d rows only", sql, n);
+    public String nextFromSequence(String catalog, String schema, String sequenceName) {
+        return "next value for " + qualifiedSequenceName(catalog, schema, sequenceName);
     }
 
     @Override
@@ -138,19 +188,20 @@ public class Db2Dialect extends AnsiDialect {
     }
 
     @Override
-    public boolean supportsLockTimeout() {
-        return true;
+    public boolean supportsMultipleValueIn() {
+        return false;
     }
 
     @Override
-    public String setLockTimeout(long time, TimeUnit unit) {
-        return String.format("set current lock timeout %d", unit.toSeconds(time));
+    public boolean supportsPartitionByInOlap() {
+        return false;
     }
 
     @Override
-    public String resetLockTimeout() {
-        return "set current lock timeout null";
+    public boolean supportsOrderByInOlap() {
+        return false;
     }
+
 
     private String isolationLevelSqlWithLocks(String sql, IsolationLevel level, LockLevel keepLocks) {
         return String.format("%s for read only with %s use and keep %s locks",
@@ -174,5 +225,4 @@ public class Db2Dialect extends AnsiDialect {
                 return sql + " with rr";
         }
         return sql;
-    }
-}
+    }}

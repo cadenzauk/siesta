@@ -23,9 +23,12 @@
 package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.model.SalespersonRow;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
@@ -76,13 +79,17 @@ public abstract class TransactionIntegrationTest extends IntegrationTest {
         try (Transaction transaction = database.beginTransaction()) {
             database.insert(transaction, salesperson);
 
-            Optional<Long> result = database.from(SalespersonRow.class)
-                .select(SalespersonRow::salespersonId)
-                .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
-                .withIsolation(IsolationLevel.REPEATABLE_READ)
-                .keepLocks(LockLevel.UPDATE)
-                .optional();
+            CompletableFuture<Optional<Long>> selectFuture = CompletableFuture.supplyAsync(() ->
+                database.from(SalespersonRow.class)
+                    .select(SalespersonRow::salespersonId)
+                    .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
+                    .withIsolation(IsolationLevel.REPEATABLE_READ)
+                    .optional());
+            CompletableFuture<Void> sleepFuture = CompletableFuture.runAsync(() -> Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS));
+            CompletableFuture.anyOf(sleepFuture, selectFuture).join();
+            transaction.rollback();
 
+            Optional<Long> result = selectFuture.join();
             assertThat(result.isPresent(), is(false));
         }
     }

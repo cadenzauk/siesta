@@ -66,10 +66,9 @@ public class H2Dialect extends AnsiDialect {
         this.versionNo = versionNo;
         this.defaultLockTimeout = defaultLockTimeout;
 
-        DateFunctionSpecs.registerDateAdd(functions());
-        DateFunctionSpecs.registerDateDiff(functions());
-
         functions()
+            .register(DateFunctionSpecs::registerDateAdd)
+            .register(DateFunctionSpecs::registerDateDiff)
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"));
 

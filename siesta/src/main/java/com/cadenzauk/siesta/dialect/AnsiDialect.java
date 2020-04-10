@@ -53,9 +53,10 @@ public class AnsiDialect implements Dialect {
     private SequenceInfo sequenceInfo;
 
     public AnsiDialect() {
-        AggregateFunctionSpecs.registerDefaults(functions);
-        DateFunctionSpecs.registerDefaults(functions);
-        StringFunctionSpecs.registerDefaults(functions);
+        functions
+            .register(AggregateFunctionSpecs::registerDefaults)
+            .register(DateFunctionSpecs::registerDefaults)
+            .register(StringFunctionSpecs::registerDefaults);
         sequenceInfo = SequenceInfo.newBuilder().build();
     }
 

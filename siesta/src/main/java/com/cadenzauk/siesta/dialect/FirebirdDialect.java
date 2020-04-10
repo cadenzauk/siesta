@@ -51,10 +51,9 @@ import java.util.stream.Stream;
 
 public class FirebirdDialect extends AnsiDialect {
     public FirebirdDialect() {
-        DateFunctionSpecs.registerExtract(functions());
-        DateFunctionSpecs.registerDateAdd(functions());
-
         functions()
+            .register(DateFunctionSpecs::registerExtract)
+            .register(DateFunctionSpecs::registerDateAdd)
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
             .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("position") {

@@ -53,9 +53,9 @@ import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.I
 
 public class PostgresDialect extends AnsiDialect {
     public PostgresDialect() {
-        DateFunctionSpecs.registerExtract(functions());
-        DateFunctionSpecs.registerPlusNumber(functions());
         functions()
+            .register(DateFunctionSpecs::registerExtract)
+            .register(DateFunctionSpecs::registerPlusNumber)
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, ArgumentlessFunctionSpec.of("localtimestamp"))
@@ -74,7 +74,7 @@ public class PostgresDialect extends AnsiDialect {
                 }
             })
             .register(MINUTE_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('minute', %1$s) - date_trunc('minute', %2$s))) / 60", argsSql[0], argsSql[1]))
-            .register(SECOND_DIFF, (s, argsSql) -> String.format("extract(epoch from (%1$s - %2$s))", argsSql[0], argsSql[1]))
+            .register(SECOND_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('second', %1$s) - date_trunc('second', %2$s)))", argsSql[0], argsSql[1]))
             .register(INSTR, SimpleFunctionSpec.of("strpos"));
 
         types()

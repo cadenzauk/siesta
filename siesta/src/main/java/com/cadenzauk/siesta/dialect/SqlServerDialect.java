@@ -58,11 +58,11 @@ public class SqlServerDialect extends AnsiDialect {
     private static final Pattern SELECT_PATTERN = Pattern.compile("(select (distinct )?)");
 
     public SqlServerDialect() {
-        DateFunctionSpecs.registerDatePart(functions());
-        DateFunctionSpecs.registerDateAdd(functions());
-        DateFunctionSpecs.registerDateDiff(functions());
 
         functions()
+            .register(DateFunctionSpecs::registerDatePart)
+            .register(DateFunctionSpecs::registerDateAdd)
+            .register(DateFunctionSpecs::registerDateDiff)
             .register(DateFunctionSpecs.CURRENT_DATE, SimpleFunctionSpec.of("getdate"))
             .register(StringFunctionSpecs.INSTR, new SimpleFunctionSpec("charindex") {
                 @Override
