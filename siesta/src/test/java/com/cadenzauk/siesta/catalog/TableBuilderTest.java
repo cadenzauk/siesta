@@ -26,7 +26,7 @@ import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.TableAlias;
+import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import org.junit.jupiter.api.Test;
 
@@ -236,7 +236,7 @@ class TableBuilderTest {
             .table(NoAnnotations.class,
                 t -> t.column(NoAnnotations::id, c -> c.identifier(true)))
             .build();
-        Alias<NoAnnotations> alias = TableAlias.of(database.table(NoAnnotations.class));
+        Alias<NoAnnotations> alias = RegularTableAlias.of(database.table(NoAnnotations.class));
 
         String idSql = database.table(NoAnnotations.class)
             .columns()
@@ -268,7 +268,7 @@ class TableBuilderTest {
         Database database = Database.newBuilder()
             .defaultSchema("DEFAULT_SCHEMA")
             .build();
-        Alias<IdAnnotation> alias = TableAlias.of(database.table(IdAnnotation.class));
+        Alias<IdAnnotation> alias = RegularTableAlias.of(database.table(IdAnnotation.class));
 
         String idSql = database.table(IdAnnotation.class)
             .columns()
@@ -286,7 +286,7 @@ class TableBuilderTest {
                 .embedded(Key.class, EmbeddedIdNoAnnotation::key, c -> c
                     .identifier(true)))
             .build();
-        Alias<EmbeddedIdNoAnnotation> alias = TableAlias.of(database.table(EmbeddedIdNoAnnotation.class));
+        Alias<EmbeddedIdNoAnnotation> alias = RegularTableAlias.of(database.table(EmbeddedIdNoAnnotation.class));
 
         String idSql = database.table(EmbeddedIdNoAnnotation.class)
             .columns()

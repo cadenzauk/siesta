@@ -34,7 +34,7 @@ import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.ForeignKey;
 import com.cadenzauk.siesta.Reference;
 import com.cadenzauk.siesta.SqlExecutor;
-import com.cadenzauk.siesta.TableAlias;
+import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.InvalidForeignKeyException;
 import com.google.common.collect.ImmutableList;
@@ -102,6 +102,11 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     @Override
+    public Stream<Column<?,?>> primitiveColumns() {
+        return columnMapping.primitiveColumns();
+    }
+
+    @Override
     public <T> Column<T,R> column(MethodInfo<R,T> methodInfo) {
         return columnMapping.column(methodInfo);
     }
@@ -125,7 +130,7 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     public Alias<R> as(String alias) {
-        return TableAlias.of(this, alias);
+        return RegularTableAlias.of(this, alias);
     }
 
     public int insert(SqlExecutor sqlExecutor, R[] rows) {
@@ -230,33 +235,27 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     private String insertSql(R[] rows) {
-        String sql = String.format("insert into %s (%s) values %s",
+        return String.format("insert into %s (%s) values %s",
             qualifiedName(),
             columns().flatMap(Column::insertColumnSql).collect(joining(", ")),
             IntStream.range(0, rows.length)
                 .mapToObj(i -> "(" + columns().flatMap(Column::insertArgsSql).collect(joining(", ")) + ")")
                 .collect(joining(", ")));
-        LOG.debug(sql);
-        return sql;
     }
 
     private String updateSql() {
-        Alias<R> alias = TableAlias.of(this);
-        String sql = String.format("update %s set %s where %s",
+        Alias<R> alias = RegularTableAlias.of(this);
+        return String.format("update %s set %s where %s",
             qualifiedName(),
             columns().flatMap(Column::updateSql).collect(joining(", ")),
             columns().flatMap(c -> c.idSql(alias)).collect(joining(" and ")));
-        LOG.debug(sql);
-        return sql;
     }
 
     private String deleteSql() {
-        Alias<R> alias = TableAlias.of(this);
-        String sql = String.format("delete from %s where %s",
+        Alias<R> alias = RegularTableAlias.of(this);
+        return String.format("delete from %s where %s",
             qualifiedName(),
             columns().flatMap(c -> c.idSql(alias)).collect(joining(" and ")));
-        LOG.debug(sql);
-        return sql;
     }
 
     public static final class Builder<R, B> extends ColumnMapping.Builder<R,B,Builder<R,B>> {

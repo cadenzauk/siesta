@@ -26,6 +26,7 @@ import com.cadenzauk.core.reflect.TypeInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +56,7 @@ public class ObjectStringParser implements StringParser<Object> {
         register(Short.class, nullOr(Short::parseShort));
         register(Integer.class, nullOr(Integer::parseInt));
         register(Long.class, nullOr(Long::parseLong));
+        register(BigDecimal.class, nullOr(BigDecimal::new));
 
         register(Class.class, nullOr(className -> ClassUtil.forName(className).orElseThrow(IllegalArgumentException::new)));
 

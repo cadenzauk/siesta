@@ -29,6 +29,7 @@ import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.model.IncorrectSalesAreaRow;
@@ -386,6 +387,15 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
         calling(() -> database.from(table).select(column).list())
             .shouldThrow(RuntimeSqlException.class)
             .with(subclass(SqlSyntaxException.class));
+    }
+
+    @Test
+    void tableNameIncorrect() {
+        Database database = TestDatabase.testDatabase(dataSource);
+
+        calling(() -> database.from(NoSuchTableRow.class, "x").list())
+            .shouldThrow(RuntimeSqlException.class)
+            .with(subclass(NoSuchObjectException.class));
     }
 
     private CompletableFuture<Throwable> performUpdate(Database database, SalespersonRow salespersonRow1, SalespersonRow salespersonRow2, CompletableFuture<Void> wait1, CompletableFuture<Void> wait2, CompletableFuture<Void> wait3, CompletableFuture<Void> wait4) {

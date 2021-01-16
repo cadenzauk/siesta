@@ -151,6 +151,12 @@ public class TestRow {
             .build();
     }
 
+    public static TestRow of(BigDecimal value) {
+        return TestRow.newBuilder()
+            .decimalOpt(Optional.of(value))
+            .build();
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }

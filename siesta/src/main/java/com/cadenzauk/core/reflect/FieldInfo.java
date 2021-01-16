@@ -27,6 +27,8 @@ import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -51,6 +53,30 @@ public class FieldInfo<C, F> {
         this.field = field;
         this.effectiveType = effectiveType;
         this.optionalGetter = Getter.forField(declaringType, effectiveType, field);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FieldInfo<?,?> fieldInfo = (FieldInfo<?,?>) o;
+
+        return new EqualsBuilder()
+            .append(declaringType, fieldInfo.declaringType)
+            .append(field, fieldInfo.field)
+            .append(effectiveType, fieldInfo.effectiveType)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+            .append(declaringType)
+            .append(field)
+            .append(effectiveType)
+            .toHashCode();
     }
 
     @Override

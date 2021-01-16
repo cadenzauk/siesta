@@ -28,7 +28,7 @@ import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
-import com.cadenzauk.siesta.TableAlias;
+import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
@@ -266,7 +266,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
     }
 
     public <R> InSelectIntoExpectingWith<R> selectInto(Alias<R> alias) {
-        TableAlias<R> tableAlias = OptionalUtil.as(new TypeToken<TableAlias<R>>() {}, alias)
+        RegularTableAlias<R> tableAlias = OptionalUtil.as(new TypeToken<RegularTableAlias<R>>() {}, alias)
             .orElseThrow(() -> new IllegalArgumentException("Can only selectInto a TableAlias."));
         DynamicRowMapperFactory<R> rowMapper = tableAlias.dynamicRowMapperFactory();
         DynamicProjection<R> projection = new DynamicProjection<>(false, tableAlias);

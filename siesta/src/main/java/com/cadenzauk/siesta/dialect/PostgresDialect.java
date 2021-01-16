@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
@@ -116,8 +117,11 @@ public class PostgresDialect extends AnsiDialect {
             .register("23503", ReferentialIntegrityException::new)
             .register("23505", DuplicateKeyException::new)
             .register("40P01", LockingException::new)
+            .register("42P01", NoSuchObjectException::new)
             .register("42.+", SqlSyntaxException::new)
             .register("55P03", LockingException::new);
+
+        setTempTableInfo(new PostgresTempTableInfo());
     }
 
     @Override

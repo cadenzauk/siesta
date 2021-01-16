@@ -37,6 +37,8 @@ public interface ColumnCollection<R> {
 
     Stream<Column<?,R>> columns();
 
+    Stream<Column<?,?>> primitiveColumns();
+
     <T> Column<T,R> column(MethodInfo<R,T> methodInfo);
 
     <T> ColumnCollection<T> embedded(MethodInfo<R,T> methodInfo);

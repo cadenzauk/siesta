@@ -22,10 +22,12 @@
 
 package com.cadenzauk.siesta.model;
 
+import javax.persistence.Column;
 import javax.persistence.Table;
 
 @Table(name = "NO_SUCH_TABLE")
 public class NoSuchTableRow {
+    @Column(name = "some_column")
     private final String column;
 
     private NoSuchTableRow(Builder builder) {

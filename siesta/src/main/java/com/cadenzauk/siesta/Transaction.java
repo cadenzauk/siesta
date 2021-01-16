@@ -26,6 +26,7 @@ import com.cadenzauk.core.sql.RowMapper;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public interface Transaction extends AutoCloseable {
@@ -34,7 +35,11 @@ public interface Transaction extends AutoCloseable {
 
     void commit();
 
+    void beforeCommit(Consumer<Transaction> hook);
+
     void rollback();
+
+    void afterRollback(Consumer<Transaction> hook);
 
     <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper);
 

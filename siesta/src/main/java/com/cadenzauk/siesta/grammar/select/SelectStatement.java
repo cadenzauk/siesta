@@ -43,8 +43,6 @@ import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +54,6 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 class SelectStatement<RT> {
-    private static final Logger LOG = LoggerFactory.getLogger(SelectStatement.class);
-
     protected final Scope scope;
     private final LabelGenerator labelGenerator = new LabelGenerator("select_");
     private final List<CommonTableExpression<?>> commonTableExpressions = new ArrayList<>();
@@ -138,14 +134,12 @@ class SelectStatement<RT> {
     List<RT> list(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        LOG.debug(sql);
         return scope.database().execute(sql, () -> sqlExecutor.query(sql, args, rowMapper()));
     }
 
     List<RT> list(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        LOG.debug(sql);
         return scope.database().execute(sql, () -> transaction.query(sql, args, rowMapper()));
     }
 
@@ -162,7 +156,6 @@ class SelectStatement<RT> {
     CompletableFuture<List<RT>> listAsync(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        LOG.debug(sql);
         return transaction.queryAsync(sql, args, rowMapper())
             .exceptionally(e -> scope.database().translateException(sql, e));
     }
@@ -186,14 +179,12 @@ class SelectStatement<RT> {
     Stream<RT> stream(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        LOG.debug(sql);
         return scope.database().execute(sql, () -> sqlExecutor.stream(sql, args, rowMapper()));
     }
 
     Stream<RT> stream(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql();
-        LOG.debug(sql);
         return scope.database().execute(sql, () -> transaction.stream(sql, args, rowMapper()));
     }
 

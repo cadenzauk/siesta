@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Projections;
+import com.cadenzauk.siesta.grammar.temp.TempTable;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
@@ -41,6 +42,10 @@ public class ExpectingJoin1<RT> extends ExpectingSelect<RT> {
 
     public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> join(Class<R2> r2Class, String alias2) {
         return join(JoinType.INNER, scope().database().table(r2Class).as(alias2));
+    }
+
+    public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> join(TempTable<R2> tempTable, String alias2) {
+        return join(JoinType.INNER, tempTable.as(alias2));
     }
 
     public <R2> InJoinExpectingOn<ExpectingJoin2<RT,R2>, Tuple2<RT, R2>> join(Select<R2> subselect, String alias2) {

@@ -24,10 +24,11 @@ package com.cadenzauk.siesta.ddl.definition.intercept;
 
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.Action;
+import com.cadenzauk.siesta.ddl.action.ActionInterceptor;
 import com.cadenzauk.siesta.ddl.action.Priority;
 import com.cadenzauk.siesta.ddl.definition.action.CreateTableAction;
+import com.cadenzauk.siesta.ddl.sql.action.CreateGlobalTemporaryTableSql;
 import com.cadenzauk.siesta.ddl.sql.action.CreateTableSql;
-import com.cadenzauk.siesta.ddl.action.ActionInterceptor;
 import com.google.common.reflect.TypeToken;
 
 import java.util.stream.Stream;
@@ -35,7 +36,9 @@ import java.util.stream.Stream;
 public class CreateTableGenerator extends ActionInterceptor<CreateTableAction> {
     @Override
     public Stream<Action> intercept(Database database, CreateTableAction action) {
-        return Stream.of(new CreateTableSql(action));
+        return Stream.of(action.globalTemporary()
+            ? new CreateGlobalTemporaryTableSql(action)
+            : new CreateTableSql(action));
     }
 
     @Override

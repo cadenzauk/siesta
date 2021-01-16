@@ -31,6 +31,7 @@ import com.cadenzauk.core.sql.QualifiedName;
 import com.cadenzauk.core.sql.ResultSetUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.SequenceInfo;
+import com.cadenzauk.siesta.TempTableInfo;
 import com.cadenzauk.siesta.ddl.action.Action;
 import com.cadenzauk.siesta.ddl.action.ActionPipeline;
 import com.cadenzauk.siesta.ddl.definition.action.DropForeignKeyAction;
@@ -48,6 +49,7 @@ import com.cadenzauk.siesta.ddl.log.intercept.ActionLogGenerator;
 import com.cadenzauk.siesta.ddl.log.intercept.ActionLogRecorder;
 import com.cadenzauk.siesta.ddl.log.intercept.ActionLogTableCreator;
 import com.cadenzauk.siesta.ddl.sql.intercept.SqlActionExecutor;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,14 +100,25 @@ public class SchemaGenerator {
             DatabaseMetaData metadata = database.getDefaultSqlExecutor().metadata(closer);
             Stream<Action> dropSequences = dropSequenceActions(database, closer);
             Stream<Action> dropForeignKeys = dropForeignKeyActions(database, closer, metadata);
+            Stream<Action> dropGlobalTempTables = dropGlobalTempTableActions(database, closer, metadata);
             Stream<Action> dropTables = dropTableActions(database, closer, metadata);
-            Stream<Action> actionStream = Stream.of(dropSequences, dropForeignKeys, dropTables).flatMap(Function.identity());
+            Stream<Action> actionStream = Stream.of(dropSequences, dropForeignKeys, dropGlobalTempTables, dropTables).flatMap(Function.identity());
             return pipeline.process(database, actionStream).count();
         }
     }
 
     private Stream<Action> dropTableActions(Database database, CompositeAutoCloseable closer, DatabaseMetaData metadata) {
         return closer.add(DatabaseMetaDataUtil.tableNames(metadata, database.defaultCatalog(), database.defaultSchema()))
+            .map(t -> DropTableAction.newBuilder()
+                .logged(false)
+                .catalog(t.catalog())
+                .schemaName(t.schema())
+                .tableName(t.name())
+                .build());
+    }
+
+    private Stream<Action> dropGlobalTempTableActions(Database database, CompositeAutoCloseable closer, DatabaseMetaData metadata) {
+        return closer.add(globalTempTableStream(database))
             .map(t -> DropTableAction.newBuilder()
                 .logged(false)
                 .catalog(t.catalog())
@@ -134,6 +147,19 @@ public class SchemaGenerator {
                 .schemaName(t.schema())
                 .sequenceName(t.name())
                 .build());
+    }
+
+    private Stream<QualifiedName> globalTempTableStream(Database database) {
+        TempTableInfo tempTableInfo = database.dialect().tempTableInfo();
+        String sql = tempTableInfo.listGlobalSql();
+        return StringUtils.isBlank(sql)
+            ? Stream.empty()
+            : database
+                .getDefaultSqlExecutor()
+                .stream(
+                    sql,
+                    new Object[0],
+                    rs -> new QualifiedName(ResultSetUtil.getString(rs, "TEMP_TABLE_CATALOG"), ResultSetUtil.getString(rs, "TEMP_TABLE_SCHEMA_NAME"), ResultSetUtil.getString(rs, "TEMP_TABLE_NAME")));
     }
 
     private Stream<QualifiedName> sequenceStream(Database database) {

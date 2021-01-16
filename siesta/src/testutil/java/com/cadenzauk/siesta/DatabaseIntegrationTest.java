@@ -43,6 +43,7 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.grammar.expression.olap.Olap;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
+import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.ManufacturerRow;
@@ -897,6 +898,26 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         }
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"1.000"})
+    @TestCase({"-21.120"})
+    @TestCase({"3000.123"})
+    @TestCase({"-9999999999.999"})
+    void canRoundTripBigDecimals(BigDecimal expected) {
+        Database database = testDatabase(dataSource, dialect);
+        TestRow input = TestRow.of(expected);
+
+        database.insert(input);
+        BigDecimal result = database
+            .from(TestRow.class)
+            .select(TestRow::decimalOpt)
+            .where(TestRow::guid).isEqualTo(input.guid())
+            .single();
+
+        assertThat(result, is(expected));
+    }
+
     @Test
     void localDatePartFuncs() {
         LocalDate date = RandomValues.randomLocalDate();
@@ -1409,7 +1430,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .from(SalespersonRow.class, "i")
             .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId());
         SalespersonRow result = database
-            .from(subselect, "o" )
+            .from(subselect, "o")
             .single();
 
         assertThat(result, is(salespersonRow2));
@@ -1428,7 +1449,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .select(SalespersonRow::surname)
             .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId());
         String result = database
-            .from(subselect, "o" )
+            .from(subselect, "o")
             .single();
 
         assertThat(result, is(salespersonRow2.surname()));
@@ -1450,7 +1471,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .on(SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
             .where("i", SalespersonRow::salespersonId).isEqualTo(salespersonRow2.salespersonId());
         String result = database
-            .from(subselect, "o" )
+            .from(subselect, "o")
             .select(SalesAreaRow::salesAreaName)
             .single();
 

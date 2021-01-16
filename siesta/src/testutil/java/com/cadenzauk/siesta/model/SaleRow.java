@@ -21,6 +21,10 @@
  */
 package com.cadenzauk.siesta.model;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import javax.persistence.Column;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
@@ -29,6 +33,7 @@ public class SaleRow {
     private final long salespersonId;
     private final long widgetId;
     private final long quantity;
+    @Column(precision = 18, scale = 2)
     private final BigDecimal price;
 
     private SaleRow(Builder builder) {
@@ -36,6 +41,42 @@ public class SaleRow {
         widgetId = builder.widgetId;
         quantity = builder.quantity;
         price = builder.price;
+    }
+
+    @Override
+    public String toString() {
+        return "SaleRow{" +
+                   "salespersonId=" + salespersonId +
+                   ", widgetId=" + widgetId +
+                   ", quantity=" + quantity +
+                   ", price=" + price +
+                   '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SaleRow saleRow = (SaleRow) o;
+
+        return new EqualsBuilder()
+                   .append(salespersonId, saleRow.salespersonId)
+                   .append(widgetId, saleRow.widgetId)
+                   .append(quantity, saleRow.quantity)
+                   .append(price, saleRow.price)
+                   .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                   .append(salespersonId)
+                   .append(widgetId)
+                   .append(quantity)
+                   .append(price)
+                   .toHashCode();
     }
 
     public long salespersonId() {

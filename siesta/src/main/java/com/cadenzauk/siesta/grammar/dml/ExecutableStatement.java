@@ -28,13 +28,10 @@ import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.stream.Stream;
 
 public abstract class ExecutableStatement {
-    private final static Logger LOG = LoggerFactory.getLogger(ExecutableStatement.class);
     private final Scope scope;
     private final BooleanExpressionChain whereClause = new BooleanExpressionChain();
 
@@ -45,14 +42,12 @@ public abstract class ExecutableStatement {
     int execute(SqlExecutor sqlExecutor) {
         Object[] args = args(scope).toArray();
         String sql = sql(scope);
-        LOG.debug(sql);
         return scope.database().execute(sql, () -> sqlExecutor.update(sql, args));
     }
 
     int execute(Transaction transaction) {
         Object[] args = args(scope).toArray();
         String sql = sql(scope);
-        LOG.debug(sql);
         return scope.database().execute(sql, () -> transaction.update(sql, args));
     }
 

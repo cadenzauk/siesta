@@ -37,6 +37,7 @@ public class PostgresConfig {
     public DataSource dataSource() {
         PGConnectionPoolDataSource pool = new PGConnectionPoolDataSource();
         pool.setUser("siesta");
+        pool.setPassword("siesta");
         pool.setDatabaseName("postgres");
         return new PooledDataSource(pool);
     }

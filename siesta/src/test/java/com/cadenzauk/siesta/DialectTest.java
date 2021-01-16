@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.Db2Dialect;
+import com.cadenzauk.siesta.dialect.DerbyDialect;
 import com.cadenzauk.siesta.dialect.FirebirdDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.dialect.OracleDialect;
@@ -119,6 +120,10 @@ class DialectTest {
             isolationLevelTest(new Db2Dialect(), IsolationLevel.READ_COMMITTED, " with cs"),
             isolationLevelTest(new Db2Dialect(), IsolationLevel.REPEATABLE_READ, " with rs"),
             isolationLevelTest(new Db2Dialect(), IsolationLevel.SERIALIZABLE, " with rr"),
+            isolationLevelTest(new DerbyDialect(), IsolationLevel.UNCOMMITTED_READ, " with ur"),
+            isolationLevelTest(new DerbyDialect(), IsolationLevel.READ_COMMITTED, " with cs"),
+            isolationLevelTest(new DerbyDialect(), IsolationLevel.REPEATABLE_READ, " with rs"),
+            isolationLevelTest(new DerbyDialect(), IsolationLevel.SERIALIZABLE, " with rr"),
             isolationLevelTest(new FirebirdDialect(), IsolationLevel.UNCOMMITTED_READ, ""),
             isolationLevelTest(new FirebirdDialect(), IsolationLevel.READ_COMMITTED, ""),
             isolationLevelTest(new FirebirdDialect(), IsolationLevel.REPEATABLE_READ, ""),

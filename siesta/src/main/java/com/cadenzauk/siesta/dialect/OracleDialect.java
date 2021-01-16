@@ -22,6 +22,10 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.ResultSetMetaDataUtil;
+import com.cadenzauk.core.sql.ResultSetUtil;
+import com.cadenzauk.core.sql.RuntimeSqlException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
@@ -40,13 +44,16 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBigint;
 import com.cadenzauk.siesta.type.DefaultDate;
+import com.cadenzauk.siesta.type.DefaultDecimal;
 import com.cadenzauk.siesta.type.DefaultSmallint;
 import com.cadenzauk.siesta.type.DefaultTime;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -100,6 +107,32 @@ public class OracleDialect extends AnsiDialect {
                 @Override
                 public String sqlType(Database database) {
                     return "number(19)";
+                }
+            })
+            .register(DbTypeId.DECIMAL, new DefaultDecimal() {
+                @Override
+                public BigDecimal getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    int colNo = ResultSetMetaDataUtil.findColumnWithLabel(metaData, col);
+                    BigDecimal bigDecimal = rs.getBigDecimal(col);
+                    return setScale(metaData, colNo, bigDecimal);
+                }
+
+                @Override
+                public BigDecimal getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+                    ResultSetMetaData metaData = rs.getMetaData();
+                    BigDecimal bigDecimal = rs.getBigDecimal(col);
+                    return setScale(metaData, col, bigDecimal);
+                }
+
+                private BigDecimal setScale(ResultSetMetaData metaData, int colNo, BigDecimal bigDecimal) throws SQLException {
+                    if (bigDecimal != null) {
+                        int scale = metaData.getScale(colNo);
+                        if (scale > bigDecimal.scale()) {
+                            return bigDecimal.setScale(scale, BigDecimal.ROUND_UNNECESSARY);
+                        }
+                    }
+                    return bigDecimal;
                 }
             })
             .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
@@ -168,12 +201,14 @@ public class OracleDialect extends AnsiDialect {
             .register("23000", 1400, IllegalNullException::new)
             .register("23000", 2291, ReferentialIntegrityException::new)
             .register("23000", 2292, ReferentialIntegrityException::new)
+            .register("42000", 942, NoSuchObjectException::new)
             .register("42.+", SqlSyntaxException::new)
             .register("61000", 60, LockingException::new)
             .register("72000", 1407, IllegalNullException::new)
             .register("72000", 12899, InvalidValueException::new);
 
         setSequenceInfo(new OracleSequenceInfo());
+        setTempTableInfo(new OracleTempTableInfo());
     }
 
     @Override

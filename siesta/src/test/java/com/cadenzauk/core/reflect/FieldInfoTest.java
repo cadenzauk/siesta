@@ -23,12 +23,15 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.cadenzauk.core.sql.QualifiedName;
 import com.google.common.reflect.TypeToken;
+import com.google.common.testing.EqualsTester;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import java.lang.reflect.Field;
+import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -43,6 +46,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class FieldInfoTest {
+    @Test
+    void equalsAndHashCode() {
+        new EqualsTester()
+            .addEqualityGroup(FieldInfo.of(ClassWithField.class, optionalStringField()), FieldInfo.of(ClassWithField.class, optionalStringField()))
+            .addEqualityGroup(FieldInfo.of(ClassWithField.class, stringField()), FieldInfo.of(ClassWithField.class, stringField()), FieldInfo.of(ClassWithField.class, stringField()))
+            .testEquals();
+    }
+
     @Test
     void toStringGeneric() {
         Field field = optionalStringField();

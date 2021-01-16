@@ -26,11 +26,14 @@ import com.cadenzauk.siesta.Alias;
 
 import java.sql.ResultSet;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface TableColumn<T, R, B> extends Column<T,R> {
     ResultSetValue<B> extract(Alias<?> alias, ResultSet rs, String prefix, Optional<String> label);
 
     String label(String labelPrefix);
+
+    Stream<Column<?,?>> primitiveColumns();
 
     interface ResultSetValue<B> {
         boolean isPresent();

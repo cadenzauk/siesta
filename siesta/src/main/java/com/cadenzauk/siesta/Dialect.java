@@ -52,6 +52,10 @@ public interface Dialect {
 
     String selectivity(double s);
 
+    String updateSql(String qualifiedTableName, Optional<String> alias, String sets, String whereClause);
+
+    String deleteSql(String qualifiedTableName, Optional<String> alias, String whereClause);
+
     boolean supportsMultiInsert();
 
     boolean requiresFromDual();
@@ -89,4 +93,6 @@ public interface Dialect {
     String nextFromSequence(String catalog, String schema, String sequenceName);
 
     SequenceInfo sequenceInfo();
+
+    TempTableInfo tempTableInfo();
 }

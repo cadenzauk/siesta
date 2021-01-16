@@ -39,7 +39,7 @@ public class OracleConfig {
         OracleConnectionPoolDataSource pool = new OracleConnectionPoolDataSource();
         pool.setUser("siesta");
         pool.setPassword("siesta");
-        pool.setURL("jdbc:oracle:thin:@127.0.0.1:1521:xe");
+        pool.setURL("jdbc:oracle:thin:@127.0.0.1:1521/xepdb1");
         return new PooledDataSource(pool, "ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD'");
     }
 

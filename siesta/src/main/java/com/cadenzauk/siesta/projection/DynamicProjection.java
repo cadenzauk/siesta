@@ -30,7 +30,7 @@ import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.TableAlias;
+import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.ImmutableList;
 
@@ -43,10 +43,10 @@ import static java.util.stream.Collectors.joining;
 
 public class DynamicProjection<R> implements Projection<R> {
     private final boolean distinct;
-    private final TableAlias<R> alias;
+    private final RegularTableAlias<R> alias;
     private final List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
 
-    public DynamicProjection(boolean distinct, TableAlias<R> alias) {
+    public DynamicProjection(boolean distinct, RegularTableAlias<R> alias) {
         this.distinct = distinct;
         this.alias = alias;
     }

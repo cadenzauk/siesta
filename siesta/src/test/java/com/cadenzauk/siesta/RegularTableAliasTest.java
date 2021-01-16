@@ -40,7 +40,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -62,7 +61,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TableAliasTest {
+class RegularTableAliasTest {
     @Mock
     private Table<WidgetRow> widgetTable;
 
@@ -122,15 +121,15 @@ class TableAliasTest {
         when(widgetTable.qualifiedName()).thenReturn("WIDGET");
         when(widgetTable2.qualifiedName()).thenReturn("WIDGET");
         new EqualsTester()
-            .addEqualityGroup(TableAlias.of(widgetTable), TableAlias.of(widgetTable2))
-            .addEqualityGroup(TableAlias.of(widgetTable, "a"), TableAlias.of(widgetTable2, "a"))
+            .addEqualityGroup(RegularTableAlias.of(widgetTable), RegularTableAlias.of(widgetTable2))
+            .addEqualityGroup(RegularTableAlias.of(widgetTable, "a"), RegularTableAlias.of(widgetTable2, "a"))
             .testEquals();
     }
 
     @Test
     void database() {
         when(widgetTable.database()).thenReturn(database);
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "bob");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "bob");
 
         Database result = sut.database();
 
@@ -139,7 +138,7 @@ class TableAliasTest {
 
     @Test
     void argsIsEmpty() {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "w");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "w");
 
         Stream<Object> result = sut.args(scope);
 
@@ -148,7 +147,7 @@ class TableAliasTest {
 
     @Test
     void isDualIsTrueForDual() {
-        TableAlias<Dual> sut = TableAlias.of(dual, "d");
+        RegularTableAlias<Dual> sut = RegularTableAlias.of(dual, "d");
         when(dual.rowType()).thenReturn(TypeToken.of(Dual.class));
 
         boolean result = sut.isDual();
@@ -158,7 +157,7 @@ class TableAliasTest {
 
     @Test
     void isDualIsFalseWhenNotDual() {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "w");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "w");
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
 
         boolean result = sut.isDual();
@@ -169,7 +168,7 @@ class TableAliasTest {
     @Test
     void withoutAlias() {
         when(widgetTable.qualifiedName()).thenReturn("SCHEMA.WIDGET");
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "bob");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "bob");
 
         String result = sut.withoutAlias();
 
@@ -180,7 +179,7 @@ class TableAliasTest {
     void inFromClauseSql()  {
         when(widgetTable.qualifiedName()).thenReturn("SCHEMA.WIDGET");
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "bob");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "bob");
 
         String result = sut.inFromClauseSql();
 
@@ -192,7 +191,7 @@ class TableAliasTest {
         when(dual.rowType()).thenReturn(TypeToken.of(Dual.class));
         when(dual.database()).thenReturn(database);
         when(database.dialect()).thenReturn(new Db2Dialect());
-        Alias<Dual> sut = TableAlias.of(dual);
+        Alias<Dual> sut = RegularTableAlias.of(dual);
 
         String result = sut.inFromClauseSql();
 
@@ -201,7 +200,7 @@ class TableAliasTest {
 
     @Test
     void inSelectClauseSql()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "fred");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "fred");
 
         String result = sut.inSelectClauseSql("WIDGET_ID");
 
@@ -210,7 +209,7 @@ class TableAliasTest {
 
     @Test
     void inSelectClauseLabel()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "fred");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "fred");
 
         String result = sut.inSelectClauseLabel("WIDGET_ID");
 
@@ -219,7 +218,7 @@ class TableAliasTest {
 
     @Test
     void columnSqlDelegatesToColumn() {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "barney");
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         when(widgetTable.column(MethodInfo.of(WidgetRow::name))).thenReturn(column);
         when(column.sql(sut)).thenReturn("colname");
@@ -231,7 +230,7 @@ class TableAliasTest {
 
     @Test
     void columnSqlWithLabelDelegatesToColumn() {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "barney");
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
         when(widgetTable.column(MethodInfo.of(WidgetRow::name))).thenReturn(column);
         when(column.sqlWithLabel(sut, Optional.of("fred"))).thenReturn("colname as foo");
@@ -243,7 +242,7 @@ class TableAliasTest {
 
     @Test
     void inSelectClauseSqlDelegatesToColumns() {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "barney");
         when(widgetTable.columns()).thenReturn(Stream.of(column, column2));
         when(column.sqlWithLabel(sut, Optional.empty())).thenReturn("colname as foo");
         when(column2.sqlWithLabel(sut, Optional.empty())).thenReturn("colname2 as bar");
@@ -255,7 +254,7 @@ class TableAliasTest {
 
     @Test
     void inSelectClauseSqlDelegatesToColumn() {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "barney");
 
         String result = sut.inSelectClauseSql("SomeCol", Optional.of("foo"));
 
@@ -264,7 +263,7 @@ class TableAliasTest {
 
     @Test
     void col()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "fred");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "fred");
 
         TypedExpression<Long> result = sut.column(WidgetRow::widgetId);
 
@@ -274,7 +273,7 @@ class TableAliasTest {
 
     @Test
     void colOptional()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "fred");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "fred");
 
         TypedExpression<String> result = sut.column(WidgetRow::description);
 
@@ -289,7 +288,7 @@ class TableAliasTest {
         when(widgetTable.columns()).thenReturn(Stream.of(widgetRowId));
         when(widgetRowId.columnName()).thenReturn("bob");
         when(widgetRowId.as(TypeToken.of(Long.class))).thenReturn(Stream.of(widgetRowId));
-        Alias<?> sut = TableAlias.of(widgetTable, "joe");
+        Alias<?> sut = RegularTableAlias.of(widgetTable, "joe");
 
         Optional<AliasColumn<Long>> result = sut.findAliasColumn(scope, columnSpecifier);
 
@@ -301,7 +300,7 @@ class TableAliasTest {
         when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
         when(widgetTable.columns()).thenReturn(Stream.of(column));
         when(column.as(TypeToken.of(Long.class))).thenReturn(Stream.empty());
-        Alias<?> sut = TableAlias.of(widgetTable, "joe");
+        Alias<?> sut = RegularTableAlias.of(widgetTable, "joe");
 
         Optional<AliasColumn<Long>> result = sut.findAliasColumn(scope, columnSpecifier);
 
@@ -311,9 +310,9 @@ class TableAliasTest {
     @Test
     void foreignKeyDelegatesToTable() {
         when(widgetTable.foreignKey(manufacturerTable, Optional.empty())).thenReturn(Optional.of(foreignKey));
-        Alias<?> sut = TableAlias.of(widgetTable, "joe");
+        Alias<?> sut = RegularTableAlias.of(widgetTable, "joe");
 
-        Optional<? extends ForeignKeyReference<?,?>> result = sut.foreignKey(TableAlias.of(manufacturerTable, "joe"), Optional.empty());
+        Optional<? extends ForeignKeyReference<?,?>> result = sut.foreignKey(RegularTableAlias.of(manufacturerTable, "joe"), Optional.empty());
 
         verify(widgetTable, times(1)).foreignKey(manufacturerTable, Optional.empty());
         assertThat(result, is(Optional.of(foreignKey)));
@@ -322,7 +321,7 @@ class TableAliasTest {
     @Test
     void projectionColumnsAreGeneratedByColumns() {
         when(widgetTable.columns()).thenReturn(Stream.of(column, column2));
-        Alias<?> sut = TableAlias.of(widgetTable, "band");
+        Alias<?> sut = RegularTableAlias.of(widgetTable, "band");
         when(column.toProjection(sut, Optional.empty())).thenReturn(projectionColumn);
         when(column2.toProjection(sut, Optional.empty())).thenReturn(projectionColumn2);
 
@@ -333,7 +332,7 @@ class TableAliasTest {
 
     @Test
     void rowMapperFactoryDelegatesToColumn()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "barney");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "barney");
         when(widgetTable.rowMapperFactory(sut, Optional.empty())).thenReturn(rowMapperFactory);
 
         RowMapperFactory<WidgetRow> result = sut.rowMapperFactory();
@@ -347,7 +346,7 @@ class TableAliasTest {
     @Test
     void asRightClassWithRightNameReturnsAlias()  {
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "wilma").collect(toList());
 
@@ -357,7 +356,7 @@ class TableAliasTest {
     @Test
     void asDifferentClassWithSameNameThrowsException()  {
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         calling(() -> sut.as(ManufacturerRow.class, "wilma"))
             .shouldThrow(IllegalArgumentException.class)
@@ -368,7 +367,7 @@ class TableAliasTest {
 
     @Test
     void asRightClassWithDifferentNameReturnsEmpty()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "pebbles");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "pebbles");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class, "dino").collect(toList());
 
@@ -377,7 +376,7 @@ class TableAliasTest {
 
     @Test
     void asDifferentClassWithDifferentNameReturnsEmpty()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "dino");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class, "burt").collect(toList());
 
@@ -387,7 +386,7 @@ class TableAliasTest {
     @Test
     void asWithWrongClassReturnsEmpty()  {
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "dino");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "dino");
 
         List<Alias<ManufacturerRow>> result = sut.as(ManufacturerRow.class).collect(toList());
 
@@ -398,7 +397,7 @@ class TableAliasTest {
     @Test
     void asWithSameClassReturnsAlias()  {
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         List<Alias<WidgetRow>> result = sut.as(WidgetRow.class).collect(toList());
 
@@ -409,7 +408,7 @@ class TableAliasTest {
     @Test
     void asWithSuperClassReturnsAlias()  {
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         List<Alias<Object>> result = sut.as(Object.class).collect(toList());
 
@@ -420,7 +419,7 @@ class TableAliasTest {
     void asMethodInfoFromSameClassWithRightNameReturnsAlias()  {
         when(columnSpecifier.referringClass()).thenReturn(Optional.of(WidgetRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("wilma")).collect(toList());
 
@@ -431,7 +430,7 @@ class TableAliasTest {
     void asMethodInfoForDifferentClassWithWrongNameThrowsException()  {
         when(columnSpecifier.referringClass()).thenReturn(Optional.of(ManufacturerRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         calling(() -> sut.as(scope, columnSpecifier, Optional.of("wilma")))
             .shouldThrow(IllegalArgumentException.class)
@@ -442,7 +441,7 @@ class TableAliasTest {
 
     @Test
     void asMethodInfoForRightClassWithDifferentNameReturnsEmpty()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "pebbles");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "pebbles");
 
         List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("dino")).collect(toList());
 
@@ -451,7 +450,7 @@ class TableAliasTest {
 
     @Test
     void asMethodInfoForDifferentClassWithDifferentNameReturnsEmpty()  {
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "dino");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "dino");
 
         List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.of("burt")).collect(toList());
 
@@ -462,7 +461,7 @@ class TableAliasTest {
     void asMethodInfoWithWrongClassReturnsEmpty()  {
         when(columnSpecifier.referringClass()).thenReturn(Optional.of(ManufacturerRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "dino");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "dino");
 
         List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
@@ -473,7 +472,7 @@ class TableAliasTest {
     void asMethodInfoWithSameClassReturnsAlias()  {
         when(columnSpecifier.referringClass()).thenReturn(Optional.of(WidgetRow.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
@@ -484,7 +483,7 @@ class TableAliasTest {
     void asMethodInfoWithSuperClassReturnsAlias()  {
         when(columnSpecifier.referringClass()).thenReturn(Optional.of(Object.class));
         when(widgetTable.rowType()).thenReturn(TypeToken.of(WidgetRow.class));
-        Alias<WidgetRow> sut = TableAlias.of(widgetTable, "wilma");
+        Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         List<Alias<?>> result = sut.as(scope, columnSpecifier, Optional.empty()).collect(toList());
 
@@ -493,7 +492,7 @@ class TableAliasTest {
 
     @Test
     void dynamicRowMapperFactory() {
-        TableAlias<WidgetRow> sut = TableAlias.of(widgetTable, "pebbles");
+        RegularTableAlias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "pebbles");
         when(widgetTable.dynamicRowMapperFactory(sut)).thenReturn(dynamicRowMapperFactory);
 
         DynamicRowMapperFactory<WidgetRow> result = sut.dynamicRowMapperFactory();

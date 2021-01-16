@@ -23,6 +23,10 @@ version '1.0.0-SNAPSHOT'
 
 dependencies {
     compile project(":siesta")
-    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.1.0.jre8'
+    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '8.4.1.jre8'
     testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+}
+
+tasks.withType(Test) {
+    systemProperty "java.library.path", sqlserverAuthPath
 }

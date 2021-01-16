@@ -22,13 +22,16 @@
 
 package com.cadenzauk.siesta.dialect;
 
-import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
-import com.cadenzauk.core.sql.exception.LockingException;
-import com.cadenzauk.core.sql.exception.IllegalNullException;
-import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
+import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
+import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.IsolationLevel;
+import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
@@ -47,6 +50,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -141,9 +145,42 @@ public class SqlServerDialect extends AnsiDialect {
             .register("23000", 547, ReferentialIntegrityException::new)
             .register("23000", 2627, DuplicateKeyException::new)
             .register("40001", 1205, LockingException::new)
+            .register("S0001", 156, NoSuchObjectException::new)
+            .register("S0001", 2628, InvalidValueException::new)
+            .register("S0002", 208, NoSuchObjectException::new)
             .register("S0001", SqlSyntaxException::new)
             .register("S0002", 8115, InvalidValueException::new)
             .register(1222, LockingException::new);
+
+        setTempTableInfo(new SqlServerTempTableInfo());
+    }
+
+    @Override
+    public String updateSql(String qualifiedTableName, Optional<String> alias, String sets, String whereClause) {
+        return alias
+            .map(a -> String.format("update %s set %s from %s %s%s",
+                a,
+                sets,
+                qualifiedTableName,
+                a,
+                whereClause))
+            .orElseGet(() -> String.format("update %s set %s%s",
+                qualifiedTableName,
+                sets,
+                whereClause));
+    }
+
+    @Override
+    public String deleteSql(String qualifiedTableName, Optional<String> alias, String whereClause) {
+        return alias
+            .map(a -> String.format("delete %s from %s %s%s",
+                a,
+                qualifiedTableName,
+                a,
+                whereClause))
+            .orElseGet(() -> String.format("delete %s%s",
+                qualifiedTableName,
+                whereClause));
     }
 
     @Override
@@ -183,7 +220,7 @@ public class SqlServerDialect extends AnsiDialect {
 
     @Override
     public String setLockTimeout(long time, TimeUnit unit) {
-        return String.format("set lock_timeout %d", unit.toMillis(time));
+        return String.format("set lock_timeout %d", Long.max(unit.toMillis(time), 1));
     }
 
     @Override

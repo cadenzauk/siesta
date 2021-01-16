@@ -26,6 +26,7 @@ import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
@@ -64,6 +65,7 @@ public class Db2Dialect extends AnsiDialect {
             });
 
         exceptions()
+            .register("42704", NoSuchObjectException::new)
             .register("07006", SqlSyntaxException::new)
             .register("42[67]..", SqlSyntaxException::new)
 
@@ -103,6 +105,7 @@ public class Db2Dialect extends AnsiDialect {
         ;
 
         setSequenceInfo(new Db2SequenceInfo());
+        setTempTableInfo(new Db2TempTableInfo());
     }
 
     @Override

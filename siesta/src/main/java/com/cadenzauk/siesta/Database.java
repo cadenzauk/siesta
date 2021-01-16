@@ -46,6 +46,11 @@ import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InProjectionExpectingComma1;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.grammar.select.SubselectAlias;
+import com.cadenzauk.siesta.grammar.temp.GlobalTempTable;
+import com.cadenzauk.siesta.grammar.temp.LocalTempTable;
+import com.cadenzauk.siesta.grammar.temp.TempTable;
+import com.cadenzauk.siesta.grammar.temp.TempTableColumn;
+import com.cadenzauk.siesta.grammar.temp.TempTableCommitAction;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeAdapter;
@@ -67,6 +72,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.stream.Collectors.joining;
 
 public class Database {
     private static final Logger LOG = LoggerFactory.getLogger(Database.class);
@@ -118,7 +125,6 @@ public class Database {
         return sequence(valueClass, defaultCatalog, defaultSchema, name);
     }
 
-    @SuppressWarnings("WeakerAccess")
     public <T extends Number> Sequence<T> sequence(Class<T> valueClass, String catalog, String schema, String name) {
         return Sequence.<T>newBuilder()
             .database(this)
@@ -186,6 +192,41 @@ public class Database {
         throw new RuntimeException(String.format("Error while executing '%s'.", sql), throwable);
     }
 
+    public <T,B> TempTable<T> createTemporaryTable(Transaction transaction, Class<T> rowClass, Function1<LocalTempTable.Builder<T,T>,LocalTempTable.Builder<T,B>> init) {
+        LocalTempTable<T> tempTable = init.apply(LocalTempTable.newBuilder(this, rowClass)).build();
+        String sql = tempTable.createSql();
+        execute(sql, () -> transaction.execute(sql, new Object[0]));
+        if (! dialect.tempTableInfo().supportsLocalOnCommitDeleteRows() && tempTable.onCommit() == TempTableCommitAction.DELETE_ROWS) {
+            ExpectingWhere delete = delete(tempTable.as(""));
+            transaction.beforeCommit(delete::execute);
+        }
+        if (! dialect.tempTableInfo().supportsLocalOnCommitDropTable() && tempTable.onCommit() == TempTableCommitAction.DROP_TABLE) {
+            transaction.beforeCommit(t -> dropTemporaryTable(t, tempTable));
+        }
+        if (! dialect.tempTableInfo().createLocalIsTransactional() && (tempTable.onCommit() != TempTableCommitAction.DROP_TABLE || ! dialect.tempTableInfo().supportsLocalOnCommitDropTable())) {
+            transaction.afterRollback(t -> dropTemporaryTable(t, tempTable));
+        }
+        return tempTable;
+    }
+
+    private void dropTemporaryTable(Transaction transaction, LocalTempTable<?> tempTable) {
+        String sql = "drop table " + tempTable.qualifiedTableName();
+        execute(sql, () -> transaction.execute(sql, new Object[0]));
+    }
+
+    public <T,B> TempTable<T> globalTemporaryTable(Transaction transaction, Class<T> rowClass, Function1<GlobalTempTable.Builder<T,T>,GlobalTempTable.Builder<T,B>> init) {
+        TempTable<T> tempTable = init.apply(GlobalTempTable
+                                            .newBuilder(this, rowClass)
+                                            .catalog(defaultCatalog)
+                                            .schema(defaultSchema))
+                                 .build();
+        if (! dialect.tempTableInfo().clearsGlobalOnCommit()) {
+            ExpectingWhere delete = delete(tempTable.as(""));
+            transaction.beforeCommit(delete::execute);
+        }
+        return tempTable;
+    }
+
     @SuppressWarnings("unchecked")
     private <R, B> Table<R> table(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
         return (Table<R>) metadataCache.computeIfAbsent(rowType, k -> {
@@ -233,6 +274,10 @@ public class Database {
 
     public <T, R> Optional<DataType<T>> dataTypeOf(FieldInfo<R,T> fieldInfo) {
         return dataTypeRegistry.dataTypeOf(fieldInfo.effectiveClass());
+    }
+
+    public String columnName(String fieldName) {
+        return namingStrategy.columnName(fieldName);
     }
 
     private <R, T> Optional<String> nameFromMethodAnnotation(FieldInfo<R,T> fieldInfo) {
@@ -311,6 +356,10 @@ public class Database {
         return Select.from(this, table(rowClass).as(alias));
     }
 
+    public <R> ExpectingJoin1<R> from(TempTable<R> tempTable, String alias) {
+        return Select.from(this, tempTable.as(alias));
+    }
+
     public <R> ExpectingJoin1<R> from(Select<R> select, String alias) {
         return Select.from(this, new SubselectAlias<>(select, alias));
     }
@@ -338,6 +387,22 @@ public class Database {
         return table(rowClass).insert(transaction, rows);
     }
 
+    @SuppressWarnings("unchecked")
+    public <R> int insert(Transaction transaction, TempTable<R> tempTable, R... rows) {
+        if (rows.length == 0) {
+            return 0;
+        }
+        return tempTable.insert(transaction, rows);
+    }
+
+    public <R> int insert(Transaction transaction, TempTable<R> tempTable, Select<R> select) {
+        String sql = String.format("insert into %s(%s) %s",
+            tempTable.qualifiedTableName(),
+            tempTable.columnDefinitions().map(TempTableColumn::columnName).collect(joining(", ")),
+            select.sql());
+        return execute(sql, () -> transaction.update(sql, select.args(new Scope(this)).toArray()));
+    }
+
     public <U> InSetExpectingWhere<U> update(Alias<U> alias) {
         return Update.update(this, alias);
     }
@@ -348,6 +413,14 @@ public class Database {
 
     public <U> InSetExpectingWhere<U> update(Class<U> rowClass, String alias) {
         return Update.update(this, table(rowClass).as(alias));
+    }
+
+    public <U> InSetExpectingWhere<U> update(TempTable<U> tempTable) {
+        return Update.update(this, tempTable.as(""));
+    }
+
+    public <U> InSetExpectingWhere<U> update(TempTable<U> tempTable, String alias) {
+        return Update.update(this, tempTable.as(alias));
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -377,6 +450,14 @@ public class Database {
 
     public <D> ExpectingWhere delete(Class<D> rowClass, String alias) {
         return Delete.delete(this, table(rowClass).as(alias));
+    }
+
+    public <U> ExpectingWhere delete(TempTable<U> tempTable) {
+        return Delete.delete(this, tempTable.as(""));
+    }
+
+    public <U> ExpectingWhere delete(TempTable<U> tempTable, String alias) {
+        return Delete.delete(this, tempTable.as(alias));
     }
 
     @SuppressWarnings("UnusedReturnValue")

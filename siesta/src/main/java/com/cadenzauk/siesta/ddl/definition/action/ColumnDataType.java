@@ -35,7 +35,7 @@ import java.util.Optional;
 public class ColumnDataType<T> {
     private final DbTypeId<T> dataTypeId;
     private final Optional<Integer> length;
-    private final Optional<Integer> precision;
+    private final Optional<Integer> scale;
 
     private ColumnDataType(DbTypeId<T> dataTypeId) {
         this(dataTypeId, Optional.empty(), Optional.empty());
@@ -45,20 +45,20 @@ public class ColumnDataType<T> {
         this(dataTypeId, Optional.of(length), Optional.empty());
     }
 
-    private ColumnDataType(DbTypeId<T> dataTypeId, int length, int precision) {
-        this(dataTypeId, Optional.of(length), Optional.of(precision));
+    private ColumnDataType(DbTypeId<T> dataTypeId, int length, int scale) {
+        this(dataTypeId, Optional.of(length), Optional.of(scale));
     }
 
-    private ColumnDataType(DbTypeId<T> dataTypeId, Optional<Integer> length, Optional<Integer> precision) {
+    private ColumnDataType(DbTypeId<T> dataTypeId, Optional<Integer> length, Optional<Integer> scale) {
         this.dataTypeId = dataTypeId;
         this.length = length;
-        this.precision = precision;
+        this.scale = scale;
     }
 
     public String sql(Database database) {
         DbType<T> type = database.dialect().type(dataTypeId);
         return length
-            .map(len -> precision
+            .map(len -> scale
                 .map(prec -> type.sqlType(database, len, prec))
                 .orElseGet(() -> type.sqlType(database, len)))
             .orElseGet(() -> type.sqlType(database));
@@ -104,7 +104,11 @@ public class ColumnDataType<T> {
         return new ColumnDataType<>(DbTypeId.TIME);
     }
 
-    public static ColumnDataType<BigDecimal> decimal(int length, int precision) {
-        return new ColumnDataType<>(DbTypeId.DECIMAL, length, precision);
+    public static ColumnDataType<BigDecimal> decimal(int precision, int scale) {
+        return new ColumnDataType<>(DbTypeId.DECIMAL, precision, scale);
+    }
+
+    public static <T> ColumnDataType<T> of(DbTypeId<T> type, int len, int prec, int scale) {
+        return new ColumnDataType<>(type, type.length(len, prec), type.scale(scale));
     }
 }

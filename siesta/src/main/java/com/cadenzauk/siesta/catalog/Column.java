@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.ddl.definition.action.ColumnDataType;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Optional;
@@ -43,6 +44,8 @@ public interface Column<T, R> extends AliasColumn<T> {
     boolean updatable();
 
     int count();
+
+    ColumnDataType<T> columnType();
 
     Stream<String> idSql(Alias<?> alias);
 
@@ -76,4 +79,5 @@ public interface Column<T, R> extends AliasColumn<T> {
     }
 
     boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier);
+
 }

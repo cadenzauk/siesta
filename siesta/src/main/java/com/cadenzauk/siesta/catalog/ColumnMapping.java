@@ -78,7 +78,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     private final Function<B,R> buildRow;
     private final List<TableColumn<?,R,B>> columns;
 
-    ColumnMapping(Builder<R,B,?> builder) {
+    public ColumnMapping(Builder<R,B,?> builder) {
         database = builder.database;
         rowType = builder.rowType;
         newRowBuilder = builder.newBuilder;
@@ -94,6 +94,13 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     @Override
     public Stream<Column<?,R>> columns() {
         return columns.stream().map(Function.identity());
+    }
+
+    @Override
+    public Stream<Column<?,?>> primitiveColumns() {
+        return columns
+            .stream()
+            .flatMap(TableColumn::primitiveColumns);
     }
 
     @Override
@@ -160,7 +167,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         };
     }
 
-    Object[] insertArgs(R[] rows) {
+    public Object[] insertArgs(R[] rows) {
         return Arrays.stream(rows)
             .map(Optional::ofNullable)
             .flatMap(r -> columns.stream().flatMap(c -> c.insertArgs(database, r)))
@@ -217,7 +224,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         }
 
         @SuppressWarnings("unchecked")
-        private S self() {
+        protected S self() {
             return (S) this;
         }
 
@@ -349,6 +356,18 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
             return override(propertyName, javax.persistence.Column::updatable);
         }
 
+        private Optional<Integer> overrideLength(String propertyName) {
+            return override(propertyName, javax.persistence.Column::length);
+        }
+
+        private Optional<Integer> overridePrecision(String propertyName) {
+            return override(propertyName, javax.persistence.Column::precision);
+        }
+
+        private Optional<Integer> overrideScale(String propertyName) {
+            return override(propertyName, javax.persistence.Column::scale);
+        }
+
         private <T> Optional<T> override(String propertyName, Function<javax.persistence.Column,T> function) {
             return Optional.ofNullable(overrides.get(propertyName))
                 .flatMap(o -> o.stream()
@@ -392,6 +411,36 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
                     Optional<javax.persistence.Column> annotation = fieldInfo.annotation(javax.persistence.Column.class);
                     return annotation.map(javax.persistence.Column::updatable)
                         .orElse(true);
+                });
+        }
+
+        private <T> int determineLengthFor(FieldInfo<R,T> fieldInfo) {
+            return overrideLength(fieldInfo.name())
+                .orElseGet(() -> {
+                    Optional<javax.persistence.Column> annotation = fieldInfo.annotation(javax.persistence.Column.class);
+                    return annotation
+                        .map(javax.persistence.Column::length)
+                        .orElse(255);
+                });
+        }
+
+        private <T> int determinePrecisionFor(FieldInfo<R,T> fieldInfo) {
+            return overridePrecision(fieldInfo.name())
+                .orElseGet(() -> {
+                    Optional<javax.persistence.Column> annotation = fieldInfo.annotation(javax.persistence.Column.class);
+                    return annotation
+                        .map(javax.persistence.Column::precision)
+                        .orElse(255);
+                });
+        }
+
+        private <T> int determineScaleFor(FieldInfo<R,T> fieldInfo) {
+            return overrideScale(fieldInfo.name())
+                .orElseGet(() -> {
+                    Optional<javax.persistence.Column> annotation = fieldInfo.annotation(javax.persistence.Column.class);
+                    return annotation
+                        .map(javax.persistence.Column::scale)
+                        .orElse(255);
                 });
         }
 
@@ -466,7 +515,8 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
 
         private <T> void addPrimitive(FieldInfo<R,T> fieldInfo) {
             DataType<T> dataType = database
-                .dataTypeOf(fieldInfo).orElseThrow(() -> new IllegalArgumentException("Unable to determine the data type for " + fieldInfo));
+                .dataTypeOf(fieldInfo)
+                .orElseThrow(() -> new IllegalArgumentException("Unable to determine the data type for " + fieldInfo));
 
             Field builderField = ClassUtil.findField(builderType.getRawType(), fieldInfo.name())
                 .orElseThrow(() -> new IllegalArgumentException("Builder class " + builderType + " does not have a field " + fieldInfo.name() + "."));
@@ -482,6 +532,9 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
                 .identifier(idAnnotation.isPresent())
                 .insertable(determineInsertableFor(fieldInfo))
                 .updatable(determineUpdateableFor(fieldInfo))
+                .length(determineLengthFor(fieldInfo))
+                .precision(determinePrecisionFor(fieldInfo))
+                .scale(determineScaleFor(fieldInfo))
                 .columnName(determineColumnNameFor(fieldInfo));
 
             columns.add(columnBuilder.build());

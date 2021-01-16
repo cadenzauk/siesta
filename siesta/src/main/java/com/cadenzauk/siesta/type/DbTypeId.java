@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 public class DbTypeId<T> {
@@ -39,21 +40,56 @@ public class DbTypeId<T> {
     public static final DbTypeId<Integer> INTEGER = new DbTypeId<>("integer", Types.INTEGER, Integer.class);
     public static final DbTypeId<Long> BIGINT = new DbTypeId<>("bigint", Types.BIGINT, Long.class);
 
-    public static final DbTypeId<byte[]> BINARY = new DbTypeId<>("binary", Types.BINARY, byte[].class);
-    public static final DbTypeId<byte[]> VARBINARY = new DbTypeId<>("varbinary", Types.VARBINARY, byte[].class);
+    public static final DbTypeId<byte[]> BINARY = new DbTypeId<byte[]>("binary", Types.BINARY, byte[].class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
+    public static final DbTypeId<byte[]> VARBINARY = new DbTypeId<byte[]>("varbinary", Types.VARBINARY, byte[].class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
 
     public static final DbTypeId<Double> DOUBLE = new DbTypeId<>("double precision", Types.DOUBLE, Double.class);
     public static final DbTypeId<Float> REAL = new DbTypeId<>("real", Types.FLOAT, Float.class);
-    public static final DbTypeId<BigDecimal> DECIMAL = new DbTypeId<>("decimal", Types.DECIMAL, BigDecimal.class);
+    public static final DbTypeId<BigDecimal> DECIMAL = new DbTypeId<BigDecimal>("decimal", Types.DECIMAL, BigDecimal.class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(prec > 0 ? prec : 18);
+        }
+
+        @Override
+        public Optional<Integer> scale(int scale) {
+            return Optional.of(scale);
+        }
+    };
 
     public static final DbTypeId<LocalDate> DATE = new DbTypeId<>("date", Types.DATE, LocalDate.class);
     public static final DbTypeId<LocalTime> TIME = new DbTypeId<>("time", Types.TIME, LocalTime.class);
     public static final DbTypeId<LocalDateTime> TIMESTAMP = new DbTypeId<>("timestamp", Types.TIMESTAMP, LocalDateTime.class);
-    public static final DbTypeId<UUID> UUID = new DbTypeId<>("guid", Types.BINARY, UUID.class);
+    public static final DbTypeId<UUID> UUID = new DbTypeId<UUID>("guid", Types.BINARY, UUID.class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
     public static final DbTypeId<ZonedDateTime> UTC_TIMESTAMP = new DbTypeId<>("utctimestamp", Types.TIMESTAMP, ZonedDateTime.class);
 
-    public static final DbTypeId<String> CHAR = new DbTypeId<>("char", Types.CHAR, String.class);
-    public static final DbTypeId<String> VARCHAR = new DbTypeId<>("varchar", Types.VARCHAR, String.class);
+    public static final DbTypeId<String> CHAR = new DbTypeId<String>("char", Types.CHAR, String.class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
+    public static final DbTypeId<String> VARCHAR = new DbTypeId<String>("varchar", Types.VARCHAR, String.class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
 
     private final String name;
     private final int typeCode;
@@ -71,6 +107,14 @@ public class DbTypeId<T> {
 
     public int typeCode() {
         return typeCode;
+    }
+
+    public Optional<Integer> length(int len, int prec) {
+        return Optional.empty();
+    }
+
+    public Optional<Integer> scale(int scale) {
+        return Optional.empty();
     }
 
     @Override

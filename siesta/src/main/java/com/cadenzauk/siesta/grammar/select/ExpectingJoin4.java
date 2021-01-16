@@ -28,6 +28,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Projections;
+import com.cadenzauk.siesta.grammar.temp.TempTable;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
@@ -44,6 +45,10 @@ public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<Expec
         return join(JoinType.INNER, scope().database().table(rowClass).as(alias));
     }
 
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> join(TempTable<R5> tempTable, String alias) {
+        return join(JoinType.INNER, tempTable.as(alias));
+    }
+
     public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> join(Select<R5> select, String alias) {
         return join(JoinType.INNER, new SubselectAlias<>(select, alias));
     }
@@ -54,6 +59,10 @@ public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<Expec
 
     public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> leftJoin(Class<R5> rowClass, String alias) {
         return join(JoinType.LEFT_OUTER, scope().database().table(rowClass).as(alias));
+    }
+
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> leftJoin(TempTable<R5> tempTable, String alias) {
+        return join(JoinType.LEFT_OUTER, tempTable.as(alias));
     }
 
     public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> leftJoin(Select<R5> select, String alias) {
@@ -68,6 +77,10 @@ public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<Expec
         return join(JoinType.RIGHT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> rightJoin(TempTable<R5> tempTable, String alias) {
+        return join(JoinType.RIGHT_OUTER, tempTable.as(alias));
+    }
+
     public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> rightJoin(Select<R5> select, String alias) {
         return join(JoinType.RIGHT_OUTER, new SubselectAlias<>(select, alias));
     }
@@ -78,6 +91,10 @@ public class ExpectingJoin4<RT1, RT2, RT3, RT4> extends InJoinExpectingAnd<Expec
 
     public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> fullOuterJoin(Class<R5> rowClass, String alias) {
         return join(JoinType.FULL_OUTER, scope().database().table(rowClass).as(alias));
+    }
+
+    public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> fullOuterJoin(TempTable<R5> tempTable, String alias) {
+        return join(JoinType.FULL_OUTER, tempTable.as(alias));
     }
 
     public <R5> InJoinExpectingOn<ExpectingJoin5<RT1,RT2,RT3,RT4,R5>, Tuple5<RT1,RT2,RT3,RT4,R5>> fullOuterJoin(Select<R5> select, String alias) {

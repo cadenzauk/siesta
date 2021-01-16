@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.dml;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.catalog.Table;
@@ -42,9 +43,9 @@ public class Delete<D> extends ExecutableStatement {
 
     @Override
     protected String sql(Scope scope) {
-        return String.format("delete from %s%s%s",
-            alias.table().qualifiedName(),
-            alias.aliasName().map(a -> " " + a).orElse(""),
+        return scope.database().dialect().deleteSql(
+            alias.qualifiedTableName(),
+            alias.aliasName(),
             whereClauseSql(scope));
     }
 
@@ -58,7 +59,7 @@ public class Delete<D> extends ExecutableStatement {
     }
 
     public static <U> ExpectingWhere delete(Database database, Table<U> table) {
-        return delete(database, TableAlias.of(table));
+        return delete(database, RegularTableAlias.of(table));
     }
 
     public static <U> ExpectingWhere delete(Database database, Alias<U> alias) {

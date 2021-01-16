@@ -33,6 +33,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.NamingStrategy;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.ddl.definition.action.ColumnDataType;
 import com.google.common.reflect.TypeToken;
 
 import java.sql.ResultSet;
@@ -101,6 +102,11 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     @Override
     public int count() {
         return columns().mapToInt(Column::count).sum();
+    }
+
+    @Override
+    public ColumnDataType<T> columnType() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -264,6 +270,11 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
         return prefix + columnName;
     }
 
+    @Override
+    public Stream<Column<?,?>> primitiveColumns() {
+        return columnMapping.primitiveColumns();
+    }
+
     static <T, R, B> Builder<T,T,R,B> mandatory(Database database, String name, TypeToken<T> rowType, Function1<R,T> getter, BiConsumer<B,T> setter) {
         return new Builder<>(database, name, rowType, rowType, r -> Optional.ofNullable(getter.apply(r)), (b, v) -> setter.accept(b, v.orElse(null)), Function.identity());
     }
@@ -287,7 +298,7 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
             this.propertyName = propertyName;
             this.getter = getter;
             this.setter = setter;
-            columnName(database.namingStrategy().columnName(propertyName));
+            columnName(database.columnName(propertyName));
         }
 
         public <BB> Builder<T,BB,R,RB> builder(Function1<BB,T> buildRow) {

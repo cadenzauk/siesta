@@ -27,6 +27,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -60,6 +61,11 @@ public class FluentAssert {
 
         public ThrowableMatcher<T> with(Matcher<T> matcher) {
             assertThat(actual, matcher);
+            return this;
+        }
+
+        public <V> ThrowableMatcher<T> with(Function<? super T,V> property, Matcher<V> matcher) {
+            assertThat(property.apply(actual), matcher);
             return this;
         }
 

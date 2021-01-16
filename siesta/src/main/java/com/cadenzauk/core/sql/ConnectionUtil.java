@@ -70,6 +70,7 @@ public final class ConnectionUtil extends UtilityClass {
 
     public static PreparedStatement prepare(Connection connection, String sql) {
         try {
+            LOG.debug(sql);
             return connection.prepareStatement(sql);
         } catch (SQLException e) {
             throw new RuntimeSqlException(e);

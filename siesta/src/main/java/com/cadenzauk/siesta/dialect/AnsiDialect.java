@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.SequenceInfo;
+import com.cadenzauk.siesta.TempTableInfo;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
@@ -51,6 +52,7 @@ public class AnsiDialect implements Dialect {
     private final DbTypeRegistry types = new DbTypeRegistry();
     private final SqlStateExceptionTranslator exceptionTranslator = new SqlStateExceptionTranslator();
     private SequenceInfo sequenceInfo;
+    private TempTableInfo tempTableInfo;
 
     public AnsiDialect() {
         functions
@@ -58,11 +60,38 @@ public class AnsiDialect implements Dialect {
             .register(DateFunctionSpecs::registerDefaults)
             .register(StringFunctionSpecs::registerDefaults);
         sequenceInfo = SequenceInfo.newBuilder().build();
+        tempTableInfo = TempTableInfo.newBuilder().build();
     }
 
     @Override
     public String selectivity(double s) {
         return "";
+    }
+
+    @Override
+    public String updateSql(String qualifiedTableName, Optional<String> alias, String sets, String whereClause) {
+        return alias
+                   .map(a -> String.format("update %s %s set %s%s",
+                       qualifiedTableName,
+                       a,
+                       sets,
+                       whereClause))
+                   .orElseGet(() -> String.format("update %s set %s%s",
+                       qualifiedTableName,
+                       sets,
+                       whereClause));
+    }
+
+    @Override
+    public String deleteSql(String qualifiedTableName, Optional<String> alias, String whereClause) {
+        return alias
+                   .map(a -> String.format("delete from %s %s%s",
+                       qualifiedTableName,
+                       a,
+                       whereClause))
+                   .orElseGet(() -> String.format("delete from %s%s",
+                       qualifiedTableName,
+                       whereClause));
     }
 
     @Override
@@ -208,6 +237,11 @@ public class AnsiDialect implements Dialect {
         return sequenceInfo;
     }
 
+    @Override
+    public TempTableInfo tempTableInfo() {
+        return tempTableInfo;
+    }
+
     protected DbTypeRegistry types() {
         return types;
     }
@@ -222,5 +256,9 @@ public class AnsiDialect implements Dialect {
 
     protected void setSequenceInfo(SequenceInfo sequenceInfo) {
         this.sequenceInfo = sequenceInfo;
+    }
+
+    protected void setTempTableInfo(TempTableInfo tempTableInfo) {
+        this.tempTableInfo = tempTableInfo;
     }
 }

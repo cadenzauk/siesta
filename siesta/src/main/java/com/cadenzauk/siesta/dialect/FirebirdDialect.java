@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
@@ -129,10 +130,12 @@ public class FirebirdDialect extends AnsiDialect {
             .register("23000", 335544665, DuplicateKeyException::new)
             .register("23000", 335544466, ReferentialIntegrityException::new)
             .register("40001", 335544336, LockingException::new)
+            .register("42S02", 335544580, NoSuchObjectException::new)
             .register("42.+", SqlSyntaxException::new)
         ;
 
         setSequenceInfo(new FirebirdSequenceInfo());
+        setTempTableInfo(new FirebirdTempTableInfo());
     }
 
     @Override

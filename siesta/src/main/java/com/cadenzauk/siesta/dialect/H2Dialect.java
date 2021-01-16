@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
@@ -73,6 +74,7 @@ public class H2Dialect extends AnsiDialect {
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"));
 
         exceptions()
+            .register("42S02", NoSuchObjectException::new)
             .register("42.+", SqlSyntaxException::new)
 
             // DUPLICATE_KEY_1 = 23505
@@ -100,6 +102,8 @@ public class H2Dialect extends AnsiDialect {
             // LOCK_TIMEOUT_1 = 50200
             .register("40001", LockingException::new)
             .register("HYT00", 50200, LockingException::new);
+
+        setTempTableInfo(new H2TempTableInfo());
     }
 
     @Override

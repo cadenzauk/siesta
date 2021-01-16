@@ -28,14 +28,11 @@ import com.cadenzauk.siesta.ddl.action.ActionInterceptor;
 import com.cadenzauk.siesta.ddl.action.Priority;
 import com.cadenzauk.siesta.ddl.sql.action.SqlAction;
 import com.google.common.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.stream.Stream;
 
 public class SqlActionExecutor extends ActionInterceptor<SqlAction> {
-    private static final Logger LOG = LoggerFactory.getLogger(SqlActionExecutor.class);
-
     @Override
     public int priority() {
         return Priority.EXECUTION;
@@ -44,8 +41,9 @@ public class SqlActionExecutor extends ActionInterceptor<SqlAction> {
     @Override
     public Stream<Action> intercept(Database database, SqlAction action) {
         String sql = action.sql(database);
-        LOG.info("{}", sql);
-        database.execute(sql, () -> database.getDefaultSqlExecutor().update(sql));
+        if (StringUtils.isNotBlank(sql)) {
+            database.execute(sql, () -> database.getDefaultSqlExecutor().update(sql));
+        }
         return Stream.of(action);
     }
 

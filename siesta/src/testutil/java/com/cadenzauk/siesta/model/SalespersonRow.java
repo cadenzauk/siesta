@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.model;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.math.BigDecimal;
@@ -32,10 +33,14 @@ import java.util.Optional;
 public class SalespersonRow {
     @Id
     private final long salespersonId;
+    @Column(length = 100)
     private final String firstName;
+    @Column(length = 100)
     private final Optional<String> middleNames;
+    @Column(length = 100)
     private final String surname;
     private final int numberOfSales;
+    @Column(precision = 10, scale = 5)
     private final Optional<BigDecimal> commission;
 
     private SalespersonRow(Builder builder) {

@@ -26,6 +26,7 @@ import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
@@ -90,7 +91,10 @@ public class HSqlDialect extends AnsiDialect {
 
             .register("40001", LockingException::new)
 
+            .register("42501", NoSuchObjectException::new)
             .register("42.+", SqlSyntaxException::new);
+
+        setTempTableInfo(new HSqlTempTableInfo());
     }
 
     @Override

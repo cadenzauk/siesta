@@ -30,14 +30,18 @@ import com.cadenzauk.siesta.Transaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class JdbcTransaction implements Transaction {
     private final CompositeAutoCloseable autoCloseable = new CompositeAutoCloseable();
     private final Connection connection;
     private final JdbcSqlExecutor sqlExecutor;
+    private final List<Consumer<Transaction>> beforeCommitHooks = new ArrayList<>();
+    private final List<Consumer<Transaction>> afterRollbackHooks = new ArrayList<>();
 
     public JdbcTransaction(JdbcSqlExecutor sqlExecutor) {
         this.sqlExecutor = sqlExecutor;
@@ -51,12 +55,28 @@ public class JdbcTransaction implements Transaction {
 
     @Override
     public void commit() {
+        beforeCommitHooks.forEach(hook -> hook.accept(this));
         ConnectionUtil.commit(connection);
+        afterRollbackHooks.clear();
+        beforeCommitHooks.clear();
+    }
+
+    @Override
+    public void beforeCommit(Consumer<Transaction> hook) {
+        beforeCommitHooks.add(hook);
     }
 
     @Override
     public void rollback() {
         ConnectionUtil.rollback(connection);
+        afterRollbackHooks.forEach(hook -> hook.accept(this));
+        afterRollbackHooks.clear();
+        beforeCommitHooks.clear();
+    }
+
+    @Override
+    public void afterRollback(Consumer<Transaction> hook) {
+        afterRollbackHooks.add(hook);
     }
 
     @Override

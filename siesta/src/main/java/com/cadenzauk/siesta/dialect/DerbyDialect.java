@@ -26,6 +26,7 @@ import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.core.sql.exception.LockingException;
+import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
@@ -120,6 +121,7 @@ public class DerbyDialect extends AnsiDialect {
             });
 
         exceptions()
+            .register("42X05", NoSuchObjectException::new)
             .register("07006", SqlSyntaxException::new)
             .register("42[X67]..", SqlSyntaxException::new)
 
@@ -158,6 +160,7 @@ public class DerbyDialect extends AnsiDialect {
             .register("57033", LockingException::new)
         ;
         setSequenceInfo(new DerbySequenceInfo());
+        setTempTableInfo(new DerbyTempTableInfo());
     }
 
     @Override
@@ -225,4 +228,5 @@ public class DerbyDialect extends AnsiDialect {
                 return sql + " with rr";
         }
         return sql;
-    }}
+    }
+}

@@ -65,6 +65,10 @@ public class DataType<T> {
         return javaClass;
     }
 
+    public DbTypeId<T> dbTypeId() {
+        return dbTypeId;
+    }
+
     public Object toDatabase(Database database, Optional<T> value) {
         return value
             .map(v -> dbType(database).convertToDatabase(database, v))

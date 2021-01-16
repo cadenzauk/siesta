@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.JoinType;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.Projections;
+import com.cadenzauk.siesta.grammar.temp.TempTable;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 </#if>
@@ -50,6 +51,10 @@ public class ExpectingJoin${n}<${typelist_space}> extends InJoinExpectingAnd<Exp
         return join(JoinType.INNER, scope().database().table(rowClass).as(alias));
     }
 
+    public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> join(TempTable<R${n+1}> tempTable, String alias) {
+        return join(JoinType.INNER, tempTable.as(alias));
+    }
+
     public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> join(Select<R${n+1}> select, String alias) {
         return join(JoinType.INNER, new SubselectAlias<>(select, alias));
     }
@@ -60,6 +65,10 @@ public class ExpectingJoin${n}<${typelist_space}> extends InJoinExpectingAnd<Exp
 
     public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> leftJoin(Class<R${n+1}> rowClass, String alias) {
         return join(JoinType.LEFT_OUTER, scope().database().table(rowClass).as(alias));
+    }
+
+    public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> leftJoin(TempTable<R${n+1}> tempTable, String alias) {
+        return join(JoinType.LEFT_OUTER, tempTable.as(alias));
     }
 
     public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> leftJoin(Select<R${n+1}> select, String alias) {
@@ -74,6 +83,10 @@ public class ExpectingJoin${n}<${typelist_space}> extends InJoinExpectingAnd<Exp
         return join(JoinType.RIGHT_OUTER, scope().database().table(rowClass).as(alias));
     }
 
+    public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> rightJoin(TempTable<R${n+1}> tempTable, String alias) {
+        return join(JoinType.RIGHT_OUTER, tempTable.as(alias));
+    }
+
     public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> rightJoin(Select<R${n+1}> select, String alias) {
         return join(JoinType.RIGHT_OUTER, new SubselectAlias<>(select, alias));
     }
@@ -84,6 +97,10 @@ public class ExpectingJoin${n}<${typelist_space}> extends InJoinExpectingAnd<Exp
 
     public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> fullOuterJoin(Class<R${n+1}> rowClass, String alias) {
         return join(JoinType.FULL_OUTER, scope().database().table(rowClass).as(alias));
+    }
+
+    public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> fullOuterJoin(TempTable<R${n+1}> tempTable, String alias) {
+        return join(JoinType.FULL_OUTER, tempTable.as(alias));
     }
 
     public <R${n+1}> InJoinExpectingOn<ExpectingJoin${n+1}<${typelist},R${n+1}>, Tuple${n+1}<${typelist},R${n+1}>> fullOuterJoin(Select<R${n+1}> select, String alias) {

@@ -36,7 +36,7 @@ public class SqlServerConfig {
     @Bean
     public DataSource dataSource() {
         SQLServerConnectionPoolDataSource pool = new SQLServerConnectionPoolDataSource();
-        pool.setServerName("localhost\\SQLEXPRESS");
+        pool.setServerName("localhost\\MSSQLSERVER");
         pool.setDatabaseName("SIESTA");
         pool.setIntegratedSecurity(true);
         return new PooledDataSource(pool);

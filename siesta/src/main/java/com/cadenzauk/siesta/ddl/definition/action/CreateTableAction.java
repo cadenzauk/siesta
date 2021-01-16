@@ -38,6 +38,7 @@ public class CreateTableAction extends LoggableAction {
     private final Optional<String> catalog;
     private final Optional<String> schemaName;
     private final String tableName;
+    private final boolean globalTemporary;
     private final List<Column> columns;
 
     private CreateTableAction(Builder builder) {
@@ -47,10 +48,19 @@ public class CreateTableAction extends LoggableAction {
         tableName = builder.tableName
             .filter(StringUtils::isNotBlank)
             .orElseThrow(() -> new IllegalArgumentException("tableName is required"));
+        globalTemporary = builder.globalTemporary;
         columns = builder.columns
             .stream()
             .map(b -> b.build(catalog, schemaName, tableName))
             .collect(Collectors.toList());
+    }
+
+    public String catalog() {
+        return catalog.orElse("");
+    }
+
+    public String schemaName() {
+        return schemaName.orElse("");
     }
 
     public String tableName() {
@@ -59,6 +69,10 @@ public class CreateTableAction extends LoggableAction {
 
     public String qualifiedName(Database database) {
         return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName);
+    }
+
+    public boolean globalTemporary() {
+        return globalTemporary;
     }
 
     public Stream<Column> columns() {
@@ -73,6 +87,7 @@ public class CreateTableAction extends LoggableAction {
         private Optional<String> catalog = Optional.empty();
         private Optional<String> schemaName = Optional.empty();
         private Optional<String> tableName = Optional.empty();
+        private boolean globalTemporary = false;
         private final List<Column.Builder> columns = new ArrayList<>();
 
         public Builder catalog(String val) {
@@ -87,6 +102,11 @@ public class CreateTableAction extends LoggableAction {
 
         public Builder tableName(String val) {
             tableName = OptionalUtil.ofBlankable(val);
+            return this;
+        }
+
+        public Builder globalTemporary() {
+            globalTemporary = true;
             return this;
         }
 

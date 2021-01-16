@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.grammar.dml;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.TableAlias;
 import com.cadenzauk.siesta.catalog.Table;
@@ -51,11 +52,12 @@ public class Update<U> extends ExecutableStatement {
     }
 
     protected String sql(Scope scope) {
-        return String.format("update %s%s set %s%s",
-            alias.table().qualifiedName(),
-            alias.aliasName().map(a -> " " + a).orElse(""),
-            sets.stream().map(e -> e.sql(scope)).collect(joining(", ")),
-            whereClauseSql(scope));
+        return alias.database().dialect()
+                   .updateSql(
+                       alias.qualifiedTableName(),
+                       alias.aliasName(),
+                       sets.stream().map(e -> e.sql(scope)).collect(joining(", ")),
+                       whereClauseSql(scope));
     }
 
     protected Stream<Object> args(Scope scope) {
@@ -96,7 +98,7 @@ public class Update<U> extends ExecutableStatement {
     }
 
     public static <U> InSetExpectingWhere<U> update(Database database, Table<U> table) {
-        return update(database, TableAlias.of(table));
+        return update(database, RegularTableAlias.of(table));
     }
 
     public static <U> InSetExpectingWhere<U> update(Database database, Alias<U> alias) {

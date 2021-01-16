@@ -31,6 +31,7 @@ import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.ddl.definition.action.ColumnDataType;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,6 +51,7 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     private final boolean insertable;
     private final boolean updatable;
     private final DataType<T> dataType;
+    private final ColumnDataType<T> columnType;
     private final Function<R,Optional<T>> getter;
     private final BiConsumer<B,Optional<T>> setter;
 
@@ -62,6 +64,7 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
         dataType = builder.dataType;
         getter = builder.getter;
         setter = builder.setter;
+        columnType = builder.columnType();
     }
 
     @Override
@@ -112,6 +115,11 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     @Override
     public int count() {
         return 1;
+    }
+
+    @Override
+    public ColumnDataType<T> columnType() {
+        return columnType;
     }
 
     @Override
@@ -224,6 +232,11 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
         return prefix + columnName;
     }
 
+    @Override
+    public Stream<Column<?,?>> primitiveColumns() {
+        return Stream.of(this);
+    }
+
     static <T, R, B> Builder<T,R,B> mandatory(Database database, String fieldName, DataType<T> dataType, Function<R,T> getter, BiConsumer<B,T> setter) {
         return new Builder<>(database, fieldName, dataType, row -> Optional.ofNullable(getter.apply(row)), (b, v) -> setter.accept(b, v.orElseThrow(NoSuchElementException::new)));
     }
@@ -238,16 +251,20 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
         private boolean identifier = false;
         private boolean insertable = true;
         private boolean updatable = true;
+        private int length = 255;
+        private int precision = 0;
+        private int scale = 0;
         private final DataType<T> dataType;
         private final Function<R,Optional<T>> getter;
         private final BiConsumer<B,Optional<T>> setter;
+        private Optional<ColumnDataType<T>> columnType = Optional.empty();
 
         private Builder(Database database, String propertyName, DataType<T> dataType, Function<R,Optional<T>> getter, BiConsumer<B,Optional<T>> setter) {
             this.propertyName = propertyName;
             this.dataType = dataType;
             this.getter = getter;
             this.setter = setter;
-            this.columnName = database.namingStrategy().columnName(this.propertyName);
+            this.columnName = database.columnName(this.propertyName);
         }
 
         public Builder<T,R,B> columnName(String val) {
@@ -268,6 +285,32 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
         public Builder<T,R,B> updatable(boolean val) {
             updatable = val;
             return this;
+        }
+
+        public Builder<T,R,B> length(int val) {
+            length = val;
+            return this;
+        }
+
+        public Builder<T,R,B> precision(int val) {
+            precision = val;
+            return this;
+        }
+
+        public Builder<T,R,B> scale(int val) {
+            scale = val;
+            return this;
+        }
+
+        public Builder<T,R,B> columnType(ColumnDataType<T> val) {
+            columnType = Optional.of(val);
+            return this;
+        }
+
+
+        private ColumnDataType<T> columnType() {
+            return columnType
+                .orElseGet(() -> ColumnDataType.of(dataType.dbTypeId(), length, precision, scale));
         }
 
         public PrimitiveColumn<T,R,B> build() {
