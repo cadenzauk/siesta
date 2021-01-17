@@ -28,5 +28,5 @@ dependencies {
 }
 
 tasks.withType(Test) {
-    systemProperty "java.library.path", sqlserverAuthPath
+    systemProperty "java.library.path", project.hasProperty("sqlserverAuthPath") ? sqlserverAuthPath : ""
 }
