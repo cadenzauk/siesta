@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    compile project(":siesta")
-    compile group: 'com.ibm.db2', name: 'db2jcc4', version: '11.1.0'
-    compile group: 'com.ibm.db2', name: 'sqlj4', version: '11.1.0'
-    testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+    implementation project(":siesta")
+    implementation group: 'com.ibm.db2', name: 'db2jcc4', version: '11.1.0'
+    implementation group: 'com.ibm.db2', name: 'sqlj4', version: '11.1.0'
+    testImplementation project(":siesta").sourceSets.testFixtures.runtimeClasspath
 }

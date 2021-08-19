@@ -29,6 +29,8 @@ import org.junit.jupiter.api.Test
 import java.util.Optional
 
 open class Widget {
+    var id: String = "WIDG-101"
+
     fun widgetDescription(): String {
         return "Widget"
     }
@@ -39,8 +41,20 @@ class SpecialWidget : Widget() {
 
 internal class KotlinMethodCrackerTest {
     @Test
-    fun fromReference() {
-        val result = KotlinMethodCracker().fromReference(Widget::widgetDescription)
+    fun fromReferenceToGetter() {
+        val methodRef: Function1<Widget, String> = Widget::id
+        val result = KotlinMethodCracker().fromReference(methodRef)
+
+        val resultClass = result.map { it.declaringClass }
+        val resultName = result.map { it.name }
+        assertThat(resultClass, contains(Widget::class.java as Class<*>))
+        assertThat(resultName, contains("getId"))
+    }
+
+    @Test
+    fun fromReferenceToFun() {
+        val methodRef: Function1<Widget, String> = Widget::widgetDescription
+        val result = KotlinMethodCracker().fromReference(methodRef)
 
         val resultClass = result.map { it.declaringClass }
         val resultName = result.map { it.name }
@@ -50,7 +64,8 @@ internal class KotlinMethodCrackerTest {
 
     @Test
     fun referringClass() {
-        val referringClass = KotlinMethodCracker().referringClass(SpecialWidget::widgetDescription)
+        val methodReference: Function1<SpecialWidget, String> = SpecialWidget::widgetDescription
+        val referringClass = KotlinMethodCracker().referringClass(methodReference)
 
         assertThat(referringClass, contains(SpecialWidget::class.java as Class<*>));
     }

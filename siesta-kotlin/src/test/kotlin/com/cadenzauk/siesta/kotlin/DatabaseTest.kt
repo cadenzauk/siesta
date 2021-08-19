@@ -22,23 +22,46 @@
 
 package com.cadenzauk.siesta.kotlin
 
+import co.unruly.matchers.OptionalMatchers.contains
 import com.cadenzauk.siesta.Database
-import com.cadenzauk.siesta.model.WidgetRow
+import com.cadenzauk.siesta.IntegrationTest
+import com.cadenzauk.siesta.model.TestDatabase
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 
-class DatabaseTest {
+class DatabaseTest : IntegrationTest() {
     @Test
     fun canSelect() {
-        val database = Database.newBuilder()
-            .build();
+        val database = Database.newBuilder().build()
 
-        val sql = database.from(WidgetRow::class.java, "w")
-            .select(WidgetRow::description)
-            .where(WidgetRow::manufacturerId).isEqualTo(10)
+        val sql = database.from(KWidgetRow::class, "w")
+            .select(KWidgetRow::description)
+            .where("w", KWidgetRow::manufacturerId).isEqualTo(10)
             .sql()
 
-        assertThat(sql, equalTo("select w.DESCRIPTION as w_DESCRIPTION from SIESTA.WIDGET w where w.MANUFACTURER_ID = ?"))
+        assertThat(
+            sql,
+            equalTo("select w.DESCRIPTION as w_DESCRIPTION from SIESTA.WIDGET w where w.MANUFACTURER_ID = ?")
+        )
+    }
+
+    @Test
+    fun canSelectFromDatabase() {
+        val database = TestDatabase.testDatabase(dataSource, dialect)
+        val aWidget = KWidgetRow(
+            widgetId = newId(),
+            manufacturerId = newId(),
+            name = "Dodacky",
+            description = "Thingamibob"
+        )
+        database.insert(aWidget)
+
+        val theSame = database.from(KWidgetRow::class)
+            .where(KWidgetRow::widgetId).isEqualTo(aWidget.widgetId)
+            .optional()
+
+        assertThat(theSame, contains(aWidget))
     }
 }

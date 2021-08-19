@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    compile project(":siesta")
-    compile group: 'org.firebirdsql.jdbc', name: 'jaybird-jdk18', version: '3.0.1'
-	testCompile project(":siesta").sourceSets.testutil.runtimeClasspath
+    implementation project(":siesta")
+    implementation group: 'org.firebirdsql.jdbc', name: 'jaybird-jdk18', version: '3.0.1'
+    testImplementation project(":siesta").sourceSets.testFixtures.runtimeClasspath
 }

@@ -22,5 +22,5 @@
 version '1.0.0-SNAPSHOT'
 
 dependencies {
-    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
+    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
 }

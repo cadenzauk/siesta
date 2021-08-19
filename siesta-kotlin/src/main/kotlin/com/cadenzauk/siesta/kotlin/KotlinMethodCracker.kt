@@ -27,40 +27,65 @@ import com.cadenzauk.core.reflect.util.FieldUtil
 import com.cadenzauk.core.reflect.util.MethodUtil
 import java.lang.reflect.Method
 import java.util.Optional
-import java.util.Optional.ofNullable
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.jvm.javaMethod
 
 class KotlinMethodCracker : MethodUtil.MethodCracker {
     override fun fromReference(methodReference: Any?): Optional<Method> {
-        return kfunctionOf(methodReference)
-            .map { it.javaMethod }
+        return crack(methodReference, this::getMethod)
     }
 
     override fun referringClass(methodReference: Any?): Optional<Class<*>> {
-        return kfunctionOf(methodReference)
-            .flatMap { referringClass(it).map{ it.java } }
+        return crack(methodReference, this::getReferringClass)
     }
 
-    private fun kfunctionOf(methodReference: Any?): Optional<KFunction<*>> {
-        return ofNullable(methodReference)
-            .filter { it is KFunction<*> }
-            .map { it as KFunction<*> }
-            .or {
-                ofNullable(methodReference)
-                    .flatMap { ClassUtil.findField(it.javaClass, "function").map { field -> FieldUtil.get(field, it) } }
-                    .map { it as? KFunction<*> }
-            }
+    private fun <T> crack(methodReference: Any?, target: (KFunction<*>?) -> T?): Optional<T> {
+        if (methodReference == null) {
+            return Optional.empty()
+        }
+
+        val fromKFunction: T? = target(methodReference as? KFunction<*>)
+        if (fromKFunction != null) {
+            return Optional.of(fromKFunction)
+        }
+
+        val fromGetter = crackProperty(methodReference, target)
+        if (fromGetter.isPresent) {
+            return fromGetter
+        }
+
+        val underlyingFunction = ClassUtil.findField(methodReference.javaClass, "function")
+            .map { FieldUtil.get(it, methodReference) }
+        val fromUnderlyingFunction: Optional<T> = underlyingFunction
+            .map { it as? KFunction<*> }
+            .map { target(it) }
+        if (fromUnderlyingFunction.isPresent) {
+            return fromUnderlyingFunction
+        }
+
+        return underlyingFunction.flatMap{ crackProperty(it, target) }
     }
 
-    private fun referringClass(x: KFunction<*>): Optional<KClass<*>> {
-        return Optional.ofNullable(x.instanceParameter)
-            .flatMap{ ClassUtil.findField(it.javaClass, "callable").map{ field -> FieldUtil.get(field, it)}}
-            .flatMap{ ClassUtil.findField(it.javaClass, "container").map{ field -> FieldUtil.get(field, it)}}
-            .map{ it as KClass<*> }
+    private fun <T> crackProperty(methodReference: Any?, target: (KFunction<*>?) -> T?): Optional<T> {
+        if (methodReference == null) {
+            return Optional.empty()
+        }
+        methodReference.toString()
+        return ClassUtil.findField(methodReference.javaClass, "reflected")
+            .map { FieldUtil.get(it, methodReference) }
+            .map { it as? KProperty<*> }
+            .map { it?.getter }
+            .map { target(it) }
+    }
+
+    private fun getMethod(x: KFunction<*>?): Method? {
+        return x?.javaMethod
+    }
+
+    private fun getReferringClass(x: KFunction<*>?): Class<*>? {
+        return (x?.instanceParameter?.type?.classifier as? KClass<*>)?.java
     }
 }
-
-fun <T> Optional<T>.or(alt: () -> Optional<T>): Optional<T> = if (this.isPresent) this else alt()
