@@ -87,7 +87,8 @@ public final class Getter extends UtilityClass {
     private static <T> Optional<Method> findGetter(TypeToken<T> targetClass, Class<?> argType, Field field) {
         return getMethods()
             .map(f -> f.apply(field.getName()))
-            .flatMap(name -> ClassUtil.declaredMethods(targetClass.getRawType())
+            .flatMap(name -> ClassUtil.superclasses(targetClass.getRawType())
+                            .flatMap(ClassUtil::declaredMethods)
                 .filter(method -> method.getName().equals(name))
                 .filter(method -> method.getParameterCount() == 0)
                 .filter(method -> argType.isAssignableFrom(method.getReturnType()) || method.getReturnType() == Optional.class))

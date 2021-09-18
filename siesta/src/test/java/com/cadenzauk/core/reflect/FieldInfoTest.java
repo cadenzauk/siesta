@@ -25,6 +25,7 @@ package com.cadenzauk.core.reflect;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -221,6 +222,22 @@ class FieldInfoTest {
         assertThat(result, is(Optional.empty()));
     }
 
+    @Test
+    void optionalGetterForExtendingClassIsFromAbstractClass() {
+
+        AnExtendingClass extendingClassMock = Mockito.mock(AnExtendingClass.class);
+        when(extendingClassMock.field()).thenReturn("ABC");
+
+        FieldInfo<AnAbstractClass,String> fieldInfoAbstractClass = FieldInfo.of(AnAbstractClass.class, "field", String.class);
+        FieldInfo<AnExtendingClass,String> fieldInfoExtendingClass = FieldInfo.of(AnExtendingClass.class, "field", String.class);
+
+        Optional<String> fieldAbstract = fieldInfoAbstractClass.optionalGetter().apply(extendingClassMock);
+        Optional<String> fieldExtending = fieldInfoExtendingClass.optionalGetter().apply(extendingClassMock);
+
+        assertThat(fieldAbstract, is(Optional.of("ABC")));
+        assertThat(fieldExtending, is(Optional.of("ABC")));
+    }
+
     private Field stringField() {
         return ClassUtil.getDeclaredField(ClassWithField.class, "string");
     }
@@ -241,6 +258,27 @@ class FieldInfoTest {
 
         String string() {
             return string;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static abstract class AnAbstractClass {
+        private String field;
+
+        protected AnAbstractClass(String field){
+            this.field = field;
+        }
+
+        String field() {
+            return field;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static class AnExtendingClass extends AnAbstractClass {
+
+        public AnExtendingClass(String field){
+            super(field);
         }
     }
 
