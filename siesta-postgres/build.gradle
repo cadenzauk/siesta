@@ -19,10 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-version '1.0.0-SNAPSHOT'
+plugins {
+    id 'java-library'
+}
+
+group = 'com.cadenzauk'
+version siestaVersion
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    implementation project(":siesta")
-    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.18'
-    testImplementation project(":siesta").sourceSets.testFixtures.runtimeClasspath
+    implementation "org.postgresql:postgresql:42.3.4"
+    implementation "com.cadenzauk:siesta:$siestaVersion"
+
+    testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")
+    testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+}
+
+test {
+    useJUnitPlatform {
+        excludeEngines 'junit-vintage'
+    }
 }

@@ -120,6 +120,7 @@ public final class MethodUtil extends UtilityClass {
         return ClassUtil.declaredMethod(methodReference.getClass(), "writeReplace")
             .map(writeReplace -> (SerializedLambda) invoke(writeReplace, methodReference))
             .flatMap(lambda -> ClassUtil.forName(lambda.getImplClass().replaceAll("/", "."))
+                .filter(implClass -> ClassUtil.hasDeclaredMethod(implClass, lambda.getImplMethodName()))
                 .map(implClass -> ClassUtil.getDeclaredMethod(implClass, lambda.getImplMethodName())));
     }
 

@@ -19,15 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-version '1.0.0-SNAPSHOT'
+plugins {
+    id 'java-library'
+}
+
+group = 'com.cadenzauk'
+version siestaVersion
 
 repositories {
+    mavenCentral()
     mavenLocal()
 }
 
 dependencies {
-    implementation project(":siesta")
     implementation group: 'com.ibm.db2', name: 'db2jcc4', version: '11.1.0'
     implementation group: 'com.ibm.db2', name: 'sqlj4', version: '11.1.0'
-    testImplementation project(":siesta").sourceSets.testFixtures.runtimeClasspath
+    implementation "com.cadenzauk:siesta:$siestaVersion"
+
+    testImplementation testFixtures("com.cadenzauk:siesta:1siestaVersion")
+
+    testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+}
+
+test {
+    useJUnitPlatform {
+        excludeEngines 'junit-vintage'
+    }
 }

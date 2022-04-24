@@ -31,6 +31,7 @@ import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
@@ -44,6 +45,7 @@ public class H2Dialect extends AnsiDialect {
     private static final VersionNo CURRENT_VERSION = new VersionNo("1.4.199");
     private static final VersionNo WINDOW_FUNCTIONS = new VersionNo("1.4.198");
     private static final VersionNo TUPLES_IN = new VersionNo("1.4.198");
+    private static final VersionNo NEW_SEQUENCE = new VersionNo("2.0.0");
     private final VersionNo versionNo;
     private final int defaultLockTimeout;
 
@@ -70,6 +72,7 @@ public class H2Dialect extends AnsiDialect {
         functions()
             .register(DateFunctionSpecs::registerDateAdd)
             .register(DateFunctionSpecs::registerDateDiff)
+            .register(DateFunctionSpecs.CURRENT_TIMESTAMP, ArgumentlessFunctionSpec.of("localtimestamp"))
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"));
 
@@ -152,5 +155,14 @@ public class H2Dialect extends AnsiDialect {
     @Override
     public boolean supportsMultipleValueIn() {
         return versionNo.isAtLeast(TUPLES_IN);
+    }
+
+    @Override
+    public String nextFromSequence(String catalog, String schema, String sequenceName) {
+        if (versionNo.isAtLeast(NEW_SEQUENCE)) {
+            return String.format("next value for %s.%s", schema, sequenceName);
+        } else {
+            return super.nextFromSequence(catalog, schema, sequenceName);
+        }
     }
 }

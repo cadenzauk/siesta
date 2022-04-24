@@ -65,6 +65,10 @@ public final class ClassUtil extends UtilityClass {
                 name, Arrays.stream(parameterTypes).map(Object::toString).collect(joining(", ")), aClass)));
     }
 
+    public static boolean hasDeclaredMethod(Class<?> aClass, String name, Class<?>... parameterTypes) {
+        return declaredMethod(aClass, name, parameterTypes).isPresent();
+    }
+
     public static Optional<Method> declaredMethod(Class<?> aClass, String name, Class<?>... parameterTypes) {
         try {
             return Optional.of(aClass.getDeclaredMethod(name, parameterTypes));

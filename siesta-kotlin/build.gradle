@@ -19,20 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-plugins {
-    id 'org.jetbrains.kotlin.jvm'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
 }
 
-version '1.0.0-SNAPSHOT'
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'com.cadenzauk'
+version siestaVersion
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    implementation project(":siesta")
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.5.21'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21'
-    implementation 'com.natpryce:hamkrest:1.8.0.1'
-    testImplementation group: 'com.h2database', name: 'h2', version: h2Version
-    testImplementation group: 'co.unruly', name: 'java-8-matchers', version: '1.5'
-    testImplementation project(":siesta").sourceSets.testFixtures.runtimeClasspath
+    implementation "com.cadenzauk:siesta:$siestaVersion"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+
+    testImplementation testFixtures("com.cadenzauk:siesta:1siestaVersion")
+    testImplementation 'com.natpryce:hamkrest:1.8.0.1'
+
+    testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
+}
+
+test {
+    useJUnitPlatform {
+        excludeEngines 'junit-vintage'
+    }
 }
 
 compileKotlin {
@@ -41,4 +68,69 @@ compileKotlin {
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from tasks.javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "ossrh"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username = project.hasProperty("ossrhUsername") ? ossrhUsername : ""
+                password = project.hasProperty("ossrhPassword") ? ossrhPassword : ""
+            }
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'Cadenza UK SIESTA Kotlin'
+                artifactId = 'siesta-kotlin'
+                packaging = 'jar'
+                description = 'SIESTA Is an Easy SQL Typesafe API with Kotlin Support'
+                url = 'https://github.com/cadenzauk/siesta'
+                licenses {
+                    license {
+                        name = 'The MIT License'
+                        url = 'https://raw.githubusercontent.com/cadenzauk/siesta/master/LICENCE'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'mdrodg'
+                        name = 'Mark Rodgers'
+                    }
+                }
+                scm {
+                    url = 'scm:git@github.com:cadenzauk/siesta.git'
+                    connection = 'scm:git@github.com:cadenzauk/siesta.git'
+                    developerConnection = 'scm:git@github.com:cadenzauk/siesta.git'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }

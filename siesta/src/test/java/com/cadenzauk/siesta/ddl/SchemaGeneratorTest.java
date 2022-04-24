@@ -44,7 +44,6 @@ class SchemaGeneratorTest {
             .build();
         SchemaGenerator schemaGenerator = new SchemaGenerator(true);
         schemaGenerator.generate(database, TestSchema::schemaDefinition);
-        schemaGenerator.generate(database, TestSchema::schemaDefinition);
         SalespersonRow salespersonRow = aRandomSalesperson();
         database.insert(salespersonRow);
     }

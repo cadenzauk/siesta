@@ -19,8 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-version '1.0.0-SNAPSHOT'
+plugins {
+    id 'java-library'
+    id 'java-test-fixtures'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = 'com.cadenzauk'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.23'
+    implementation "org.freemarker:freemarker:2.3.31"
 }

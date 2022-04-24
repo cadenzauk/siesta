@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.kotlin
 import com.cadenzauk.core.reflect.util.ClassUtil
 import com.cadenzauk.core.reflect.util.FieldUtil
 import com.cadenzauk.core.reflect.util.MethodUtil
+import com.cadenzauk.core.util.OptionalUtil
 import java.lang.reflect.Method
 import java.util.Optional
 import kotlin.reflect.KClass
@@ -42,7 +43,7 @@ class KotlinMethodCracker : MethodUtil.MethodCracker {
         return crack(methodReference, this::getReferringClass)
     }
 
-    private fun <T> crack(methodReference: Any?, target: (KFunction<*>?) -> T?): Optional<T> {
+    private fun <T : Any> crack(methodReference: Any?, target: (KFunction<*>?) -> T?): Optional<T> {
         if (methodReference == null) {
             return Optional.empty()
         }
@@ -69,16 +70,21 @@ class KotlinMethodCracker : MethodUtil.MethodCracker {
         return underlyingFunction.flatMap{ crackProperty(it, target) }
     }
 
-    private fun <T> crackProperty(methodReference: Any?, target: (KFunction<*>?) -> T?): Optional<T> {
+    private fun <T : Any> crackProperty(methodReference: Any?, target: (KFunction<*>?) -> T?): Optional<T> {
         if (methodReference == null) {
             return Optional.empty()
         }
         methodReference.toString()
-        return ClassUtil.findField(methodReference.javaClass, "reflected")
-            .map { FieldUtil.get(it, methodReference) }
-            .map { it as? KProperty<*> }
-            .map { it?.getter }
-            .map { target(it) }
+        val fromArg1: Optional<T> = ClassUtil.findField(methodReference.javaClass, "arg$1")
+            .map { field -> FieldUtil.get(field, methodReference) }
+            .flatMap { crackProperty(it, target) }
+        return OptionalUtil.orGet(fromArg1) {
+            ClassUtil.findField(methodReference.javaClass, "reflected")
+                .map { FieldUtil.get(it, methodReference) }
+                .map { it as? KProperty<*> }
+                .map { it?.getter }
+                .map { target(it) }
+        }
     }
 
     private fun getMethod(x: KFunction<*>?): Method? {
