@@ -109,6 +109,8 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            artifact(tasks["sourcesJar"])
+            artifact(tasks["javadocJar"])
 
             pom {
                 name = 'Cadenza UK SIESTA'
