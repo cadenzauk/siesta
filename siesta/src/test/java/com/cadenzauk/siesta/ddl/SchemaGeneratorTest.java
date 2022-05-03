@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.ddl;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -38,11 +39,12 @@ import static com.cadenzauk.siesta.IntegrationTest.aRandomSalesperson;
 class SchemaGeneratorTest {
     @Test
     void generate() {
+        H2Dialect dialect = new H2Dialect();
         Database database = TestDatabase.testDatabaseBuilder()
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource()))
-            .dialect(new H2Dialect())
+            .dialect(dialect)
             .build();
-        SchemaGenerator schemaGenerator = new SchemaGenerator(true);
+        SchemaGenerator schemaGenerator = new SchemaGenerator(true, dialect);
         schemaGenerator.generate(database, TestSchema::schemaDefinition);
         SalespersonRow salespersonRow = aRandomSalesperson();
         database.insert(salespersonRow);

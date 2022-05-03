@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DefaultDate implements DbType<LocalDate> {
@@ -62,7 +63,7 @@ public class DefaultDate implements DbType<LocalDate> {
     }
 
     @Override
-    public String parameter(Database database, LocalDate value) {
+    public String parameter(Database database, Optional<LocalDate> value) {
         return "cast(? as date)";
     }
 }

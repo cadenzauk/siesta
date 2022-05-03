@@ -23,6 +23,8 @@
 package com.cadenzauk.siesta.ddl.definition.action;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 
@@ -82,6 +84,14 @@ public class ColumnDataType<T> {
 
     public static ColumnDataType<String> varchar(int length) {
         return new ColumnDataType<>(DbTypeId.VARCHAR, length);
+    }
+
+    public static ColumnDataType<Json> json(int length) {
+        return new ColumnDataType<>(DbTypeId.JSON, length);
+    }
+
+    public static ColumnDataType<BinaryJson> jsonb(int length) {
+        return new ColumnDataType<>(DbTypeId.JSONB, length);
     }
 
     public static ColumnDataType<String> character(int length) {

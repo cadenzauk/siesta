@@ -36,6 +36,7 @@ import java.util.stream.IntStream;
 public class SiestaCodeGenerator {
     private static final String CORE = "siesta/src/main/java/com/cadenzauk/core";
     private static final String SIESTA = "siesta/src/main/java/com/cadenzauk/siesta";
+    private static final String SIESTA_KOTLIN = "siesta-kotlin/src/main/kotlin/com/cadenzauk/siesta/kotlin";
 
     private final Configuration cfg;
 
@@ -118,15 +119,21 @@ public class SiestaCodeGenerator {
         IntStream.range(2, max + 1).forEach(i -> generateTupleN(i, max));
     }
 
+    private void generateExpectingJoinExtensions(int n) {
+        generate("ExpectingJoinExtensions.ftl", n, n, SIESTA_KOTLIN + "/ExpectingJoinExtensions.kt");
+    }
+
     private void generateAll() {
 //        generateFunctions(20);
 //        generateTuples(20);
 //        generateRowMappers(20);
 //        generateRowMapperFactories(20);
 //        generateProjections(20);
-        generateExpectingJoins(20);
+//        generateExpectingJoins(20);
 //        generateInProjectionExpectingCommas(19);
 //        generateTupleBuilders(20);
+
+        generateExpectingJoinExtensions(20);
     }
 
     public static void main(String[] args) {

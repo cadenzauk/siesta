@@ -30,8 +30,6 @@ import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.IsolationLevel;
-import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
@@ -111,7 +109,7 @@ public class SqlServerDialect extends AnsiDialect {
                 }
 
                 @Override
-                public String parameter(Database database, LocalDateTime value) {
+                public String parameter(Database database, Optional<LocalDateTime> value) {
                     return "cast(? as datetime2)";
                 }
             })
@@ -134,7 +132,7 @@ public class SqlServerDialect extends AnsiDialect {
                 }
 
                 @Override
-                public String parameter(Database database, ZonedDateTime value) {
+                public String parameter(Database database, Optional<ZonedDateTime> value) {
                     return "cast(? as datetime2)";
                 }
             });

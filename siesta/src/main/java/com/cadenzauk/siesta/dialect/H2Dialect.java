@@ -29,6 +29,7 @@ import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
@@ -36,6 +37,11 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
+import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultBinaryJson;
+import com.cadenzauk.siesta.type.DefaultJson;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +74,30 @@ public class H2Dialect extends AnsiDialect {
     public H2Dialect(VersionNo versionNo, int defaultLockTimeout) {
         this.versionNo = versionNo;
         this.defaultLockTimeout = defaultLockTimeout;
+
+        types()
+            .register(DbTypeId.JSON, new DefaultJson() {
+                @Override
+                public String literal(Database database, Json value) {
+                    return "JSON " + super.literal(database, value);
+                }
+
+                @Override
+                public String parameter(Database database, Optional<Json> value) {
+                    return "? format json";
+                }
+            })
+            .register(DbTypeId.JSONB, new DefaultBinaryJson() {
+                @Override
+                public String literal(Database database, BinaryJson value) {
+                    return "JSON " + super.literal(database, value);
+                }
+
+                @Override
+                public String parameter(Database database, Optional< BinaryJson > value) {
+                    return "? format json";
+                }
+            });
 
         functions()
             .register(DateFunctionSpecs::registerDateAdd)
@@ -150,6 +180,11 @@ public class H2Dialect extends AnsiDialect {
     @Override
     public boolean supportsOrderByInOlap() {
         return versionNo.isAtLeast(WINDOW_FUNCTIONS);
+    }
+
+    @Override
+    public boolean supportsJsonFunctions() {
+        return true;
     }
 
     @Override

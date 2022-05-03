@@ -30,6 +30,7 @@ import java.sql.Time;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DefaultTime implements DbType<LocalTime> {
@@ -39,7 +40,7 @@ public class DefaultTime implements DbType<LocalTime> {
     }
 
     @Override
-    public String parameter(Database database, LocalTime value) {
+    public String parameter(Database database, Optional<LocalTime> value) {
         return "cast(? as time)";
     }
 

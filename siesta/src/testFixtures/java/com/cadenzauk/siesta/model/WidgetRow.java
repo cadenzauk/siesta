@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.Column;
 import javax.persistence.Table;
 import java.util.Optional;
 

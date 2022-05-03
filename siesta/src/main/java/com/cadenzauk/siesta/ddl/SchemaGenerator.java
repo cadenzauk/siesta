@@ -26,10 +26,13 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.reflect.Factory;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.reflect.util.ClassUtil;
+import com.cadenzauk.core.reflect.util.ConstructorUtil;
 import com.cadenzauk.core.sql.DatabaseMetaDataUtil;
 import com.cadenzauk.core.sql.QualifiedName;
 import com.cadenzauk.core.sql.ResultSetUtil;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.SequenceInfo;
 import com.cadenzauk.siesta.TempTableInfo;
 import com.cadenzauk.siesta.ddl.action.Action;
@@ -53,9 +56,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.sql.DatabaseMetaData;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.sql.QualifiedName.matchesCatalogAndSchema;
@@ -64,9 +69,11 @@ public class SchemaGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(SchemaGenerator.class);
     private final ActionPipeline pipeline;
     private final boolean dropFirst;
+    private final Dialect dialect;
 
-    public SchemaGenerator(boolean dropFirst) {
+    public SchemaGenerator(boolean dropFirst, Dialect dialect) {
         this.dropFirst = dropFirst;
+        this.dialect = dialect;
         pipeline = new ActionPipeline();
         pipeline.addInterceptor(new ActionLogTableCreator());
         pipeline.addInterceptor(new ActionFilter());
@@ -172,7 +179,19 @@ public class SchemaGenerator {
 
     public <T> void generate(Database database, Function1<T,SchemaDefinition> schemaDefinition) {
         MethodInfo<T,SchemaDefinition> methodInfo = MethodInfo.of(schemaDefinition);
-        T schemaDefintionFactory = Factory.forClass(methodInfo.referringClass()).get();
+        T schemaDefintionFactory = schemaConstructor(methodInfo.referringClass()).get();
         generate(database, schemaDefinition.apply(schemaDefintionFactory));
     }
+
+    private <T> Supplier<T> schemaConstructor(Constructor<T> ctor) {
+        return () -> ConstructorUtil.newInstance(ctor, dialect);
+    }
+
+    private <T> Supplier<T> schemaConstructor(Class<T> schemaClass) {
+        return ClassUtil.constructor(schemaClass, Dialect.class)
+            .map(this::schemaConstructor)
+            .orElseGet(() -> Factory.forClass(schemaClass));
+    }
+
+
 }

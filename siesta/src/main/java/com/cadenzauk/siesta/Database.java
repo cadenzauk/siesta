@@ -162,7 +162,6 @@ public class Database {
         };
     }
 
-    @SuppressWarnings("unchecked")
     public <R> Table<R> table(Class<R> rowClass) {
         return table(TypeToken.of(rowClass), Function.identity());
     }
@@ -525,7 +524,7 @@ public class Database {
             return this;
         }
 
-        public <T> Builder function(FunctionName functionName, FunctionSpec functionSpec) {
+        public Builder function(FunctionName functionName, FunctionSpec functionSpec) {
             customizations.add(dialect -> dialect.registerFunction(functionName, functionSpec));
             return this;
         }
@@ -545,7 +544,7 @@ public class Database {
             return type(javaClass, EnumByName.id(javaClass), new EnumByName<>(javaClass));
         }
 
-        public <R, B> Builder table(Class<R> rowClass, Consumer<Table.Builder<R,?>> init) {
+        public <R> Builder table(Class<R> rowClass, Consumer<Table.Builder<R,?>> init) {
             return table(TypeToken.of(rowClass), init);
         }
 

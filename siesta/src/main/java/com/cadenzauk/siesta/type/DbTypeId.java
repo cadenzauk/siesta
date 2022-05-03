@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.type;
 
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -85,6 +87,20 @@ public class DbTypeId<T> {
         }
     };
     public static final DbTypeId<String> VARCHAR = new DbTypeId<String>("varchar", Types.VARCHAR, String.class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
+
+    public static final DbTypeId<Json> JSON = new DbTypeId<Json>("json", Types.JAVA_OBJECT, Json.class) {
+        @Override
+        public Optional<Integer> length(int len, int prec) {
+            return Optional.of(len);
+        }
+    };
+
+    public static final DbTypeId<BinaryJson> JSONB = new DbTypeId<BinaryJson>("json", Types.JAVA_OBJECT, BinaryJson.class) {
         @Override
         public Optional<Integer> length(int len, int prec) {
             return Optional.of(len);

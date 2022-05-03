@@ -50,6 +50,8 @@ public class DataTypeRegistry {
         register(DataType.STRING);
         register(DataType.UUID);
         register(DataType.ZONED_DATE_TIME);
+        register(DataType.JSON);
+        register(DataType.JSONB);
     }
 
     public <T> void register(DataType<T> dataType) {

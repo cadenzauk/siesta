@@ -61,6 +61,10 @@ public class SchemaDefinition {
             return this;
         }
 
+        public Builder applyIf(boolean condition, Function<Builder, Builder> build) {
+            return condition ? build.apply(this) : this;
+        }
+
         public Builder createSequence(Consumer<CreateSequenceAction.Builder> sequenceDef) {
             CreateSequenceAction.Builder tableBuilder = CreateSequenceAction.newBuilder()
                 .definition(id);

@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Database;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class DefaultUuid implements DbType<UUID> {
@@ -68,8 +69,8 @@ public class DefaultUuid implements DbType<UUID> {
     }
 
     @Override
-    public String parameter(Database database, UUID value) {
-        return type(database).parameter(database, toBytes(value));
+    public String parameter(Database database, Optional<UUID> value) {
+        return type(database).parameter(database, value.map(DefaultUuid::toBytes));
     }
 
     private DbType<byte[]> type(Database database) {

@@ -22,6 +22,17 @@
 
 package com.cadenzauk.siesta.ddl;
 
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.model.LockTestRow;
+import com.cadenzauk.siesta.model.ManufacturerRow;
+import com.cadenzauk.siesta.model.MoneyAmount;
+import com.cadenzauk.siesta.model.PartRow;
+import com.cadenzauk.siesta.model.PartWithTypeRow;
+import com.cadenzauk.siesta.model.SalesAreaRow;
+import com.cadenzauk.siesta.model.SalespersonRow;
+import com.cadenzauk.siesta.model.TestRow;
+import com.cadenzauk.siesta.model.WidgetRow;
+
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.foreignKey;
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.notNull;
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.primaryKey;
@@ -31,12 +42,21 @@ import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.characte
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.date;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.decimal;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.integer;
+import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.json;
+import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.jsonb;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.smallint;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.time;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.timestamp;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.varchar;
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 
 public class TestSchema {
+    private final Dialect dialect;
+
+    public TestSchema(Dialect dialect) {
+        this.dialect = dialect;
+    }
+
     public SchemaDefinition schemaDefinition() {
         return SchemaDefinition.newBuilder()
             .id("test schema")
@@ -50,23 +70,22 @@ public class TestSchema {
             .createTable(t -> t
                 .id("create widget table")
                 .author("mark")
-                .schemaName("SIESTA")
-                .tableName("WIDGET")
-                .column("WIDGET_ID", bigint(), notNull(), primaryKey())
-                .column("NAME", varchar(100), notNull())
-                .column("MANUFACTURER_ID", bigint(), notNull())
-                .column("DESCRIPTION", varchar(200))
+                .forClass(WidgetRow.class)
+                .column(WidgetRow::widgetId, bigint(), notNull(), primaryKey())
+                .column(WidgetRow::name, varchar(100), notNull())
+                .column(WidgetRow::manufacturerId, bigint(), notNull())
+                .column(WidgetRow::description, varchar(200))
                 .column("INSERTION_TS", timestamp())
             )
             .createTable(t -> t
                 .id("create part table")
                 .author("mark")
                 .schemaName("SIESTA")
-                .tableName("PART")
-                .column("PART_ID", bigint(), notNull(), primaryKey())
-                .column("WIDGET_ID", bigint(), notNull())
-                .column("DESCRIPTION", varchar(200), notNull())
-                .column("PART_TYPE", varchar(100))
+                .forClass(PartRow.class)
+                .column(PartRow::partId, bigint(), notNull(), primaryKey())
+                .column(PartRow::widgetId, bigint(), notNull())
+                .column(PartRow::description, varchar(200), notNull())
+                .column(PartWithTypeRow::partType, varchar(100))
                 .column("PURCHASE_PRICE_AMOUNT", decimal(15, 2))
                 .column("PURCHASE_PRICE_CCY", character(3))
                 .column("RETAIL_PRICE_AMOUNT", decimal(15, 2))
@@ -86,9 +105,9 @@ public class TestSchema {
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("MANUFACTURER")
-                .column("MANUFACTURER_ID", bigint(), notNull(), primaryKey())
-                .column("NAME", varchar(100), notNull())
-                .column("CHECKED", date())
+                .column(ManufacturerRow::manufacturerId, bigint(), notNull(), primaryKey())
+                .column(ManufacturerRow::name, varchar(100), notNull())
+                .column(ManufacturerRow::checked, date())
                 .column("INSERTION_TS", timestamp())
             )
             .createTable(t -> t
@@ -96,12 +115,12 @@ public class TestSchema {
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("SALESPERSON")
-                .column("SALESPERSON_ID", bigint(), notNull(), primaryKey())
-                .column("FIRST_NAME", varchar(100), notNull())
-                .column("SURNAME", varchar(100), notNull())
-                .column("MIDDLE_NAMES", varchar(100))
-                .column("NUMBER_OF_SALES", integer())
-                .column("COMMISSION", decimal(10, 5))
+                .column(SalespersonRow::salespersonId, bigint(), notNull(), primaryKey())
+                .column(SalespersonRow::firstName, varchar(100), notNull())
+                .column(SalespersonRow::surname, varchar(100), notNull())
+                .column(SalespersonRow::middleNames, varchar(100))
+                .column(SalespersonRow::numberOfSales, integer())
+                .column(SalespersonRow::commission, decimal(10, 5))
             )
             .createTable(t -> t
                 .id("create SALESPERSON temp table")
@@ -109,53 +128,53 @@ public class TestSchema {
                 .schemaName("SIESTA")
                 .tableName("TMP_SALESPERSON")
                 .globalTemporary()
-                .column("SALESPERSON_ID", bigint(), notNull())
-                .column("FIRST_NAME", varchar(100), notNull())
-                .column("SURNAME", varchar(100), notNull())
-                .column("MIDDLE_NAMES", varchar(100))
-                .column("NUMBER_OF_SALES", integer())
-                .column("COMMISSION", decimal(10, 5))
+                .column(SalespersonRow::salespersonId, bigint(), notNull())
+                .column(SalespersonRow::firstName, varchar(100), notNull())
+                .column(SalespersonRow::surname, varchar(100), notNull())
+                .column(SalespersonRow::middleNames, varchar(100))
+                .column(SalespersonRow::numberOfSales, integer())
+                .column(SalespersonRow::commission, decimal(10, 5))
             )
             .createTable(t -> t
                 .id("create test_table table")
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("TEST_TABLE")
-                .column("GUID", binary(16), notNull(), primaryKey())
-                .column("STRING_REQ", varchar(40))
-                .column("STRING_OPT", varchar(40))
-                .column("INTEGER_REQ", integer())
-                .column("INTEGER_OPT", integer())
-                .column("DECIMAL_REQ", decimal(15, 3))
-                .column("DECIMAL_OPT", decimal(15, 3))
-                .column("LOCAL_DATE_REQ", date())
-                .column("LOCAL_DATE_OPT", date())
-                .column("LOCAL_DATE_TIME_REQ", timestamp())
-                .column("LOCAL_DATE_TIME_OPT", timestamp())
-                .column("LOCAL_TIME_REQ", time())
-                .column("LOCAL_TIME_OPT", time())
-                .column("UTC_DATE_TIME_REQ", timestamp())
-                .column("UTC_DATE_TIME_OPT", timestamp())
+                .column(TestRow::guid, binary(16), notNull(), primaryKey())
+                .column(TestRow::stringReq, varchar(40))
+                .column(TestRow::stringOpt, varchar(40))
+                .column(TestRow::integerReq, integer())
+                .column(TestRow::integerOpt, integer())
+                .column(TestRow::decimalReq, decimal(15, 3))
+                .column(TestRow::decimalOpt, decimal(15, 3))
+                .column(TestRow::localDateReq, date())
+                .column(TestRow::localDateOpt, date())
+                .column(TestRow::localDateTimeReq, timestamp())
+                .column(TestRow::localDateTimeOpt, timestamp())
+                .column(TestRow::localTimeReq, time())
+                .column(TestRow::localTimeOpt, time())
+                .column(TestRow::utcDateTimeReq, timestamp())
+                .column(TestRow::utcDateTimeOpt, timestamp())
             )
             .createTable(t -> t
                 .id("create LOCK_TEST table")
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("LOCK_TEST")
-                .column("ID", bigint(), notNull(), primaryKey())
-                .column("REVISION", integer(), notNull())
-                .column("UPDATED_BY", varchar(80), notNull())
+                .column(LockTestRow::id, bigint(), notNull(), primaryKey())
+                .column(LockTestRow::revision, integer(), notNull())
+                .column(LockTestRow::updatedBy, varchar(80), notNull())
             )
             .createTable(t -> t
                 .id("create sales_area table")
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("SALES_AREA")
-                .column("SALES_AREA_ID", bigint(), notNull(), primaryKey())
-                .column("SALES_AREA_NAME", varchar(20), notNull())
-                .column("SALESPERSON_ID", bigint(),
+                .column(SalesAreaRow::salesAreaId, bigint(), notNull(), primaryKey())
+                .column(SalesAreaRow::salesAreaName, varchar(20), notNull())
+                .column(SalesAreaRow::salespersonId, bigint(),
                     foreignKey("FK_SALES_AREA_SALESPERSON").references("SALESPERSON").column("SALESPERSON_ID"))
-                .column("SALES_COUNT", smallint())
+                .column(SalesAreaRow::salesCount, smallint())
                 .column("INSERT_TIME", timestamp())
             )
             .createTable(t -> t
@@ -167,6 +186,17 @@ public class TestSchema {
                 .column("WIDGET_ID", bigint(), notNull())
                 .column("QUANTITY", bigint(), notNull())
                 .column("PRICE", decimal(15, 2), notNull())
+            )
+            .applyIf(dialect.supportsJsonFunctions(), b -> b
+                .createTable(t -> t
+                    .id("create a table with json")
+                    .author("mark")
+                    .schemaName("SIESTA")
+                    .tableName("JSON_DATA")
+                    .column("JSON_ID", bigint(), notNull(), primaryKey())
+                    .column("DATA", json(1000))
+                    .column("DATA_BINARY", jsonb(1000))
+                )
             )
             .build();
     }

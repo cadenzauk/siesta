@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Cadenza United Kingdom Limited
+ * Copyright (c) 2017 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +20,40 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta;
+package com.cadenzauk.siesta.type;
 
-import com.cadenzauk.siesta.ddl.SchemaDefinition;
-import com.cadenzauk.siesta.ddl.SchemaGenerator;
-import org.springframework.beans.factory.InitializingBean;
+import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.json.Json;
 
-public class SpringSiesta implements InitializingBean {
-    private Database database;
-    private boolean dropFirst = false;
-    private SchemaDefinition schemaDefinition;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-    public SpringSiesta setDatabase(Database database) {
-        this.database = database;
-        return this;
+public class DefaultJson extends DefaultDbType<Json> {
+    public DefaultJson() {
+        super("json", DefaultJson::getJson, DefaultJson::getJson);
     }
 
-    public SpringSiesta setDropFirst(boolean dropFirst) {
-        this.dropFirst = dropFirst;
-        return this;
-    }
-
-    public SpringSiesta setSchemaDefinition(SchemaDefinition schemaDefinition) {
-        this.schemaDefinition = schemaDefinition;
-        return this;
+    public DefaultJson(String sqlType) {
+        super(sqlType, DefaultJson::getJson, DefaultJson::getJson);
     }
 
     @Override
-    public void afterPropertiesSet() {
-        SchemaGenerator schemaGenerator = new SchemaGenerator(dropFirst, database.dialect());
-        schemaGenerator.generate(database, schemaDefinition);
+    public String literal(Database database, Json value) {
+        return "'" + value.data().replaceAll("'", "''") + "'";
+    }
+
+    @Override
+    public Object convertToDatabase(Database database, Json value) {
+        return value == null ? null : value.data();
+    }
+
+    private static Json getJson(ResultSet rs, String colName) throws SQLException {
+        String json = rs.getString(colName);
+        return json == null ? null : new Json(json);
+    }
+
+    private static Json getJson(ResultSet rs, int colNo) throws SQLException {
+        String json = rs.getString(colNo);
+        return json == null ? null : new Json(json);
     }
 }

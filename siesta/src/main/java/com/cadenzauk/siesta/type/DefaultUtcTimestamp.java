@@ -32,6 +32,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DefaultUtcTimestamp implements DbType<ZonedDateTime> {
@@ -64,7 +65,7 @@ public class DefaultUtcTimestamp implements DbType<ZonedDateTime> {
     }
 
     @Override
-    public String parameter(Database database, ZonedDateTime value) {
+    public String parameter(Database database, Optional<ZonedDateTime> value) {
         return "cast(? as timestamp)";
     }
 

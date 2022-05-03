@@ -22,17 +22,19 @@
 
 package com.cadenzauk.siesta.ddl.definition.action;
 
+import com.cadenzauk.siesta.Database;
+
 import java.util.Optional;
 import java.util.function.Function;
 
 public class Column {
-    private final String columnName;
+    private final Function<Database,String> columnName;
     private final ColumnDataType<?> dataType;
     private final boolean nullable;
     private final boolean primaryKey;
     private final Optional<AddForeignKeyAction> foreignKey;
 
-    private Column(Optional<String> catalog, Optional<String> schemaName, String tableName, Builder builder) {
+    private Column(Optional<Function<Database, String>> catalog, Optional<Function<Database, String>> schemaName, Function<Database, String> tableName, Builder builder) {
         columnName = builder.columnName;
         dataType = builder.dataType;
         nullable = builder.nullable;
@@ -60,8 +62,8 @@ public class Column {
         return primaryKey;
     }
 
-    public String columnName() {
-        return columnName;
+    public String columnName(Database database) {
+        return columnName.apply(database);
     }
 
     public Optional<AddForeignKeyAction> foreignKey() {
@@ -73,7 +75,7 @@ public class Column {
     }
 
     public static class Builder {
-        private String columnName;
+        private Function<Database,String> columnName;
         private ColumnDataType<?> dataType;
         private boolean nullable = true;
         private boolean primaryKey = false;
@@ -82,7 +84,7 @@ public class Column {
         private Builder() {
         }
 
-        public Builder columnName(String val) {
+        public Builder columnName(Function<Database,String> val) {
             columnName = val;
             return this;
         }
@@ -107,7 +109,7 @@ public class Column {
             return this;
         }
 
-        public Column build(Optional<String> catalog, Optional<String> schemaName, String tableName) {
+        public Column build(Optional<Function<Database, String>> catalog, Optional<Function<Database, String>> schemaName, Function<Database, String> tableName) {
             return new Column(catalog, schemaName, tableName, this);
         }
     }

@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ValueExpression<T> implements TypedExpression<T> {
@@ -47,7 +48,7 @@ public class ValueExpression<T> implements TypedExpression<T> {
 
     @Override
     public String sql(Scope scope) {
-        return scope.database().getDataTypeOf(value).sqlType(scope.database(), value);
+        return scope.database().getDataTypeOf(value).sqlType(scope.database(), Optional.of(value));
     }
 
     @Override

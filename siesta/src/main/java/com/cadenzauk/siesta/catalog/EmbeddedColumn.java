@@ -160,9 +160,9 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
-    public Stream<String> insertArgsSql() {
+    public Stream<String> insertArgsSql(Database database, Optional<R> row) {
         return insertable
-            ? columns().flatMap(Column::insertArgsSql)
+            ? columns().flatMap(c -> c.insertArgsSql(database, row.flatMap(getter)))
             : Stream.empty();
     }
 

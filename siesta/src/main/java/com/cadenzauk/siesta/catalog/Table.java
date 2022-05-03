@@ -83,6 +83,10 @@ public class Table<R> implements ColumnCollection<R> {
         return database;
     }
 
+    public String catalog() {
+        return catalog;
+    }
+
     public String schema() {
         return schema;
     }
@@ -239,7 +243,7 @@ public class Table<R> implements ColumnCollection<R> {
             qualifiedName(),
             columns().flatMap(Column::insertColumnSql).collect(joining(", ")),
             IntStream.range(0, rows.length)
-                .mapToObj(i -> "(" + columns().flatMap(Column::insertArgsSql).collect(joining(", ")) + ")")
+                .mapToObj(i -> "(" + columns().flatMap(col -> col.insertArgsSql(database, Optional.of(rows[i]))).collect(joining(", ")) + ")")
                 .collect(joining(", ")));
     }
 

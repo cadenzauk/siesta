@@ -24,6 +24,8 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.reflect.util.TypeUtil;
 import com.cadenzauk.core.sql.RuntimeSqlException;
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 
@@ -52,6 +54,8 @@ public class DataType<T> {
     public static final DataType<String> STRING = new DataType<>(String.class, DbTypeId.VARCHAR);
     public static final DataType<UUID> UUID = new DataType<>(UUID.class, DbTypeId.UUID);
     public static final DataType<ZonedDateTime> ZONED_DATE_TIME = new DataType<>(ZonedDateTime.class, DbTypeId.UTC_TIMESTAMP);
+    public static final DataType<Json> JSON = new DataType<>(Json.class, DbTypeId.JSON);
+    public static final DataType<BinaryJson> JSONB = new DataType<>(BinaryJson.class, DbTypeId.JSONB);
 
     private final Class<T> javaClass;
     private final DbTypeId<T> dbTypeId;
@@ -101,7 +105,7 @@ public class DataType<T> {
         return dbType(database).literal(database, value);
     }
 
-    public String sqlType(Database database, T value) {
+    public String sqlType(Database database, Optional<T> value) {
         return dbType(database).parameter(database, value);
     }
 

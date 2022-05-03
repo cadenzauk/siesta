@@ -78,6 +78,8 @@ public interface Dialect {
 
     boolean supportsMultipleValueIn();
 
+    boolean supportsJsonFunctions();
+
     boolean requiresOrderByInRowNumber();
 
     String qualifiedSequenceName(String catalog, String schema, String name);

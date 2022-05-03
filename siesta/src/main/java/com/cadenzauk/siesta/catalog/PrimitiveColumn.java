@@ -169,9 +169,9 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
-    public Stream<String> insertArgsSql() {
+    public Stream<String> insertArgsSql(Database database, Optional<R> row) {
         return insertable
-            ? Stream.of("?")
+            ? Stream.of(dataType.sqlType(database, row.flatMap(getter())))
             : Stream.empty();
     }
 

@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DefaultTimestamp implements DbType<LocalDateTime> {
@@ -61,7 +62,7 @@ public class DefaultTimestamp implements DbType<LocalDateTime> {
     }
 
     @Override
-    public String parameter(Database database, LocalDateTime value) {
+    public String parameter(Database database, Optional<LocalDateTime> value) {
         return "cast(? as timestamp)";
     }
 }

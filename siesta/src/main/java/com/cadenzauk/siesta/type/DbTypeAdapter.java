@@ -26,6 +26,7 @@ import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DbTypeAdapter<T, D> implements DbType<T> {
@@ -67,8 +68,8 @@ public class DbTypeAdapter<T, D> implements DbType<T> {
     }
 
     @Override
-    public String parameter(Database database, T value) {
-        return type(database).parameter(database, value == null ? null : toDatabase.apply(value));
+    public String parameter(Database database, Optional<T> value) {
+        return type(database).parameter(database, value.map(toDatabase));
     }
 
     private DbType<D> type(Database database) {

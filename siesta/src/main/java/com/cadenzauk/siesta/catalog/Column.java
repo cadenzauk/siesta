@@ -53,7 +53,7 @@ public interface Column<T, R> extends AliasColumn<T> {
 
     Stream<String> insertColumnSql();
 
-    Stream<String> insertArgsSql();
+    Stream<String> insertArgsSql(Database database, Optional<R> row);
 
     Stream<Object> insertArgs(Database database, Optional<R> row);
 

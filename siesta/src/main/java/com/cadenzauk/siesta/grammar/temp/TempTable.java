@@ -118,7 +118,7 @@ public abstract class TempTable<R> {
             qualifiedTableName(),
             columnMapping.columns().flatMap(Column::insertColumnSql).collect(joining(", ")),
             IntStream.range(0, rows.length)
-                .mapToObj(i -> "(" + columnMapping.columns().flatMap(Column::insertArgsSql).collect(joining(", ")) + ")")
+                .mapToObj(i -> "(" + columnMapping.columns().flatMap(col -> col.insertArgsSql(database, Optional.of(rows[i]))).collect(joining(", ")) + ")")
                 .collect(joining(", ")));
     }
 

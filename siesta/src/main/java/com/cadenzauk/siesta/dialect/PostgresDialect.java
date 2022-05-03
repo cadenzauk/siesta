@@ -38,11 +38,16 @@ import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultBinaryJson;
+import com.cadenzauk.siesta.type.DefaultJson;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -50,6 +55,8 @@ import static com.cadenzauk.core.lang.StringUtil.octal;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_OBJECT;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_OBJECT;
 import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.INSTR;
 
 public class PostgresDialect extends AnsiDialect {
@@ -76,7 +83,9 @@ public class PostgresDialect extends AnsiDialect {
             })
             .register(MINUTE_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('minute', %1$s) - date_trunc('minute', %2$s))) / 60", argsSql[0], argsSql[1]))
             .register(SECOND_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('second', %1$s) - date_trunc('second', %2$s)))", argsSql[0], argsSql[1]))
-            .register(INSTR, SimpleFunctionSpec.of("strpos"));
+            .register(INSTR, SimpleFunctionSpec.of("strpos"))
+            .register(JSON_OBJECT, SimpleFunctionSpec.of("json_build_object"))
+            .register(JSONB_OBJECT, SimpleFunctionSpec.of("jsonb_build_object"));
 
         types()
             .register(DbTypeId.BINARY, new DefaultVarbinary() {
@@ -108,7 +117,40 @@ public class PostgresDialect extends AnsiDialect {
                     builder.append("'::bytea");
                     return builder.toString();
                 }
-            });
+            })
+            .register(DbTypeId.JSON, new DefaultJson() {
+                @Override
+                public String literal(Database database, Json value) {
+                    return super.literal(database, value) + "::json";
+                }
+
+                @Override
+                public String sqlType(Database database, int arg) {
+                    return super.sqlType(database);
+                }
+
+                @Override
+                public String parameter(Database database, Optional<Json> value) {
+                    return "?::json";
+                }
+            })
+            .register(DbTypeId.JSONB, new DefaultBinaryJson(){
+                @Override
+                public String sqlType(Database database, int arg) {
+                    return super.sqlType(database);
+                }
+
+                @Override
+                public String literal(Database database, BinaryJson value) {
+                    return super.literal(database, value) + "::jsonb";
+                }
+
+                @Override
+                public String parameter(Database database, Optional<BinaryJson> value) {
+                    return "?::jsonb";
+                }
+            })
+        ;
 
         exceptions()
             .register("22001", InvalidValueException::new)
@@ -161,6 +203,11 @@ public class PostgresDialect extends AnsiDialect {
     @Override
     public String resetLockTimeout() {
         return "SET LOCAL lock_timeout = '10s'";
+    }
+
+    @Override
+    public boolean supportsJsonFunctions() {
+        return true;
     }
 
     @Override

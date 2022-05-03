@@ -23,35 +23,37 @@
 package com.cadenzauk.siesta.type;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.json.BinaryJson;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
-public interface DbType<T> {
-    T getColumnValue(Database database, ResultSet rs, String col) throws SQLException;
-
-    T getColumnValue(Database database, ResultSet rs, int col) throws SQLException;
-
-    String sqlType(Database database);
-
-    default String sqlType(Database database, int arg) {
-        return String.format("%s(%d)", sqlType(database), arg);
+public class DefaultBinaryJson extends DefaultDbType<BinaryJson> {
+    public DefaultBinaryJson() {
+        super("json", DefaultBinaryJson::getJson, DefaultBinaryJson::getJson);
     }
 
-    default String sqlType(Database database, int arg1, int arg2) {
-        return String.format("%s(%d,%d)", sqlType(database), arg1, arg2);
+    public DefaultBinaryJson(String sqlType) {
+        super(sqlType, DefaultBinaryJson::getJson, DefaultBinaryJson::getJson);
     }
 
-    default Object convertToDatabase(Database database, T value) {
-        return value;
+    @Override
+    public String literal(Database database, BinaryJson value) {
+        return "'" + value.data().replaceAll("'", "''") + "'";
     }
 
-    default String literal(Database database, T value) {
-        return value.toString();
+    @Override
+    public Object convertToDatabase(Database database, BinaryJson value) {
+        return value == null ? null : value.data();
     }
 
-    default String parameter(Database database, Optional<T> value) {
-        return "?";
+    private static BinaryJson getJson(ResultSet rs, String colName) throws SQLException {
+        String json = rs.getString(colName);
+        return json == null ? null : new BinaryJson(json);
+    }
+
+    private static BinaryJson getJson(ResultSet rs, int colNo) throws SQLException {
+        String json = rs.getString(colNo);
+        return json == null ? null : new BinaryJson(json);
     }
 }

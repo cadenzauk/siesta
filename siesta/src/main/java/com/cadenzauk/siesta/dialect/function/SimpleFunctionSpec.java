@@ -25,7 +25,7 @@ package com.cadenzauk.siesta.dialect.function;
 import com.cadenzauk.siesta.Scope;
 
 public class SimpleFunctionSpec implements FunctionSpec {
-    private final String name;
+    protected final String name;
 
     protected SimpleFunctionSpec(String name) {
         this.name = name;

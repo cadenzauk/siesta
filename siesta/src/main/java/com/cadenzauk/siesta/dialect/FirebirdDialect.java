@@ -48,6 +48,7 @@ import com.cadenzauk.siesta.type.DefaultVarchar;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class FirebirdDialect extends AnsiDialect {
@@ -79,7 +80,7 @@ public class FirebirdDialect extends AnsiDialect {
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
             .register(DbTypeId.INTEGER, new DefaultInteger() {
                 @Override
-                public String parameter(Database database, Integer value) {
+                public String parameter(Database database, Optional<Integer> value) {
                     return "cast(? as integer)";
                 }
             })
@@ -118,8 +119,8 @@ public class FirebirdDialect extends AnsiDialect {
             })
             .register(DbTypeId.VARCHAR, new DefaultVarchar() {
                 @Override
-                public String parameter(Database database, String value) {
-                    return String.format("cast(? as varchar(%d))", Integer.max(1, value.length()));
+                public String parameter(Database database, Optional<String> value) {
+                    return String.format("cast(? as varchar(%d))", Integer.max(1, value.map(String::length).orElse(0)));
                 }
             });
 

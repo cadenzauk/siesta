@@ -41,15 +41,15 @@ public class CreateTableSql extends SqlAction {
         return String.format("create table %s (%s%s%s)",
             definition.qualifiedName(database),
             definition.columns().map(column -> columnSql(database, column)).collect(joining(", ")),
-            primaryKeySql(),
+            primaryKeySql(database),
             foreignKeySql(database));
     }
 
-    private String primaryKeySql() {
+    private String primaryKeySql(Database database) {
         String primaryKeyColumns = definition
             .columns()
             .filter(Column::primaryKey)
-            .map(Column::columnName)
+            .map(c -> c.columnName(database))
             .collect(joining(", "));
         return primaryKeyColumns.isEmpty() ? "" : String.format(", primary key (%s)", primaryKeyColumns);
     }
@@ -58,13 +58,13 @@ public class CreateTableSql extends SqlAction {
         return definition
             .columns()
             .flatMap(c -> StreamUtil.of(c.foreignKey()))
-            .map(fk -> String.format(", constraint %s foreign key(%s) references %s(%s)", fk.constraintName(), fk.columnNames(), fk.qualifiedReferencedTableName(database), fk.referencedColumnNames()))
+            .map(fk -> String.format(", constraint %s foreign key(%s) references %s(%s)", fk.constraintName(), fk.columnNames(database), fk.qualifiedReferencedTableName(database), fk.referencedColumnNames(database)))
             .collect(joining());
     }
 
     private String columnSql(Database database, Column column) {
         return String.format("%s %s%s",
-            column.columnName(),
+            column.columnName(database),
             column.dataType().sql(database),
             column.nullable() ? "" : " not null");
     }

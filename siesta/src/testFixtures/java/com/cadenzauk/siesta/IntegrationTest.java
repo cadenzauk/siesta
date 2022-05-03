@@ -36,6 +36,7 @@ import com.cadenzauk.siesta.model.TestDatabase;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -44,7 +45,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,10 +63,10 @@ public abstract class IntegrationTest {
 
     private static final AtomicLong ids = new AtomicLong();
 
-    @Resource
+    @Autowired
     protected DataSource dataSource;
 
-    @Resource
+    @Autowired
     protected Dialect dialect;
 
     protected Tuple2<Long,Long> insertSalespeople(Database database, int n) {
@@ -145,7 +145,7 @@ public abstract class IntegrationTest {
             return new SpringSiesta()
                 .setDropFirst(true)
                 .setDatabase(database())
-                .setSchemaDefinition(new TestSchema().schemaDefinition());
+                .setSchemaDefinition(new TestSchema(dialect()).schemaDefinition());
         }
 
         @Bean

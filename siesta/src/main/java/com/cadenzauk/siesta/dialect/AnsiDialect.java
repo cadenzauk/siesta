@@ -35,7 +35,9 @@ import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.grammar.expression.JsonFunctions;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbTypeRegistry;
@@ -58,7 +60,9 @@ public class AnsiDialect implements Dialect {
         functions
             .register(AggregateFunctionSpecs::registerDefaults)
             .register(DateFunctionSpecs::registerDefaults)
-            .register(StringFunctionSpecs::registerDefaults);
+            .register(StringFunctionSpecs::registerDefaults)
+            .register(JsonFunctionSpecs::registerDefaults);
+
         sequenceInfo = SequenceInfo.newBuilder().build();
         tempTableInfo = TempTableInfo.newBuilder().build();
     }
@@ -220,6 +224,11 @@ public class AnsiDialect implements Dialect {
     @Override
     public boolean supportsMultipleValueIn() {
         return true;
+    }
+
+    @Override
+    public boolean supportsJsonFunctions() {
+        return false;
     }
 
     @Override

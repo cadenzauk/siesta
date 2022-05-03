@@ -25,23 +25,25 @@ package com.cadenzauk.siesta.ddl.definition.action;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.ddl.action.LoggableAction;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class AddForeignKeyAction extends LoggableAction {
     private final String constraintName;
-    private final Optional<String> catalog;
-    private final Optional<String> schemaName;
-    private final String tableName;
-    private final String columnNames;
-    private final Optional<String> referencedCatalog;
-    private final Optional<String> referencedSchemaName;
-    private final String referencedTableName;
-    private final String referencedColumnNames;
+    private final Optional<Function<Database,String>> catalog;
+    private final Optional<Function<Database,String>> schemaName;
+    private final Function<Database,String> tableName;
+    private final List<Function<Database,String>> columnNames;
+    private final Optional<Function<Database,String>> referencedCatalog;
+    private final Optional<Function<Database,String>> referencedSchemaName;
+    private final Function<Database,String> referencedTableName;
+    private final List<Function<Database,String>> referencedColumnNames;
 
     private AddForeignKeyAction(Builder builder) {
         super(builder);
@@ -51,39 +53,40 @@ public class AddForeignKeyAction extends LoggableAction {
         catalog = builder.catalog;
         schemaName = builder.schemaName;
         tableName = builder.tableName
-            .filter(StringUtils::isNotBlank)
             .orElseThrow(() -> new IllegalArgumentException("tableName is required"));
-        columnNames = String.join(", ", builder.columnNames);
+        columnNames = builder.columnNames;
         referencedCatalog = OptionalUtil.or(builder.referencedCatalog, builder.catalog);
         referencedSchemaName = OptionalUtil.or(builder.referencedSchemaName, builder.schemaName);
         referencedTableName = builder.referencedTableName
-            .filter(StringUtils::isNotBlank)
             .orElseThrow(() -> new IllegalArgumentException("referencedTableName is required"));
-        referencedColumnNames = String.join(", ", builder.referencedColumnNames);
+        referencedColumnNames = ImmutableList.copyOf(builder.referencedColumnNames);
     }
 
-    public String tableName() {
-        return tableName;
+    public String tableName(Database database) {
+        return tableName.apply(database);
     }
 
     public String qualifiedTableName(Database database) {
-        return database.dialect().qualifiedTableName(catalog.orElse(""), schemaName.orElse(""), tableName);
+        return database.dialect().qualifiedTableName(catalog.map(c -> c.apply(database)).orElse(""), schemaName.map(s -> s.apply(database)).orElse(""), tableName.apply(database));
     }
 
     public String constraintName() {
         return constraintName;
     }
 
-    public String columnNames() {
-        return columnNames;
+    public String columnNames(Database database) {
+        return columnNames.stream().map(c -> c.apply(database)).collect(Collectors.joining(", "));
     }
 
     public String qualifiedReferencedTableName(Database database) {
-        return database.dialect().qualifiedTableName(referencedCatalog.orElse(""), referencedSchemaName.orElse(""), referencedTableName);
+        return database.dialect().qualifiedTableName(
+            referencedCatalog.map(cat -> cat.apply(database)).orElse(""),
+            referencedSchemaName.map(schema -> schema.apply(database)).orElse(""),
+            referencedTableName.apply(database));
     }
 
-    public String referencedColumnNames() {
-        return referencedColumnNames;
+    public String referencedColumnNames(Database database) {
+        return referencedColumnNames.stream().map(c -> c.apply(database)).collect(Collectors.joining(", "));
     }
 
     public static Builder newBuilder() {
@@ -91,15 +94,15 @@ public class AddForeignKeyAction extends LoggableAction {
     }
 
     public static final class Builder extends LoggableAction.Builder<Builder> {
-        private Optional<String> catalog = Optional.empty();
-        private Optional<String> schemaName = Optional.empty();
-        private Optional<String> tableName = Optional.empty();
+        private Optional<Function<Database,String>> catalog = Optional.empty();
+        private Optional<Function<Database,String>> schemaName = Optional.empty();
+        private Optional<Function<Database,String>> tableName = Optional.empty();
         private Optional<String> constraintName = Optional.empty();
-        private final List<String> columnNames = new ArrayList<>();
-        private Optional<String> referencedCatalog = Optional.empty();
-        private Optional<String> referencedSchemaName = Optional.empty();
-        private Optional<String> referencedTableName = Optional.empty();
-        private final List<String> referencedColumnNames = new ArrayList<>();
+        private final List<Function<Database,String>> columnNames = new ArrayList<>();
+        private Optional<Function<Database,String>> referencedCatalog = Optional.empty();
+        private Optional<Function<Database,String>> referencedSchemaName = Optional.empty();
+        private Optional<Function<Database,String>> referencedTableName = Optional.empty();
+        private final List<Function<Database,String>> referencedColumnNames = new ArrayList<>();
 
         public Builder constraintName(String val) {
             constraintName = OptionalUtil.ofBlankable(val);
@@ -112,72 +115,77 @@ public class AddForeignKeyAction extends LoggableAction {
         }
 
         public Builder catalog(String val) {
-            catalog = OptionalUtil.ofBlankable(val);
+            catalog = OptionalUtil.ofBlankable(val).map(name -> d -> name);
             return this;
         }
 
-        public Builder catalog(Optional<String> val) {
-            catalog = val.filter(StringUtils::isNotBlank);
+        public Builder catalog(Optional<Function<Database, String>> val) {
+            catalog = val;
             return this;
         }
 
         public Builder schemaName(String val) {
-            schemaName = OptionalUtil.ofBlankable(val);
+            schemaName = OptionalUtil.ofBlankable(val).map(name -> d -> name);;
             return this;
         }
 
-        public Builder schemaName(Optional<String> val) {
-            schemaName = val.filter(StringUtils::isNotBlank);
+        public Builder schemaName(Optional<Function<Database, String>> val) {
+            schemaName = val;
             return this;
         }
 
         public Builder tableName(String val) {
-            tableName = OptionalUtil.ofBlankable(val);
+            tableName = OptionalUtil.ofBlankable(val).map(name -> d -> name);
             return this;
         }
 
         public Builder tableName(Optional<String> val) {
-            tableName = val.filter(StringUtils::isNotBlank);
+            tableName = val.filter(StringUtils::isNotBlank).map(name -> d -> name);;
             return this;
         }
 
-        public Builder column(String val) {
+        public Builder tableName(Function<Database, String> val) {
+            tableName = Optional.of(val);
+            return this;
+        }
+
+        public Builder column(Function<Database,String> val) {
             columnNames.add(val);
             return this;
         }
 
         public Builder referencedCatalog(String val) {
-            referencedCatalog = OptionalUtil.ofBlankable(val);
+            referencedCatalog = OptionalUtil.ofBlankable(val).map(n -> d -> n);
             return this;
         }
 
-        public Builder referencedCatalog(Optional<String> val) {
-            referencedCatalog = val.filter(StringUtils::isNotBlank);
+        public Builder referencedCatalog(Optional<Function<Database,String>> val) {
+            referencedCatalog = val;
             return this;
         }
 
         public Builder referencedSchemaName(String val) {
-            referencedSchemaName = OptionalUtil.ofBlankable(val);
+            referencedSchemaName = OptionalUtil.ofBlankable(val).map(n -> d -> n);
             return this;
         }
 
-        public Builder referencedSchemaName(Optional<String> val) {
-            referencedSchemaName = val.filter(StringUtils::isNotBlank);
+        public Builder referencedSchemaName(Optional<Function<Database,String>> val) {
+            referencedSchemaName = val;
             return this;
         }
 
         public Builder referencedTableName(String val) {
-            referencedTableName = OptionalUtil.ofBlankable(val);
+            referencedTableName = OptionalUtil.ofBlankable(val).map(n -> d -> n);
             return this;
         }
 
-        public Builder referencedTableName(Optional<String> val) {
-            referencedTableName = val.filter(StringUtils::isNotBlank);
+        public Builder referencedTableName(Optional<Function<Database,String>> val) {
+            referencedTableName = val;
             return this;
         }
 
         public Builder referencedColumn(String val) {
-            referencedColumnNames.add(val);
+            referencedColumnNames.add(d -> val);
             return this;
         }
 

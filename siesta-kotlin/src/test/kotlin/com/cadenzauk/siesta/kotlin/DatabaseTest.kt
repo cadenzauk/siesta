@@ -25,11 +25,49 @@ package com.cadenzauk.siesta.kotlin
 import co.unruly.matchers.OptionalMatchers.contains
 import com.cadenzauk.siesta.Database
 import com.cadenzauk.siesta.IntegrationTest
+import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor
+import com.cadenzauk.siesta.json.Json
 import com.cadenzauk.siesta.model.TestDatabase
+import com.cadenzauk.siesta.type.DbTypeId
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.LocalDate
+import javax.persistence.Table
+
+data class Price(
+    val amount: BigDecimal,
+    val currency: String
+)
+
+data class Quantity(
+    val amount: Int,
+    val unit: String
+)
+
+data class Product(
+    val code: String,
+    val description: String
+)
+
+data class Order(
+    val orderDate: LocalDate,
+    val price: Price,
+    val quantity: Quantity,
+    val product: Product
+)
+
+@Table(name = "JSON_DATA", schema = "SIESTA")
+data class KJsonRow(
+    val jsonId: Long,
+    val data: Order,
+)
 
 class DatabaseTest : IntegrationTest() {
     @Test
@@ -63,5 +101,42 @@ class DatabaseTest : IntegrationTest() {
             .optional()
 
         assertThat(theSame, contains(aWidget))
+    }
+
+    @Test
+    fun `can insert and restore a json object`() {
+        val anOrder = Order(
+            orderDate = LocalDate.now(),
+            price = Price(
+                amount = BigDecimal("123.45"),
+                currency = "USD"
+            ),
+            quantity = Quantity(
+                amount = 1000,
+                unit = "DOZEN"
+            ),
+            product = Product(
+                code = "SPROC102",
+                description = "Spacely's Special Sprocket"
+            )
+        )
+        val objectMapper = ObjectMapper()
+            .registerModule(Jdk8Module())
+            .registerModule(JavaTimeModule())
+            .registerModule(KotlinModule.Builder().build())
+        val database = Database.newBuilder()
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource, 0))
+            .adapter(
+                Order::class.java,
+                DbTypeId.JSON,
+                { Json(objectMapper.writeValueAsString(it)) },
+                { objectMapper.readValue(it.data(), Order::class.java) })
+            .build()
+        val aRow = KJsonRow(newId(), anOrder)
+        database.insert(aRow)
+
+        val result = database.from(KJsonRow::class, "j").where(KJsonRow::jsonId).isEqualTo(aRow.jsonId).single()
+
+        assertThat(result.data, equalTo(anOrder))
     }
 }

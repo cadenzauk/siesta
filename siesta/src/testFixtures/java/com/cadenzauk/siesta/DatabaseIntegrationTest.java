@@ -34,6 +34,7 @@ import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
 import com.cadenzauk.core.tuple.Tuple8;
+import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.dialect.DerbyDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.expression.DateFunctions;
@@ -43,9 +44,11 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.grammar.expression.olap.Olap;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
-import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
+import com.cadenzauk.siesta.model.JsonDataRow;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
@@ -57,6 +60,10 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -105,6 +112,9 @@ import static com.cadenzauk.siesta.grammar.expression.DateFunctions.secondDiff;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.year;
 import static com.cadenzauk.siesta.grammar.expression.ExistsExpression.exists;
 import static com.cadenzauk.siesta.grammar.expression.ExistsExpression.notExists;
+import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonObject;
+import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonbObject;
+import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.key;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.instr;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.lower;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
@@ -1519,4 +1529,61 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(result, is(part1.purchasePrice().currency()));
     }
+
+    @Test
+    void canSelectJson() throws JsonProcessingException {
+        assumeTrue(dialect.supportsJsonFunctions());
+        long jsonId = newId();
+        JsonDataRow input = new JsonDataRow(jsonId, new Json("{\"name\": \"bob\"}"), Optional.of(new BinaryJson("{\"name\": \"fred\"}")));
+        Database database = testDatabase(dataSource, dialect);
+        database.insert(input);
+
+        JsonDataRow result = database.from(JsonDataRow.class).where(JsonDataRow::jsonId).isEqualTo(jsonId).single();
+
+        assertThat(parse(result.data()), is(parse(input.data())));
+        assertThat(parse(result.dataBinary().orElseThrow(AssertionError::new)), is(parse(input.dataBinary().orElseThrow(AssertionError::new))));
+    }
+
+    @Test
+    void canSelectJsonLiterals() throws JsonProcessingException {
+        assumeTrue(dialect.supportsJsonFunctions());
+        Database database = testDatabase(dataSource, dialect);
+        Json json = new Json("{\"name\":\"Tom\"}");
+        BinaryJson jsonb = new BinaryJson("{\"name\":\"Jerry\"}");
+
+        Tuple2<Json, BinaryJson> result = database
+            .select(literal(json))
+            .comma(literal(jsonb))
+            .single();
+
+        assertThat(parse(result.item1()), is(parse(json)));
+        assertThat(parse(result.item2()), is(parse(jsonb)));
+    }
+
+    @Test
+    void canSelectJsonObjects() throws JsonProcessingException {
+        assumeTrue(dialect.supportsJsonFunctions());
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson(s -> s.numberOfSales(100));
+        SalespersonRow salespersonRow2 = aRandomSalesperson(s -> s.numberOfSales(200));
+        database.insert(salespersonRow1, salespersonRow2);
+
+        Tuple2<Json, BinaryJson> result = database.from(SalespersonRow.class)
+            .select(jsonObject(key("numberOfSales").value(column(SalespersonRow::numberOfSales))))
+            .comma(jsonbObject(key("numberOfSales").value(column(SalespersonRow::numberOfSales))))
+            .where(SalespersonRow::salespersonId).isEqualTo(salespersonRow1.salespersonId())
+            .single();
+
+        assertThat(parse(result.item1()), is(parse(Json.of("{\"numberOfSales\": 100}"))));
+        assertThat(parse(result.item2()), is(parse(BinaryJson.of("{\"numberOfSales\": 100}"))));
+    }
+
+    private static JsonNode parse(Json json) throws JsonProcessingException {
+        return objectMapper.get().readTree(json.data());
+    }
+
+    private static JsonNode parse(BinaryJson json) throws JsonProcessingException {
+        return objectMapper.get().readTree(json.data());
+    }
+    private static final Lazy<ObjectMapper> objectMapper = new Lazy<>(() -> new ObjectMapper().registerModule(new Jdk8Module()));
 }

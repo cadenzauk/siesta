@@ -59,6 +59,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -151,6 +152,11 @@ public class OracleDialect extends AnsiDialect {
                 @Override
                 public String literal(Database database, LocalTime value) {
                     return String.format("INTERVAL '%s' HOUR TO SECOND", value.format(DateTimeFormatter.ISO_TIME));
+                }
+
+                @Override
+                public String parameter(Database database, Optional<LocalTime> value) {
+                    return "cast(? as interval day to second)";
                 }
 
                 @Override
