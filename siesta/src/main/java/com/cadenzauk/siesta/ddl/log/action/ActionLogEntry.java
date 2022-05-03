@@ -25,15 +25,21 @@ package com.cadenzauk.siesta.ddl.log.action;
 import com.cadenzauk.siesta.ddl.action.Action;
 import com.cadenzauk.siesta.ddl.log.intercept.ActionLogTableCreator;
 
+import javax.persistence.Column;
 import javax.persistence.Table;
 import java.time.ZonedDateTime;
 
 @Table(name = ActionLogTableCreator.LOG_TABLE_NAME)
 public class ActionLogEntry extends Action {
+    @Column(name = "DEFINITION_ID")
     private final String definitionId;
+    @Column(name = "ACTION_ID")
     private final String actionId;
+    @Column(name = "AUTHOR")
     private final String author;
+    @Column(name = "EXECUTED_BY")
     private final String executedBy;
+    @Column(name = "EXECUTION_TS")
     private final ZonedDateTime executionTs;
 
     private ActionLogEntry(Builder builder) {
