@@ -66,6 +66,18 @@ public class SalespersonRow {
     }
 
     @Override
+    public String toString() {
+        return "SalespersonRow{" +
+            "salespersonId=" + salespersonId +
+            ", firstName='" + firstName + '\'' +
+            ", middleNames=" + middleNames +
+            ", surname='" + surname + '\'' +
+            ", numberOfSales=" + numberOfSales +
+            ", commission=" + commission +
+            '}';
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(salespersonId, firstName, middleNames, surname, numberOfSales, commission);
     }

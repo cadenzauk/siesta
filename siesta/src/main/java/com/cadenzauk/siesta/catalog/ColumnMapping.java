@@ -168,7 +168,15 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     }
 
     public Object[] insertArgs(R[] rows) {
-        return Arrays.stream(rows)
+        return insertArgs(Arrays.stream(rows));
+    }
+
+    public Object[] insertArgs(List<R> rows) {
+        return insertArgs(rows.stream());
+    }
+
+    public Object[] insertArgs(Stream<R> rows) {
+        return rows
             .map(Optional::ofNullable)
             .flatMap(r -> columns.stream().flatMap(c -> c.insertArgs(database, r)))
             .toArray();

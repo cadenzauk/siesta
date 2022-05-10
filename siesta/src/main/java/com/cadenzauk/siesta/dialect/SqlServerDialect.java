@@ -34,6 +34,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.dialect.merge.SqlServerMergeInfo;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.BooleanAsTinyInt;
 import com.cadenzauk.siesta.type.DbTypeId;
@@ -80,6 +81,7 @@ public class SqlServerDialect extends AnsiDialect {
             });
 
         types()
+            .register(DbTypeId.BOOLEAN, new BooleanAsTinyInt())
             .register(DbTypeId.TINYINT, new DefaultTinyint() {
                 @Override
                 public String literal(Database database, Byte value) {
@@ -152,6 +154,7 @@ public class SqlServerDialect extends AnsiDialect {
             .register(1222, LockingException::new);
 
         setTempTableInfo(new SqlServerTempTableInfo());
+        setMergeInfo(new SqlServerMergeInfo(this));
     }
 
     @Override

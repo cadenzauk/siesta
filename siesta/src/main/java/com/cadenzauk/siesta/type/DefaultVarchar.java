@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.type;
 import com.cadenzauk.siesta.Database;
 
 import java.sql.ResultSet;
+import java.util.Optional;
 
 public class DefaultVarchar extends DefaultDbType<String> {
     public DefaultVarchar() {
@@ -38,5 +39,10 @@ public class DefaultVarchar extends DefaultDbType<String> {
     @Override
     public String literal(Database database, String value) {
         return "'" + value.replaceAll("'", "''") + "'";
+    }
+
+    @Override
+    public String sqlTypeOf(Database database, Optional<String> value) {
+        return String.format("varchar(%d)", Integer.max(1, value.map(String::length).orElse(1)));
     }
 }

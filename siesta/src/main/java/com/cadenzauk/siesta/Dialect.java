@@ -97,4 +97,6 @@ public interface Dialect {
     SequenceInfo sequenceInfo();
 
     TempTableInfo tempTableInfo();
+
+    MergeInfo mergeInfo();
 }

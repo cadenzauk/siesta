@@ -139,9 +139,42 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
+    public Stream<String> columnNames() {
+        return columns().flatMap(Column::columnNames);
+    }
+
+    @Override
+    public Stream<String> idColumnNames() {
+        return identifier
+            ? columns().flatMap(Column::columnNames)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> insertColumnNames() {
+        return insertable
+            ? columns().flatMap(Column::columnNames)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> updateColumnNames() {
+        return updatable
+            ? columns().flatMap(Column::updateColumnNames)
+            : Stream.empty();
+    }
+
+    @Override
     public Stream<String> idSql(Alias<?> alias) {
         return identifier
             ? columns().map(c -> String.format("%s = ?", alias.inSelectClauseSql(c.columnName())))
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> idSql(Alias<?> alias, Alias<?> sourceAlias) {
+        return identifier
+            ? columns().map(c -> String.format("%s = %s", alias.inSelectClauseSql(c.columnName()), sourceAlias.inSelectClauseSql(c.columnName())))
             : Stream.empty();
     }
 
@@ -160,10 +193,27 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
+    public Stream<String> insertColumnSql(Alias<?> alias) {
+        return insertable
+            ? columns().flatMap(tColumn -> tColumn.insertColumnSql(alias))
+            : Stream.empty();
+    }
+
+    @Override
     public Stream<String> insertArgsSql(Database database, Optional<R> row) {
         return insertable
             ? columns().flatMap(c -> c.insertArgsSql(database, row.flatMap(getter)))
             : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> selectArgsSql(Database database, Optional<R> row) {
+        return columns().flatMap(c -> c.selectArgsSql(database, row.flatMap(getter)));
+    }
+
+    @Override
+    public Stream<Object> selectArgs(Database database, Optional<R> row) {
+        return columns().flatMap(c -> c.selectArgs(database, row.flatMap(getter)));
     }
 
     @Override
@@ -177,6 +227,13 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     public Stream<String> updateSql() {
         return updatable
             ? columns().flatMap(Column::updateSql)
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> updateSql(Alias<?> sourceAlias) {
+        return updatable
+            ? columns().flatMap(col -> col.updateSql(sourceAlias))
             : Stream.empty();
     }
 

@@ -148,9 +148,42 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
+    public Stream<String> columnNames() {
+        return Stream.of(columnName());
+    }
+
+    @Override
+    public Stream<String> idColumnNames() {
+        return identifier
+            ? Stream.of(columnName())
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> insertColumnNames() {
+        return insertable
+            ? Stream.of(columnName())
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> updateColumnNames() {
+        return updatable && ! identifier
+            ? Stream.of(columnName())
+            : Stream.empty();
+    }
+
+    @Override
     public Stream<String> idSql(Alias<?> alias) {
         return identifier
             ? Stream.of(sql(alias) + " = ?")
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> idSql(Alias<?> alias, Alias<?> sourceAlias) {
+        return identifier
+            ? Stream.of(sql(alias) + " = " + sql(sourceAlias))
             : Stream.empty();
     }
 
@@ -169,10 +202,27 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
+    public Stream<String> insertColumnSql(Alias<?> alias) {
+        return insertable
+            ? Stream.of(sql(alias))
+            : Stream.empty();
+    }
+
+    @Override
     public Stream<String> insertArgsSql(Database database, Optional<R> row) {
         return insertable
-            ? Stream.of(dataType.sqlType(database, row.flatMap(getter())))
+            ? Stream.of(dataType.parameterSql(database, row.flatMap(getter())))
             : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> selectArgsSql(Database database, Optional<R> row) {
+        return Stream.of(dataType.castParameterSql(database, row.flatMap(getter())));
+    }
+
+    @Override
+    public Stream<Object> selectArgs(Database database, Optional<R> row) {
+        return rowToDatabase(database, row);
     }
 
     @Override
@@ -186,6 +236,13 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     public Stream<String> updateSql() {
         return updatable && ! identifier
             ? Stream.of(sql() + " = ?")
+            : Stream.empty();
+    }
+
+    @Override
+    public Stream<String> updateSql(Alias<?> sourceAlias) {
+        return updatable && ! identifier
+            ? Stream.of(sql() + " = " + sourceAlias.inSelectClauseSql(sql()))
             : Stream.empty();
     }
 

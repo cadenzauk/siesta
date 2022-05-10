@@ -33,13 +33,15 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.ForeignKey;
 import com.cadenzauk.siesta.Reference;
-import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.RegularTableAlias;
+import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
+import com.cadenzauk.siesta.dialect.merge.MergeSpec;
 import com.cadenzauk.siesta.grammar.InvalidForeignKeyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -138,21 +139,29 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     public int insert(SqlExecutor sqlExecutor, R[] rows) {
+        return insert(sqlExecutor, ImmutableList.copyOf(rows));
+    }
+
+    public int insert(SqlExecutor sqlExecutor, List<R> rows) {
         if (database().dialect().supportsMultiInsert()) {
             return performInsert(sqlExecutor, rows);
         } else {
-            return Arrays.stream(rows)
-                .mapToInt(r -> performInsert(sqlExecutor, r))
+            return rows.stream()
+                .mapToInt(r -> performInsert(sqlExecutor, ImmutableList.of(r)))
                 .sum();
         }
     }
 
     public int insert(Transaction transaction, R[] rows) {
+        return insert(transaction, ImmutableList.copyOf(rows));
+    }
+
+    public int insert(Transaction transaction, List<R> rows) {
         if (database().dialect().supportsMultiInsert()) {
             return performInsert(transaction, rows);
         } else {
-            return Arrays.stream(rows)
-                .mapToInt(r -> performInsert(transaction, r))
+            return rows.stream()
+                .mapToInt(r -> performInsert(transaction, ImmutableList.of(r)))
                 .sum();
         }
     }
@@ -172,6 +181,38 @@ public class Table<R> implements ColumnCollection<R> {
         }
         String sql = updateSql();
         Object[] args = columnMapping.updateArgs(row);
+        return database.execute(sql, () -> transaction.update(sql, args));
+    }
+
+    public int upsert(SqlExecutor sqlExecutor, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return 0;
+        }
+        return rows
+            .stream().mapToInt(row -> upsertRow(sqlExecutor, row))
+            .sum();
+    }
+
+    public int upsert(Transaction transaction, List<R> rows) {
+        if (rows == null) {
+            return 0;
+        }
+        return rows
+            .stream().mapToInt(row -> upsertRow(transaction, row))
+            .sum();
+    }
+
+    private int upsertRow(SqlExecutor sqlExecutor, R row) {
+        MergeSpec mergeSpec = mergeSpec(row);
+        String sql = upsertSql(mergeSpec);
+        Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
+        return database.execute(sql, () -> sqlExecutor.update(sql, args));
+    }
+
+    private int upsertRow(Transaction transaction, R row) {
+        MergeSpec mergeSpec = mergeSpec(row);
+        String sql = upsertSql(mergeSpec);
+        Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
         return database.execute(sql, () -> transaction.update(sql, args));
     }
 
@@ -218,9 +259,8 @@ public class Table<R> implements ColumnCollection<R> {
             .findFirst();
     }
 
-    @SafeVarargs
-    private final int performInsert(SqlExecutor sqlExecutor, R... rows) {
-        if (rows.length == 0) {
+    private int performInsert(SqlExecutor sqlExecutor, List<R> rows) {
+        if (rows.size() == 0) {
             return 0;
         }
         String sql = insertSql(rows);
@@ -228,9 +268,8 @@ public class Table<R> implements ColumnCollection<R> {
         return database.execute(sql, () -> sqlExecutor.update(sql, args));
     }
 
-    @SafeVarargs
-    private final int performInsert(Transaction transaction, R... rows) {
-        if (rows.length == 0) {
+    private int performInsert(Transaction transaction, List<R> rows) {
+        if (rows.size() == 0) {
             return 0;
         }
         String sql = insertSql(rows);
@@ -238,13 +277,18 @@ public class Table<R> implements ColumnCollection<R> {
         return database.execute(sql, () -> transaction.update(sql, args));
     }
 
-    private String insertSql(R[] rows) {
+    private String insertSql(List<R> rows) {
         return String.format("insert into %s (%s) values %s",
             qualifiedName(),
-            columns().flatMap(Column::insertColumnSql).collect(joining(", ")),
-            IntStream.range(0, rows.length)
-                .mapToObj(i -> "(" + columns().flatMap(col -> col.insertArgsSql(database, Optional.of(rows[i]))).collect(joining(", ")) + ")")
+            insertColumnsSql(),
+            rows.stream()
+                .map(row -> "(" + columns().flatMap(col -> col.insertArgsSql(database, Optional.of(row))).collect(joining(", ")) + ")")
                 .collect(joining(", ")));
+    }
+
+    @NotNull
+    public String insertColumnsSql() {
+        return columns().flatMap(Column::insertColumnSql).collect(joining(", "));
     }
 
     private String updateSql() {
@@ -253,6 +297,27 @@ public class Table<R> implements ColumnCollection<R> {
             qualifiedName(),
             columns().flatMap(Column::updateSql).collect(joining(", ")),
             columns().flatMap(c -> c.idSql(alias)).collect(joining(" and ")));
+    }
+
+    private String upsertSql(MergeSpec mergeSpec) {
+        return database.dialect().mergeInfo().mergeSql(mergeSpec);
+    }
+
+    private MergeSpec mergeSpec(R row) {
+        return MergeSpec
+            .newBuilder()
+            .targetTableName(qualifiedName())
+            .targetAlias("t")
+            .selectArgsSql(columns().flatMap(col -> col.selectArgsSql(database, Optional.of(row))).collect(toList()))
+            .columnNames(columns().flatMap(Column::columnNames).collect(toList()))
+            .sourceAlias("s")
+            .idColumnNames(columns().flatMap(Column::idColumnNames).collect(toList()))
+            .updateColumnNames(columns().flatMap(Column::updateColumnNames).collect(toList()))
+            .insertColumnNames(columns().flatMap(Column::insertColumnNames).collect(toList()))
+            .insertArgsSql(columns().flatMap(col -> col.insertArgsSql(database, Optional.of(row))).collect(toList()))
+            .insertArgs(ImmutableList.of(columns().flatMap(col -> col.insertArgs(database, Optional.of(row))).toArray()))
+            .selectArgs(ImmutableList.of(columns().flatMap(col -> col.selectArgs(database, Optional.of(row))).toArray()))
+            .build();
     }
 
     private String deleteSql() {

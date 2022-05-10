@@ -37,6 +37,7 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.merge.PostgresMergeInfo;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
@@ -164,6 +165,7 @@ public class PostgresDialect extends AnsiDialect {
             .register("55P03", LockingException::new);
 
         setTempTableInfo(new PostgresTempTableInfo());
+        setMergeInfo(new PostgresMergeInfo(this));
     }
 
     @Override

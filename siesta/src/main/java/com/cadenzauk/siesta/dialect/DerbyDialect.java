@@ -36,6 +36,7 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.dialect.merge.DerbyMergeInfo;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultDate;
 import com.cadenzauk.siesta.type.DefaultTime;
@@ -161,6 +162,7 @@ public class DerbyDialect extends AnsiDialect {
         ;
         setSequenceInfo(new DerbySequenceInfo());
         setTempTableInfo(new DerbyTempTableInfo());
+        setMergeInfo(new DerbyMergeInfo(this));
     }
 
     @Override

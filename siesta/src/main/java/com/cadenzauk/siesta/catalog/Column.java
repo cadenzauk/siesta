@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.catalog;
 
 import com.cadenzauk.core.reflect.util.TypeUtil;
-import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
@@ -47,17 +46,35 @@ public interface Column<T, R> extends AliasColumn<T> {
 
     ColumnDataType<T> columnType();
 
+    Stream<String> columnNames();
+
+    Stream<String> idColumnNames();
+
+    Stream<String> insertColumnNames();
+
+    Stream<String> updateColumnNames();
+
     Stream<String> idSql(Alias<?> alias);
+
+    Stream<String> idSql(Alias<?> alias, Alias<?> sourceAlias);
 
     Stream<Object> idArgs(Database database, R row);
 
     Stream<String> insertColumnSql();
 
+    Stream<String> insertColumnSql(Alias<?> alias);
+
     Stream<String> insertArgsSql(Database database, Optional<R> row);
+
+    Stream<String> selectArgsSql(Database database, Optional<R> row);
+
+    Stream<Object> selectArgs(Database database, Optional<R> row);
 
     Stream<Object> insertArgs(Database database, Optional<R> row);
 
     Stream<String> updateSql();
+
+    Stream<String> updateSql(Alias<?> sourceAlias);
 
     Stream<Object> updateArgs(Database database, R row);
 

@@ -56,6 +56,7 @@ import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeAdapter;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.EnumByName;
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -422,21 +423,75 @@ public class Database {
         return Update.update(this, tempTable.as(alias));
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @Deprecated
     public <R> int update(R row) {
-        return update(getDefaultSqlExecutor(), row);
+        return updateRow(row);
+    }
+
+    @Deprecated
+    public <R> int update(SqlExecutor sqlExecutor, R row) {
+        return updateRow(sqlExecutor, row);
+    }
+
+    @Deprecated
+    public <R> int update(Transaction transaction, R row) {
+        return updateRow(transaction, row);
+    }
+
+    public <R> int updateRow(R row) {
+        return updateRow(getDefaultSqlExecutor(), row);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> int update(SqlExecutor sqlExecutor, R row) {
+    public <R> int updateRow(SqlExecutor sqlExecutor, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).update(sqlExecutor, row);
     }
 
-    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
-    public <R> int update(Transaction transaction, R row) {
+    @SuppressWarnings("unchecked")
+    public <R> int updateRow(Transaction transaction, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).update(transaction, row);
+    }
+
+    @SafeVarargs
+    public final <R> int upsertRows(R... rows) {
+        return upsertRows(getDefaultSqlExecutor(), ImmutableList.copyOf(rows));
+    }
+
+    @SafeVarargs
+    public final <R> int upsertRows(SqlExecutor sqlExecutor, R... rows) {
+        return upsertRows(sqlExecutor, ImmutableList.copyOf(rows));
+    }
+
+    @SafeVarargs
+    public final <R> int upsertRows(Transaction transaction, R... rows) {
+        return upsertRows(transaction, ImmutableList.copyOf(rows));
+    }
+
+    public <R> int upsertRows(List<R> rows) {
+        if (rows.isEmpty()) {
+            return 0;
+        }
+        return upsertRows(getDefaultSqlExecutor(), rows);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int upsertRows(SqlExecutor sqlExecutor, List<R> rows) {
+        if (rows.isEmpty()) {
+            return 0;
+        }
+        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
+        return table(rowClass).upsert(sqlExecutor, rows);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int upsertRows(Transaction transaction, List<R> rows) {
+        if (rows.isEmpty()) {
+            return 0;
+        }
+        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
+        return table(rowClass).upsert(transaction, rows);
     }
 
     public <D> ExpectingWhere delete(Alias<D> alias) {

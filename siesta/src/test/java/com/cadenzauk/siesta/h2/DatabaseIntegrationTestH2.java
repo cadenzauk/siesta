@@ -158,7 +158,7 @@ class DatabaseIntegrationTestH2 extends DatabaseIntegrationTest {
             .build();
         database.insert(salespersonRow);
 
-        database.update(updated);
+        database.updateRow(updated);
 
         Integer valueInDatabase = database.from(SalespersonRow.class)
             .select(SalespersonRow::numberOfSales)

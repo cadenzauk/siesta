@@ -34,5 +34,9 @@ includeBuild ("siesta-oracle")
 includeBuild ("siesta-postgres")
 includeBuild ("siesta-sqlserver")
 includeBuild ("siesta-firebird")
-includeBuild ("siesta-kotlin")
+includeBuild ("siesta-kotlin") {
+    dependencySubstitution {
+        substitute module('com.cadenzauk:siesta-kotlin') using project(':')
+    }
+}
 

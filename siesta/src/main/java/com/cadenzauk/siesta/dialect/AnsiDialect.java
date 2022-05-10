@@ -28,6 +28,7 @@ import com.cadenzauk.core.sql.exception.SqlStateExceptionTranslator;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.MergeInfo;
 import com.cadenzauk.siesta.SequenceInfo;
 import com.cadenzauk.siesta.TempTableInfo;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
@@ -55,6 +56,7 @@ public class AnsiDialect implements Dialect {
     private final SqlStateExceptionTranslator exceptionTranslator = new SqlStateExceptionTranslator();
     private SequenceInfo sequenceInfo;
     private TempTableInfo tempTableInfo;
+    private MergeInfo mergeInfo;
 
     public AnsiDialect() {
         functions
@@ -65,6 +67,7 @@ public class AnsiDialect implements Dialect {
 
         sequenceInfo = SequenceInfo.newBuilder().build();
         tempTableInfo = TempTableInfo.newBuilder().build();
+        mergeInfo = new MergeInfo(this);
     }
 
     @Override
@@ -251,6 +254,11 @@ public class AnsiDialect implements Dialect {
         return tempTableInfo;
     }
 
+    @Override
+    public MergeInfo mergeInfo() {
+        return mergeInfo;
+    }
+
     protected DbTypeRegistry types() {
         return types;
     }
@@ -269,5 +277,9 @@ public class AnsiDialect implements Dialect {
 
     protected void setTempTableInfo(TempTableInfo tempTableInfo) {
         this.tempTableInfo = tempTableInfo;
+    }
+
+    protected void setMergeInfo(MergeInfo mergeInfo) {
+        this.mergeInfo = mergeInfo;
     }
 }

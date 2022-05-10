@@ -382,7 +382,7 @@ class DatabaseTest {
             .build();
         SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
 
-        database.update(salesperson);
+        database.updateRow(salesperson);
 
         verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("update SIESTA.SALESPERSON " +
@@ -403,7 +403,7 @@ class DatabaseTest {
         Database database = Database.newBuilder().build();
         SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
 
-        database.update(sqlExecutor, salesperson);
+        database.updateRow(sqlExecutor, salesperson);
 
         verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("update SIESTA.SALESPERSON " +
@@ -424,7 +424,7 @@ class DatabaseTest {
         Database database = Database.newBuilder().build();
         SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
 
-        database.update(transaction, salesperson);
+        database.updateRow(transaction, salesperson);
 
         verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("update SIESTA.SALESPERSON " +

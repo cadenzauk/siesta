@@ -38,6 +38,8 @@ import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
+import com.cadenzauk.siesta.type.DefaultBigint;
+import com.cadenzauk.siesta.type.DefaultDecimal;
 import com.cadenzauk.siesta.type.DefaultInteger;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
@@ -45,6 +47,7 @@ import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -81,7 +84,7 @@ public class FirebirdDialect extends AnsiDialect {
             .register(DbTypeId.INTEGER, new DefaultInteger() {
                 @Override
                 public String parameter(Database database, Optional<Integer> value) {
-                    return "cast(? as integer)";
+                    return castParameter(database, value);
                 }
             })
             .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
@@ -120,7 +123,7 @@ public class FirebirdDialect extends AnsiDialect {
             .register(DbTypeId.VARCHAR, new DefaultVarchar() {
                 @Override
                 public String parameter(Database database, Optional<String> value) {
-                    return String.format("cast(? as varchar(%d))", Integer.max(1, value.map(String::length).orElse(0)));
+                    return castParameter(database, value);
                 }
             });
 

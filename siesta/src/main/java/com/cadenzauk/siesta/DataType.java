@@ -106,8 +106,12 @@ public class DataType<T> {
         return dbType(database).literal(database, value);
     }
 
-    public String sqlType(Database database, Optional<T> value) {
+    public String parameterSql(Database database, Optional<T> value) {
         return dbType(database).parameter(database, value);
+    }
+
+    public String castParameterSql(Database database, Optional<T> value) {
+        return dbType(database).castParameter(database, value);
     }
 
     private DbType<T> dbType(Database database) {

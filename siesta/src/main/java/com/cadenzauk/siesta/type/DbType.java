@@ -43,6 +43,10 @@ public interface DbType<T> {
         return String.format("%s(%d,%d)", sqlType(database), arg1, arg2);
     }
 
+    default String sqlTypeOf(Database database, Optional<T> value) {
+        return sqlType(database);
+    }
+
     default Object convertToDatabase(Database database, T value) {
         return value;
     }
@@ -53,5 +57,9 @@ public interface DbType<T> {
 
     default String parameter(Database database, Optional<T> value) {
         return "?";
+    }
+
+    default String castParameter(Database database, Optional<T> value) {
+        return "cast(? as " + sqlTypeOf(database, value) + ")";
     }
 }

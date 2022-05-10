@@ -213,6 +213,36 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void upsertInsertsWhenNotMatched() {
+        assumeTrue(dialect.mergeInfo().supportsUpsert());
+
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow row = aRandomSalesperson();
+
+        int result = database.upsertRows(row);
+        SalespersonRow stored = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(row.salespersonId()).single();
+
+        assertThat(result, is(1));
+        assertThat(stored, is(row));
+    }
+
+    @Test
+    void upsertUpdatesWhentMatched() {
+        assumeTrue(dialect.mergeInfo().supportsUpsert());
+
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow original = aRandomSalesperson(s -> s.numberOfSales(20));
+        SalespersonRow updated = aRandomSalesperson(s -> s.numberOfSales(30).salespersonId(original.salespersonId()));
+        database.insert(original);
+
+        int result = database.upsertRows(updated);
+        SalespersonRow stored = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(original.salespersonId()).single();
+
+        assertThat(result, is(1));
+        assertThat(stored, is(updated));
+    }
+
+    @Test
     void selectRow() {
         Database database = testDatabase(dataSource, dialect);
         long manufacturerId = newId();
@@ -241,7 +271,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .orderBy(WidgetRow::name, DESC)
             .list();
 
-        List<Tuple2<String,WidgetRow>> acclaimedWidgets2 = database
+        List<Tuple2<String, WidgetRow>> acclaimedWidgets2 = database
             .from(ManufacturerRow.class, "m")
             .join(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
             .select(WidgetRow::name, "name")
@@ -317,7 +347,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .build();
         database.insert(aWidget1, aWidget2, aWidget3);
 
-        List<Tuple3<Long,String,String>> result = database.from(WidgetRow.class)
+        List<Tuple3<Long, String, String>> result = database.from(WidgetRow.class)
             .select(WidgetRow::manufacturerId).comma(max(WidgetRow::name)).comma(min(WidgetRow::name))
             .where(WidgetRow::widgetId).isIn(aWidget1.widgetId(), aWidget2.widgetId(), aWidget3.widgetId())
             .groupBy(WidgetRow::manufacturerId)
@@ -354,7 +384,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .build();
         database.insert(aWidget1, aWidget2, aWidget3);
 
-        List<Tuple5<Long,Integer,Integer,Long,Long>> result = database.from(WidgetRow.class)
+        List<Tuple5<Long, Integer, Integer, Long, Long>> result = database.from(WidgetRow.class)
             .select(WidgetRow::manufacturerId)
             .comma(countDistinct(WidgetRow::name))
             .comma(count())
@@ -406,7 +436,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         database.insert(aWidget1);
         database.insert(aWidget2);
 
-        List<Tuple2<String,String>> result = database.from(ManufacturerRow.class, "m")
+        List<Tuple2<String, String>> result = database.from(ManufacturerRow.class, "m")
             .leftJoin(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
             .select(ManufacturerRow::name)
             .comma(coalesce(WidgetRow::description).orElse(WidgetRow::name).orElse("-- no parts --"))
@@ -444,7 +474,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         database.insert(noParts, twoParts);
         database.insert(aWidget1);
 
-        List<Tuple2<ManufacturerRow,WidgetRow>> result = database.from(ManufacturerRow.class, "m")
+        List<Tuple2<ManufacturerRow, WidgetRow>> result = database.from(ManufacturerRow.class, "m")
             .leftJoin(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
             .where(ManufacturerRow::manufacturerId).isIn(manufacturer1, manufacturer2)
             .orderBy(ManufacturerRow::manufacturerId)
@@ -659,9 +689,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     void olapWithPartitionAndOrder() {
         assumeTrue(dialect.supportsPartitionByInOlap() && dialect.supportsOrderByInOlap(), dialect.getClass().getSimpleName() + " does not support PARTITION BY/ORDER BY in OLAP functions.");
         Database database = testDatabase(dataSource, dialect);
-        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 5);
 
-        List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
+        List<Tuple3<Long, Integer, Long>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber()
                 .partitionBy(SalespersonRow::salespersonId)
@@ -683,13 +713,13 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assumeTrue(dialect.supportsPartitionByInOlap(), dialect.getClass().getSimpleName() + " does not support PARTITION BY in OLAP functions.");
 
         Database database = testDatabase(dataSource, dialect);
-        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 5);
 
         TypedExpression<Integer> rowNumber =
             dialect.requiresOrderByInRowNumber()
                 ? rowNumber().partitionBy(column(SalespersonRow::salespersonId)).orderBy(SalespersonRow::salespersonId, ASC)
                 : rowNumber().partitionBy(column(SalespersonRow::salespersonId));
-        List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
+        List<Tuple3<Long, Integer, Long>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber)
             .comma(Olap.sum(SalespersonRow::salespersonId).partitionBy(SalespersonRow::salespersonId).then(SalespersonRow::firstName))
@@ -706,9 +736,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     void olapWithOrderBy() {
         assumeTrue(dialect.supportsOrderByInOlap(), dialect.getClass().getSimpleName() + " does not support row_number() with ORDER BY.");
         Database database = testDatabase(dataSource, dialect);
-        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 5);
 
-        List<Tuple3<Long,Integer,Long>> result = database.from(SalespersonRow.class)
+        List<Tuple3<Long, Integer, Long>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber().orderBy(SalespersonRow::salespersonId, DESC))
             .comma(Olap.sum(SalespersonRow::salespersonId).orderBy(SalespersonRow::salespersonId, ASC))
@@ -725,9 +755,9 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     void olapWithoutPartitionOrOrder() {
         assumeFalse(dialect.requiresOrderByInRowNumber(), dialect.getClass().getSimpleName() + " does not support row_number() without ORDER BY.");
         Database database = testDatabase(dataSource, dialect);
-        Tuple2<Long,Long> inserted = insertSalespeople(database, 5);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 5);
 
-        List<Tuple2<Long,Integer>> result = database.from(SalespersonRow.class)
+        List<Tuple2<Long, Integer>> result = database.from(SalespersonRow.class)
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber())
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
@@ -744,7 +774,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         return Stream.of(
             arguments(new BigDecimal("5001.12")),
             arguments((byte) 0xff),
-            arguments((Object) new byte[] {(byte) 0xff, 0x1, 0x7f}),
+            arguments((Object) new byte[]{(byte) 0xff, 0x1, 0x7f}),
             arguments(3.1415),
             arguments(2.71f),
             arguments(LocalDate.of(2014, 9, 12)),
@@ -952,7 +982,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         LocalDate date = RandomValues.randomLocalDate();
         Database database = testDatabase(dataSource, dialect);
 
-        Tuple3<Integer,Integer,Integer> result = database
+        Tuple3<Integer, Integer, Integer> result = database
             .select(year(LiteralExpression.of(date)))
             .comma(month(ValueExpression.of(date)))
             .comma(day(LiteralExpression.of(date)))
@@ -968,7 +998,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         LocalDateTime dateTime = RandomValues.randomLocalDateTime();
         Database database = testDatabase(dataSource, dialect);
 
-        Tuple6<Integer,Integer,Integer,Integer,Integer,Integer> result = database
+        Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> result = database
             .select(year(LiteralExpression.of(dateTime)))
             .comma(month(ValueExpression.of(dateTime)))
             .comma(day(LiteralExpression.of(dateTime)))
@@ -1000,7 +1030,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .build();
         ZonedDateTime dateTime = RandomValues.randomZonedDateTime(database.databaseTimeZone());
 
-        Tuple7<Integer,Integer,Integer,Integer,Integer,Integer,Integer> result = database
+        Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = database
             .select(year(LiteralExpression.of(dateTime)))
             .comma(month(ValueExpression.of(dateTime)))
             .comma(day(LiteralExpression.of(dateTime)))
@@ -1042,7 +1072,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     @Test
     void fetchFirst() {
         Database database = testDatabase(dataSource);
-        Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 10);
 
         List<SalespersonRow> fullList = database.from(SalespersonRow.class)
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
@@ -1061,7 +1091,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assumeFalse(dialect instanceof H2Dialect, "H2 is buggy");
         assumeFalse(dialect instanceof DerbyDialect, "Derby does not support CTEs");
         Database database = testDatabase(dataSource, dialect);
-        Tuple2<Long,Long> inserted = insertSalespeople(database, 10);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 10);
 
         CommonTableExpression<SalespersonRow> first5 = database.with("first5")
             .as(
@@ -1213,7 +1243,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .localDateReq(localDate)
             .build());
 
-        Tuple8<Integer,Integer,Integer,Integer,Integer,Integer,Integer,Integer> result = database
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = database
             .select(dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 31, 0)), value(LocalDateTime.of(2018, 2, 17, 11, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
@@ -1288,7 +1318,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     void instrFunction() {
         Database database = testDatabase(dataSource, dialect);
 
-        Tuple3<Integer,Integer,Integer> result = database
+        Tuple3<Integer, Integer, Integer> result = database
             .select(instr(literal("ABCABC"), literal("B")))
             .comma(instr(literal("ABC"), literal("D")))
             .comma(instr(literal("DABC"), literal("D")))
@@ -1434,7 +1464,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .build();
         database.insert(salesAreaRow);
 
-        List<Tuple2<String,Long>> result = database.from(SalespersonRow.class, "s")
+        List<Tuple2<String, Long>> result = database.from(SalespersonRow.class, "s")
             .leftJoin(database.from(SalesAreaRow.class, "sa"), "sa2")
             .on("sa2", SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
             .select("sa2", SalesAreaRow::salesAreaName, "area_name")
@@ -1494,7 +1524,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         SalesAreaRow salesAreaRow = aRandomSalesArea(a -> a.salespersonId(Optional.of(salespersonRow2.salespersonId())));
         database.insert(salesAreaRow);
 
-        Select<Tuple2<SalespersonRow,SalesAreaRow>> subselect = database
+        Select<Tuple2<SalespersonRow, SalesAreaRow>> subselect = database
             .from(SalespersonRow.class, "i")
             .leftJoin(SalesAreaRow.class, "a")
             .on(SalesAreaRow::salespersonId).isEqualTo(SalespersonRow::salespersonId)
@@ -1517,7 +1547,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
         Label<Integer> rowNum = Label.of("rown", Integer.class);
 
-        Select<Tuple2<Long,Integer>> subselect = database
+        Select<Tuple2<Long, Integer>> subselect = database
             .from(SalespersonRow.class, "i")
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber().orderBy(SalespersonRow::numberOfSales), rowNum)
@@ -1527,7 +1557,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
                 salespersonRow3.salespersonId()
             );
         long result = database
-            .from(subselect, "o" )
+            .from(subselect, "o")
             .select(SalespersonRow::salespersonId)
             .where(rowNum).isEqualTo(3)
             .single();
@@ -1604,5 +1634,6 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     private static JsonNode parse(BinaryJson json) throws JsonProcessingException {
         return objectMapper.get().readTree(json.data());
     }
+
     private static final Lazy<ObjectMapper> objectMapper = new Lazy<>(() -> new ObjectMapper().registerModule(new Jdk8Module()));
 }
