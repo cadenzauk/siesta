@@ -66,6 +66,10 @@ public class ColumnDataType<T> {
             .orElseGet(() -> type.sqlType(database));
     }
 
+    public static ColumnDataType<Boolean> bool() {
+        return new ColumnDataType<>(DbTypeId.BOOLEAN);
+    }
+
     public static ColumnDataType<Short> smallint() {
         return new ColumnDataType<>(DbTypeId.SMALLINT);
     }

@@ -41,6 +41,7 @@ import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.type.BooleanAsTinyInt;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBigint;
 import com.cadenzauk.siesta.type.DefaultDate;
@@ -98,6 +99,7 @@ public class OracleDialect extends AnsiDialect {
         types()
             .register(DbTypeId.BINARY, new DefaultVarbinary("raw"))
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.BOOLEAN, new BooleanAsTinyInt("smallint"))
             .register(DbTypeId.SMALLINT, new DefaultSmallint(){
                 @Override
                 public String sqlType(Database database) {

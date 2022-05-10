@@ -37,6 +37,7 @@ public class DataTypeRegistry {
 
     public DataTypeRegistry() {
         register(DataType.BIG_DECIMAL);
+        register(DataType.BOOLEAN);
         register(DataType.BYTE);
         register(DataType.BYTE_ARRAY);
         register(DataType.DOUBLE);

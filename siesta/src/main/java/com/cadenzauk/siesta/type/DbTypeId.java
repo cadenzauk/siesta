@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class DbTypeId<T> {
+    public static final DbTypeId<Boolean> BOOLEAN = new DbTypeId<>("boolean", Types.BOOLEAN, Boolean.class);
     public static final DbTypeId<Byte> TINYINT = new DbTypeId<>("tinyint", Types.TINYINT, Byte.class);
     public static final DbTypeId<Short> SMALLINT = new DbTypeId<>("smallint", Types.SMALLINT, Short.class);
     public static final DbTypeId<Integer> INTEGER = new DbTypeId<>("integer", Types.INTEGER, Integer.class);

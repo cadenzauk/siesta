@@ -31,6 +31,7 @@ public class DbTypeRegistry {
 
     public DbTypeRegistry() {
         this
+            .register(DbTypeId.BOOLEAN, new DefaultBoolean())
             .register(DbTypeId.DECIMAL, new DefaultDecimal())
             .register(DbTypeId.TINYINT, new DefaultTinyint())
             .register(DbTypeId.BINARY, new DefaultVarbinary("binary"))

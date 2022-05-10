@@ -35,6 +35,7 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.type.BooleanAsTinyInt;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultDate;
 import com.cadenzauk.siesta.type.DefaultTime;

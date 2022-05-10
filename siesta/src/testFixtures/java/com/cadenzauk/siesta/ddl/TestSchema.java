@@ -38,6 +38,7 @@ import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.notN
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.primaryKey;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.bigint;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.binary;
+import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.bool;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.character;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.date;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.decimal;
@@ -155,6 +156,8 @@ public class TestSchema {
                 .column(TestRow::localTimeOpt, time())
                 .column(TestRow::utcDateTimeReq, timestamp())
                 .column(TestRow::utcDateTimeOpt, timestamp())
+                .column(TestRow::booleanReq, bool())
+                .column(TestRow::booleanOpt, bool())
             )
             .createTable(t -> t
                 .id("create LOCK_TEST table")

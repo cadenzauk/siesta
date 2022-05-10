@@ -54,6 +54,8 @@ public class TestRow {
     private final Optional<LocalTime> localTimeOpt;
     private final ZonedDateTime utcDateTimeReq;
     private final Optional<ZonedDateTime> utcDateTimeOpt;
+    private final Boolean booleanReq;
+    private final Optional<Boolean> booleanOpt;
 
     private TestRow(Builder builder) {
         guid = builder.guid;
@@ -71,6 +73,8 @@ public class TestRow {
         localTimeOpt = builder.localTimeOpt;
         utcDateTimeReq = builder.utcDateTimeReq;
         utcDateTimeOpt = builder.utcDateTimeOpt;
+        booleanReq = builder.booleanReq;
+        booleanOpt = builder.booleanOpt;
     }
 
     public UUID guid() {
@@ -133,6 +137,21 @@ public class TestRow {
         return localTimeOpt;
     }
 
+    public Boolean booleanReq() {
+        return booleanReq;
+    }
+
+    public Optional<Boolean> booleanOpt() {
+        return booleanOpt;
+    }
+
+    public static TestRow of(Boolean b) {
+        return TestRow.newBuilder()
+            .booleanReq(b)
+            .booleanOpt(Optional.ofNullable(b))
+            .build();
+    }
+
     public static TestRow of(LocalTime localTimeOpt) {
         return TestRow.newBuilder()
             .localTimeOpt(Optional.of(localTimeOpt))
@@ -177,6 +196,8 @@ public class TestRow {
         private Optional<LocalTime> localTimeOpt;
         private ZonedDateTime utcDateTimeReq;
         private Optional<ZonedDateTime> utcDateTimeOpt;
+        private Boolean booleanReq;
+        private Optional<Boolean> booleanOpt;
 
         private Builder() {
             this.guid = UUID.randomUUID();
@@ -268,6 +289,16 @@ public class TestRow {
 
         public Builder utcDateTimeOpt(Optional<ZonedDateTime> utcDateTimeOpt) {
             this.utcDateTimeOpt = utcDateTimeOpt;
+            return this;
+        }
+
+        public Builder booleanReq(Boolean val) {
+            booleanReq = val;
+            return this;
+        }
+
+        public Builder booleanOpt(Optional<Boolean> val) {
+            booleanOpt = val;
             return this;
         }
 

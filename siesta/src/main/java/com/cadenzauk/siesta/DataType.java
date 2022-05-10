@@ -42,6 +42,7 @@ import java.util.UUID;
 public class DataType<T> {
     public static final DataType<BigDecimal> BIG_DECIMAL = new DataType<>(BigDecimal.class, DbTypeId.DECIMAL);
     public static final DataType<Byte> BYTE = new DataType<>(Byte.class, DbTypeId.TINYINT);
+    public static final DataType<Boolean> BOOLEAN = new DataType<>(Boolean.class, DbTypeId.BOOLEAN);
     public static final DataType<byte[]> BYTE_ARRAY = new DataType<>(byte[].class, DbTypeId.VARBINARY);
     public static final DataType<Double> DOUBLE = new DataType<>(Double.class, DbTypeId.DOUBLE);
     public static final DataType<Float> FLOAT = new DataType<>(Float.class, DbTypeId.REAL);

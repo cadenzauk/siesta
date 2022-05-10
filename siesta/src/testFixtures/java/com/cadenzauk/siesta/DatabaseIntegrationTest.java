@@ -928,6 +928,25 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result, is(expected));
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"null"})
+    @TestCase({"true"})
+    @TestCase({"false"})
+    void canRoundTripBooleans(Boolean expected) {
+        Database database = testDatabase(dataSource, dialect);
+        TestRow input = TestRow.of(expected);
+
+        database.insert(input);
+        Boolean result = database
+            .from(TestRow.class)
+            .select(TestRow::booleanOpt)
+            .where(TestRow::guid).isEqualTo(input.guid())
+            .single();
+
+        assertThat(result, is(expected));
+    }
+
     @Test
     void localDatePartFuncs() {
         LocalDate date = RandomValues.randomLocalDate();
