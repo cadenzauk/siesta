@@ -977,6 +977,28 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result, is(expected));
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(TestCaseArgumentsProvider.class)
+    @TestCase({"true"})
+    @TestCase({"false"})
+    void canQueryByLiteralBoolean(Boolean expected) {
+        Database database = testDatabase(dataSource, dialect);
+        TestRow input = TestRow.of(expected);
+
+        database.insert(input);
+        Boolean result = database
+            .from(TestRow.class)
+            .select(TestRow::booleanOpt)
+            .where(TestRow::guid).isEqualTo(input.guid())
+            .and(TestRow::booleanReq).isEqualTo(expected)
+            .and(TestRow::booleanOpt).isEqualTo(expected)
+            .and(TestRow::booleanReq).isEqualTo(literal(expected))
+            .and(TestRow::booleanOpt).isEqualTo(literal(expected))
+            .single();
+
+        assertThat(result, is(expected));
+    }
+
     @Test
     void localDatePartFuncs() {
         LocalDate date = RandomValues.randomLocalDate();

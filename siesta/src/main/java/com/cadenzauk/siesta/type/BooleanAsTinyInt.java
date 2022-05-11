@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.type;
 
+import com.cadenzauk.siesta.Database;
+
 import java.sql.ResultSet;
 
 public class BooleanAsTinyInt extends DefaultDbType<Boolean> {
@@ -31,5 +33,10 @@ public class BooleanAsTinyInt extends DefaultDbType<Boolean> {
 
     public BooleanAsTinyInt(String sqlType) {
         super(sqlType, ResultSet::getBoolean, ResultSet::getBoolean);
+    }
+
+    @Override
+    public String literal(Database database, Boolean value) {
+        return value ? "1" : "0";
     }
 }
