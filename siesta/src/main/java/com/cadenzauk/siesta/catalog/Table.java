@@ -170,7 +170,7 @@ public class Table<R> implements ColumnCollection<R> {
         if (row == null) {
             return 0;
         }
-        String sql = updateSql();
+        String sql = updateSql(row);
         Object[] args = columnMapping.updateArgs(row);
         return database.execute(sql, () -> sqlExecutor.update(sql, args));
     }
@@ -179,7 +179,7 @@ public class Table<R> implements ColumnCollection<R> {
         if (row == null) {
             return 0;
         }
-        String sql = updateSql();
+        String sql = updateSql(row);
         Object[] args = columnMapping.updateArgs(row);
         return database.execute(sql, () -> transaction.update(sql, args));
     }
@@ -291,11 +291,11 @@ public class Table<R> implements ColumnCollection<R> {
         return columns().flatMap(Column::insertColumnSql).collect(joining(", "));
     }
 
-    private String updateSql() {
+    private String updateSql(R row) {
         Alias<R> alias = RegularTableAlias.of(this);
         return String.format("update %s set %s where %s",
             qualifiedName(),
-            columns().flatMap(Column::updateSql).collect(joining(", ")),
+            columns().flatMap(c -> c.updateSql(database, Optional.of(row))).collect(joining(", ")),
             columns().flatMap(c -> c.idSql(alias)).collect(joining(" and ")));
     }
 

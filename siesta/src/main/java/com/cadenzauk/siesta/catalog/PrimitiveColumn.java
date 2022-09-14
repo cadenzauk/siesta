@@ -233,9 +233,9 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
     }
 
     @Override
-    public Stream<String> updateSql() {
+    public Stream<String> updateSql(Database database, Optional<R> row) {
         return updatable && ! identifier
-            ? Stream.of(sql() + " = ?")
+            ? Stream.of(sql() + " = " + dataType.parameterSql(database, row.flatMap(getter())))
             : Stream.empty();
     }
 

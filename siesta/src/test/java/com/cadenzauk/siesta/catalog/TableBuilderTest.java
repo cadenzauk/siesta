@@ -418,14 +418,14 @@ class TableBuilderTest {
 
         String insertSql = database.table(NoAnnotations.class)
             .columns()
-            .flatMap(Column::updateSql)
+            .flatMap(c -> c.updateSql(database, Optional.empty()))
             .collect(joining(", "));
 
         assertThat(database.table(NoAnnotations.class).column(NoAnnotations::id).updatable(), is(true));
         assertThat(database.table(NoAnnotations.class).column(NoAnnotations::name).updatable(), is(true));
         assertThat(database.table(NoAnnotations.class).column(NoAnnotations::updateTime).updatable(), is(false));
         assertThat(database.table(NoAnnotations.class).column(NoAnnotations::insertTime).updatable(), is(true));
-        assertThat(insertSql, is("ID = ?, NAME = ?, INSERT_TIME = ?"));
+        assertThat(insertSql, is("ID = ?, NAME = ?, INSERT_TIME = cast(? as timestamp)"));
     }
 
     @Test
@@ -436,14 +436,14 @@ class TableBuilderTest {
 
         String updateSql = database.table(IdAnnotation.class)
             .columns()
-            .flatMap(Column::updateSql)
+            .flatMap(c -> c.updateSql(database, Optional.empty()))
             .collect(joining(", "));
 
         assertThat(database.table(IdAnnotation.class).column(IdAnnotation::id).updatable(), is(false));
         assertThat(database.table(IdAnnotation.class).column(IdAnnotation::name).updatable(), is(true));
         assertThat(database.table(IdAnnotation.class).column(IdAnnotation::insertTime).updatable(), is(false));
         assertThat(database.table(IdAnnotation.class).column(IdAnnotation::updateTime).updatable(), is(true));
-        assertThat(updateSql, is("NAME = ?, UPDATE_TIME = ?"));
+        assertThat(updateSql, is("NAME = ?, UPDATE_TIME = cast(? as timestamp)"));
     }
 
     @Test
@@ -458,7 +458,7 @@ class TableBuilderTest {
 
         String updateSql = database.table(EmbeddedColumnsNoAnnotations.class)
             .columns()
-            .flatMap(Column::updateSql)
+            .flatMap(c -> c.updateSql(database, Optional.empty()))
             .collect(joining(", "));
 
         assertThat(database.table(EmbeddedColumnsNoAnnotations.class).column(EmbeddedColumnsNoAnnotations::gross).updatable(), is(false));
@@ -479,7 +479,7 @@ class TableBuilderTest {
         Table<EmbeddedColumnsNoAnnotations> table = database.table(EmbeddedColumnsNoAnnotations.class);
         String updateSql = table
             .columns()
-            .flatMap(Column::updateSql)
+            .flatMap(c -> c.updateSql(database, Optional.empty()))
             .collect(joining(", "));
 
         assertThat(table.column(EmbeddedColumnsNoAnnotations::gross).updatable(), is(true));
@@ -500,7 +500,7 @@ class TableBuilderTest {
         Table<EmbeddedColumnsInsertOverride> table = database.table(EmbeddedColumnsInsertOverride.class);
         String updateSql = table
             .columns()
-            .flatMap(Column::updateSql)
+            .flatMap(c -> c.updateSql(database, Optional.empty()))
             .collect(joining(", "));
 
         assertThat(table.column(EmbeddedColumnsInsertOverride::gross).updatable(), is(true));

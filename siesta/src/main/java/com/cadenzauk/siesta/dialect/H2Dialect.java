@@ -86,6 +86,11 @@ public class H2Dialect extends AnsiDialect {
                 public String parameter(Database database, Optional<Json> value) {
                     return "? format json";
                 }
+
+                @Override
+                public String castParameter(Database database, Optional<Json> value) {
+                    return "cast(? format json as " + sqlTypeOf(database, value) + ")";
+                }
             })
             .register(DbTypeId.JSONB, new DefaultBinaryJson() {
                 @Override
@@ -94,8 +99,13 @@ public class H2Dialect extends AnsiDialect {
                 }
 
                 @Override
-                public String parameter(Database database, Optional< BinaryJson > value) {
+                public String parameter(Database database, Optional<BinaryJson> value) {
                     return "? format json";
+                }
+
+                @Override
+                public String castParameter(Database database, Optional<BinaryJson> value) {
+                    return "cast(? format json as " + sqlTypeOf(database, value) + ")";
                 }
             });
 

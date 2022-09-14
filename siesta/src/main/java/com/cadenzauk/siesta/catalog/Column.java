@@ -72,7 +72,7 @@ public interface Column<T, R> extends AliasColumn<T> {
 
     Stream<Object> insertArgs(Database database, Optional<R> row);
 
-    Stream<String> updateSql();
+    Stream<String> updateSql(Database database, Optional<R> row);
 
     Stream<String> updateSql(Alias<?> sourceAlias);
 

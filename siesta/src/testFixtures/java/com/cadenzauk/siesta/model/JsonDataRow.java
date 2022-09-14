@@ -25,12 +25,14 @@ package com.cadenzauk.siesta.model;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
 
+import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
 import java.util.Optional;
 
 @Table(name = "JSON_DATA")
 public class JsonDataRow {
+    @Id
     private final long jsonId;
     private final Json data;
     private final Optional<BinaryJson> dataBinary;

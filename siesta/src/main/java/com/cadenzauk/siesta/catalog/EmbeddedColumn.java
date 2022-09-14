@@ -224,9 +224,9 @@ public class EmbeddedColumn<T, TB, R, RB> implements TableColumn<T,R,RB>, Column
     }
 
     @Override
-    public Stream<String> updateSql() {
+    public Stream<String> updateSql(Database database, Optional<R> row) {
         return updatable
-            ? columns().flatMap(Column::updateSql)
+            ? columns().flatMap(c -> c.updateSql(database, row.flatMap(getter)))
             : Stream.empty();
     }
 

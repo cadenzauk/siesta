@@ -1649,6 +1649,38 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(parse(result.item2()), is(parse(BinaryJson.of("{\"numberOfSales\": 100}"))));
     }
 
+    @Test
+    void canUpdateJson() throws JsonProcessingException {
+        assumeTrue(dialect.supportsJsonFunctions());
+        long jsonId = newId();
+        Database database = testDatabase(dataSource, dialect);
+        JsonDataRow input1 = new JsonDataRow(jsonId, new Json("{\"name\": \"bob\"}"), Optional.of(new BinaryJson("{\"name\": \"fred\"}")));
+        JsonDataRow input2 = new JsonDataRow(jsonId, new Json("{\"name\": \"bert\"}"), Optional.of(new BinaryJson("{\"name\": \"ernie\"}")));
+        database.insert(input1);
+        database.updateRow(input2);
+
+        JsonDataRow result = database.from(JsonDataRow.class).where(JsonDataRow::jsonId).isEqualTo(jsonId).single();
+
+        assertThat(parse(result.data()), is(parse(input2.data())));
+        assertThat(parse(result.dataBinary().orElseThrow(AssertionError::new)), is(parse(input2.dataBinary().orElseThrow(AssertionError::new))));
+    }
+
+    @Test
+    void canUpsertJson() throws JsonProcessingException {
+        assumeTrue(dialect.supportsJsonFunctions());
+        long jsonId = newId();
+        Database database = testDatabase(dataSource, dialect);
+        JsonDataRow input1 = new JsonDataRow(jsonId, new Json("{\"name\": \"bob\"}"), Optional.of(new BinaryJson("{\"name\": \"fred\"}")));
+        JsonDataRow input2 = new JsonDataRow(jsonId, new Json("{\"name\": \"bert\"}"), Optional.of(new BinaryJson("{\"name\": \"ernie\"}")));
+        database.insert(input1);
+        database.upsertRows(input2);
+
+        JsonDataRow result = database.from(JsonDataRow.class).where(JsonDataRow::jsonId).isEqualTo(jsonId).single();
+
+        assertThat(parse(result.data()), is(parse(input2.data())));
+        assertThat(parse(result.dataBinary().orElseThrow(AssertionError::new)), is(parse(input2.dataBinary().orElseThrow(AssertionError::new))));
+    }
+
     private static JsonNode parse(Json json) throws JsonProcessingException {
         return objectMapper.get().readTree(json.data());
     }
