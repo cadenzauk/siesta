@@ -48,8 +48,8 @@ public class DbTypeRegistry {
             .register(DbTypeId.VARCHAR, new DefaultVarchar())
             .register(DbTypeId.UUID, new DefaultUuid())
             .register(DbTypeId.UTC_TIMESTAMP, new DefaultUtcTimestamp())
-            .register(DbTypeId.JSON, new DefaultJson())
-            .register(DbTypeId.JSONB, new DefaultBinaryJson())
+            .register(DbTypeId.JSON, new DefaultJson("varchar"))
+            .register(DbTypeId.JSONB, new DefaultBinaryJson("varchar"))
         ;
     }
 

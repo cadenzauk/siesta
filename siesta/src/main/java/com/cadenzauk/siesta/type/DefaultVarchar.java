@@ -43,6 +43,6 @@ public class DefaultVarchar extends DefaultDbType<String> {
 
     @Override
     public String sqlTypeOf(Database database, Optional<String> value) {
-        return String.format("varchar(%d)", Integer.max(1, value.map(String::length).orElse(1)));
+        return String.format("%s(%d)", sqlType(database), Integer.max(1, value.map(String::length).orElse(1)));
     }
 }

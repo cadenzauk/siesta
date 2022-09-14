@@ -33,10 +33,12 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.type.DbTypeId;
@@ -45,6 +47,7 @@ import com.cadenzauk.siesta.type.DefaultJson;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class H2Dialect extends AnsiDialect {
     private static final int DEFAULT_LOCK_TIMEOUT = 1000;
@@ -209,5 +212,18 @@ public class H2Dialect extends AnsiDialect {
         } else {
             return super.nextFromSequence(catalog, schema, sequenceName);
         }
+    }
+
+    @Override
+    public String createJavaProcSql(Database database, Class<?> procClass, String methodName, String functionName) {
+        return String.format("create alias if not exists %s for \"%s.%s\"", functionName, procClass.getCanonicalName(), methodName);
+    }
+
+    @Override
+    public Stream<FunctionName> missingJsonFunctions() {
+        return Stream.of(
+            JsonFunctionSpecs.JSON_VALUE,
+            JsonFunctionSpecs.JSONB_VALUE
+        );
     }
 }

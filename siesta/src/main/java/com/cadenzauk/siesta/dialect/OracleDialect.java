@@ -41,11 +41,15 @@ import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.json.BinaryJson;
+import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.type.BooleanAsTinyInt;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBigint;
+import com.cadenzauk.siesta.type.DefaultBinaryJson;
 import com.cadenzauk.siesta.type.DefaultDate;
 import com.cadenzauk.siesta.type.DefaultDecimal;
+import com.cadenzauk.siesta.type.DefaultJson;
 import com.cadenzauk.siesta.type.DefaultSmallint;
 import com.cadenzauk.siesta.type.DefaultTime;
 import com.cadenzauk.siesta.type.DefaultTinyint;
@@ -195,10 +199,17 @@ public class OracleDialect extends AnsiDialect {
                     return LocalTime.parse(string);
                 }
             })
-            .register(DbTypeId.VARCHAR, new DefaultVarchar() {
+            .register(DbTypeId.VARCHAR, new DefaultVarchar("varchar2"))
+            .register(DbTypeId.JSON, new DefaultJson("varchar2") {
                 @Override
-                public String sqlType(Database database) {
-                    return "varchar2";
+                public String sqlTypeOf(Database database, Optional<Json> value) {
+                    return String.format("%s(%d)", sqlType(database), Integer.max(1, value.map(Json::data).map(String::length).orElse(1)));
+                }
+            })
+            .register(DbTypeId.JSONB, new DefaultBinaryJson("varchar2") {
+                @Override
+                public String sqlTypeOf(Database database, Optional<BinaryJson> value) {
+                    return String.format("%s(%d)", sqlType(database), Integer.max(1, value.map(BinaryJson::data).map(String::length).orElse(1)));
                 }
             });
 
@@ -222,6 +233,11 @@ public class OracleDialect extends AnsiDialect {
     @Override
     public String fetchFirst(String sql, long n) {
         return String.format("select * from (%s) where rownum <= %d", sql, n);
+    }
+
+    @Override
+    public boolean supportsJsonFunctions() {
+        return true;
     }
 
     @Override

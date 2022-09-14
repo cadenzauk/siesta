@@ -39,4 +39,9 @@ includeBuild ("siesta-kotlin") {
         substitute module('com.cadenzauk:siesta-kotlin') using project(':')
     }
 }
+includeBuild ("siesta-jackson") {
+    dependencySubstitution {
+        substitute module('com.cadenzauk:siesta-jackson') using project(':')
+    }
+}
 

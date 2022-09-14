@@ -24,13 +24,18 @@ package com.cadenzauk.siesta.dialect.function.json;
 
 import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.FunctionRegistry;
+import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 
 public class JsonFunctionSpecs {
     public static final FunctionName JSON_OBJECT = new FunctionName("json_object");
     public static final FunctionName JSONB_OBJECT = new FunctionName("jsonb_object");
+    public static final FunctionName JSON_VALUE = new FunctionName("json_value");
+    public static final FunctionName JSONB_VALUE = new FunctionName("jsonb_value");
 
     public static void registerDefaults(FunctionRegistry functions) {
         functions.register(JSON_OBJECT, new JsonObjectFunctionSpec("json_object"));
         functions.register(JSONB_OBJECT, new JsonObjectFunctionSpec("json_object"));
+        functions.register(JSON_VALUE, SimpleFunctionSpec.of("json_value"));
+        functions.register(JSONB_VALUE, SimpleFunctionSpec.of("json_value"));
     }
 }

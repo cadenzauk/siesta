@@ -58,15 +58,15 @@ dependencies {
     testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
     testFixturesApi group: 'co.unruly', name: 'java-8-matchers', version: '1.5'
     testFixturesApi group: 'com.h2database', name: 'h2', version: h2Version
-    testFixturesImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.2.2'
-    testFixturesImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.13.2'
+    testFixturesImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion
+    testFixturesImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
 
     testFixturesRuntimeOnly group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
 
     testImplementation group: 'org.hsqldb', name: 'hsqldb', version: hsqldbVersion
     testImplementation group: 'org.apache.derby', name: 'derby', version: derbyVersion
     testImplementation group: 'com.google.guava', name: 'guava-testlib', version: '31.1-jre'
-
+    testImplementation group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.3'
     testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
 }

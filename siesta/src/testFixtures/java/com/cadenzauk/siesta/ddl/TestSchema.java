@@ -25,7 +25,6 @@ package com.cadenzauk.siesta.ddl;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.model.LockTestRow;
 import com.cadenzauk.siesta.model.ManufacturerRow;
-import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.PartWithTypeRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
@@ -49,7 +48,6 @@ import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.smallint
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.time;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.timestamp;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.varchar;
-import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 
 public class TestSchema {
     private final Dialect dialect;
@@ -190,16 +188,14 @@ public class TestSchema {
                 .column("QUANTITY", bigint(), notNull())
                 .column("PRICE", decimal(15, 2), notNull())
             )
-            .applyIf(dialect.supportsJsonFunctions(), b -> b
-                .createTable(t -> t
-                    .id("create a table with json")
-                    .author("mark")
-                    .schemaName("SIESTA")
-                    .tableName("JSON_DATA")
-                    .column("JSON_ID", bigint(), notNull(), primaryKey())
-                    .column("DATA", json(1000))
-                    .column("DATA_BINARY", jsonb(1000))
-                )
+            .createTable(t -> t
+                .id("create a table with json")
+                .author("mark")
+                .schemaName("SIESTA")
+                .tableName("JSON_DATA")
+                .column("JSON_ID", bigint(), notNull(), primaryKey())
+                .column("DATA", json(1000))
+                .column("DATA_BINARY", jsonb(1000))
             )
             .build();
     }

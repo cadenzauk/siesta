@@ -774,7 +774,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         return Stream.of(
             arguments(new BigDecimal("5001.12")),
             arguments((byte) 0xff),
-            arguments((Object) new byte[]{(byte) 0xff, 0x1, 0x7f}),
+            arguments(new byte[]{(byte) 0xff, 0x1, 0x7f}),
             arguments(3.1415),
             arguments(2.71f),
             arguments(LocalDate.of(2014, 9, 12)),

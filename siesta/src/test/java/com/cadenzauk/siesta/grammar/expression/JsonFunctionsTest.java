@@ -49,7 +49,7 @@ class JsonFunctionsTest extends FunctionTest {
     @SuppressWarnings("unused")
     static Stream<Arguments> parametersForFunctionTest() {
         return Stream.of(
-            testCase(s -> jsonObject(key("name").value("bob")), "json_object(key ? value ?)", toArray("name", "bob")),
+            testCase(s -> jsonObject(key("name").value("bob")), "json_object(key 'name' value ?)", toArray("bob")),
             testCase(s -> jsonObject(key(literal("name")).value("bob")), "json_object(key 'name' value ?)", toArray("bob")),
             testCase(s -> jsonObject(key(TestRow::stringReq).value("bob")), "json_object(key s.STRING_REQ value ?)", toArray("bob")),
             testCase(s -> jsonObject(key(TestRow::stringOpt).value("bob")), "json_object(key s.STRING_OPT value ?)", toArray("bob")),
@@ -58,15 +58,15 @@ class JsonFunctionsTest extends FunctionTest {
             testCase(s -> jsonObject(key(s, TestRow::stringReq).value("bob")), "json_object(key s.STRING_REQ value ?)", toArray("bob")),
             testCase(s -> jsonObject(key(s, TestRow::stringOpt).value("bob")), "json_object(key s.STRING_OPT value ?)", toArray("bob")),
 
-            testCase(s -> jsonObject(key("name").value(literal("bob"))), "json_object(key ? value 'bob')", toArray("name")),
-            testCase(s -> jsonObject(key("name").value(TestRow::stringReq)), "json_object(key ? value s.STRING_REQ)", toArray("name")),
-            testCase(s -> jsonObject(key("name").value(TestRow::stringOpt)), "json_object(key ? value s.STRING_OPT)", toArray("name")),
-            testCase(s -> jsonObject(key("name").value("s", TestRow::stringReq)), "json_object(key ? value s.STRING_REQ)", toArray("name")),
-            testCase(s -> jsonObject(key("name").value("s", TestRow::stringOpt)), "json_object(key ? value s.STRING_OPT)", toArray("name")),
-            testCase(s -> jsonObject(key("name").value(s, TestRow::stringReq)), "json_object(key ? value s.STRING_REQ)", toArray("name")),
-            testCase(s -> jsonObject(key("name").value(s, TestRow::stringOpt)), "json_object(key ? value s.STRING_OPT)", toArray("name")),
+            testCase(s -> jsonObject(key("name").value(literal("bob"))), "json_object(key 'name' value 'bob')", toArray()),
+            testCase(s -> jsonObject(key("name").value(TestRow::stringReq)), "json_object(key 'name' value s.STRING_REQ)", toArray()),
+            testCase(s -> jsonObject(key("name").value(TestRow::stringOpt)), "json_object(key 'name' value s.STRING_OPT)", toArray()),
+            testCase(s -> jsonObject(key("name").value("s", TestRow::stringReq)), "json_object(key 'name' value s.STRING_REQ)", toArray()),
+            testCase(s -> jsonObject(key("name").value("s", TestRow::stringOpt)), "json_object(key 'name' value s.STRING_OPT)", toArray()),
+            testCase(s -> jsonObject(key("name").value(s, TestRow::stringReq)), "json_object(key 'name' value s.STRING_REQ)", toArray()),
+            testCase(s -> jsonObject(key("name").value(s, TestRow::stringOpt)), "json_object(key 'name' value s.STRING_OPT)", toArray()),
 
-            testCase(s -> jsonObject(key("name").value(TestRow::stringReq), key("title").value(TestRow::stringOpt)), "json_object(key ? value s.STRING_REQ, key ? value s.STRING_OPT)", toArray("name", "title")),
+            testCase(s -> jsonObject(key("name").value(TestRow::stringReq), key("title").value(TestRow::stringOpt)), "json_object(key 'name' value s.STRING_REQ, key 'title' value s.STRING_OPT)", toArray()),
             testCase(s -> jsonObject(key(literal("name")).value(TestRow::stringReq), key(literal("title")).value(TestRow::stringOpt)), "json_object(key 'name' value s.STRING_REQ, key 'title' value s.STRING_OPT)", toArray())
         );
     }

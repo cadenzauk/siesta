@@ -33,6 +33,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.dialect.merge.SqlServerMergeInfo;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
@@ -53,6 +54,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
@@ -77,6 +80,24 @@ public class SqlServerDialect extends AnsiDialect {
                 @Override
                 public Stream<Object> args(Scope scope, TypedExpression<?>[] args) {
                     return super.args(scope, args[1], args[0]);
+                }
+            })
+            .register(JsonFunctionSpecs.JSON_OBJECT, new SimpleFunctionSpec("json_object") {
+                @Override
+                public String sql(Scope scope, String... argsSql) {
+                    String args = IntStream.range(0, argsSql.length / 2)
+                        .mapToObj(i -> argsSql[2*i] + ":" + argsSql[2*i+1])
+                        .collect(Collectors.joining(", "));
+                    return String.format("%s(%s)", name, args);
+                }
+            })
+            .register(JsonFunctionSpecs.JSONB_OBJECT, new SimpleFunctionSpec("json_object") {
+                @Override
+                public String sql(Scope scope, String... argsSql) {
+                    String args = IntStream.range(0, argsSql.length / 2)
+                        .mapToObj(i -> argsSql[2*i] + ":" + argsSql[2*i+1])
+                        .collect(Collectors.joining(", "));
+                    return String.format("%s(%s)", name, args);
                 }
             });
 
@@ -218,6 +239,11 @@ public class SqlServerDialect extends AnsiDialect {
     @Override
     public boolean supportsMultipleValueIn() {
         return false;
+    }
+
+    @Override
+    public boolean supportsJsonFunctions() {
+        return true;
     }
 
     @Override

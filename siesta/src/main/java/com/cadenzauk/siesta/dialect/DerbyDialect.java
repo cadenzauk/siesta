@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.sql.exception.DuplicateKeyException;
 import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.InvalidValueException;
@@ -29,14 +30,18 @@ import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
+import com.cadenzauk.siesta.DataType;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.dialect.function.FunctionName;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
+import com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.dialect.merge.DerbyMergeInfo;
+import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultDate;
 import com.cadenzauk.siesta.type.DefaultTime;
@@ -44,20 +49,27 @@ import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.ADD_DAYS;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.DAY_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_OBJECT;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_OBJECT;
 
 public class DerbyDialect extends AnsiDialect {
     public DerbyDialect() {
@@ -69,7 +81,9 @@ public class DerbyDialect extends AnsiDialect {
             .register(SECOND_DIFF, (s, a) -> "{fn TIMESTAMPDIFF(SQL_TSI_SECOND, timestamp(substr(varchar(" + a[1] + "), 1, 19)), timestamp(substr(varchar(" + a[0] + "), 1, 19)))}")
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
-            .register(StringFunctionSpecs.INSTR, (s, a) -> String.format("locate(%s, %s)", a[1], a[0]));
+            .register(StringFunctionSpecs.INSTR, (s, a) -> String.format("locate(%s, %s)", a[1], a[0]))
+            .register(JSON_OBJECT, SimpleFunctionSpec.of("json_object"))
+            .register(JSONB_OBJECT, SimpleFunctionSpec.of("json_object"));
 
         types()
             .register(DbTypeId.DATE, new DefaultDate() {
@@ -207,7 +221,6 @@ public class DerbyDialect extends AnsiDialect {
         return false;
     }
 
-
     private String isolationLevelSqlWithLocks(String sql, IsolationLevel level, LockLevel keepLocks) {
         return String.format("%s for read only with %s use and keep %s locks",
             sql,
@@ -231,4 +244,37 @@ public class DerbyDialect extends AnsiDialect {
         }
         return sql;
     }
-}
+
+
+    @Override
+    public String createJavaProcSql(Database database, Class<?> procClass, String methodName, String functionName) {
+        Method method = ClassUtil.declaredMethods(procClass)
+            .filter(it -> StringUtils.equals(it.getName(), methodName))
+            .limit(1)
+            .findFirst()
+            .orElseThrow(IllegalArgumentException::new);
+        String returnType = typeString(database, method.getReturnType());
+        String parameters = Arrays.stream(method.getParameters())
+            .map(p -> {
+                String typeString = "Object";//typeString(database, p.getType());
+                return String.format("%s %s", p.getName(), typeString);
+            })
+            .collect(Collectors.joining(", "));
+        return String.format("create function siesta.%s(%s) returns %s language java parameter style java no sql external name '%s.%s'", functionName, parameters, returnType, procClass.getCanonicalName(), methodName);
+    }
+
+    private String typeString(Database database, Class<?> parameterType) {
+        DataType<?> dataType = database.getDataTypeOf(parameterType);
+        DbType<?> dbType = types().get(dataType.dbTypeId());
+        return dbType.sqlType(database, 32000);
+    }
+
+    @Override
+    public Stream<FunctionName> missingJsonFunctions() {
+        return Stream.of(
+            JsonFunctionSpecs.JSON_OBJECT,
+            JsonFunctionSpecs.JSONB_OBJECT,
+            JsonFunctionSpecs.JSON_VALUE,
+            JsonFunctionSpecs.JSONB_VALUE
+        );
+    }}
