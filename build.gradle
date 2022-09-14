@@ -50,6 +50,7 @@ tasks.register('integrationTest', Test) {
 test {
     dependsOn gradle.includedBuild('siesta').task(':test')
     dependsOn gradle.includedBuild('siesta-kotlin').task(':test')
+    dependsOn gradle.includedBuild('siesta-jackson').task(':test')
 }
 
 subprojects {

@@ -57,7 +57,9 @@ import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.HOUR_
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.MINUTE_DIFF;
 import static com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs.SECOND_DIFF;
 import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_OBJECT;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_VALUE;
 import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_OBJECT;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_VALUE;
 import static com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs.INSTR;
 
 public class PostgresDialect extends AnsiDialect {
@@ -86,7 +88,9 @@ public class PostgresDialect extends AnsiDialect {
             .register(SECOND_DIFF, (s, argsSql) -> String.format("extract(epoch from (date_trunc('second', %1$s) - date_trunc('second', %2$s)))", argsSql[0], argsSql[1]))
             .register(INSTR, SimpleFunctionSpec.of("strpos"))
             .register(JSON_OBJECT, SimpleFunctionSpec.of("json_build_object"))
-            .register(JSONB_OBJECT, SimpleFunctionSpec.of("jsonb_build_object"));
+            .register(JSONB_OBJECT, SimpleFunctionSpec.of("jsonb_build_object"))
+            .register(JSON_VALUE, (sql, argsSql) -> String.format("(jsonb_path_query_first(cast(%s as jsonb), cast(%s as jsonpath)) #>> '{}')", argsSql[0], argsSql[1]))
+            .register(JSONB_VALUE, (sql, argsSql) -> String.format("(jsonb_path_query_first(cast(%s as jsonb), cast(%s as jsonpath)) #>> '{}')", argsSql[0], argsSql[1]));
 
         types()
             .register(DbTypeId.BINARY, new DefaultVarbinary() {

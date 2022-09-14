@@ -99,4 +99,8 @@ public interface Dialect {
     TempTableInfo tempTableInfo();
 
     MergeInfo mergeInfo();
+
+    String createJavaProcSql(Database database, Class<?> procClass, String methodName, String schema);
+
+    Stream<FunctionName> missingJsonFunctions();
 }

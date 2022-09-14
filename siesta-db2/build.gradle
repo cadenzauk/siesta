@@ -37,6 +37,7 @@ dependencies {
     implementation "com.cadenzauk:siesta:$siestaVersion"
 
     testImplementation testFixtures("com.cadenzauk:siesta:1siestaVersion")
+    testImplementation testFixtures("com.cadenzauk:siesta-jackson:$siestaVersion")
 
     testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion

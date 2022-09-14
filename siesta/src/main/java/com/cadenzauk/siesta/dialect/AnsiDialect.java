@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.dialect;
 import com.cadenzauk.core.sql.exception.SqlExceptionConstructor;
 import com.cadenzauk.core.sql.exception.SqlExceptionTranslator;
 import com.cadenzauk.core.sql.exception.SqlStateExceptionTranslator;
+import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
@@ -38,7 +39,6 @@ import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
-import com.cadenzauk.siesta.grammar.expression.JsonFunctions;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbTypeRegistry;
@@ -231,7 +231,7 @@ public class AnsiDialect implements Dialect {
 
     @Override
     public boolean supportsJsonFunctions() {
-        return false;
+        return true;
     }
 
     @Override
@@ -257,6 +257,16 @@ public class AnsiDialect implements Dialect {
     @Override
     public MergeInfo mergeInfo() {
         return mergeInfo;
+    }
+
+    @Override
+    public String createJavaProcSql(Database database, Class<?> procClass, String methodName, String schema) {
+        return "";
+    }
+
+    @Override
+    public Stream<FunctionName> missingJsonFunctions() {
+        return Stream.empty();
     }
 
     protected DbTypeRegistry types() {

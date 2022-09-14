@@ -94,6 +94,7 @@ class StringUtilTest {
     @TestCase({"1_23", "123"})
     @TestCase({"A1_B2_C3", "a1B2C3"})
     @TestCase({"TRADE_ID_1", "tradeId1"})
+    @TestCase({"trade_id_1", "tradeId1"})
     void upperToCamel(String input, String expectedResult) {
         assertThat(StringUtil.upperToCamel(input), is(expectedResult));
     }

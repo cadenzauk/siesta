@@ -20,28 +20,11 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'com.cadenzauk'
+package com.cadenzauk.siesta.oracle;
 
-includeBuild ("siesta") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta') using project(':')
-    }
-}
+import com.cadenzauk.siesta.jackson.test.JsonIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-includeBuild ("siesta-codegen")
-includeBuild ("siesta-db2")
-includeBuild ("siesta-oracle")
-includeBuild ("siesta-postgres")
-includeBuild ("siesta-sqlserver")
-includeBuild ("siesta-firebird")
-includeBuild ("siesta-kotlin") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta-kotlin') using project(':')
-    }
+@ContextConfiguration(classes = OracleConfig.class)
+class JsonIntegrationTestOracle extends JsonIntegrationTest {
 }
-includeBuild ("siesta-jackson") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta-jackson') using project(':')
-    }
-}
-
