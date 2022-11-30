@@ -62,7 +62,7 @@ dependencies {
     testFixturesImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
 
     testFixturesRuntimeOnly group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
-
+    testImplementation 'org.exparity:hamcrest-date:2.0.8'
     testImplementation group: 'org.hsqldb', name: 'hsqldb', version: hsqldbVersion
     testImplementation group: 'org.apache.derby', name: 'derby', version: derbyVersion
     testImplementation group: 'com.google.guava', name: 'guava-testlib', version: '31.1-jre'

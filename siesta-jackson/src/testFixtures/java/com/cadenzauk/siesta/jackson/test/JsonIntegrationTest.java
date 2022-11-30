@@ -23,14 +23,11 @@
 package com.cadenzauk.siesta.jackson.test;
 
 import com.cadenzauk.core.tuple.Tuple2;
-import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.IntegrationTest;
 import com.cadenzauk.siesta.grammar.expression.JsonFunctions;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
-import com.cadenzauk.siesta.json.JsonProvider;
 import com.cadenzauk.siesta.model.JsonDataRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -45,9 +42,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
-
 import java.util.Optional;
 
+import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonFieldText;
 import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonValue;
 import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonbValue;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
@@ -97,6 +94,22 @@ public abstract class JsonIntegrationTest extends IntegrationTest {
         assertThat(result.item2().data(), is("Flintstone"));
     }
 
+    @Test
+    void canQueryBinaryJsonField() throws JsonProcessingException {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow fred = aRandomSalesperson(s -> s.firstName("Fred").surname("Flintstone"));
+        String json = objectMapper.writeValueAsString(fred);
+        JsonDataRow jsonDataRow = new JsonDataRow(newId(), Json.of(json), Optional.of(BinaryJson.of(json)));
+        database.insert(jsonDataRow);
+
+        String result = database
+            .from(JsonDataRow.class)
+            .select(jsonFieldText(JsonDataRow::data, "firstName"))
+            .where(JsonDataRow::jsonId).isEqualTo(jsonDataRow.jsonId())
+            .single();
+
+        assertThat(result, is("Fred"));
+    }
 
     private static JsonNode parse(Json json) throws JsonProcessingException {
         return objectMapper.readTree(json.data());

@@ -31,7 +31,6 @@ import com.cadenzauk.core.sql.DataSourceUtil;
 import com.cadenzauk.core.util.UtilityClass;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.Database;
-import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.json.JsonSupport;
@@ -42,8 +41,10 @@ import org.apache.commons.lang3.StringUtils;
 import javax.sql.DataSource;
 import java.sql.Connection;
 
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_FIELD_TEXT;
 import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_OBJECT;
 import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSONB_VALUE;
+import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_FIELD_TEXT;
 import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_OBJECT;
 import static com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs.JSON_VALUE;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
@@ -180,6 +181,90 @@ public final class JsonFunctions extends UtilityClass {
 
     public static <R> TypedExpression<BinaryJson> jsonbValue(String alias, Label<BinaryJson> jsonb, String path) {
         return SqlFunction.of(JSONB_VALUE, BinaryJson.class, UnresolvedColumn.of(alias, jsonb), literal(path));
+    }
+
+    //--
+
+    public static TypedExpression<String> jsonFieldText(String json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, ValueExpression.of(Json.of(json)), literal(path));
+    }
+
+    public static TypedExpression<String> jsonFieldText(TypedExpression<String> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, json, literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(Function1<R,Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, UnresolvedColumn.of(json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(FunctionOptional1<R,Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, UnresolvedColumn.of(json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(String alias, Function1<R,Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, UnresolvedColumn.of(alias, json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(String alias, FunctionOptional1<R,Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, UnresolvedColumn.of(alias, json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(Alias<R> alias, Function1<R,Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, ResolvedColumn.of(alias, json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(Alias<R> alias, FunctionOptional1<R,Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, ResolvedColumn.of(alias, json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(Label<Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, UnresolvedColumn.of(json), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonFieldText(String alias, Label<Json> json, String path) {
+        return SqlFunction.of(JSON_FIELD_TEXT, String.class, UnresolvedColumn.of(alias, json), literal(path));
+    }
+
+    //--
+
+    public static TypedExpression<String> jsonbFieldText(String jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, ValueExpression.of(BinaryJson.of(jsonb)), literal(path));
+    }
+
+    public static TypedExpression<String> jsonbFieldText(TypedExpression<String> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, jsonb, literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(Function1<R,BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, UnresolvedColumn.of(jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(FunctionOptional1<R,BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, UnresolvedColumn.of(jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(String alias, Function1<R,BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, UnresolvedColumn.of(alias, jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(String alias, FunctionOptional1<R,BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, UnresolvedColumn.of(alias, jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(Alias<R> alias, Function1<R,BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, ResolvedColumn.of(alias, jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(Alias<R> alias, FunctionOptional1<R,BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, ResolvedColumn.of(alias, jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(Label<BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, UnresolvedColumn.of(jsonb), literal(path));
+    }
+
+    public static <R> TypedExpression<String> jsonbFieldText(String alias, Label<BinaryJson> jsonb, String path) {
+        return SqlFunction.of(JSONB_FIELD_TEXT, String.class, UnresolvedColumn.of(alias, jsonb), literal(path));
     }
 
     //--

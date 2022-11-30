@@ -32,6 +32,7 @@ import com.cadenzauk.siesta.model.ManufacturerId;
 import com.cadenzauk.siesta.model.WidgetId;
 import com.cadenzauk.siesta.model.WidgetRowWithTypeSafeId;
 import com.cadenzauk.siesta.type.DbTypeId;
+import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -44,9 +45,12 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentDate;
 import static com.cadenzauk.siesta.grammar.expression.DateFunctions.currentTimestamp;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
+import static org.exparity.hamcrest.date.ZonedDateTimeMatchers.after;
+import static org.exparity.hamcrest.date.ZonedDateTimeMatchers.before;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 class SiestaExample extends IntegrationTest {
     @Test
@@ -100,8 +104,8 @@ class SiestaExample extends IntegrationTest {
         assertThat(makersOfGizmos.get(0).item1(), is("Gizmos Inc"));
         assertThat(makersOfGizmos.get(1).item1(), is("Acme Inc"));
         assertThat(makersOfGizmos.get(2).item1(), is("Acme Inc"));
-        assertThat(makersOfGizmos.get(0).item3().isBefore(start), is(false));
-        assertThat(makersOfGizmos.get(0).item3().isAfter(end), is(false));
+        assertThat(makersOfGizmos.get(0).item3(), not(before(start)));
+        assertThat(makersOfGizmos.get(0).item3(), not(after(end)));
     }
 
     private static class ManufacturerSummary {
