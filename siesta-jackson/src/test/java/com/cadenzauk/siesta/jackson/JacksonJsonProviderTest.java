@@ -22,11 +22,59 @@
 
 package com.cadenzauk.siesta.jackson;
 
+import com.cadenzauk.siesta.json.JsonProvider;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Supplier;
+
+import static com.cadenzauk.core.testutil.FluentAssert.calling;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+
 class JacksonJsonProviderTest {
+    @Test
+    void evaluateJsonPathReturnsEvaluatesThePath() {
+        JsonProvider sut = new JacksonJsonProvider();
+
+        String result = sut.evaluateJsonPath("{\"foo\":\"abc\"}", "$.foo");
+
+        assertThat(result, is("abc"));
+    }
 
     @Test
-    void evaluateJsonPath() {
+    void evaluateJsonPathReturnsNullIfJsonIsNull() {
+        JsonProvider sut = new JacksonJsonProvider();
+
+        String result = sut.evaluateJsonPath(null, "$.foo");
+
+        assertThat(result, nullValue());
+    }
+
+    @Test
+    void evaluateJsonPathThrowsIfPathIsNull() {
+        JsonProvider sut = new JacksonJsonProvider();
+
+        calling(() -> sut.evaluateJsonPath("{}", null))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Path cannot be null or empty.");
+    }
+
+    @Test
+    void evaluateJsonPathThrowsIfPathIsEmpty() {
+        JsonProvider sut = new JacksonJsonProvider();
+
+        calling(() -> sut.evaluateJsonPath("{}", ""))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Path cannot be null or empty.");
+    }
+
+    @Test
+    void evaluateJsonPathThrowsIfPathIsWhitespace() {
+        JsonProvider sut = new JacksonJsonProvider();
+
+        calling(() -> sut.evaluateJsonPath("{}", " "))
+            .shouldThrow(IllegalArgumentException.class)
+            .withMessage("Path cannot be null or empty.");
     }
 }

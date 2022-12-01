@@ -28,8 +28,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class JacksonJsonProvider implements JsonProvider {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -45,6 +47,12 @@ public class JacksonJsonProvider implements JsonProvider {
 
     @Override
     public String evaluateJsonPath(String json, String jsonPath) {
+        if (json == null) {
+            return null;
+        }
+        if (StringUtils.isBlank(jsonPath)) {
+            throw new IllegalArgumentException("Path cannot be null or empty.");
+        }
         DocumentContext jsonContext = JsonPath.parse(json);
         Object result = jsonContext.read(jsonPath);
         return result == null ? null : result.toString();
