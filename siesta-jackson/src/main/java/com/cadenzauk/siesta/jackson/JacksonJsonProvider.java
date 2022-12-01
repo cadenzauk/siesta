@@ -47,7 +47,7 @@ public class JacksonJsonProvider implements JsonProvider {
 
     @Override
     public String evaluateJsonPath(String json, String jsonPath) {
-        if (json == null) {
+        if (json == null || json.equals("null")) {
             return null;
         }
         if (StringUtils.isBlank(jsonPath)) {

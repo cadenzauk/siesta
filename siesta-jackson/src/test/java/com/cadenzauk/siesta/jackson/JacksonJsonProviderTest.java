@@ -52,6 +52,15 @@ class JacksonJsonProviderTest {
     }
 
     @Test
+    void evaluateJsonPathReturnsNullIfJsonContainsNull() {
+        JsonProvider sut = new JacksonJsonProvider();
+
+        String result = sut.evaluateJsonPath("null", "$.foo");
+
+        assertThat(result, nullValue());
+    }
+
+    @Test
     void evaluateJsonPathThrowsIfPathIsNull() {
         JsonProvider sut = new JacksonJsonProvider();
 

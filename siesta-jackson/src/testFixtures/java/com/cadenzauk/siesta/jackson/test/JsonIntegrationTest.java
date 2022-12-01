@@ -50,6 +50,7 @@ import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonbValue;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @ContextConfiguration
 public abstract class JsonIntegrationTest extends IntegrationTest {
@@ -92,6 +93,25 @@ public abstract class JsonIntegrationTest extends IntegrationTest {
 
         assertThat(result.item1().data(), is("Fred"));
         assertThat(result.item2().data(), is("Flintstone"));
+    }
+
+    @Test
+    void jsonValueIsNullIfJsonIsNull() throws JsonProcessingException {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow fred = aRandomSalesperson(s -> s.firstName("Barney").surname("Rubble"));
+        String json = objectMapper.writeValueAsString(fred);
+        JsonDataRow jsonDataRow = new JsonDataRow(newId(), Json.of(json), Optional.empty());
+        database.insert(jsonDataRow);
+
+        Tuple2<Json, BinaryJson> result = database
+            .from(JsonDataRow.class)
+            .select(jsonValue(JsonDataRow::data, "$.firstName"))
+            .comma(jsonbValue(JsonDataRow::dataBinary, "$.surname"))
+            .where(JsonDataRow::jsonId).isEqualTo(jsonDataRow.jsonId())
+            .single();
+
+        assertThat(result.item1().data(), is("Barney"));
+        assertThat(result.item2(), nullValue());
     }
 
     @Test
