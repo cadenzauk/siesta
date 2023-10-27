@@ -28,7 +28,6 @@ import com.cadenzauk.core.reflect.Factory;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.reflect.util.ConstructorUtil;
-import com.cadenzauk.core.sql.DatabaseMetaDataUtil;
 import com.cadenzauk.core.sql.QualifiedName;
 import com.cadenzauk.core.sql.ResultSetUtil;
 import com.cadenzauk.siesta.Database;
@@ -57,7 +56,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.sql.DatabaseMetaData;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -104,7 +102,7 @@ public class SchemaGenerator {
 
     private long dropAll(Database database) {
         try (CompositeAutoCloseable closer = new CompositeAutoCloseable()) {
-            DatabaseMetaData metadata = database.getDefaultSqlExecutor().metadata(closer);
+            SchemaMetadata metadata = new SchemaMetadata(database.getDefaultSqlExecutor().metadata(closer), dialect);
             Stream<Action> dropSequences = dropSequenceActions(database, closer);
             Stream<Action> dropForeignKeys = dropForeignKeyActions(database, closer, metadata);
             Stream<Action> dropGlobalTempTables = dropGlobalTempTableActions(database, closer, metadata);
@@ -114,8 +112,9 @@ public class SchemaGenerator {
         }
     }
 
-    private Stream<Action> dropTableActions(Database database, CompositeAutoCloseable closer, DatabaseMetaData metadata) {
-        return closer.add(DatabaseMetaDataUtil.tableNames(metadata, database.defaultCatalog(), database.defaultSchema()))
+    private Stream<Action> dropTableActions(Database database, CompositeAutoCloseable closer, SchemaMetadata metadata) {
+        return closer.add(metadata.tableNames(database.defaultCatalog(), database.defaultSchema()))
+            .map(dialect::fixQualifiedName)
             .map(t -> DropTableAction.newBuilder()
                 .logged(false)
                 .catalog(t.catalog())
@@ -124,7 +123,7 @@ public class SchemaGenerator {
                 .build());
     }
 
-    private Stream<Action> dropGlobalTempTableActions(Database database, CompositeAutoCloseable closer, DatabaseMetaData metadata) {
+    private Stream<Action> dropGlobalTempTableActions(Database database, CompositeAutoCloseable closer, SchemaMetadata metadata) {
         return closer.add(globalTempTableStream(database))
             .map(t -> DropTableAction.newBuilder()
                 .logged(false)
@@ -134,8 +133,9 @@ public class SchemaGenerator {
                 .build());
     }
 
-    private Stream<Action> dropForeignKeyActions(Database database, CompositeAutoCloseable closer, DatabaseMetaData metadata) {
-        return closer.add(DatabaseMetaDataUtil.foreignKeyNames(metadata, database.defaultCatalog(), database.defaultSchema()))
+    private Stream<Action> dropForeignKeyActions(Database database, CompositeAutoCloseable closer, SchemaMetadata metadata) {
+
+        return closer.add(metadata.foreignKeyNames(database.defaultCatalog(), database.defaultSchema()))
             .map(t -> DropForeignKeyAction.newBuilder()
                 .logged(false)
                 .catalog(t.catalog())
@@ -146,6 +146,9 @@ public class SchemaGenerator {
     }
 
     private Stream<Action> dropSequenceActions(Database database, CompositeAutoCloseable closer) {
+        if (!dialect.sequenceInfo().supportsSequences()) {
+            return Stream.empty();
+        }
         return closer.add(sequenceStream(database))
             .filter(matchesCatalogAndSchema(database.defaultCatalog(), database.defaultSchema()))
             .map(t -> DropSequenceAction.newBuilder()

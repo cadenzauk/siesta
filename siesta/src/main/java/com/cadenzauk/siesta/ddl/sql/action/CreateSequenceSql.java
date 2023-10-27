@@ -38,6 +38,9 @@ public class CreateSequenceSql extends SqlAction {
     @Override
     public String sql(Database database) {
         SequenceInfo sequenceInfo = database.dialect().sequenceInfo();
+        if (!sequenceInfo.supportsSequences()) {
+            return null;
+        }
         return String.format("create sequence %s%s",
             definition.qualifiedName(database),
             definition.startValue().filter(x -> sequenceInfo.supportsStartValue()).map(prepend(" start with ")).orElse("")

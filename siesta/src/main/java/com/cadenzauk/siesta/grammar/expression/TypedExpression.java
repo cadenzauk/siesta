@@ -128,7 +128,7 @@ public interface TypedExpression<T> extends Expression {
         return times(value(value));
     }
 
-    default TypedExpression<T> times(TypedExpression<T> value) {
+    default ArithmeticExpressionChain<T> times(TypedExpression<T> value) {
         return new ArithmeticExpressionChain<>(this).times(value);
     }
 

@@ -39,50 +39,50 @@ public class CastBuilder<T> {
     }
 
     public ExpressionBuilder<String,BooleanExpression> asChar(int len) {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.CHAR, (d, db) -> d.sqlType(db, len)), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.CHAR, (d, db) -> d.castType(db, len)), Function.identity());
     }
 
     public ExpressionBuilder<Byte,BooleanExpression> asTinyInteger() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.BYTE, DbTypeId.TINYINT, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.BYTE, DbTypeId.TINYINT, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<Double,BooleanExpression> asDoublePrecision() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.DOUBLE, DbTypeId.DOUBLE, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.DOUBLE, DbTypeId.DOUBLE, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<Float,BooleanExpression> asReal() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.FLOAT, DbTypeId.REAL, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.FLOAT, DbTypeId.REAL, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<LocalDate,BooleanExpression> asDate() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE, DbTypeId.DATE, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE, DbTypeId.DATE, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<LocalTime,BooleanExpression> asTime() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_TIME, DbTypeId.TIME, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_TIME, DbTypeId.TIME, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<LocalDateTime,BooleanExpression> asTimestamp() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE_TIME, DbTypeId.TIMESTAMP, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE_TIME, DbTypeId.TIMESTAMP, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<LocalDateTime,BooleanExpression> asTimestamp(int prec) {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE_TIME, DbTypeId.TIMESTAMP, (d, db) -> d.sqlType(db, prec)), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LOCAL_DATE_TIME, DbTypeId.TIMESTAMP, (d, db) -> d.castType(db, prec)), Function.identity());
     }
 
     public ExpressionBuilder<Long,BooleanExpression> asBigInteger() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LONG, DbTypeId.BIGINT, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.LONG, DbTypeId.BIGINT, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<Short,BooleanExpression> asSmallInteger() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.SHORT, DbTypeId.SMALLINT, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.SHORT, DbTypeId.SMALLINT, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<Integer,BooleanExpression> asInteger() {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.INTEGER, DbTypeId.INTEGER, DbType::sqlType), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.INTEGER, DbTypeId.INTEGER, DbType::castType), Function.identity());
     }
 
     public ExpressionBuilder<String,BooleanExpression> asVarchar(int len) {
-        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.VARCHAR, (d, db) -> d.sqlType(db, len)), Function.identity());
+        return ExpressionBuilder.of(new CastExpression<>(expression, DataType.STRING, DbTypeId.VARCHAR, (d, db) -> d.castType(db, len)), Function.identity());
     }
 }

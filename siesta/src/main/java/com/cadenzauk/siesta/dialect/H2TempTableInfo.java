@@ -29,7 +29,7 @@ public class H2TempTableInfo extends TempTableInfo {
         super(TempTableInfo.newBuilder()
             .createLocalIsTransactional(false)
             .clearsGlobalOnCommit(false)
-            .createGlobalSqlFormat("create global temporary table %s(%s%s%s) not persistent transactional")
-            .createLocalPreserveRowsSqlFormat("create local temporary table %s(%s) not persistent transactional"));
+            .createGlobalSqlFormat("create global temporary table ${tableName}(${columnDefs}${primaryKeyDef}${foreignKeyDefs}) not persistent transactional")
+            .createLocalPreserveRowsSqlFormat("create local temporary table ${tableName}(${columnDefs}) not persistent transactional"));
     }
 }

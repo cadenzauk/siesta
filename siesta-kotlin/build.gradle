@@ -49,7 +49,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 
-    testImplementation testFixtures("com.cadenzauk:siesta:1siestaVersion")
+    testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")
     testImplementation 'com.natpryce:hamkrest:1.8.0.1'
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion
     testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion

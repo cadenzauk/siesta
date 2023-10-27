@@ -61,7 +61,7 @@ public class HSqlDialect extends AnsiDialect {
             .register(DateFunctionSpecs::registerDateAdd)
             .register(AggregateFunctionSpecs.COUNT_BIG, SimpleFunctionSpec.of("count"))
             .register(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, CountDistinctFunctionSpec.of("count"))
-            .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, (scope, argsSql) -> "current_timestamp at time zone interval '00:00' hour to minute")
+            .register(DateFunctionSpecs.CURRENT_TIMESTAMP_UTC, (scope, argsSql) -> currentTimestamp(scope))
             .register(DateFunctionSpecs.CURRENT_TIMESTAMP, (scope, argsSql) -> currentTimestamp(scope))
             .register(DateFunctionSpecs.CURRENT_DATE, (scope, argsSql) -> String.format("cast(%s as date)", currentTimestamp(scope)))
             .register(SECOND_DIFF, (s, a) -> "datediff('second', trunc(" + a[1] + ", 'SS'), trunc(" + a[0] + ", 'SS'))")

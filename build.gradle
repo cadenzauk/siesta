@@ -42,6 +42,8 @@ tasks.register('integrationTest', Test) {
     group = 'verification'
     dependsOn gradle.includedBuild('siesta-db2').task(':test')
     dependsOn gradle.includedBuild('siesta-firebird').task(':test')
+    dependsOn gradle.includedBuild('siesta-mariadb').task(':test')
+    dependsOn gradle.includedBuild('siesta-mysql').task(':test')
     dependsOn gradle.includedBuild('siesta-oracle').task(':test')
     dependsOn gradle.includedBuild('siesta-postgres').task(':test')
     dependsOn gradle.includedBuild('siesta-sqlserver').task(':test')

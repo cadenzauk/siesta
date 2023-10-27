@@ -33,6 +33,6 @@ public class DefaultReal extends DefaultDbType<Float> {
 
     @Override
     public String literal(Database database, Float value) {
-        return String.format("cast(%s as real)", value);
+        return String.format("cast(%s as %s)", value, castType(database));
     }
 }

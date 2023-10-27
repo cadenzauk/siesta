@@ -119,7 +119,7 @@ public abstract class IntegrationTest {
             .partId(newId())
             .description(RandomStringUtils.randomAlphabetic(10, 30))
             .purchasePrice(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), randomAscii(3)))
-            .retailPrice(Optional.of(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), randomAscii(3))))
+            .retailPrice(Optional.of(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), RandomValues.randomStringOf(3, 'A', 'Z'))))
             .widgetId(newId())
             .build();
     }

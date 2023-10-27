@@ -33,12 +33,14 @@ import java.util.stream.LongStream;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class HiLoGeneratorIntegrationTest extends IntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(HiLoGenerator.class);
 
     @Test
     void hiLoGenerationLoad() {
+        assumeTrue(dialect.sequenceInfo().supportsSequences());
         Database database = testDatabase(dataSource);
         Sequence<Long> widgetSeq = database.sequence(Long.class, "widget_seq");
         HiLoGenerator sut = HiLoGenerator.newBuilder(widgetSeq)

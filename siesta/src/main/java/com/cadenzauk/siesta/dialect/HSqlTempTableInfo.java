@@ -29,9 +29,9 @@ public class HSqlTempTableInfo extends TempTableInfo {
     public HSqlTempTableInfo() {
         super(TempTableInfo.newBuilder()
                   .localCommitOptions(TempTableCommitAction.PRESERVE_ROWS, TempTableCommitAction.DELETE_ROWS)
-                  .tableNameFormat("session.%s")
+                  .tableNameFormat("session.${tableName}")
                   .createLocalIsTransactional(false)
-                  .createLocalPreserveRowsSqlFormat("declare local temporary table %s(%s) on commit preserve rows")
-                  .createLocalDeleteRowsSqlFormat("declare local temporary table %s(%s) on commit delete rows"));
+                  .createLocalPreserveRowsSqlFormat("declare local temporary table ${tableName}(${columnDefs}) on commit preserve rows")
+                  .createLocalDeleteRowsSqlFormat("declare local temporary table ${tableName}(${columnDefs}) on commit delete rows"));
     }
 }

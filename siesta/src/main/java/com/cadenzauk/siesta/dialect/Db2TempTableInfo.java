@@ -30,8 +30,8 @@ public class Db2TempTableInfo extends TempTableInfo {
         super(TempTableInfo.newBuilder()
                   .listGlobalSql("select '' as TEMP_TABLE_CATALOG, tabschema as TEMP_TABLE_SCHEMA_NAME, tabname as TEMP_TABLE_NAME from syscat.tables where type = 'G'")
                   .localCommitOptions(TempTableCommitAction.PRESERVE_ROWS, TempTableCommitAction.DELETE_ROWS)
-                  .createLocalPreserveRowsSqlFormat("declare global temporary table %s (%s) on commit preserve rows not logged on rollback delete rows")
-                  .createLocalDeleteRowsSqlFormat("declare global temporary table %s (%s) on commit delete rows not logged on rollback delete rows ")
-                  .tableNameFormat("session.%s"));
+                  .createLocalPreserveRowsSqlFormat("declare global temporary table ${tableName} (${columnDefs}) on commit preserve rows not logged on rollback delete rows")
+                  .createLocalDeleteRowsSqlFormat("declare global temporary table ${tableName} (${columnDefs}) on commit delete rows not logged on rollback delete rows ")
+                  .tableNameFormat("session.${tableName}"));
     }
 }

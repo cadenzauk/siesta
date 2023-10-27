@@ -38,7 +38,9 @@ import com.cadenzauk.siesta.dialect.function.FunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.json.JsonFunctionSpecs;
+import com.cadenzauk.siesta.dialect.function.numeric.NumericFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.grammar.expression.NumericFunctions;
 import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DbTypeRegistry;
@@ -62,6 +64,7 @@ public class AnsiDialect implements Dialect {
         functions
             .register(AggregateFunctionSpecs::registerDefaults)
             .register(DateFunctionSpecs::registerDefaults)
+            .register(NumericFunctionSpecs::registerDefaults)
             .register(StringFunctionSpecs::registerDefaults)
             .register(JsonFunctionSpecs::registerDefaults);
 

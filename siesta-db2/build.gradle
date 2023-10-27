@@ -36,7 +36,7 @@ dependencies {
     implementation group: 'com.ibm.db2', name: 'sqlj4', version: '11.1.0'
     implementation "com.cadenzauk:siesta:$siestaVersion"
 
-    testImplementation testFixtures("com.cadenzauk:siesta:1siestaVersion")
+    testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")
     testImplementation testFixtures("com.cadenzauk:siesta-jackson:$siestaVersion")
 
     testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'

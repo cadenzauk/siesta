@@ -22,14 +22,13 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -87,7 +86,7 @@ public class ArithmeticExpressionChain<T> implements TypedExpression<T> {
     }
 
     @Override
-    public TypedExpression<T> times(TypedExpression<T> value) {
+    public ArithmeticExpressionChain<T> times(TypedExpression<T> value) {
         terms.add(Term.times(value));
         return this;
     }
@@ -96,6 +95,14 @@ public class ArithmeticExpressionChain<T> implements TypedExpression<T> {
     public TypedExpression<T> dividedBy(TypedExpression<T> value) {
         terms.add(Term.dividedBy(value));
         return this;
+    }
+
+    public BetweenBuilder<T,BooleanExpression> isNotBetween(T value) {
+        return new BetweenBuilder<>(this, ValueExpression.of(value), "not ", Function.identity());
+    }
+
+    public BetweenBuilder<T,BooleanExpression> isNotBetween(TypedExpression<T> expression) {
+        return new BetweenBuilder<>(this, expression, "not ", Function.identity());
     }
 
     private Stream<TypedExpression<T>> expressions() {

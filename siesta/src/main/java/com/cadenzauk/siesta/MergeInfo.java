@@ -41,6 +41,14 @@ public class MergeInfo {
         return true;
     }
 
+    public int insertedResult() {
+        return 1;
+    }
+
+    public int updatedResult() {
+        return 1;
+    }
+
     public String mergeSql(MergeSpec mergeSpec) {
         return String.format("merge into %s %s using (select %s%s) %s on (%s) when matched then update set %s when not matched then insert(%s) values(%s)",
             mergeSpec.targetTableName(),
@@ -59,4 +67,5 @@ public class MergeInfo {
     public Object[] mergeArgs(MergeSpec mergeSpec) {
         return mergeSpec.selectArgs().stream().flatMap(Arrays::stream).toArray();
     }
+
 }

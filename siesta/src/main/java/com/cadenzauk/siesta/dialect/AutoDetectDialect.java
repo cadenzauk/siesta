@@ -51,6 +51,8 @@ public class AutoDetectDialect {
         Tuple.of(Pattern.compile("^H2.*").asPredicate(), AutoDetectDialect::createH2Dialect),
         Tuple.of(Pattern.compile("^HSQL.*").asPredicate(), conn -> new HSqlDialect()),
         Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), conn -> new FirebirdDialect()),
+        Tuple.of(Pattern.compile("^Maria.*").asPredicate(), conn -> new MariaDbDialect()),
+        Tuple.of(Pattern.compile("^MySQL.*").asPredicate(), conn -> new MySqlDialect()),
         Tuple.of(Pattern.compile("^Oracle.*").asPredicate(), conn -> new OracleDialect()),
         Tuple.of(Pattern.compile("^PostgreSQL.*").asPredicate(), conn -> new PostgresDialect()),
         Tuple.of(Pattern.compile("^Microsoft SQL\\s*Server.*").asPredicate(), conn -> new SqlServerDialect())

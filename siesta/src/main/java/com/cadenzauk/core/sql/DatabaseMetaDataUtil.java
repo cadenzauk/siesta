@@ -41,8 +41,8 @@ public final class DatabaseMetaDataUtil extends UtilityClass {
 
     public static Stream<QualifiedName> tableNames(DatabaseMetaData metaData, String catalog, String schema) {
         return ResultSetUtil.stream(
-            () -> metaData.getTables(null, null, null, new String[] {"TABLE"}),
-            rs -> new QualifiedName(getString(rs, "TABLE_CAT"), getString(rs, "TABLE_SCHEM"), getString(rs, "TABLE_NAME")))
+                () -> metaData.getTables(null, null, null, new String[]{"TABLE"}),
+                rs -> new QualifiedName(getString(rs, "TABLE_CAT"), getString(rs, "TABLE_SCHEM"), getString(rs, "TABLE_NAME")))
             .filter(matchesCatalogAndSchema(catalog, schema));
     }
 
@@ -51,10 +51,10 @@ public final class DatabaseMetaDataUtil extends UtilityClass {
         return tableNames
             .stream()
             .flatMap(table -> ResultSetUtil.stream(
-                () -> metaData.getImportedKeys(table.catalog().orElse(null), table.schema().orElse(null), table.name().orElse(null)),
-                rs -> new ForeignKeyName(
-                    new QualifiedName(getString(rs, "FKTABLE_CAT"), getString(rs, "FKTABLE_SCHEM"), getString(rs, "FKTABLE_NAME")),
-                    getString(rs, "FK_NAME")))
+                    () -> metaData.getImportedKeys(table.catalog().orElse(null), table.schema().orElse(null), table.name().orElse(null)),
+                    rs -> new ForeignKeyName(
+                        new QualifiedName(getString(rs, "FKTABLE_CAT"), getString(rs, "FKTABLE_SCHEM"), getString(rs, "FKTABLE_NAME")),
+                        getString(rs, "FK_NAME")))
                 .distinct()
             );
     }

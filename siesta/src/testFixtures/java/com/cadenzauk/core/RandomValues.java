@@ -33,6 +33,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.Calendar.APRIL;
@@ -53,6 +55,18 @@ public abstract class RandomValues extends UtilityClass {
 
     public static char randomChar() {
         return (char) RANDOM.nextInt(Character.MIN_VALUE, Character.MAX_VALUE + 1);
+    }
+
+    public static char randomChar(char from, char to) {
+        return (char) (from + RANDOM.nextInt(to - from + 1));
+    }
+
+    public static String randomStringOf(int length, char from, char to) {
+        char[] chars = new char[length];
+        for (int i = 0; i < length; ++i) {
+            chars[i] = randomChar(from, to);
+        }
+        return new String(chars);
     }
 
     public static short randomShort() {

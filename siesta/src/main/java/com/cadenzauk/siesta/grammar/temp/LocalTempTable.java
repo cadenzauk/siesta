@@ -24,7 +24,10 @@ package com.cadenzauk.siesta.grammar.temp;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.reflect.MethodInfo;
+import com.cadenzauk.core.sql.QualifiedName;
+import com.cadenzauk.core.util.TokenReplacer;
 import com.cadenzauk.siesta.Database;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 
 import java.util.function.Function;
@@ -37,21 +40,34 @@ public class LocalTempTable<R> extends TempTable<R> {
     }
 
     public String qualifiedTableName() {
-        return database().dialect().tempTableInfo().tableName(tableName());
+        String catalog = database().defaultCatalog();
+        String schema = database().defaultSchema();
+        String table = tableName();
+        TokenReplacer tokenReplacer = new TokenReplacer(ImmutableMap.of(
+            "catalogName", catalog,
+            "schemaName", schema,
+            "tableName", table,
+            "qualifiedTableName", database().dialect().qualifiedTableName(catalog, schema, table)
+        ));
+        return database().dialect().tempTableInfo().tableName(tokenReplacer);
     }
 
     public String createSql() {
         String columnsSql = columnDefinitions()
                                 .map(c -> c.sql(database()))
                                 .collect(joining(", "));
+        TokenReplacer tokenReplacer = new TokenReplacer(ImmutableMap.of(
+            "tableName", qualifiedTableName(),
+            "columnDefs", columnsSql
+        ));
         switch (onCommit()) {
             case PRESERVE_ROWS:
             default:
-                return database().dialect().tempTableInfo().createLocalPreserveRowsSql(qualifiedTableName(), columnsSql);
+                return database().dialect().tempTableInfo().createLocalPreserveRowsSql(tokenReplacer);
             case DELETE_ROWS:
-                return database().dialect().tempTableInfo().createLocalDeleteRowsSql(qualifiedTableName(), columnsSql);
+                return database().dialect().tempTableInfo().createLocalDeleteRowsSql(tokenReplacer);
             case DROP_TABLE:
-                return database().dialect().tempTableInfo().createLocalDropTableSql(qualifiedTableName(), columnsSql);
+                return database().dialect().tempTableInfo().createLocalDropTableSql(tokenReplacer);
         }
     }
 
@@ -74,6 +90,5 @@ public class LocalTempTable<R> extends TempTable<R> {
             finish();
             return new LocalTempTable<>(this);
         }
-
     }
 }

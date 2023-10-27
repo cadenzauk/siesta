@@ -31,8 +31,8 @@ public class DerbyTempTableInfo extends TempTableInfo {
                   .supportsGlobal(false)
                   .createGlobalSqlFormat("")
                   .localCommitOptions(TempTableCommitAction.PRESERVE_ROWS, TempTableCommitAction.DELETE_ROWS)
-                  .createLocalPreserveRowsSqlFormat("declare global temporary table %s (%s) on commit preserve rows not logged")
-                  .createLocalDeleteRowsSqlFormat("declare global temporary table %s (%s) on commit delete rows not logged")
-                  .tableNameFormat("session.%s"));
+                  .createLocalPreserveRowsSqlFormat("declare global temporary table ${tableName} (${columnDefs}) on commit preserve rows not logged")
+                  .createLocalDeleteRowsSqlFormat("declare global temporary table ${tableName} (${columnDefs}) on commit delete rows not logged")
+                  .tableNameFormat("session.${tableName}"));
     }
 }

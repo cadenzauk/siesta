@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.sql.QualifiedName;
 import com.cadenzauk.core.sql.exception.SqlExceptionConstructor;
 import com.cadenzauk.core.sql.exception.SqlExceptionTranslator;
 import com.cadenzauk.siesta.dialect.function.FunctionName;
@@ -87,6 +88,10 @@ public interface Dialect {
     String qualifiedIndexName(String catalog, String schema, String name);
 
     String qualifiedTableName(String catalog, String schema, String name);
+
+    default QualifiedName fixQualifiedName(QualifiedName qualifiedName) {
+        return qualifiedName;
+    }
 
     String concat(Stream<String> sql);
 

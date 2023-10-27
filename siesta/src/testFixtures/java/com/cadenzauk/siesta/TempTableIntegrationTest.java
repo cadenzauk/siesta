@@ -38,6 +38,7 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.function.Function;
 
@@ -256,10 +257,7 @@ public abstract class TempTableIntegrationTest extends IntegrationTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(TestCaseArgumentsProvider.class)
-    @TestCase("PRESERVE_ROWS")
-    @TestCase("DELETE_ROWS")
-    @TestCase("DROP_TABLE")
+    @EnumSource(TempTableCommitAction.class)
     void localTempDroppedAfterTransactionRollsback(TempTableCommitAction commitAction) {
         try (Scenario<SalespersonRow> scenario = givenLocalTempTable(SalespersonRow.class, "tmp10", t -> t.onCommit(commitAction))
                                                      .containing(aRandomSalesperson(), aRandomSalesperson())) {
@@ -299,7 +297,7 @@ public abstract class TempTableIntegrationTest extends IntegrationTest {
         SalespersonRow salesperson = aRandomSalesperson(v -> v.firstName("Bruce"));
         try (Scenario<SalespersonRow> scenario = givenLocalTempTable(SalespersonRow.class, "tmp12")
                                                      .containing(salesperson, aRandomSalesperson())) {
-            scenario.database.delete(scenario.sut, "t")
+            scenario.database.delete(scenario.sut)
                 .where(SalespersonRow::salespersonId).isEqualTo(salesperson.salespersonId())
                 .execute(scenario.tran);
 

@@ -24,15 +24,21 @@ package com.cadenzauk.siesta;
 
 public class SequenceInfo {
     private final String listSql;
+    private final boolean supportsSequences;
     private final boolean supportsStartValue;
 
     protected SequenceInfo(Builder builder) {
         listSql = builder.listSql;
+        supportsSequences = builder.supportsSequences;
         supportsStartValue = builder.supportsStartValue;
     }
 
     public String listSql() {
         return listSql;
+    }
+
+    public boolean supportsSequences() {
+        return supportsSequences;
     }
 
     public boolean supportsStartValue() {
@@ -45,6 +51,7 @@ public class SequenceInfo {
 
     public static final class Builder {
         private String listSql = "SELECT SEQUENCE_CATALOG, SEQUENCE_SCHEMA, SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES";
+        private boolean supportsSequences = true;
         private boolean supportsStartValue = true;
 
         private Builder() {
@@ -52,6 +59,11 @@ public class SequenceInfo {
 
         public Builder listSql(String val) {
             listSql = val;
+            return this;
+        }
+
+        public Builder supportsSequences(boolean val) {
+            supportsSequences = val;
             return this;
         }
 

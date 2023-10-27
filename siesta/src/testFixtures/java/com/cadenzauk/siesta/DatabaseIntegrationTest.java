@@ -28,12 +28,13 @@ import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.testutil.TemporalTestUtil;
 import com.cadenzauk.core.tuple.Tuple;
+import com.cadenzauk.core.tuple.Tuple10;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
-import com.cadenzauk.core.tuple.Tuple8;
+import com.cadenzauk.core.tuple.Tuple9;
 import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.dialect.DerbyDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -222,12 +223,12 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         int result = database.upsertRows(row);
         SalespersonRow stored = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(row.salespersonId()).single();
 
-        assertThat(result, is(1));
+        assertThat(result, is(dialect.mergeInfo().insertedResult()));
         assertThat(stored, is(row));
     }
 
     @Test
-    void upsertUpdatesWhentMatched() {
+    void upsertUpdatesWhenMatched() {
         assumeTrue(dialect.mergeInfo().supportsUpsert());
 
         Database database = testDatabase(dataSource, dialect);
@@ -238,8 +239,27 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         int result = database.upsertRows(updated);
         SalespersonRow stored = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(original.salespersonId()).single();
 
-        assertThat(result, is(1));
+        assertThat(result, is(dialect.mergeInfo().updatedResult()));
         assertThat(stored, is(updated));
+    }
+
+    @Test
+    void upsertCanInsertAndUpdate() {
+        assumeTrue(dialect.mergeInfo().supportsUpsert());
+
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow original = aRandomSalesperson(s -> s.numberOfSales(20));
+        SalespersonRow updated = aRandomSalesperson(s -> s.numberOfSales(30).salespersonId(original.salespersonId()));
+        SalespersonRow inserted = aRandomSalesperson(s -> s.numberOfSales(40));
+        database.insert(original);
+
+        int result = database.upsertRows(updated, inserted);
+        SalespersonRow stored1 = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(original.salespersonId()).single();
+        SalespersonRow stored2 = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(inserted.salespersonId()).single();
+
+        assertThat(result, is(dialect.mergeInfo().insertedResult() + dialect.mergeInfo().updatedResult()));
+        assertThat(stored1, is(updated));
+        assertThat(stored2, is(inserted));
     }
 
     @Test
@@ -564,14 +584,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             LocalDateTime before = LocalDateTime.now(database.databaseTimeZone()).minusSeconds(10);
-            LocalDateTime now = database
+            Tuple2<LocalDateTime, String> now = database
                 .select(currentTimestampLocal())
+                .comma(cast(currentTimestampLocal()).asVarchar(100))
                 .single();
             LocalDateTime after = LocalDateTime.now(database.databaseTimeZone()).plusSeconds(10);
 
             System.out.printf("%s <= %s <= %s%n", before, now, after);
-            assertThat(before.isAfter(now), is(false));
-            assertThat(now.isAfter(after), is(false));
+            assertThat(before.isAfter(now.item1()), is(false));
+            assertThat(now.item1().isAfter(after), is(false));
         }
     }
 
@@ -588,14 +609,15 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         try (UncheckedAutoCloseable ignored = TemporalTestUtil.withTimeZone(timeZone)) {
             ZonedDateTime before = ZonedDateTime.now(ZoneId.of("UTC")).minusSeconds(10);
-            ZonedDateTime now = database
+            Tuple2<ZonedDateTime, String> now = database
                 .select(currentTimestamp())
+                .comma(cast(currentTimestampLocal()).asVarchar(100))
                 .single();
             ZonedDateTime after = ZonedDateTime.now(ZoneId.of("UTC")).plusSeconds(10);
 
             System.out.printf("%s <= %s <= %s%n", before, now, after);
-            assertThat(before.isAfter(now), is(false));
-            assertThat(now.isAfter(after), is(false));
+            assertThat(before.isAfter(now.item1()), is(false));
+            assertThat(now.item1().isAfter(after), is(false));
         }
     }
 
@@ -1212,6 +1234,8 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
     @Test
     void sequence() {
+        assumeTrue(dialect.sequenceInfo().supportsSequences());
+
         Database database = testDatabase(dataSource, dialect);
         Sequence<Integer> widgetSeq = database.sequence("widget_seq");
         long salespersonId = newId();
@@ -1265,25 +1289,29 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .localDateReq(localDate)
             .build());
 
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = database
+        Tuple10<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> result = database
             .select(dayDiff(literal(LocalDate.of(2015, 1, 20)), literal(LocalDate.of(2015, 1, 11))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 31, 0)), value(LocalDateTime.of(2018, 2, 17, 11, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 20, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
             .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 15, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 0, 0))))
+            .comma(hourDiff(literal(LocalDateTime.of(2018, 2, 15, 10, 0, 0)), value(LocalDateTime.of(2018, 2, 17, 9, 59, 0))))
             .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 0))))
-            .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59))))
+            .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), literal(LocalDateTime.of(2018, 2, 15, 1, 20, 59))))
+            .comma(minuteDiff(literal(LocalDateTime.of(2018, 2, 15, 1, 20, 59)), literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0))))
             .comma(secondDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59))))
-            .comma(secondDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), value(LocalDateTime.of(2018, 2, 15, 1, 20, 59, 999_999_000))))
+            .comma(secondDiff(literal(LocalDateTime.of(2018, 2, 15, 5, 30, 0)), literal(LocalDateTime.of(2018, 2, 15, 1, 20, 59, 999_999_000))))
             .single();
 
         assertThat(result.item1(), is(9));
         assertThat(result.item2(), is(71));
         assertThat(result.item3(), is(73));
         assertThat(result.item4(), is(-47));
-        assertThat(result.item5(), is(250));
+        assertThat(result.item5(), is(-47));
         assertThat(result.item6(), is(250));
-        assertThat(result.item7(), is(14941));
-        assertThat(result.item8(), is(14941));
+        assertThat(result.item7(), is(250));
+        assertThat(result.item8(), is(-250));
+        assertThat(result.item9(), is(14941));
+        assertThat(result.item10(), is(14941));
     }
 
     @Test

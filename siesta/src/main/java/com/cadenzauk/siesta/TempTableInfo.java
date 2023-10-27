@@ -22,6 +22,7 @@
 
 package com.cadenzauk.siesta;
 
+import com.cadenzauk.core.util.TokenReplacer;
 import com.cadenzauk.siesta.grammar.temp.TempTableCommitAction;
 import com.google.common.collect.ImmutableSet;
 import org.intellij.lang.annotations.PrintFormat;
@@ -75,24 +76,24 @@ public class TempTableInfo {
         return listGlobalSql;
     }
 
-    public String createGlobalSql(String tempTableName, String columnsSql, String primaryKeySql, String foreignKeySql) {
-        return String.format(createGlobalSqlFormat, tempTableName, columnsSql, primaryKeySql, foreignKeySql);
+    public String createGlobalSql(TokenReplacer tokenReplacer) {
+        return tokenReplacer.replace(createGlobalSqlFormat);
     }
 
-    public String createLocalPreserveRowsSql(String tempTableName, String columnsSql) {
-        return String.format(createLocalPreserveRowsSqlFormat, tempTableName, columnsSql);
+    public String createLocalPreserveRowsSql(TokenReplacer tokenReplacer) {
+        return tokenReplacer.replace(createLocalPreserveRowsSqlFormat);
     }
 
-    public String createLocalDeleteRowsSql(String tempTableName, String columnsSql) {
+    public String createLocalDeleteRowsSql(TokenReplacer tokenReplacer) {
         return supportsLocalOnCommitDeleteRows()
-                   ? String.format(createLocalDeleteRowsSqlFormat, tempTableName, columnsSql)
-                   : createLocalPreserveRowsSql(tempTableName, columnsSql);
+                   ? tokenReplacer.replace(createLocalDeleteRowsSqlFormat)
+                   : createLocalPreserveRowsSql(tokenReplacer);
     }
 
-    public String createLocalDropTableSql(String tempTableName, String columnsSql) {
+    public String createLocalDropTableSql(TokenReplacer tokenReplacer) {
         return supportsLocalOnCommitDropTable()
-                   ? String.format(createLocalDropTableSqlFormat, tempTableName, columnsSql)
-                   : createLocalPreserveRowsSql(tempTableName, columnsSql);
+                   ? tokenReplacer.replace(createLocalDropTableSqlFormat)
+                   : createLocalPreserveRowsSql(tokenReplacer);
     }
 
     public boolean supportsLocalOnCommitPreserveRows() {
@@ -107,8 +108,8 @@ public class TempTableInfo {
         return localCommitOptions.contains(TempTableCommitAction.DROP_TABLE);
     }
 
-    public String tableName(String tableName) {
-        return String.format(tableNameFormat, tableName);
+    public String tableName(TokenReplacer tokenReplacer) {
+        return tokenReplacer.replace(tableNameFormat);
     }
 
     public String globalTempTableName(Dialect dialect, String catalog, String schemaName, String tableName) {
@@ -123,11 +124,11 @@ public class TempTableInfo {
         private boolean supportsGlobal = true;
         private boolean supportsLocal = true;
         private String listGlobalSql = "";
-        private String createGlobalSqlFormat = "create global temporary table %s(%s%s%s)";
-        private String createLocalPreserveRowsSqlFormat = "create temporary table %s(%s)";
+        private String createGlobalSqlFormat = "create global temporary table ${tableName}(${columnDefs}${primaryKeyDef}${foreignKeyDefs})";
+        private String createLocalPreserveRowsSqlFormat = "create temporary table ${tableName}(${columnDefs})";
         private String createLocalDeleteRowsSqlFormat = "";
         private String createLocalDropTableSqlFormat = "";
-        private String tableNameFormat = "%s";
+        private String tableNameFormat = "${tableName}";
         private EnumSet<TempTableCommitAction> localCommitOptions = EnumSet.of(TempTableCommitAction.PRESERVE_ROWS);
         private boolean createLocalIsTransactional = true;
         private boolean clearsGlobalOnCommit = true;

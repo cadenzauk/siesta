@@ -33,6 +33,6 @@ public class DefaultSmallint extends DefaultDbType<Short> {
 
     @Override
     public String literal(Database database, Short value) {
-        return String.format("cast(%d as smallint)", value);
+        return String.format("cast(%d as %s)", value, castType(database));
     }
 }

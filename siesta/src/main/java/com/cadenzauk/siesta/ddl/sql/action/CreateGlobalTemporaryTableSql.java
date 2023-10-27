@@ -23,10 +23,12 @@
 package com.cadenzauk.siesta.ddl.sql.action;
 
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.TokenReplacer;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.ddl.definition.action.Column;
 import com.cadenzauk.siesta.ddl.definition.action.CreateTableAction;
+import com.google.common.collect.ImmutableMap;
 
 import static java.util.stream.Collectors.joining;
 
@@ -41,11 +43,18 @@ public class CreateGlobalTemporaryTableSql extends SqlAction {
     public String sql(Database database) {
         Dialect dialect = database.dialect();
         String tableName = dialect.tempTableInfo().globalTempTableName(dialect, definition.catalog(database), definition.schemaName(database), definition.tableName(database));
-        return dialect.tempTableInfo().createGlobalSql(
-            tableName,
-            definition.columns().map(column -> columnSql(database, column)).collect(joining(", ")),
-            primaryKeySql(database),
-            foreignKeySql(database));
+        String columnDefs = definition.columns().map(column -> columnSql(database, column)).collect(joining(", "));
+        String primaryKeyDef = primaryKeySql(database);
+        String foreignKeyDefs = foreignKeySql(database);
+        TokenReplacer tokenReplacer = new TokenReplacer(
+            ImmutableMap.of(
+                "tableName", tableName,
+                "columnDefs", columnDefs,
+                "primaryKeyDef", primaryKeyDef,
+                "foreignKeyDefs", foreignKeyDefs
+            )
+        );
+        return dialect.tempTableInfo().createGlobalSql(tokenReplacer);
     }
 
     private String primaryKeySql(Database database) {

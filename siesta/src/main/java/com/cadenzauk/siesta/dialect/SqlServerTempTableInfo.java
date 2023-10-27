@@ -29,9 +29,9 @@ public class SqlServerTempTableInfo extends TempTableInfo {
     public SqlServerTempTableInfo() {
         super(TempTableInfo.newBuilder()
             .supportsGlobal(false)
-            .createGlobalSqlFormat("create table %s(%s)")
-            .createLocalPreserveRowsSqlFormat("create table %s(%s)")
-            .tableNameFormat("#%s"));
+            .createGlobalSqlFormat("create table ${tableName}(${columnDefs})")
+            .createLocalPreserveRowsSqlFormat("create table ${tableName}(${columnDefs})")
+            .tableNameFormat("#${tableName}"));
     }
 
     @Override

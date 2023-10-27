@@ -30,8 +30,8 @@ public class OracleTempTableInfo extends TempTableInfo {
         super(TempTableInfo.newBuilder()
                   .localCommitOptions(TempTableCommitAction.PRESERVE_ROWS, TempTableCommitAction.DROP_TABLE)
                   .createLocalIsTransactional(false)
-                  .createLocalPreserveRowsSqlFormat("create private temporary table %s(%s) on commit preserve definition")
-                  .createLocalDropTableSqlFormat("create private temporary table %s(%s) on commit drop definition")
-                  .tableNameFormat("ORA$PTT_%s"));
+                  .createLocalPreserveRowsSqlFormat("create private temporary table ${tableName}(${columnDefs}) on commit preserve definition")
+                  .createLocalDropTableSqlFormat("create private temporary table ${tableName}(${columnDefs}) on commit drop definition")
+                  .tableNameFormat("ORA$PTT_${tableName}"));
     }
 }
