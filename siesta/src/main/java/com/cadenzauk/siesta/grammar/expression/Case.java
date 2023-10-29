@@ -27,6 +27,10 @@ import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.Alias;
 
 public class Case {
+    public static CaseExpression.InFirstWhenExpectingThen when(BooleanExpression expression) {
+        return new CaseExpression.InFirstWhenExpectingThen(expression);
+    }
+
     public static <T> ExpressionBuilder<T,CaseExpression.InFirstWhenExpectingThen> when(T val) {
         return ExpressionBuilder.of(ValueExpression.of(val), CaseExpression.InFirstWhenExpectingThen::new);
     }
@@ -56,6 +60,42 @@ public class Case {
     }
 
     public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> when(Alias<T> alias, FunctionOptional1<T,R> method) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static CaseExpression.InFirstWhenExpectingThen whenever(BooleanExpression expression) {
+        return new CaseExpression.InFirstWhenExpectingThen(expression);
+    }
+
+    public static <T> ExpressionBuilder<T,CaseExpression.InFirstWhenExpectingThen> whenever(T val) {
+        return ExpressionBuilder.of(ValueExpression.of(val), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T> ExpressionBuilder<T,CaseExpression.InFirstWhenExpectingThen> whenever(TypedExpression<T> expression) {
+        return ExpressionBuilder.of(expression, CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> whenever(Function1<T,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(method), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> whenever(FunctionOptional1<T,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(method), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> whenever(String alias, Function1<T,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> whenever(String alias, FunctionOptional1<T,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> whenever(Alias<T> alias, Function1<T,R> method) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
+    }
+
+    public static <T,R> ExpressionBuilder<R,CaseExpression.InFirstWhenExpectingThen> whenever(Alias<T> alias, FunctionOptional1<T,R> method) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, method), CaseExpression.InFirstWhenExpectingThen::new);
     }
 }

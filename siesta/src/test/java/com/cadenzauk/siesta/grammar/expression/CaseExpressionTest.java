@@ -46,6 +46,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
@@ -160,6 +161,7 @@ class CaseExpressionTest {
 
     private static Stream<Arguments> parametersForInitialWhen() {
         return Stream.of(
+            testCase("when ? = ? then 'BURT'", w -> Case.when(value(2).isEqualTo(3)).then("BURT"), 2, 3),
             testCase("when ? = ? then 'BURT'", w -> Case.when(2).isEqualTo(3).then("BURT"), 2, 3),
             testCase("when 2 = ? then 'BURT'", w -> Case.when(literal(2)).isEqualTo(3).then("BURT"), 3),
             testCase("when w.NAME = ? then 'BURT'", w -> Case.when(WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
@@ -176,7 +178,17 @@ class CaseExpressionTest {
             testCase("when ? = ? then w.NAME", w -> Case.when(2).isEqualTo(3).then("w", WidgetRow::name), 2, 3),
             testCase("when ? = ? then w.DESCRIPTION", w -> Case.when(2).isEqualTo(3).then("w", WidgetRow::description), 2, 3),
             testCase("when ? = ? then w.NAME", w -> Case.when(2).isEqualTo(3).then(w, WidgetRow::name), 2, 3),
-            testCase("when ? = ? then w.DESCRIPTION", w -> Case.when(2).isEqualTo(3).then(w, WidgetRow::description), 2, 3)
+            testCase("when ? = ? then w.DESCRIPTION", w -> Case.when(2).isEqualTo(3).then(w, WidgetRow::description), 2, 3),
+
+            testCase("when ? = ? then 'BURT'", w -> Case.whenever(value(2).isEqualTo(3)).then("BURT"), 2, 3),
+            testCase("when ? = ? then 'BURT'", w -> Case.whenever(2).isEqualTo(3).then("BURT"), 2, 3),
+            testCase("when 2 = ? then 'BURT'", w -> Case.whenever(literal(2)).isEqualTo(3).then("BURT"), 3),
+            testCase("when w.NAME = ? then 'BURT'", w -> Case.whenever(WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> Case.whenever(WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.NAME = ? then 'BURT'", w -> Case.whenever("w", WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> Case.whenever("w", WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.NAME = ? then 'BURT'", w -> Case.whenever(w, WidgetRow::name).isEqualTo("FRED").then("BURT"), "FRED"),
+            testCase("when w.DESCRIPTION = ? then 'BURT'", w -> Case.whenever(w, WidgetRow::description).isEqualTo("FRED").then("BURT"), "FRED")
         );
     }
 
@@ -212,6 +224,7 @@ class CaseExpressionTest {
             testCase("else w.NAME", (c, w) -> c.orElse(w, WidgetRow::name)),
             testCase("else w.DESCRIPTION", (c, w) -> c.orElse(w, WidgetRow::description)),
 
+            testCase("when ? = ? then 'BOB'", (c, w) -> c.when(value("BRUCE").isEqualTo("BRUCE")).then(literal("BOB")), "BRUCE", "BRUCE"),
             testCase("when ? = ? then 'BOB'", (c, w) -> c.when("BRUCE").isEqualTo("BRUCE").then(literal("BOB")), "BRUCE", "BRUCE"),
             testCase("when 'BRUCE' = ? then 'BOB'", (c, w) -> c.when(literal("BRUCE")).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
             testCase("when w.NAME = ? then 'BOB'", (c, w) -> c.when(WidgetRow::name).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
@@ -228,7 +241,17 @@ class CaseExpressionTest {
             testCase("when ? = ? then w.NAME", (c, w) -> c.when(3).isEqualTo(4).then("w", WidgetRow::name), 3, 4),
             testCase("when ? = ? then w.DESCRIPTION", (c, w) -> c.when(3).isEqualTo(4).then("w", WidgetRow::description), 3, 4),
             testCase("when ? = ? then w.NAME", (c, w) -> c.when(3).isEqualTo(4).then(w, WidgetRow::name), 3, 4),
-            testCase("when ? = ? then w.DESCRIPTION", (c, w) -> c.when(3).isEqualTo(4).then(w, WidgetRow::description), 3, 4)
+            testCase("when ? = ? then w.DESCRIPTION", (c, w) -> c.when(3).isEqualTo(4).then(w, WidgetRow::description), 3, 4),
+
+            testCase("when ? = ? then 'BOB'", (c, w) -> c.whenever(value("BRUCE").isEqualTo("BRUCE")).then(literal("BOB")), "BRUCE", "BRUCE"),
+            testCase("when ? = ? then 'BOB'", (c, w) -> c.whenever("BRUCE").isEqualTo("BRUCE").then(literal("BOB")), "BRUCE", "BRUCE"),
+            testCase("when 'BRUCE' = ? then 'BOB'", (c, w) -> c.whenever(literal("BRUCE")).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
+            testCase("when w.NAME = ? then 'BOB'", (c, w) -> c.whenever(WidgetRow::name).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
+            testCase("when w.DESCRIPTION = ? then 'BOB'", (c, w) -> c.whenever(WidgetRow::description).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
+            testCase("when w.NAME = ? then 'BOB'", (c, w) -> c.whenever("w", WidgetRow::name).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
+            testCase("when w.DESCRIPTION = ? then 'BOB'", (c, w) -> c.whenever("w", WidgetRow::description).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
+            testCase("when w.NAME = ? then 'BOB'", (c, w) -> c.whenever(w, WidgetRow::name).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE"),
+            testCase("when w.DESCRIPTION = ? then 'BOB'", (c, w) -> c.whenever(w, WidgetRow::description).isEqualTo("BRUCE").then(literal("BOB")), "BRUCE")
         );
     }
 

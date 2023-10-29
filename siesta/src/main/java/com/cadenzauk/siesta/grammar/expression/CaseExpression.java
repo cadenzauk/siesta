@@ -124,6 +124,10 @@ public class CaseExpression<T> implements TypedExpression<T> {
         return this;
     }
 
+    public InSubsequentWhenExpectingThen when(BooleanExpression expression) {
+        return new InSubsequentWhenExpectingThen(expression);
+    }
+
     public <X> ExpressionBuilder<X,InSubsequentWhenExpectingThen> when(X val) {
         return ExpressionBuilder.of(ValueExpression.of(val), InSubsequentWhenExpectingThen::new);
     }
@@ -153,6 +157,42 @@ public class CaseExpression<T> implements TypedExpression<T> {
     }
 
     public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> when(Alias<X> alias, FunctionOptional1<X,R> method) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, method), InSubsequentWhenExpectingThen::new);
+    }
+
+    public InSubsequentWhenExpectingThen whenever(BooleanExpression expression) {
+        return new InSubsequentWhenExpectingThen(expression);
+    }
+
+    public <X> ExpressionBuilder<X,InSubsequentWhenExpectingThen> whenever(X val) {
+        return ExpressionBuilder.of(ValueExpression.of(val), InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X> ExpressionBuilder<X,InSubsequentWhenExpectingThen> whenever(TypedExpression<X> expression) {
+        return ExpressionBuilder.of(expression, InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> whenever(Function1<X,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(method), InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> whenever(FunctionOptional1<X,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(method), InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> whenever(String alias, Function1<X,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, method), InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> whenever(String alias, FunctionOptional1<X,R> method) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, method), InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> whenever(Alias<X> alias, Function1<X,R> method) {
+        return ExpressionBuilder.of(ResolvedColumn.of(alias, method), InSubsequentWhenExpectingThen::new);
+    }
+
+    public <X,R> ExpressionBuilder<R,InSubsequentWhenExpectingThen> whenever(Alias<X> alias, FunctionOptional1<X,R> method) {
         return ExpressionBuilder.of(ResolvedColumn.of(alias, method), InSubsequentWhenExpectingThen::new);
     }
 
