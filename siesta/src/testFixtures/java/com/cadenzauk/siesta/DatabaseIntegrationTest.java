@@ -66,6 +66,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -124,6 +125,8 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.cast;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
+import static com.cadenzauk.siesta.grammar.expression.olap.Olap.lag;
+import static com.cadenzauk.siesta.grammar.expression.olap.Olap.lead;
 import static com.cadenzauk.siesta.grammar.expression.olap.Olap.rowNumber;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
@@ -728,6 +731,50 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result, hasSize(5));
         assertThat(result.get(0), is(Tuple.of(inserted.item1(), 1, inserted.item1())));
         assertThat(result.get(4), is(Tuple.of(inserted.item2(), 1, inserted.item2())));
+    }
+
+    @Test
+    void olapLeadAndLag() {
+        assumeTrue(dialect.supportsPartitionByInOlap() && dialect.supportsOrderByInOlap(), dialect.getClass().getSimpleName() + " does not support PARTITION BY/ORDER BY in OLAP functions.");
+        Database database = testDatabase(dataSource, dialect);
+        long salespersonId = newId();
+        database.insert(
+             SaleRow.newBuilder()
+                .salespersonId(salespersonId)
+                .widgetId(1)
+                .quantity(10)
+                .price(new BigDecimal("100.01"))
+                .build(),
+             SaleRow.newBuilder()
+                .salespersonId(salespersonId)
+                .widgetId(2)
+                .quantity(20)
+                .price(new BigDecimal("200.02"))
+                .build(),
+             SaleRow.newBuilder()
+                .salespersonId(salespersonId)
+                .widgetId(3)
+                .quantity(30)
+                .price(new BigDecimal("300.03"))
+                .build()
+        );
+
+        List<Tuple3<Long, Long, BigDecimal>> result = database.from(SaleRow.class)
+            .select(SaleRow::widgetId)
+            .comma(lead(SaleRow::quantity)
+                .partitionBy(SaleRow::salespersonId)
+                .orderBy(SaleRow::widgetId, ASC))
+            .comma(lag(SaleRow::price, 2)
+                .partitionBy(SaleRow::salespersonId)
+                .orderBy(SaleRow::widgetId, ASC))
+            .where(SaleRow::salespersonId).isEqualTo(salespersonId)
+            .orderBy(SaleRow::widgetId)
+            .list();
+
+        assertThat(result, hasSize(3));
+        assertThat(result.get(0), is(Tuple.of(1L, 20L, null)));
+        assertThat(result.get(1), is(Tuple.of(2L, 30L, null)));
+        assertThat(result.get(2), is(Tuple.of(3L, null, new BigDecimal("100.01"))));
     }
 
     @Test

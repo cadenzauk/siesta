@@ -33,11 +33,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.math.BigDecimal;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.testutil.IsUtilityClass.isUtilityClass;
 import static com.cadenzauk.siesta.grammar.expression.StringFunctions.length;
+import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -65,13 +67,78 @@ class OlapTest {
     private static Stream<Arguments> parametersForOlapTest() {
         return Stream.of(
             testCase(s -> Olap.rowNumber(), "row_number() over ()"),
+
             testCase(s -> Olap.sum(length(SalespersonRow::surname)), "sum(length(s.SURNAME)) over ()"),
             testCase(s -> Olap.sum(SalespersonRow::numberOfSales), "sum(s.NUMBER_OF_SALES) over ()"),
             testCase(s -> Olap.sum(SalespersonRow::commission), "sum(s.COMMISSION) over ()"),
             testCase(s -> Olap.sum("s", SalespersonRow::numberOfSales), "sum(s.NUMBER_OF_SALES) over ()"),
             testCase(s -> Olap.sum("s", SalespersonRow::commission), "sum(s.COMMISSION) over ()"),
             testCase(s -> Olap.sum(s, SalespersonRow::numberOfSales), "sum(s.NUMBER_OF_SALES) over ()"),
-            testCase(s -> Olap.sum(s, SalespersonRow::commission), "sum(s.COMMISSION) over ()")
+            testCase(s -> Olap.sum(s, SalespersonRow::commission), "sum(s.COMMISSION) over ()"),
+
+            testCase(s -> Olap.firstValue(upper(SalespersonRow::surname)), "first_value(upper(s.SURNAME)) over ()"),
+            testCase(s -> Olap.firstValue(SalespersonRow::numberOfSales), "first_value(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.firstValue(SalespersonRow::commission), "first_value(s.COMMISSION) over ()"),
+            testCase(s -> Olap.firstValue("s", SalespersonRow::numberOfSales), "first_value(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.firstValue("s", SalespersonRow::commission), "first_value(s.COMMISSION) over ()"),
+            testCase(s -> Olap.firstValue(s, SalespersonRow::numberOfSales), "first_value(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.firstValue(s, SalespersonRow::commission), "first_value(s.COMMISSION) over ()"),
+
+            testCase(s -> Olap.lastValue(upper(SalespersonRow::surname)), "last_value(upper(s.SURNAME)) over ()"),
+            testCase(s -> Olap.lastValue(SalespersonRow::numberOfSales), "last_value(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lastValue(SalespersonRow::commission), "last_value(s.COMMISSION) over ()"),
+            testCase(s -> Olap.lastValue("s", SalespersonRow::numberOfSales), "last_value(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lastValue("s", SalespersonRow::commission), "last_value(s.COMMISSION) over ()"),
+            testCase(s -> Olap.lastValue(s, SalespersonRow::numberOfSales), "last_value(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lastValue(s, SalespersonRow::commission), "last_value(s.COMMISSION) over ()"),
+
+            testCase(s -> Olap.lead(upper(SalespersonRow::surname)), "lead(upper(s.SURNAME)) over ()"),
+            testCase(s -> Olap.lead(SalespersonRow::numberOfSales), "lead(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lead(SalespersonRow::commission), "lead(s.COMMISSION) over ()"),
+            testCase(s -> Olap.lead("s", SalespersonRow::numberOfSales), "lead(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lead("s", SalespersonRow::commission), "lead(s.COMMISSION) over ()"),
+            testCase(s -> Olap.lead(s, SalespersonRow::numberOfSales), "lead(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lead(s, SalespersonRow::commission), "lead(s.COMMISSION) over ()"),
+
+            testCase(s -> Olap.lead(upper(SalespersonRow::surname), -1), "lead(upper(s.SURNAME), -1) over ()"),
+            testCase(s -> Olap.lead(SalespersonRow::numberOfSales, -2), "lead(s.NUMBER_OF_SALES, -2) over ()"),
+            testCase(s -> Olap.lead(SalespersonRow::commission, -3), "lead(s.COMMISSION, -3) over ()"),
+            testCase(s -> Olap.lead("s", SalespersonRow::numberOfSales, 4), "lead(s.NUMBER_OF_SALES, 4) over ()"),
+            testCase(s -> Olap.lead("s", SalespersonRow::commission, 5), "lead(s.COMMISSION, 5) over ()"),
+            testCase(s -> Olap.lead(s, SalespersonRow::numberOfSales, 6), "lead(s.NUMBER_OF_SALES, 6) over ()"),
+            testCase(s -> Olap.lead(s, SalespersonRow::commission, 7), "lead(s.COMMISSION, 7) over ()"),
+
+            testCase(s -> Olap.lead(upper(SalespersonRow::surname), -1, "NOT FOUND"), "lead(upper(s.SURNAME), -1, 'NOT FOUND') over ()"),
+            testCase(s -> Olap.lead(SalespersonRow::numberOfSales, -2, 0), "lead(s.NUMBER_OF_SALES, -2, 0) over ()"),
+            testCase(s -> Olap.lead(SalespersonRow::commission, -3, BigDecimal.TEN), "lead(s.COMMISSION, -3, 10) over ()"),
+            testCase(s -> Olap.lead("s", SalespersonRow::numberOfSales, 4, 1), "lead(s.NUMBER_OF_SALES, 4, 1) over ()"),
+            testCase(s -> Olap.lead("s", SalespersonRow::commission, 5, BigDecimal.ZERO), "lead(s.COMMISSION, 5, 0) over ()"),
+            testCase(s -> Olap.lead(s, SalespersonRow::numberOfSales, 6, 0), "lead(s.NUMBER_OF_SALES, 6, 0) over ()"),
+            testCase(s -> Olap.lead(s, SalespersonRow::commission, 7, BigDecimal.ZERO), "lead(s.COMMISSION, 7, 0) over ()"),
+
+            testCase(s -> Olap.lag(upper(SalespersonRow::surname)), "lag(upper(s.SURNAME)) over ()"),
+            testCase(s -> Olap.lag(SalespersonRow::numberOfSales), "lag(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lag(SalespersonRow::commission), "lag(s.COMMISSION) over ()"),
+            testCase(s -> Olap.lag("s", SalespersonRow::numberOfSales), "lag(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lag("s", SalespersonRow::commission), "lag(s.COMMISSION) over ()"),
+            testCase(s -> Olap.lag(s, SalespersonRow::numberOfSales), "lag(s.NUMBER_OF_SALES) over ()"),
+            testCase(s -> Olap.lag(s, SalespersonRow::commission), "lag(s.COMMISSION) over ()"),
+
+            testCase(s -> Olap.lag(upper(SalespersonRow::surname), -1), "lag(upper(s.SURNAME), -1) over ()"),
+            testCase(s -> Olap.lag(SalespersonRow::numberOfSales, -2), "lag(s.NUMBER_OF_SALES, -2) over ()"),
+            testCase(s -> Olap.lag(SalespersonRow::commission, -3), "lag(s.COMMISSION, -3) over ()"),
+            testCase(s -> Olap.lag("s", SalespersonRow::numberOfSales, 4), "lag(s.NUMBER_OF_SALES, 4) over ()"),
+            testCase(s -> Olap.lag("s", SalespersonRow::commission, 5), "lag(s.COMMISSION, 5) over ()"),
+            testCase(s -> Olap.lag(s, SalespersonRow::numberOfSales, 6), "lag(s.NUMBER_OF_SALES, 6) over ()"),
+            testCase(s -> Olap.lag(s, SalespersonRow::commission, 7), "lag(s.COMMISSION, 7) over ()"),
+
+            testCase(s -> Olap.lag(upper(SalespersonRow::surname), -1, "NOT FOUND"), "lag(upper(s.SURNAME), -1, 'NOT FOUND') over ()"),
+            testCase(s -> Olap.lag(SalespersonRow::numberOfSales, -2, 0), "lag(s.NUMBER_OF_SALES, -2, 0) over ()"),
+            testCase(s -> Olap.lag(SalespersonRow::commission, -3, BigDecimal.TEN), "lag(s.COMMISSION, -3, 10) over ()"),
+            testCase(s -> Olap.lag("s", SalespersonRow::numberOfSales, 4, 1), "lag(s.NUMBER_OF_SALES, 4, 1) over ()"),
+            testCase(s -> Olap.lag("s", SalespersonRow::commission, 5, BigDecimal.ZERO), "lag(s.COMMISSION, 5, 0) over ()"),
+            testCase(s -> Olap.lag(s, SalespersonRow::numberOfSales, 6, 0), "lag(s.NUMBER_OF_SALES, 6, 0) over ()"),
+            testCase(s -> Olap.lag(s, SalespersonRow::commission, 7, BigDecimal.ZERO), "lag(s.COMMISSION, 7, 0) over ()")
         );
     }
 
