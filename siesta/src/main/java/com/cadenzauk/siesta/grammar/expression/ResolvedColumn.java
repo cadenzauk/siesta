@@ -118,7 +118,7 @@ public class ResolvedColumn<T, R> implements ColumnExpression<T> {
         return column(scope).findColumn(type, propertyName);
     }
 
-    private AliasColumn<T> column(Scope scope) {
+    public AliasColumn<T> column(Scope scope) {
         return resolvedColumn.getOrCompute(() ->
             alias.findAliasColumn(scope, columnSpec)
                 .orElseThrow(() -> new InvalidQueryException("There is no column for " + columnSpec + " in " + alias.inFromClauseSql())));

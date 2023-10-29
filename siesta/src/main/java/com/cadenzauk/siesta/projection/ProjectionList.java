@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.projection;
 
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.cadenzauk.siesta.ColumnSpecifier;
@@ -66,6 +65,11 @@ public class ProjectionList<R> implements Projection<R> {
         return components
             .stream()
             .flatMap(c -> c.columns(scope));
+    }
+
+    @Override
+    public Stream<String> resultingColumnNames(Scope scope) {
+        return components.stream().flatMap(it -> it.resultingColumnNames(scope));
     }
 
     @Override

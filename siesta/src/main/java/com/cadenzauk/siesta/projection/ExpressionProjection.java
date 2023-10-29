@@ -61,6 +61,11 @@ public class ExpressionProjection<T> implements Projection<T> {
         return Stream.of(projectionColumn(scope));
     }
 
+    @Override
+    public Stream<String> resultingColumnNames(Scope scope) {
+        return Stream.of(projectionColumn(scope).label());
+    }
+
     private ProjectionColumn<T> projectionColumn(Scope scope) {
         return expression.toProjectionColumn(scope, label);
     }

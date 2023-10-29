@@ -35,11 +35,13 @@ import com.cadenzauk.siesta.projection.DynamicProjection;
 public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
     private final DynamicRowMapperFactory<RT> rowMapper;
     private final DynamicProjection<RT> projection;
+    private final Alias<RT> target;
 
-    public InSelectIntoExpectingWith(SelectStatement<RT> statement, DynamicRowMapperFactory<RT> rowMapper, DynamicProjection<RT> projection) {
+    InSelectIntoExpectingWith(SelectStatement<RT> statement, DynamicRowMapperFactory<RT> rowMapper, DynamicProjection<RT> projection, Alias<RT> target) {
         super(statement);
         this.rowMapper = rowMapper;
         this.projection = projection;
+        this.target = target;
     }
 
     public <T> InSelectIntoExpectingAs<RT,T> with(TypedExpression<T> expression) {
@@ -74,8 +76,12 @@ public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
         return new InSelectIntoExpectingAs<>(this, ResolvedColumn.of(alias, methodReference));
     }
 
-    <T> void select(TypedExpression<T> source, TypedExpression<T> target) {
+    <T> void select(TypedExpression<T> source, ResolvedColumn<T, RT> target) {
         rowMapper.add(target.label(scope()));
         projection.add(source, target);
+    }
+
+    Alias<RT> target() {
+        return target;
     }
 }

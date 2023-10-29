@@ -25,6 +25,12 @@ package com.cadenzauk.siesta.kotlin
 import co.unruly.matchers.OptionalMatchers.contains
 import com.cadenzauk.siesta.Database
 import com.cadenzauk.siesta.IntegrationTest
+import com.cadenzauk.siesta.grammar.expression.Aggregates.sum
+import com.cadenzauk.siesta.grammar.expression.Case
+import com.cadenzauk.siesta.grammar.expression.CoalesceFunction.coalesce
+import com.cadenzauk.siesta.grammar.expression.TypedExpression.column
+import com.cadenzauk.siesta.grammar.expression.TypedExpression.literal
+import com.cadenzauk.siesta.grammar.expression.olap.Olap
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor
 import com.cadenzauk.siesta.json.Json
 import com.cadenzauk.siesta.model.TestDatabase
@@ -101,6 +107,104 @@ class DatabaseTest : IntegrationTest() {
             .optional()
 
         assertThat(theSame, contains(aWidget))
+    }
+
+    data class DataRow(
+        val manufacturerId: Long,
+        val name: String,
+        val prevName: String,
+        val description: String
+    )
+
+    data class ResultRow(
+        val manufacturerId: Long,
+        val complete: Int,
+        val widgets: Int,
+        val thingamibobs: Int,
+    )
+
+    @Test
+    fun cteToView() {
+        val database = TestDatabase.testDatabase(dataSource, dialect)
+        val manufacturerId1 = newId()
+        val manufacturerId2 = newId()
+        val manufacturerId3 = newId()
+        database.insert(
+            KWidgetRow(
+                widgetId = newId(),
+                manufacturerId = manufacturerId1,
+                name = "Widget",
+                description = null
+            ),
+            KWidgetRow(
+                widgetId = newId(),
+                manufacturerId = manufacturerId1,
+                name = "Gadget",
+                description = "Doohickey"
+            ),
+            KWidgetRow(
+                widgetId = newId(),
+                manufacturerId = manufacturerId2,
+                name = "Widget",
+                description = null
+            ),
+            KWidgetRow(
+                widgetId = newId(),
+                manufacturerId = manufacturerId3,
+                name = "Gadget",
+                description = null
+            ),
+            KWidgetRow(
+                widgetId = newId(),
+                manufacturerId = manufacturerId3,
+                name = "Doofer",
+                description = "Thingamibob"
+            ),
+        )
+
+        val data = database.with("data").of(
+            database.from(KWidgetRow::class.java)
+                .selectInto(DataRow::class.java)
+                .with(KWidgetRow::manufacturerId).into(DataRow::manufacturerId)
+                .with(coalesce(Olap.lag(KWidgetRow::name).partitionBy(KWidgetRow::manufacturerId).orderBy(KWidgetRow::widgetId)).orElse(literal(""))).into(DataRow::prevName)
+                .with(KWidgetRow::name).into(DataRow::name)
+                .with(coalesce(KWidgetRow::description).orElse("n/a")).into(DataRow::description)
+        )
+        val result = database.from(data, "d")
+            .selectInto(ResultRow::class.java)
+            .with(DataRow::manufacturerId).into(ResultRow::manufacturerId)
+            .with(
+                sum(Case.whenever(column(DataRow::name).isEqualTo("Gadget").and(DataRow::prevName).isEqualTo("Widget"))
+                    .then(1)
+                    .orElse(0)
+                )
+            ).into(ResultRow::complete)
+            .with(
+                sum(Case.whenever(column(DataRow::name).isEqualTo("Widget"))
+                    .then(1)
+                    .orElse(0)
+                )
+            ).into(ResultRow::widgets)
+            .with(
+                sum(Case.whenever(column(DataRow::description).isEqualTo("Thingamibob"))
+                    .then(literal(1))
+                    .orElse(literal(0))
+                )
+            ).into(ResultRow::thingamibobs)
+            .groupBy(DataRow::manufacturerId)
+            .orderBy(DataRow::manufacturerId)
+            .list().onEach(::println)
+
+        assertThat(
+            result,
+            equalTo(
+                listOf(
+                    ResultRow(manufacturerId1, 1, 1, 0),
+                    ResultRow(manufacturerId2, 0, 1, 0),
+                    ResultRow(manufacturerId3, 0, 0, 1),
+                )
+            )
+        )
     }
 
     @Test

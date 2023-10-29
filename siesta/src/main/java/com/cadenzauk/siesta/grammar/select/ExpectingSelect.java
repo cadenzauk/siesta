@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RegularTableAlias;
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
@@ -270,11 +271,12 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
             .orElseThrow(() -> new IllegalArgumentException("Can only selectInto a TableAlias."));
         DynamicRowMapperFactory<R> rowMapper = tableAlias.dynamicRowMapperFactory();
         DynamicProjection<R> projection = new DynamicProjection<>(false, tableAlias);
-        SelectStatement<R> select = new SelectStatement<>(scope().plus(alias),
+        SelectStatement<R> select = new SelectStatement<>(scope(),
             alias.type(),
             statement.from(),
             projection);
-        return new InSelectIntoExpectingWith<>(select, rowMapper, projection);
+        statement.commonTableExpressions().forEach(select::addCommonTableExpression);
+        return new InSelectIntoExpectingWith<>(select, rowMapper, projection, alias);
     }
 
     private <T> InProjectionExpectingComma1<T> select(boolean distinct, TypedExpression<T> column, Optional<String> label) {
@@ -286,6 +288,7 @@ public abstract class ExpectingSelect<RT> extends ExpectingWhere<RT> {
             column.type(),
             statement.from(),
             projection);
+        statement.commonTableExpressions().forEach(select::addCommonTableExpression);
         return new InProjectionExpectingComma1<>(select);
     }
 }

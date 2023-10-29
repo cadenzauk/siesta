@@ -1398,7 +1398,7 @@ class SelectTest {
 
         Select<Long> result = Select.from(database, commonTableExpression);
 
-        assertThat(result.sql(), is("with cte(VALUE) as (select 1 as col from DUAL) select cte.VALUE as cte_VALUE from cte"));
+        assertThat(result.sql(), is("with cte(col) as (select 1 as col from DUAL) select cte.VALUE as cte_VALUE from cte"));
     }
 
     @Test
@@ -1408,7 +1408,7 @@ class SelectTest {
 
         Select<Long> result = Select.from(database, commonTableExpression, "bob");
 
-        assertThat(result.sql(), is("with cte(VALUE) as (select 1 as col from DUAL) select bob.VALUE as bob_VALUE from cte bob"));
+        assertThat(result.sql(), is("with cte(col) as (select 1 as col from DUAL) select bob.VALUE as bob_VALUE from cte bob"));
     }
 
     private Database database() {

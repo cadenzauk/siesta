@@ -120,7 +120,7 @@ public class Scope {
     }
 
     public boolean isOutermost() {
-        return !outer.isPresent();
+        return outer.isEmpty();
     }
 
     public long newLabel() {

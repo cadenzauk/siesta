@@ -36,4 +36,8 @@ public class CommonTableExpressionBuilder {
     public <RT> CommonTableExpression<RT> as(Select<RT> select) {
         return new CommonTableExpression<>(database.table(select.type()), name, select.statement);
     }
+
+    public <RT> CommonTableExpression<RT> of(Select<RT> select) {
+        return new CommonTableExpression<>(database.table(select.type()), name, select.statement);
+    }
 }

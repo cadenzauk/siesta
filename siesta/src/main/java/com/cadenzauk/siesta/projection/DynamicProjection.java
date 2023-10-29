@@ -25,12 +25,14 @@ package com.cadenzauk.siesta.projection;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
+import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.ProjectionColumn;
-import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.RegularTableAlias;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.collect.ImmutableList;
 
@@ -44,7 +46,7 @@ import static java.util.stream.Collectors.joining;
 public class DynamicProjection<R> implements Projection<R> {
     private final boolean distinct;
     private final RegularTableAlias<R> alias;
-    private final List<Tuple2<TypedExpression<?>,TypedExpression<?>>> columns = new ArrayList<>();
+    private final List<Tuple2<TypedExpression<?>,ResolvedColumn<?, R>>> columns = new ArrayList<>();
 
     public DynamicProjection(boolean distinct, RegularTableAlias<R> alias) {
         this.distinct = distinct;
@@ -68,8 +70,14 @@ public class DynamicProjection<R> implements Projection<R> {
         return columns.stream().map(p -> p.map((s, t) -> projectionColumn(scope, s, t)));
     }
 
-    private <T> ProjectionColumn<T> projectionColumn(Scope scope, TypedExpression<?> s, TypedExpression<T> t) {
-        return new ProjectionColumn<>(t.type(), s.sql(scope), s.sql(scope), s.sql(scope), t.label(scope), t.rowMapperFactory(scope));
+    @Override
+    public Stream<String> resultingColumnNames(Scope scope) {
+        return columns(scope).map(ProjectionColumn::columnName);
+    }
+
+    private <T> ProjectionColumn<T> projectionColumn(Scope scope, TypedExpression<?> s, ResolvedColumn<T,R> t) {
+        AliasColumn<T> column = t.column(scope);
+        return new ProjectionColumn<>(t.type(), column.propertyName(), column.columnName(), s.sql(scope), t.label(scope), t.rowMapperFactory(scope));
     }
 
     @Override
@@ -106,7 +114,7 @@ public class DynamicProjection<R> implements Projection<R> {
             .anyMatch(c -> c.includes(getter));
     }
 
-    public <T> void add(TypedExpression<T> source, TypedExpression<T> target) {
+    public <T> void add(TypedExpression<T> source, ResolvedColumn<T, R> target) {
         columns.add(Tuple.of(source, target));
     }
 }

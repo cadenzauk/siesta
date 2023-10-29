@@ -24,6 +24,7 @@ package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
+import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
@@ -37,12 +38,22 @@ public class InSelectIntoExpectingAs<RT, T> {
     }
 
     public InSelectIntoExpectingWith<RT> as(Function1<RT,T> methodReference) {
-        inSelectIntoExpectingWith.select(source, UnresolvedColumn.of(methodReference));
+        inSelectIntoExpectingWith.select(source, ResolvedColumn.of(inSelectIntoExpectingWith.target(), methodReference));
         return inSelectIntoExpectingWith;
     }
 
     public InSelectIntoExpectingWith<RT> as(FunctionOptional1<RT,T> methodReference) {
-        inSelectIntoExpectingWith.select(source, UnresolvedColumn.of(methodReference));
+        inSelectIntoExpectingWith.select(source, ResolvedColumn.of(inSelectIntoExpectingWith.target(), methodReference));
+        return inSelectIntoExpectingWith;
+    }
+
+    public InSelectIntoExpectingWith<RT> into(Function1<RT,T> methodReference) {
+        inSelectIntoExpectingWith.select(source, ResolvedColumn.of(inSelectIntoExpectingWith.target(), methodReference));
+        return inSelectIntoExpectingWith;
+    }
+
+    public InSelectIntoExpectingWith<RT> into(FunctionOptional1<RT,T> methodReference) {
+        inSelectIntoExpectingWith.select(source, ResolvedColumn.of(inSelectIntoExpectingWith.target(), methodReference));
         return inSelectIntoExpectingWith;
     }
 }

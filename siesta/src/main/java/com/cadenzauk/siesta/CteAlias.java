@@ -25,6 +25,7 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
+import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
@@ -102,7 +103,14 @@ public class CteAlias<RT> extends Alias<RT> {
 
     @Override
     public <T> Optional<AliasColumn<T>> findAliasColumn(Scope scope, ColumnSpecifier<T> columnSpecifier) {
-        return commonTableExpression.findColumn(columnSpecifier);
+        return OptionalUtil.or(
+            commonTableExpression.table()
+                .columns()
+                .flatMap(ac -> ac.as(columnSpecifier.effectiveType()))
+                .filter(ac -> columnSpecifier.specifies(scope, ac))
+                .findFirst(),
+            commonTableExpression.findColumn(columnSpecifier)
+        );
     }
 
     @Override

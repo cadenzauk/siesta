@@ -38,6 +38,8 @@ public interface Projection<R> {
 
     Stream<ProjectionColumn<?>> columns(Scope scope);
 
+    Stream<String> resultingColumnNames(Scope scope);
+
     <T> Optional<ProjectionColumn<T>> findColumn(Scope scope, ColumnSpecifier<T> columnSpecifier);
 
     RowMapperFactory<R> rowMapperFactory(Scope scope);

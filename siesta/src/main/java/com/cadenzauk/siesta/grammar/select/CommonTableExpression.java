@@ -29,7 +29,6 @@ import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.CteAlias;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.catalog.Table;
 import com.google.common.reflect.TypeToken;
 
@@ -53,7 +52,7 @@ public class CommonTableExpression<RT> {
         Scope actualScope = scope.plus(select.scope());
         return String.format("%s(%s) as %s ",
             name,
-            table.columns().map(Column::columnName).collect(joining(", ")),
+            select.projection().resultingColumnNames(actualScope).collect(joining(", ")),
             select.sql(actualScope));
     }
 

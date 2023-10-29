@@ -135,7 +135,7 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
         return Objects.equals(columnSpec, columnSpecifier);
     }
 
-    private AliasColumn<T> column(Scope scope) {
+    public AliasColumn<T> column(Scope scope) {
         return resolvedColumn.getOrCompute(() ->
             resolve(scope)
                 .findAliasColumn(scope, columnSpec)
