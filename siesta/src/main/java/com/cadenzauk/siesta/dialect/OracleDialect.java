@@ -23,15 +23,13 @@
 package com.cadenzauk.siesta.dialect;
 
 import com.cadenzauk.core.sql.ResultSetMetaDataUtil;
-import com.cadenzauk.core.sql.ResultSetUtil;
-import com.cadenzauk.core.sql.RuntimeSqlException;
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
-import com.cadenzauk.core.sql.exception.LockingException;
-import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
-import com.cadenzauk.core.sql.exception.DuplicateKeyException;
-import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;

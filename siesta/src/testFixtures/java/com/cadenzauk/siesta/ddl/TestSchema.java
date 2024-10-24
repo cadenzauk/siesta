@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.model.PartWithTypeRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
+import com.cadenzauk.siesta.model.UuidTestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.foreignKey;
@@ -156,6 +157,14 @@ public class TestSchema {
                 .column(TestRow::utcDateTimeOpt, timestamp())
                 .column(TestRow::booleanReq, bool())
                 .column(TestRow::booleanOpt, bool())
+            )
+            .createTable(t -> t
+                .id("create uuid_test_table table")
+                .author("mark")
+                .schemaName("SIESTA")
+                .tableName("UUID_TEST_TABLE")
+                .column(UuidTestRow::guid, varchar(36), notNull(), primaryKey())
+                .column(UuidTestRow::textValue, varchar(40))
             )
             .createTable(t -> t
                 .id("create LOCK_TEST table")

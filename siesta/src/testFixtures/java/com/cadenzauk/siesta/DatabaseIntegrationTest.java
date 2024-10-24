@@ -34,7 +34,6 @@ import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.core.tuple.Tuple5;
 import com.cadenzauk.core.tuple.Tuple6;
 import com.cadenzauk.core.tuple.Tuple7;
-import com.cadenzauk.core.tuple.Tuple9;
 import com.cadenzauk.core.util.Lazy;
 import com.cadenzauk.siesta.dialect.DerbyDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
@@ -59,14 +58,17 @@ import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestRow;
+import com.cadenzauk.siesta.model.UuidTestRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.model.WidgetViewRow;
+import com.cadenzauk.siesta.type.DbTypeAdapter;
+import com.cadenzauk.siesta.type.DbTypeId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
+import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -1791,6 +1793,24 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(parse(result.data()), is(parse(input2.data())));
         assertThat(parse(result.dataBinary().orElseThrow(AssertionError::new)), is(parse(input2.dataBinary().orElseThrow(AssertionError::new))));
+    }
+
+    @Test
+    void uuidAsChar() {
+        Database database = Database.newBuilder()
+            .defaultSchema("SIESTA")
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
+            .type(UUID.class, DbTypeId.UUID, new DbTypeAdapter<>(DbTypeId.VARCHAR, UUID::toString, UUID::fromString))
+            .build();
+        UuidTestRow testRow = UuidTestRow.newBuilder()
+            .guid(UUID.randomUUID())
+            .textValue("Testing 123")
+            .build();
+
+        database.insert(testRow);
+        UuidTestRow result = database.from(UuidTestRow.class).where(UuidTestRow::guid).isEqualTo(testRow.guid()).single();
+
+        assertThat(result, Is.is(testRow));
     }
 
     private static JsonNode parse(Json json) throws JsonProcessingException {
