@@ -52,6 +52,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 public class FirebirdDialect extends AnsiDialect {
@@ -148,8 +149,13 @@ public class FirebirdDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s rows %d", sql, n);
+    public String fetchFirst(String sql, long n, OptionalLong offset) {
+        long off = offset.orElse(0);
+        if (off == 0) {
+            return String.format("%s rows %d", sql, n);
+        } else {
+            return String.format("%s rows %d to %d", sql, off + 1, off + n);
+        }
     }
 
     @Override

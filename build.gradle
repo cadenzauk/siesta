@@ -26,7 +26,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
     }
 }
 
@@ -53,6 +53,19 @@ test {
     dependsOn gradle.includedBuild('siesta').task(':test')
     dependsOn gradle.includedBuild('siesta-kotlin').task(':test')
     dependsOn gradle.includedBuild('siesta-jackson').task(':test')
+}
+
+clean {
+    dependsOn gradle.includedBuild('siesta').task(':clean')
+    dependsOn gradle.includedBuild('siesta-kotlin').task(':clean')
+    dependsOn gradle.includedBuild('siesta-jackson').task(':clean')
+    dependsOn gradle.includedBuild('siesta-db2').task(':clean')
+    dependsOn gradle.includedBuild('siesta-firebird').task(':clean')
+    dependsOn gradle.includedBuild('siesta-mariadb').task(':clean')
+    dependsOn gradle.includedBuild('siesta-mysql').task(':clean')
+    dependsOn gradle.includedBuild('siesta-oracle').task(':clean')
+    dependsOn gradle.includedBuild('siesta-postgres').task(':clean')
+    dependsOn gradle.includedBuild('siesta-sqlserver').task(':clean')
 }
 
 check.dependsOn('integrationTest')

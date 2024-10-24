@@ -52,7 +52,7 @@ public abstract class TableAlias<T> extends Alias<T> {
     public Stream<Alias<?>> as(Scope scope, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
         if (requiredAlias.isPresent()) {
             if (requiredAlias.equals(aliasName())) {
-                if (columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
+                if (columnSpecifier.referringClass().isEmpty() || columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
                     return Stream.of(this);
                 }
                 throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A"));
@@ -61,6 +61,9 @@ public abstract class TableAlias<T> extends Alias<T> {
             }
         }
         if (columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
+            return Stream.of(this);
+        }
+        if (columnSpecifier.referringClass().isEmpty() && findAliasColumn(scope, columnSpecifier).isPresent()) {
             return Stream.of(this);
         }
         return Stream.empty();

@@ -49,6 +49,7 @@ import com.cadenzauk.siesta.type.DefaultVarchar;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs.COUNT_BIG;
@@ -193,8 +194,8 @@ public class MySqlDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
+    public String fetchFirst(String sql, long n, OptionalLong offset) {
+        return String.format("%s limit %d offset %d", sql, n, offset.orElse(0));
     }
 
     @Override

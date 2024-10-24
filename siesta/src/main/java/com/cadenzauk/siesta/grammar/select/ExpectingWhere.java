@@ -38,7 +38,7 @@ public class ExpectingWhere<RT> extends ExpectingGroupBy<RT> {
         super(statement);
     }
 
-    public <T> InWhereExpectingAnd<RT> where(BooleanExpression expression) {
+    public InWhereExpectingAnd<RT> where(BooleanExpression expression) {
         return statement.setWhereClause(expression);
     }
 

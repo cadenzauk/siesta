@@ -70,6 +70,10 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
         return new InOrderByExpectingThen<>(statement).then(alias, columnGetter);
     }
 
+    public <T> InOrderByExpectingThen<RT> orderBy(int columnNo, Order order) {
+        return new InOrderByExpectingThen<>(statement).then(columnNo, order);
+    }
+
     public <T> InOrderByExpectingThen<RT> orderBy(TypedExpression<T> expression, Order order) {
         return new InOrderByExpectingThen<>(statement).then(expression, order);
     }
@@ -101,4 +105,29 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
     public <T, R> InOrderByExpectingThen<RT> orderBy(Alias<R> alias, FunctionOptional1<R,T> columnGetter, Order order) {
         return new InOrderByExpectingThen<>(statement).then(alias, columnGetter, order);
     }
+
+    public InOrderByExpectingThen<RT> orderBy(String columnName) {
+        return new InOrderByExpectingThen<>(statement).then(columnName, Order.ASC);
+    }
+
+    public InOrderByExpectingThen<RT> orderBy(String alias, String columnName) {
+        return new InOrderByExpectingThen<>(statement).then(alias, columnName, Order.ASC);
+    }
+
+    public <R> InOrderByExpectingThen<RT> orderBy(Alias<R> alias, String columnName) {
+        return new InOrderByExpectingThen<>(statement).then(alias, columnName, Order.ASC);
+    }
+
+    public InOrderByExpectingThen<RT> orderBy(String columnName, Order order) {
+        return new InOrderByExpectingThen<>(statement).then(columnName, order);
+    }
+
+    public InOrderByExpectingThen<RT> orderBy(String alias, String columnName, Order order) {
+        return new InOrderByExpectingThen<>(statement).then(alias, columnName, order);
+    }
+
+    public <R> InOrderByExpectingThen<RT> orderBy(Alias<R> alias, String columnName, Order order) {
+        return new InOrderByExpectingThen<>(statement).then(alias, columnName, order);
+    }
+
 }

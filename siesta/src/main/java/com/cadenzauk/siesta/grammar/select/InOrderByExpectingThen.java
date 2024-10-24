@@ -81,6 +81,11 @@ public class InOrderByExpectingThen<RT> extends Select<RT> {
         return this;
     }
 
+    public <T> InOrderByExpectingThen<RT> then(int columnNo, Order order) {
+        statement.addOrderBy(columnNo, order);
+        return this;
+    }
+
     public <T> InOrderByExpectingThen<RT> then(TypedExpression<T> column, Order order) {
         statement.addOrderBy(column, order);
         return this;
@@ -118,6 +123,35 @@ public class InOrderByExpectingThen<RT> extends Select<RT> {
 
     public <T, R> InOrderByExpectingThen<RT> then(Alias<R> alias, FunctionOptional1<R,T> column, Order order) {
         statement.addOrderBy(ResolvedColumn.of(alias, column), order);
+        return this;
+    }
+
+    public InOrderByExpectingThen<RT> then(String columnName) {
+        statement.addOrderBy(UnresolvedColumn.of(columnName), Order.ASC);
+        return this;
+    }
+
+    public InOrderByExpectingThen<RT> then(String alias, String columnName) {
+        statement.addOrderBy(UnresolvedColumn.of(alias, columnName), Order.ASC);
+        return this;
+    }
+
+    public <R> InOrderByExpectingThen<RT> then(Alias<R> alias, String columnName) {
+        statement.addOrderBy(ResolvedColumn.of(alias, columnName), Order.ASC);
+        return this;
+    }
+    public InOrderByExpectingThen<RT> then(String columnName, Order order) {
+        statement.addOrderBy(UnresolvedColumn.of(columnName), order);
+        return this;
+    }
+
+    public InOrderByExpectingThen<RT> then(String alias, String columnName, Order order) {
+        statement.addOrderBy(UnresolvedColumn.of(alias, columnName), order);
+        return this;
+    }
+
+    public <R> InOrderByExpectingThen<RT> then(Alias<R> alias, String columnName, Order order) {
+        statement.addOrderBy(ResolvedColumn.of(alias, columnName), order);
         return this;
     }
 }

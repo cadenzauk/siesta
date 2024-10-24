@@ -82,6 +82,11 @@ public class InOlapExpectingOrderBy<T> extends InOlapFunction<T> {
         return new InOlapOrderBy<>(function);
     }
 
+    public <V> InOlapOrderBy<T> orderBy(String columnName, Order order) {
+        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(columnName), order));
+        return new InOlapOrderBy<>(function);
+    }
+
     public <V> InOlapOrderBy<T> orderBy(Label<V> label, Order order) {
         function.addOrderBy(new Ordering<>(UnresolvedColumn.of(label), order));
         return new InOlapOrderBy<>(function);

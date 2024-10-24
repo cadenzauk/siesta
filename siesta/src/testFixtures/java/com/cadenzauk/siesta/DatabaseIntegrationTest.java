@@ -85,6 +85,7 @@ import java.util.UUID;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static co.unruly.matchers.OptionalMatchers.empty;
 import static com.cadenzauk.core.RandomValues.randomLocalDateTime;
 import static com.cadenzauk.core.RandomValues.randomLocalTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
@@ -291,7 +292,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .join(WidgetRow.class, "w").on(WidgetRow::manufacturerId).isEqualTo(ManufacturerRow::manufacturerId)
             .select(WidgetRow.class)
             .where(ManufacturerRow::name).isEqualTo("Acclaimed Widgets")
-            .orderBy(WidgetRow::name, DESC)
+            .orderBy("w", "NAME", DESC)
             .list();
 
         List<Tuple2<String, WidgetRow>> acclaimedWidgets2 = database
@@ -1170,11 +1171,33 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .list();
         List<SalespersonRow> reducedList = database.from(SalespersonRow.class)
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .orderBy(SalespersonRow::salespersonId)
             .fetchFirst(5)
             .list();
 
         assertThat(fullList, hasSize(10));
         assertThat(reducedList, hasSize(5));
+        assertThat(reducedList.get(0).salespersonId(), is(inserted.item1()));
+    }
+
+    @Test
+    void fetchFirstWithOffset() {
+        Database database = testDatabase(dataSource);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 10);
+
+        List<SalespersonRow> fullList = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .list();
+        List<SalespersonRow> reducedList = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .orderBy(SalespersonRow::salespersonId)
+            .offset(2)
+            .fetchFirst(5)
+            .list();
+
+        assertThat(fullList, hasSize(10));
+        assertThat(reducedList, hasSize(5));
+        assertThat(reducedList.get(0).salespersonId(), is(inserted.item1() + 2));
     }
 
     @Test
@@ -1688,6 +1711,20 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(parse(result.data()), is(parse(input.data())));
         assertThat(parse(result.dataBinary().orElseThrow(AssertionError::new)), is(parse(input.dataBinary().orElseThrow(AssertionError::new))));
+    }
+
+    @Test
+    void canInsertNullJson() throws JsonProcessingException {
+        assumeTrue(dialect.supportsJsonFunctions());
+        long jsonId = newId();
+        JsonDataRow input = new JsonDataRow(jsonId, new Json("{\"name\": \"bob\"}"), Optional.empty());
+        Database database = testDatabase(dataSource, dialect);
+        database.insert(input);
+
+        JsonDataRow result = database.from(JsonDataRow.class).where(JsonDataRow::jsonId).isEqualTo(jsonId).and(JsonDataRow::dataBinary).isNull().single();
+
+        assertThat(parse(result.data()), is(parse(input.data())));
+        assertThat(result.dataBinary(), empty());
     }
 
     @Test

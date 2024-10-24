@@ -31,6 +31,7 @@ import com.cadenzauk.siesta.type.DbType;
 import com.cadenzauk.siesta.type.DbTypeId;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -95,7 +96,15 @@ public interface Dialect {
 
     String concat(Stream<String> sql);
 
-    String fetchFirst(String sql, long n);
+    @Deprecated
+    default String fetchFirst(String sql, long n) {
+        return fetchFirst(sql, n, OptionalLong.empty());
+    }
+
+    @SuppressWarnings("unused")
+    default String fetchFirst(String sql, long n, OptionalLong offset) {
+        return fetchFirst(sql, n);
+    }
 
     String nextFromSequence(String catalog, String schema, String sequenceName);
 

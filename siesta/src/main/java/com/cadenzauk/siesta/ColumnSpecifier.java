@@ -160,6 +160,11 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
+        public String toString() {
+            return columnLabel;
+        }
+
+        @Override
         public Optional<Class<?>> referringClass() {
             return Optional.empty();
         }

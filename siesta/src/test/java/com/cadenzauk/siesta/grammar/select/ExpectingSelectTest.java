@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -49,6 +51,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ExpectingSelectTest {
     @Mock
     private Transaction transaction;
@@ -117,7 +120,6 @@ class ExpectingSelectTest {
     @ParameterizedTest
     @MethodSource("argsForSelect")
     void testSelect(BiFunction<ExpectingSelect<SalespersonRow>,Alias<SalespersonRow>,Select<?>> method, String expectedSql) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
         method.apply(database.from(alias), alias)

@@ -47,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -65,6 +66,7 @@ class SelectStatement<RT> {
     private final BooleanExpressionChain havingClause = new BooleanExpressionChain();
     private final List<Tuple2<UnionType,SelectStatement<RT>>> unions = new ArrayList<>();
     private final List<OrderingClause> orderByClauses = new ArrayList<>();
+    private OptionalLong offset = OptionalLong.empty();
     private Optional<Long> fetchFirst = Optional.empty();
     private IsolationLevel isolationLevel = IsolationLevel.UNSPECIFIED;
     private Optional<LockLevel> keepLocks = Optional.empty();
@@ -117,6 +119,10 @@ class SelectStatement<RT> {
 
     Projection<RT> projection() {
         return projection;
+    }
+
+    void offset(long i) {
+        offset = OptionalLong.of(i);
     }
 
     void fetchFirst(long i) {
@@ -353,7 +359,7 @@ class SelectStatement<RT> {
     }
 
     private String fetchFirstSql(String sql) {
-        return fetchFirst.map(n -> scope.dialect().fetchFirst(sql, n)).orElse(sql);
+        return fetchFirst.map(n -> scope.dialect().fetchFirst(sql, n, offset)).orElse(sql);
     }
 
     private String isolationLevelSql(String sql) {

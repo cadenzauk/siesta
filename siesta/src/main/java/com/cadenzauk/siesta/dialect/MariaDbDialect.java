@@ -206,11 +206,6 @@ public class MariaDbDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
-    }
-
-    @Override
     public QualifiedName fixQualifiedName(QualifiedName qualifiedName) {
         if (qualifiedName.schema().isPresent()) {
             return qualifiedName;

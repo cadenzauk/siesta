@@ -47,6 +47,7 @@ import com.cadenzauk.siesta.type.DbTypeRegistry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -188,8 +189,13 @@ public class AnsiDialect implements Dialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("select * from (select *, row_number() over() as x_row_number from (%s)) where x_row_number <= %d", sql, n);
+    public String fetchFirst(String sql, long n, OptionalLong offset) {
+        long off = offset.orElse(0);
+        if (off == 0) {
+            return String.format("%s fetch first %d rows only", sql, n);
+        } else {
+            return String.format("%s offset %d rows fetch next %d rows only", sql, off, n);
+        }
     }
 
     @Override

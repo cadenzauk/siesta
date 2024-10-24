@@ -51,6 +51,12 @@ public class ResolvedColumn<T, R> implements ColumnExpression<T> {
         columnSpec = ColumnSpecifier.of(getterMethod);
     }
 
+    private ResolvedColumn(Alias<R> alias, Class<T> type, ColumnSpecifier<T> columnSpec) {
+        this.alias = alias;
+        this.type = TypeToken.of(type);
+        this.columnSpec = columnSpec;
+    }
+
     @Override
     public String toString() {
         return columnSpec.toString();
@@ -137,5 +143,9 @@ public class ResolvedColumn<T, R> implements ColumnExpression<T> {
     public static <T, R> ResolvedColumn<T,R> of(Alias<R> alias, FunctionOptional1<R,T> getterReference) {
         MethodInfo<R,T> method = MethodInfo.of(getterReference);
         return new ResolvedColumn<>(alias, method);
+    }
+
+    public static <R> ResolvedColumn<?,R> of(Alias<R> alias, String columnName) {
+        return new ResolvedColumn<>(alias, Object.class, ColumnSpecifier.of(Object.class, columnName));
     }
 }

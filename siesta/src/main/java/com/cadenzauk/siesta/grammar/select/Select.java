@@ -150,6 +150,11 @@ public abstract class Select<RT> implements TypedExpression<RT> {
         return statement.singleAsync(transaction);
     }
 
+    public Select<RT> offset(long i) {
+        statement.offset(i);
+        return this;
+    }
+
     public Select<RT> fetchFirst(long i) {
         statement.fetchFirst(i);
         return this;

@@ -139,7 +139,7 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
         return resolvedColumn.getOrCompute(() ->
             resolve(scope)
                 .findAliasColumn(scope, columnSpec)
-                .orElseThrow(() -> new InvalidQueryException("No column " + columnSpec + " in " + resolve(scope).inFromClauseSql())));
+                .orElseThrow(() -> new InvalidQueryException("No column '" + columnSpec + "' in " + resolve(scope).inFromClauseSql())));
     }
 
     public static <T, R> UnresolvedColumn<T> of(Function1<R,T> getter) {
@@ -168,5 +168,13 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
 
     public static <T> UnresolvedColumn<T> of(String alias, Label<T> label) {
         return new UnresolvedColumn<>(alias, label.effectiveClass(), label.label());
+    }
+
+    public static UnresolvedColumn<?> of(String alias, String columnName) {
+        return new UnresolvedColumn<>(alias, Object.class, columnName);
+    }
+
+    public static UnresolvedColumn<?> of(String columnName) {
+        return new UnresolvedColumn<>(Object.class, columnName);
     }
 }

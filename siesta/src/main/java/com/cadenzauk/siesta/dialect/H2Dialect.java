@@ -45,7 +45,9 @@ import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBinaryJson;
 import com.cadenzauk.siesta.type.DefaultJson;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -86,13 +88,8 @@ public class H2Dialect extends AnsiDialect {
                 }
 
                 @Override
-                public String parameter(Database database, Optional<Json> value) {
-                    return "? format json";
-                }
-
-                @Override
-                public String castParameter(Database database, Optional<Json> value) {
-                    return "cast(? format json as " + sqlTypeOf(database, value) + ")";
+                public Object convertToDatabase(Database database, Json value) {
+                    return value == null ? null : value.data().getBytes(StandardCharsets.UTF_8);
                 }
             })
             .register(DbTypeId.JSONB, new DefaultBinaryJson() {
@@ -102,13 +99,8 @@ public class H2Dialect extends AnsiDialect {
                 }
 
                 @Override
-                public String parameter(Database database, Optional<BinaryJson> value) {
-                    return "? format json";
-                }
-
-                @Override
-                public String castParameter(Database database, Optional<BinaryJson> value) {
-                    return "cast(? format json as " + sqlTypeOf(database, value) + ")";
+                public Object convertToDatabase(Database database, BinaryJson value) {
+                    return value == null ? null : value.data().getBytes(StandardCharsets.UTF_8);
                 }
             });
 
@@ -158,8 +150,13 @@ public class H2Dialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
+    public String fetchFirst(String sql, long n, OptionalLong offset) {
+        long off = offset.orElse(0);
+        if (off == 0) {
+            return String.format("%s limit %d", sql, n);
+        } else {
+            return String.format("%s limit %d offset %d", sql, n, off);
+        }
     }
 
     @Override

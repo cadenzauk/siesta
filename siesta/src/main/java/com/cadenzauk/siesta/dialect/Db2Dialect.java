@@ -45,6 +45,7 @@ import com.cadenzauk.siesta.type.DefaultVarchar;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
@@ -147,11 +148,6 @@ public class Db2Dialect extends AnsiDialect {
     @Override
     public boolean supportsMultiInsert() {
         return true;
-    }
-
-    @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s fetch first %d rows only", sql, n);
     }
 
     @Override

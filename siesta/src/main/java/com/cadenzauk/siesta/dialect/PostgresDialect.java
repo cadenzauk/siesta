@@ -49,6 +49,7 @@ import com.cadenzauk.siesta.type.DefaultVarbinary;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -193,8 +194,8 @@ public class PostgresDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s offset 0 rows fetch next %d rows only", sql, n);
+    public String fetchFirst(String sql, long n, OptionalLong offset) {
+        return String.format("%s offset %d rows fetch next %d rows only", sql, offset.orElse(0), n);
     }
 
     @Override

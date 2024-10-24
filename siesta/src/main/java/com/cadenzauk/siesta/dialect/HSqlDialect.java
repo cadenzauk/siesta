@@ -113,11 +113,6 @@ public class HSqlDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s limit %d", sql, n);
-    }
-
-    @Override
     public String isolationLevelSql(String sql, IsolationLevel level, Optional<LockLevel> keepLocks) {
         return keepLocks
             .filter(ll -> ll.ordinal() >= LockLevel.UPDATE.ordinal())

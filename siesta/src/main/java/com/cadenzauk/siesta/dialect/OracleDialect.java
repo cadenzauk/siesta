@@ -231,11 +231,6 @@ public class OracleDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("select * from (%s) where rownum <= %d", sql, n);
-    }
-
-    @Override
     public boolean supportsJsonFunctions() {
         return true;
     }

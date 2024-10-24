@@ -185,11 +185,6 @@ public class DerbyDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return String.format("%s fetch first %d rows only", sql, n);
-    }
-
-    @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
         return "next value for " + qualifiedSequenceName(catalog, schema, sequenceName);
     }

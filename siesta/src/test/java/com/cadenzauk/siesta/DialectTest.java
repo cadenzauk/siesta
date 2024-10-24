@@ -27,6 +27,8 @@ import com.cadenzauk.siesta.dialect.Db2Dialect;
 import com.cadenzauk.siesta.dialect.DerbyDialect;
 import com.cadenzauk.siesta.dialect.FirebirdDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
+import com.cadenzauk.siesta.dialect.MariaDbDialect;
+import com.cadenzauk.siesta.dialect.MySqlDialect;
 import com.cadenzauk.siesta.dialect.OracleDialect;
 import com.cadenzauk.siesta.dialect.PostgresDialect;
 import com.cadenzauk.siesta.dialect.SqlServerDialect;
@@ -34,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
@@ -58,11 +61,13 @@ class DialectTest {
     @SuppressWarnings("unused")
     private static Stream<Arguments> parametersForFetchFirst() {
         return Stream.of(
-            testCase(new AnsiDialect(), "select * from (select *, row_number() over() as x_row_number from (select * from invoices)) where x_row_number <= 10"),
+            testCase(new AnsiDialect(), "select * from invoices fetch first 10 rows only"),
             testCase(new Db2Dialect(), "select * from invoices fetch first 10 rows only"),
             testCase(new FirebirdDialect(), "select * from invoices rows 10"),
             testCase(new H2Dialect(), "select * from invoices limit 10"),
-            testCase(new OracleDialect(), "select * from (select * from invoices) where rownum <= 10"),
+            testCase(new MariaDbDialect(), "select * from invoices fetch first 10 rows only"),
+            testCase(new MySqlDialect(), "select * from invoices limit 10 offset 0"),
+            testCase(new OracleDialect(), "select * from invoices fetch first 10 rows only"),
             testCase(new PostgresDialect(), "select * from invoices offset 0 rows fetch next 10 rows only"),
             testCase(new SqlServerDialect(), "select top 10 * from invoices")
         );
@@ -71,7 +76,29 @@ class DialectTest {
     @ParameterizedTest
     @MethodSource("parametersForFetchFirst")
     void fetchFirst(Dialect dialect, String expectedSql) {
-        String result = dialect.fetchFirst("select * from invoices", 10);
+        String result = dialect.fetchFirst("select * from invoices", 10, OptionalLong.empty());
+
+        assertThat(result, is(expectedSql));
+    }
+
+    private static Stream<Arguments> parametersForFetchFirstWithOffset() {
+        return Stream.of(
+            testCase(new AnsiDialect(), "select * from invoices offset 20 rows fetch next 10 rows only"),
+            testCase(new Db2Dialect(), "select * from invoices offset 20 rows fetch next 10 rows only"),
+            testCase(new FirebirdDialect(), "select * from invoices rows 21 to 30"),
+            testCase(new H2Dialect(), "select * from invoices limit 10 offset 20"),
+            testCase(new MariaDbDialect(), "select * from invoices offset 20 rows fetch next 10 rows only"),
+            testCase(new MySqlDialect(), "select * from invoices limit 10 offset 20"),
+            testCase(new OracleDialect(), "select * from invoices offset 20 rows fetch next 10 rows only"),
+            testCase(new PostgresDialect(), "select * from invoices offset 20 rows fetch next 10 rows only"),
+            testCase(new SqlServerDialect(), "select * from invoices offset 20 rows fetch next 10 rows only")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForFetchFirstWithOffset")
+    void fetchFirstWithOffset(Dialect dialect, String expectedSql) {
+        String result = dialect.fetchFirst("select * from invoices", 10, OptionalLong.of(20));
 
         assertThat(result, is(expectedSql));
     }

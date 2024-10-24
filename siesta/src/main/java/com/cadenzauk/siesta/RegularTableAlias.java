@@ -108,9 +108,10 @@ public class RegularTableAlias<R> extends TableAlias<R> {
 
     @Override
     public <T> String columnSql(Scope scope, ColumnSpecifier<T> columnSpecifier) {
-        Column<T,R> column = columnSpecifier.asReferringMethodInfo(type())
-            .map(table::column)
-            .orElseThrow(IllegalArgumentException::new);
+        Column<?,R> column = OptionalUtil.orGet(
+            columnSpecifier.asReferringMethodInfo(type()).map(table::column),
+            () -> table.columns().filter(it -> it.columnName().equals(columnSpecifier.columnName(scope))).findFirst()
+        ).orElseThrow(IllegalArgumentException::new);
         return column.sql(this);
     }
 

@@ -52,6 +52,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -227,8 +228,12 @@ public class SqlServerDialect extends AnsiDialect {
     }
 
     @Override
-    public String fetchFirst(String sql, long n) {
-        return SELECT_PATTERN.matcher(sql).replaceFirst("$1top " + n + " ");
+    public String fetchFirst(String sql, long n, OptionalLong offset) {
+        if (offset.isPresent()) {
+            return String.format("%s offset %d rows fetch next %d rows only", sql, offset.orElse(0), n);
+        } else {
+            return SELECT_PATTERN.matcher(sql).replaceFirst("$1top " + n + " ");
+        }
     }
 
     @Override
