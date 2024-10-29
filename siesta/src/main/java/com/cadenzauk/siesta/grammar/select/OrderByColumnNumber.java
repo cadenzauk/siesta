@@ -36,6 +36,6 @@ public class OrderByColumnNumber implements OrderingClause {
 
     @Override
     public String sql(Scope scope) {
-        return columnNumber + " " + order.sql();
+        return columnNumber + " " + order.sql(scope);
     }
 }

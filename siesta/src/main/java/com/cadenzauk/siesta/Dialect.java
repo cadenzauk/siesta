@@ -117,4 +117,8 @@ public interface Dialect {
     String createJavaProcSql(Database database, Class<?> procClass, String methodName, String schema);
 
     Stream<FunctionName> missingJsonFunctions();
+
+    default String orderSql(Order order) {
+        return Order.orderWithNullClause(order);
+    }
 }

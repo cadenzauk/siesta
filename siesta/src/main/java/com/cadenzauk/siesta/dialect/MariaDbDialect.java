@@ -31,6 +31,7 @@ import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.SequenceInfo;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
@@ -211,5 +212,10 @@ public class MariaDbDialect extends AnsiDialect {
             return qualifiedName;
         }
         return new QualifiedName(null, qualifiedName.catalog().orElse(""), qualifiedName.name().orElse(""));
+    }
+
+    @Override
+    public String orderSql(Order order) {
+        return Order.orderWithoutNullClause(order);
     }
 }

@@ -30,7 +30,7 @@ import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
-import com.cadenzauk.siesta.grammar.select.Ordering;
+import com.cadenzauk.siesta.grammar.select.OrderByExpression;
 
 public class InOlapOrderBy<T> extends InOlapFunction<T> {
     InOlapOrderBy(OlapFunction<T> function) {
@@ -38,82 +38,82 @@ public class InOlapOrderBy<T> extends InOlapFunction<T> {
     }
 
     public <V> InOlapOrderBy<T> then(TypedExpression<V> expression) {
-        function.addOrderBy(new Ordering<>(expression, Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(expression, Order.ASC));
         return this;
     }
 
     public <V> InOlapOrderBy<T> then(Label<V> label) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(label), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(label), Order.ASC));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(Function1<R,V> method) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(method), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(method), Order.ASC));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(FunctionOptional1<R,V> method) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(method), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(method), Order.ASC));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(String alias, Function1<R,V> method) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(alias, method), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(alias, method), Order.ASC));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(String alias, FunctionOptional1<R,V> method) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(alias, method), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(alias, method), Order.ASC));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(Alias<R> alias, Function1<R,V> method) {
-        function.addOrderBy(new Ordering<>(ResolvedColumn.of(alias, method), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(ResolvedColumn.of(alias, method), Order.ASC));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(Alias<R> alias, FunctionOptional1<R,V> method) {
-        function.addOrderBy(new Ordering<>(ResolvedColumn.of(alias, method), Order.ASC));
+        function.addOrderBy(new OrderByExpression<>(ResolvedColumn.of(alias, method), Order.ASC));
         return this;
     }
 
     public <V> InOlapOrderBy<T> then(TypedExpression<V> expression, Order order) {
-        function.addOrderBy(new Ordering<>(expression, order));
+        function.addOrderBy(new OrderByExpression<>(expression, order));
         return this;
     }
 
     public <V> InOlapOrderBy<T> then(Label<V> label, Order order) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(label), order));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(label), order));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(Function1<R,V> method, Order order) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(method), order));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(method), order));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(FunctionOptional1<R,V> method, Order order) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(method), order));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(method), order));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(String alias, Function1<R,V> method, Order order) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(alias, method), order));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(alias, method), order));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(String alias, FunctionOptional1<R,V> method, Order order) {
-        function.addOrderBy(new Ordering<>(UnresolvedColumn.of(alias, method), order));
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(alias, method), order));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(Alias<R> alias, Function1<R,V> method, Order order) {
-        function.addOrderBy(new Ordering<>(ResolvedColumn.of(alias, method), order));
+        function.addOrderBy(new OrderByExpression<>(ResolvedColumn.of(alias, method), order));
         return this;
     }
 
     public <R, V> InOlapOrderBy<T> then(Alias<R> alias, FunctionOptional1<R,V> method, Order order) {
-        function.addOrderBy(new Ordering<>(ResolvedColumn.of(alias, method), order));
+        function.addOrderBy(new OrderByExpression<>(ResolvedColumn.of(alias, method), order));
         return this;
     }
 

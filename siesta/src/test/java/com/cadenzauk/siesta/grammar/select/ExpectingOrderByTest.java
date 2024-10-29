@@ -82,7 +82,11 @@ class ExpectingOrderByTest {
         return Stream.of(
             orderByTestCase("colno", (s, a) -> s.orderBy(1), "1 asc"),
             orderByTestCase("colno, ASC", (s, a) -> s.orderBy(1, Order.ASC), "1 asc"),
+            orderByTestCase("colno, ASC", (s, a) -> s.orderBy(1, Order.ASC_NULLS_FIRST), "1 asc nulls first"),
+            orderByTestCase("colno, ASC", (s, a) -> s.orderBy(1, Order.ASC_NULLS_LAST), "1 asc nulls last"),
             orderByTestCase("colno, DESC", (s, a) -> s.orderBy(1, Order.DESC), "1 desc"),
+            orderByTestCase("colno, DESC", (s, a) -> s.orderBy(1, Order.DESC_NULLS_FIRST), "1 desc nulls first"),
+            orderByTestCase("colno, DESC", (s, a) -> s.orderBy(1, Order.DESC_NULLS_LAST), "1 desc nulls last"),
             orderByTestCase("func", (s, a) -> s.orderBy(SalespersonRow::surname), "s.SURNAME asc"),
             orderByTestCase("func, ASC", (s, a) -> s.orderBy(SalespersonRow::surname, Order.ASC), "s.SURNAME asc"),
             orderByTestCase("func, DESC", (s, a) -> s.orderBy(SalespersonRow::surname, Order.DESC), "s.SURNAME desc"),

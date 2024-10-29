@@ -34,6 +34,7 @@ import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
+import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
@@ -1198,6 +1199,15 @@ class SelectTest {
         sut.fetchFirst(rows);
 
         assertThat(sut.sql(), is("select p.SALESPERSON_ID as p_SALESPERSON_ID from SIESTA.SALESPERSON p fetch first " + rows + " rows only"));
+    }
+
+    @Test
+    void pageProducesCorrectOffsetAndOrder() {
+        Select<Long> sut = database().from(SalespersonRow.class, "p").select(SalespersonRow::salespersonId);
+
+        sut.page(3, 15, Ordering.of("SALESPERSON_ID", Order.DESC));
+
+        assertThat(sut.sql(), is("select p.SALESPERSON_ID as p_SALESPERSON_ID from SIESTA.SALESPERSON p order by p.SALESPERSON_ID desc offset 30 rows fetch next 15 rows only"));
     }
 
     @ParameterizedTest

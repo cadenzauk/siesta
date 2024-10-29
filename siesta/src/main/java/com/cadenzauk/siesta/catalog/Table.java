@@ -260,7 +260,7 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     private int performInsert(SqlExecutor sqlExecutor, List<R> rows) {
-        if (rows.size() == 0) {
+        if (rows.isEmpty()) {
             return 0;
         }
         String sql = insertSql(rows);
@@ -269,7 +269,7 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     private int performInsert(Transaction transaction, List<R> rows) {
-        if (rows.size() == 0) {
+        if (rows.isEmpty()) {
             return 0;
         }
         String sql = insertSql(rows);

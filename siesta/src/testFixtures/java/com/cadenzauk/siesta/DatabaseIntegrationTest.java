@@ -44,6 +44,7 @@ import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.grammar.expression.olap.Olap;
 import com.cadenzauk.siesta.grammar.select.CommonTableExpression;
+import com.cadenzauk.siesta.grammar.select.Ordering;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.json.BinaryJson;
@@ -93,6 +94,7 @@ import static com.cadenzauk.core.RandomValues.randomLocalTime;
 import static com.cadenzauk.core.RandomValues.randomZonedDateTime;
 import static com.cadenzauk.core.testutil.TemporalTestUtil.withTimeZone;
 import static com.cadenzauk.siesta.Order.ASC;
+import static com.cadenzauk.siesta.Order.ASC_NULLS_FIRST;
 import static com.cadenzauk.siesta.Order.DESC;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countBig;
@@ -1200,6 +1202,25 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(fullList, hasSize(10));
         assertThat(reducedList, hasSize(5));
         assertThat(reducedList.get(0).salespersonId(), is(inserted.item1() + 2));
+    }
+
+    @Test
+    void page() {
+        Database database = testDatabase(dataSource);
+        Tuple2<Long, Long> inserted = insertSalespeople(database, 10);
+
+        List<SalespersonRow> fullList = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .list();
+        List<SalespersonRow> reducedList = database.from(SalespersonRow.class)
+            .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
+            .page(2, 3, Ordering.of("SALESPERSON_ID", ASC_NULLS_FIRST))
+            .list();
+
+        assertThat(fullList, hasSize(10));
+        assertThat(reducedList, hasSize(3));
+        assertThat(reducedList.get(0).salespersonId(), is(inserted.item1() + 3));
+        assertThat(reducedList.get(2).salespersonId(), is(inserted.item1() + 5));
     }
 
     @Test

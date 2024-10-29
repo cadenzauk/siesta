@@ -129,5 +129,4 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
     public <R> InOrderByExpectingThen<RT> orderBy(Alias<R> alias, String columnName, Order order) {
         return new InOrderByExpectingThen<>(statement).then(alias, columnName, order);
     }
-
 }

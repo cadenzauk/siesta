@@ -24,9 +24,21 @@ package com.cadenzauk.siesta;
 
 public enum Order {
     ASC,
-    DESC;
+    DESC,
+    ASC_NULLS_FIRST,
+    ASC_NULLS_LAST,
+    DESC_NULLS_FIRST,
+    DESC_NULLS_LAST;
 
-    public String sql() {
-        return name().toLowerCase();
+    public String sql(Scope scope) {
+        return scope.dialect().orderSql(this);
+    }
+
+    public static String orderWithNullClause(Order order) {
+        return order.name().toLowerCase().replace('_', ' ');
+    }
+
+    public static String orderWithoutNullClause(Order order) {
+        return order.name().split("_")[0].toLowerCase();
     }
 }

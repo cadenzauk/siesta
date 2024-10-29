@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
-import com.cadenzauk.core.reflect.MethodInfo;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.ColumnSpecifier;
@@ -40,6 +39,7 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
 import java.util.List;
@@ -48,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public abstract class Select<RT> implements TypedExpression<RT> {
-    protected final SelectStatement<RT> statement;
+    final SelectStatement<RT> statement;
 
     Select(SelectStatement<RT> statement) {
         this.statement = statement;
@@ -158,6 +158,20 @@ public abstract class Select<RT> implements TypedExpression<RT> {
     public Select<RT> fetchFirst(long i) {
         statement.fetchFirst(i);
         return this;
+    }
+
+    public Select<RT> page(long pageNo, long pageSize, List<Ordering> orderBy) {
+        if (pageNo < 1) {
+            throw new IllegalArgumentException("'pageNo' should be greater than 0.");
+        }
+        orderBy.forEach(o -> statement.addOrderBy(o.toExpression(), o.order()));
+        offset((pageNo - 1) * pageSize);
+        fetchFirst(pageSize);
+        return this;
+    }
+
+    public Select<RT> page(long pageNo, long pageSize, Ordering... orderBy) {
+        return page(pageNo, pageSize, ImmutableList.copyOf(orderBy));
     }
 
     public Select<RT> withIsolation(IsolationLevel level) {

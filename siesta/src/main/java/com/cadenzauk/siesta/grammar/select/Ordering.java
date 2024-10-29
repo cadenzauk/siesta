@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2024 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,25 +23,55 @@
 package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
+import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
-import java.util.stream.Stream;
+import java.util.Optional;
 
-public class Ordering<T> implements OrderingClause {
-    private final TypedExpression<T> expression;
+public class Ordering {
+    private final Optional<String> alias;
+    private final String column;
     private final Order order;
 
-    public Ordering(TypedExpression<T> expression, Order order) {
-        this.expression = expression;
+    private Ordering(Optional<String> alias, String column, Order order) {
+        this.alias = alias;
+        this.column = column;
         this.order = order;
     }
 
-    public String sql(Scope scope) {
-        return expression.sql(scope) + " " + order.sql();
+    public UnresolvedColumn<Object> toExpression() {
+        return alias.map(a -> UnresolvedColumn.of(a, column)).orElseGet(() -> UnresolvedColumn.of(column));
     }
 
-    public Stream<Object> args(Scope scope) {
-        return expression.args(scope);
+    public Optional<String> alias() {
+        return alias;
+    }
+
+    public String column() {
+        return column;
+    }
+
+    public Order order() {
+        return order;
+    }
+
+    public static Ordering of(Optional<String> alias, String column, Order order) {
+        return new Ordering(alias, column, order);
+    }
+
+    public static Ordering of(String alias, String column, Order order) {
+        return new Ordering(Optional.of(alias), column, order);
+    }
+
+    public static Ordering of(String alias, String column) {
+        return new Ordering(Optional.of(alias), column, Order.ASC);
+    }
+
+    public static Ordering of(String column, Order order) {
+        return new Ordering(Optional.empty(), column, order);
+    }
+
+    public static Ordering of(String column) {
+        return new Ordering(Optional.empty(), column, Order.ASC);
     }
 }

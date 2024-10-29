@@ -30,7 +30,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import com.cadenzauk.siesta.grammar.select.Ordering;
+import com.cadenzauk.siesta.grammar.select.OrderByExpression;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,7 +48,7 @@ class OlapFunction<T> {
     private final TypeToken<T> type;
     private final TypedExpression<?>[] arguments;
     private final Lazy<List<TypedExpression<?>>> partitionBy = new Lazy<>(ArrayList::new);
-    private final Lazy<List<Ordering<?>>> orderBy = new Lazy<>(ArrayList::new);
+    private final Lazy<List<OrderByExpression<?>>> orderBy = new Lazy<>(ArrayList::new);
 
     OlapFunction(String functionName, TypeToken<T> type, TypedExpression<?>... arguments) {
         this.functionName = functionName;
@@ -102,7 +102,7 @@ class OlapFunction<T> {
         partitionBy.get().add(expression);
     }
 
-    <V> void addOrderBy(Ordering<V> ordering) {
+    <V> void addOrderBy(OrderByExpression<V> ordering) {
         orderBy.get().add(ordering);
     }
 

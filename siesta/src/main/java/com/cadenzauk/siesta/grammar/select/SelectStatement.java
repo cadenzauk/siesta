@@ -243,7 +243,7 @@ class SelectStatement<RT> {
     }
 
     <T> void addOrderBy(TypedExpression<T> expression, Order order) {
-        orderByClauses.add(new Ordering<>(expression, order));
+        orderByClauses.add(new OrderByExpression<>(expression, order));
     }
 
     void addOrderBy(int columnNumber, Order order) {

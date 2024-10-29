@@ -170,11 +170,11 @@ public class UnresolvedColumn<T> implements ColumnExpression<T> {
         return new UnresolvedColumn<>(alias, label.effectiveClass(), label.label());
     }
 
-    public static UnresolvedColumn<?> of(String alias, String columnName) {
+    public static UnresolvedColumn<Object> of(String alias, String columnName) {
         return new UnresolvedColumn<>(alias, Object.class, columnName);
     }
 
-    public static UnresolvedColumn<?> of(String columnName) {
+    public static UnresolvedColumn<Object> of(String columnName) {
         return new UnresolvedColumn<>(Object.class, columnName);
     }
 }

@@ -20,31 +20,28 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.name;
+package com.cadenzauk.siesta.grammar.select;
 
-import com.cadenzauk.core.lang.StringUtil;
-import com.cadenzauk.siesta.NamingStrategy;
+import com.cadenzauk.siesta.Order;
+import com.cadenzauk.siesta.Scope;
+import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 
-public class UppercaseUnderscores implements NamingStrategy {
-    @Override
-    public String tableName(String rowClass) {
-        return StringUtil.camelToUpper(rowClass);
+import java.util.stream.Stream;
+
+public class OrderByExpression<T> implements OrderingClause {
+    private final TypedExpression<T> expression;
+    private final Order order;
+
+    public OrderByExpression(TypedExpression<T> expression, Order order) {
+        this.expression = expression;
+        this.order = order;
     }
 
-    @Override
-    public String columnName(String fieldName) {
-        return StringUtil.camelToUpper(fieldName);
+    public String sql(Scope scope) {
+        return expression.sql(scope) + " " + order.sql(scope);
     }
 
-    @Override
-    public String embeddedName(String parentFieldColumnName, String childFieldColumnName) {
-        return parentFieldColumnName + "_" + childFieldColumnName;
-    }
-
-    @Override
-    public String propertyName(String columnName) {
-        return columnName.contains("_")
-            ? StringUtil.upperToCamel(columnName)
-            : columnName.toLowerCase();
+    public Stream<Object> args(Scope scope) {
+        return expression.args(scope);
     }
 }
