@@ -20,31 +20,11 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'com.cadenzauk'
+package com.cadenzauk.siesta.xtdb;
 
-includeBuild ("siesta") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta') using project(':')
-    }
-}
+import com.cadenzauk.siesta.jackson.test.JsonIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-includeBuild ("siesta-codegen")
-includeBuild ("siesta-db2")
-includeBuild ("siesta-firebird")
-includeBuild ("siesta-mariadb")
-includeBuild ("siesta-mysql")
-includeBuild ("siesta-oracle")
-includeBuild ("siesta-postgres")
-includeBuild ("siesta-sqlserver")
-includeBuild ("siesta-xtdb")
-includeBuild ("siesta-kotlin") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta-kotlin') using project(':')
-    }
+@ContextConfiguration(classes = XtdbConfig.class)
+class JsonIntegrationTestXtdb extends JsonIntegrationTest {
 }
-includeBuild ("siesta-jackson") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta-jackson') using project(':')
-    }
-}
-

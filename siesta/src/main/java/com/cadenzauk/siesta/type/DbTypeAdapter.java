@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.type;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.jdbc.JdbcParameterSetter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,6 +71,11 @@ public class DbTypeAdapter<T, D> implements DbType<T> {
     @Override
     public String parameter(Database database, Optional<T> value) {
         return type(database).parameter(database, value.map(toDatabase));
+    }
+
+    @Override
+    public JdbcParameterSetter<Object> nullParameterSetter(Database database) {
+        return type(database).nullParameterSetter(database);
     }
 
     private DbType<D> type(Database database) {

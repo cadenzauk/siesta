@@ -121,9 +121,7 @@ class DataTypeTest {
     @ParameterizedTest
     @MethodSource("parametersForToDatabase")
     <T> void toDatabase(DataType<T> dataType, T input, Object expected) {
-        if (input != null) {
-            when(db.dialect()).thenReturn(new AnsiDialect());
-        }
+        when(db.dialect()).thenReturn(new AnsiDialect());
 
         Object actual = dataType.toDatabase(db, input);
 
@@ -133,9 +131,7 @@ class DataTypeTest {
     @ParameterizedTest
     @MethodSource("parametersForToDatabase")
     <T> void toDatabaseOfOptional(DataType<T> dataType, T input, Object expected) {
-        if (input != null) {
-            when(db.dialect()).thenReturn(new AnsiDialect());
-        }
+        when(db.dialect()).thenReturn(new AnsiDialect());
 
         Object actual = dataType.toDatabase(db, Optional.ofNullable(input));
 

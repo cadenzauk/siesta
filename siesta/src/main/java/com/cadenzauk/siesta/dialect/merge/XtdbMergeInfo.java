@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2022 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,31 +20,18 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'com.cadenzauk'
+package com.cadenzauk.siesta.dialect.merge;
 
-includeBuild ("siesta") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta') using project(':')
+import com.cadenzauk.siesta.Dialect;
+import com.cadenzauk.siesta.MergeInfo;
+
+public class XtdbMergeInfo extends MergeInfo {
+    public XtdbMergeInfo(Dialect dialect) {
+        super(dialect);
+    }
+
+    @Override
+    public boolean supportsUpsert() {
+        return false;
     }
 }
-
-includeBuild ("siesta-codegen")
-includeBuild ("siesta-db2")
-includeBuild ("siesta-firebird")
-includeBuild ("siesta-mariadb")
-includeBuild ("siesta-mysql")
-includeBuild ("siesta-oracle")
-includeBuild ("siesta-postgres")
-includeBuild ("siesta-sqlserver")
-includeBuild ("siesta-xtdb")
-includeBuild ("siesta-kotlin") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta-kotlin') using project(':')
-    }
-}
-includeBuild ("siesta-jackson") {
-    dependencySubstitution {
-        substitute module('com.cadenzauk:siesta-jackson') using project(':')
-    }
-}
-

@@ -25,6 +25,7 @@ package com.cadenzauk.siesta.jackson;
 import com.cadenzauk.siesta.json.JsonProvider;
 import com.cadenzauk.siesta.json.JsonProviderException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -35,6 +36,7 @@ import java.util.Objects;
 
 public class JacksonJsonProvider implements JsonProvider {
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final TypeReference<Map<String,Object>> mapStringObjectTypeRef = new TypeReference<>() { };
 
     @Override
     public String constructJsonObject(Map<String, Object> entries) {
@@ -42,6 +44,15 @@ public class JacksonJsonProvider implements JsonProvider {
             return mapper.writeValueAsString(entries);
         } catch (JsonProcessingException e) {
             throw new JsonProviderException("Unable to construct JSON object.", e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> parseJsonString(String json) {
+        try {
+            return mapper.readValue(json, mapStringObjectTypeRef);
+        } catch (JsonProcessingException e) {
+            throw new JsonProviderException("Unable to parse JSON string.", e);
         }
     }
 

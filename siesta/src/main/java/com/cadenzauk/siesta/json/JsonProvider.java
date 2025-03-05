@@ -40,6 +40,8 @@ public interface JsonProvider {
 
     String constructJsonObject(Map<String, Object> entries);
 
+    Map<String, Object> parseJsonString(String json);
+
     class JsonProviderFactory {
         private static final Lazy<JsonProvider> provider = new Lazy<>(JsonProviderFactory::loadProvider);
         private static final String DEFAULT_PROVIDER = "com.cadenzauk.siesta.jackson.JacksonJsonProvider";

@@ -75,9 +75,10 @@ public class DataType<T> {
     }
 
     public Object toDatabase(Database database, Optional<T> value) {
+        DbType<T> dbType = dbType(database);
         return value
-            .map(v -> dbType(database).convertToDatabase(database, v))
-            .orElse(null);
+            .map(v -> dbType.convertToDatabase(database, v))
+            .orElseGet(() -> dbType.nullParameterSetter(database));
     }
 
     public Object toDatabase(Database database, T v) {

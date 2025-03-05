@@ -41,7 +41,12 @@ public class JdbcDataTypeRegistry {
 
     public void setParameter(PreparedStatement ps, int parameterIndex, Object o) {
         try {
-            getSetter(o).setParameter(ps, parameterIndex, o);
+            if (o instanceof JdbcParameterSetter<?>) {
+                @SuppressWarnings("unchecked") JdbcParameterSetter<Object> setter = (JdbcParameterSetter<Object>) o;
+                setter.setParameter(ps, parameterIndex, null);
+            } else {
+                getSetter(o).setParameter(ps, parameterIndex, o);
+            }
         } catch (SQLException e) {
             throw new RuntimeSqlException(e);
         }
@@ -51,7 +56,9 @@ public class JdbcDataTypeRegistry {
         return Optional.ofNullable(value)
             .map(Object::getClass)
             .map(parameterSetters::get)
-            .orElse(PreparedStatement::setObject);
+            .orElse((preparedStatement, parameterIndex, x) ->
+                preparedStatement.setObject(parameterIndex, x)
+            );
     }
 
     private static Map<Class<?>,JdbcParameterSetter<Object>> parameterSetters() {

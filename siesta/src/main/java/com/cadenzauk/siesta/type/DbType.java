@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.type;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.jdbc.JdbcParameterSetter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -73,5 +74,9 @@ public interface DbType<T> {
 
     default String castParameter(Database database, Optional<T> value) {
         return "cast(? as " + sqlTypeOf(database, value) + ")";
+    }
+
+    default JdbcParameterSetter<Object> nullParameterSetter(Database database)  {
+        return null;
     }
 }
