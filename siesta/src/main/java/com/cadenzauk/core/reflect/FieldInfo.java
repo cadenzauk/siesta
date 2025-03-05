@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.cadenzauk.core.reflect.util.FieldUtil.genericTypeArgument;
 
@@ -161,7 +162,7 @@ public class FieldInfo<C, F> {
     }
 
     public static <C, F> Optional<FieldInfo<C,F>> ofGetter(MethodInfo<C,F> getter) {
-        return Arrays.stream(getter.referringClass().getDeclaredFields())
+        return Stream.concat(Arrays.stream(getter.referringClass().getDeclaredFields()), Arrays.stream(getter.declaringClass().getDeclaredFields()))
             .filter(f -> getter.actualType().isAssignableFrom(f.getType()))
             .filter(f -> Getter.isGetter(getter.method(), f))
             .findAny()

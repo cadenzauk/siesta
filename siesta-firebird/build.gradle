@@ -32,7 +32,10 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.firebirdsql.jdbc', name: 'jaybird-jdk18', version: '3.0.1'
+    //implementation("org.firebirdsql.jdbc:jaybird:5.0.6.java11")
+    implementation("org.firebirdsql.jdbc:jaybird:4.0.10.java11")
+    //implementation("org.firebirdsql.jdbc:jaybird:3.0.12")
+    //implementation group: 'org.firebirdsql.jdbc', name: 'jaybird-jdk18', version: '3.0.1'
     implementation "com.cadenzauk:siesta:$siestaVersion"
 
     testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")

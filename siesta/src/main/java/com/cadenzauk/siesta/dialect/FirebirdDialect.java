@@ -22,13 +22,14 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.TimestampUtil;
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
-import com.cadenzauk.core.sql.exception.LockingException;
-import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
-import com.cadenzauk.core.sql.exception.DuplicateKeyException;
-import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
@@ -38,8 +39,6 @@ import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
-import com.cadenzauk.siesta.type.DefaultBigint;
-import com.cadenzauk.siesta.type.DefaultDecimal;
 import com.cadenzauk.siesta.type.DefaultInteger;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
@@ -47,16 +46,29 @@ import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
-import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.GregorianCalendar;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.TimeZone;
 import java.util.stream.Stream;
 
 public class FirebirdDialect extends AnsiDialect {
     public FirebirdDialect() {
+         this(Optional.empty());
+    }
+
+    public FirebirdDialect(VersionNo versionNo) {
+         this(Optional.of(versionNo));
+    }
+
+    private FirebirdDialect(Optional<VersionNo> versionNo) {
         functions()
             .register(DateFunctionSpecs::registerExtract)
             .register(DateFunctionSpecs::registerDateAdd)
@@ -97,6 +109,24 @@ public class FirebirdDialect extends AnsiDialect {
                 @Override
                 public String sqlType(Database database, int arg1, int arg2) {
                     return sqlType(database);
+                }
+
+                @Override
+                public LocalDateTime getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
+                    if (versionNo.map(VersionNo::majorVersion).orElse(5) <= 3) {
+                        return super.getColumnValue(database, rs, col);
+                    }
+                    Timestamp timestamp = rs.getTimestamp(col);
+                    return rs.wasNull() ? null : TimestampUtil.toZonedDateTime(timestamp, ZoneId.systemDefault(), database.databaseTimeZone()).toLocalDateTime();
+                }
+
+                @Override
+                public LocalDateTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
+                    if (versionNo.map(VersionNo::majorVersion).orElse(5) <= 3) {
+                        return super.getColumnValue(database, rs, col);
+                    }
+                    Timestamp timestamp = rs.getTimestamp(col, new GregorianCalendar(TimeZone.getTimeZone(database.databaseTimeZone())));
+                    return rs.wasNull() ? null : TimestampUtil.toZonedDateTime(timestamp, ZoneId.systemDefault(), database.databaseTimeZone()).toLocalDateTime();
                 }
 
                 @Override
@@ -142,6 +172,8 @@ public class FirebirdDialect extends AnsiDialect {
         setSequenceInfo(new FirebirdSequenceInfo());
         setTempTableInfo(new FirebirdTempTableInfo());
     }
+
+
 
     @Override
     public String dual() {

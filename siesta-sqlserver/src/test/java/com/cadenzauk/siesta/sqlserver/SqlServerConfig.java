@@ -36,9 +36,10 @@ public class SqlServerConfig {
     @Bean
     public DataSource dataSource() {
         SQLServerConnectionPoolDataSource pool = new SQLServerConnectionPoolDataSource();
-        pool.setServerName("localhost\\MSSQLSERVER");
+        pool.setServerName("localhost");
         pool.setDatabaseName("SIESTA");
         pool.setIntegratedSecurity(true);
+        pool.setTrustServerCertificate(true);
         return new PooledDataSource(pool);
     }
 

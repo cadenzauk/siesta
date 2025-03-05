@@ -50,7 +50,7 @@ public class AutoDetectDialect {
         Tuple.of(Pattern.compile("^Apache Derby.*").asPredicate(), conn -> new DerbyDialect()),
         Tuple.of(Pattern.compile("^H2.*").asPredicate(), AutoDetectDialect::createH2Dialect),
         Tuple.of(Pattern.compile("^HSQL.*").asPredicate(), conn -> new HSqlDialect()),
-        Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), conn -> new FirebirdDialect()),
+        Tuple.of(Pattern.compile("^Firebird.*").asPredicate(), AutoDetectDialect::createFirebirdDialect),
         Tuple.of(Pattern.compile("^Maria.*").asPredicate(), conn -> new MariaDbDialect()),
         Tuple.of(Pattern.compile("^MySQL.*").asPredicate(), conn -> new MySqlDialect()),
         Tuple.of(Pattern.compile("^Oracle.*").asPredicate(), conn -> new OracleDialect()),
@@ -83,6 +83,19 @@ public class AutoDetectDialect {
                 .map(H2Dialect::new)
                 .findFirst()
                 .orElseGet(H2Dialect::new);
+        }
+    }
+
+    private static FirebirdDialect createFirebirdDialect(Connection connection) {
+        try (CompositeAutoCloseable closer = new CompositeAutoCloseable()) {
+            PreparedStatement preparedStatement = closer.add(ConnectionUtil.prepare(connection, "SELECT rdb$get_context('SYSTEM', 'ENGINE_VERSION') as version from rdb$database"));
+            ResultSet resultSet = closer.add(PreparedStatementUtil.executeQuery(preparedStatement));
+            return closer.add(ResultSetUtil.stream(resultSet, rs -> ResultSetUtil.getString(rs, "VERSION")))
+                .limit(1)
+                .map(VersionNo::new)
+                .map(FirebirdDialect::new)
+                .findFirst()
+                .orElseGet(FirebirdDialect::new);
         }
     }
 }

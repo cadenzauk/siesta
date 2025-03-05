@@ -23,8 +23,6 @@
 package com.cadenzauk.siesta.firebird;
 
 import com.cadenzauk.core.sql.testutil.PooledDataSource;
-import com.cadenzauk.siesta.Dialect;
-import com.cadenzauk.siesta.dialect.FirebirdDialect;
 import org.firebirdsql.ds.FBConnectionPoolDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,10 +40,5 @@ public class FirebirdConfig {
         pool.setDatabaseName("siesta");
         pool.setCharSet("utf-8");
         return new PooledDataSource(pool);
-    }
-
-    @Bean
-    public Dialect dialect() {
-        return new FirebirdDialect();
     }
 }

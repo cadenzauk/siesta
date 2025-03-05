@@ -37,6 +37,7 @@ public class MariaDbConfig {
         HikariDataSource pool = new HikariDataSource();
         pool.setUsername("siesta");
         pool.setPassword("siesta");
+        pool.setSchema("siesta");
         pool.setJdbcUrl("jdbc:mariadb://localhost:3316");
         return pool;
     }

@@ -99,6 +99,10 @@ public class MethodInfo<C, R> {
         return (Class<C>) referringType.getRawType();
     }
 
+    public Class<? super C> declaringClass() {
+        return declaringType.getRawType();
+    }
+
     public Method method() {
         return method;
     }

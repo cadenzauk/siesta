@@ -192,6 +192,7 @@ public class TestSchema {
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("SALE")
+                .column("SALE_ID", bigint(), notNull())
                 .column("SALESPERSON_ID", bigint(), notNull())
                 .column("WIDGET_ID", bigint(), notNull())
                 .column("QUANTITY", bigint(), notNull())

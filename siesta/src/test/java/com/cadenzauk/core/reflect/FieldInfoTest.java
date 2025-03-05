@@ -23,7 +23,6 @@
 package com.cadenzauk.core.reflect;
 
 import com.cadenzauk.core.reflect.util.ClassUtil;
-import com.cadenzauk.core.sql.QualifiedName;
 import com.google.common.reflect.TypeToken;
 import com.google.common.testing.EqualsTester;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import java.lang.reflect.Field;
-import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 

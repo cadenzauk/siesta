@@ -26,6 +26,7 @@ import com.cadenzauk.core.util.UtilityClass;
 
 import java.sql.DatabaseMetaData;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.core.sql.QualifiedName.matchesCatalogAndSchema;
@@ -34,20 +35,21 @@ import static com.cadenzauk.core.sql.ResultSetUtil.getString;
 import static java.util.stream.Collectors.toList;
 
 public final class DatabaseMetaDataUtil extends UtilityClass {
-    public static boolean tableExists(DatabaseMetaData metaData, String catalog, String schema, String tableName) {
-        return tableNames(metaData, catalog, schema)
+    public static boolean tableExists(DatabaseMetaData metaData, String catalog, String schema, String tableName, Function<QualifiedName, QualifiedName> fix) {
+        return tableNames(metaData, catalog, schema, fix)
             .anyMatch(matchesName(tableName));
     }
 
-    public static Stream<QualifiedName> tableNames(DatabaseMetaData metaData, String catalog, String schema) {
+    public static Stream<QualifiedName> tableNames(DatabaseMetaData metaData, String catalog, String schema, Function<QualifiedName, QualifiedName> fix) {
         return ResultSetUtil.stream(
                 () -> metaData.getTables(null, null, null, new String[]{"TABLE"}),
                 rs -> new QualifiedName(getString(rs, "TABLE_CAT"), getString(rs, "TABLE_SCHEM"), getString(rs, "TABLE_NAME")))
+            .map(fix)
             .filter(matchesCatalogAndSchema(catalog, schema));
     }
 
-    public static Stream<ForeignKeyName> foreignKeyNames(DatabaseMetaData metaData, String catalog, String schema) {
-        List<QualifiedName> tableNames = tableNames(metaData, catalog, schema).collect(toList());
+    public static Stream<ForeignKeyName> foreignKeyNames(DatabaseMetaData metaData, String catalog, String schema, Function<QualifiedName, QualifiedName> fix) {
+        List<QualifiedName> tableNames = tableNames(metaData, catalog, schema, fix).collect(toList());
         return tableNames
             .stream()
             .flatMap(table -> ResultSetUtil.stream(

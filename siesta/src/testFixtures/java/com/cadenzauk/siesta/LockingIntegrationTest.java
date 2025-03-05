@@ -25,7 +25,6 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.model.LockTestRow;
-import com.cadenzauk.siesta.model.TestDatabase;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     void updateWithTimeout1() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
         long id = newId();
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
         Synchronization thread2 = new Synchronization();
         CompletableFuture<Boolean> update1 = CompletableFuture.supplyAsync(() -> performUpdate(true, database, id, thread1));
@@ -67,7 +66,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     @Test
     void updateWithTimeout2() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         long id = newId();
         Synchronization thread1 = new Synchronization();
         Synchronization thread2 = new Synchronization();
@@ -90,7 +89,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     @Test
     void updateWithTimeout3() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         long id = newId();
         Synchronization thread1 = new Synchronization();
         Synchronization thread2 = new Synchronization();
@@ -113,7 +112,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     @Test
     void updateWithoutTimeout() throws InterruptedException {
         long id = newId();
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
         Synchronization thread2 = new Synchronization();
 
@@ -138,7 +137,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     @Test
     void insertsWithoutTimeout() throws InterruptedException {
         long id = newId();
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
         Synchronization thread2 = new Synchronization();
 
@@ -163,7 +162,7 @@ public abstract class LockingIntegrationTest extends IntegrationTest {
     void insertsWithTimeout() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
         long id = newId();
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         Synchronization thread1 = new Synchronization();
         Synchronization thread2 = new Synchronization();
 

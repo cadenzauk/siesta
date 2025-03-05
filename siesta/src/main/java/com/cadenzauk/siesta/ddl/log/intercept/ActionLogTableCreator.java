@@ -59,7 +59,7 @@ public class ActionLogTableCreator extends ActionInterceptor<CreateActionLogTabl
     public Stream<Action> intercept(Database database, CreateActionLogTable action) {
         try (CompositeAutoCloseable closeable = new CompositeAutoCloseable()) {
             DatabaseMetaData metaData = database.execute("get database metadata", () -> database.getDefaultSqlExecutor().metadata(closeable));
-            if (DatabaseMetaDataUtil.tableExists(metaData, action.catalog(), action.schemaName(), LOG_TABLE_NAME)) {
+            if (DatabaseMetaDataUtil.tableExists(metaData, action.catalog(), action.schemaName(), LOG_TABLE_NAME, database.dialect()::fixQualifiedName)) {
                 return Stream.empty();
             }
         }

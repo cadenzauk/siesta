@@ -133,8 +133,8 @@ import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.grammar.expression.olap.Olap.lag;
 import static com.cadenzauk.siesta.grammar.expression.olap.Olap.lead;
 import static com.cadenzauk.siesta.grammar.expression.olap.Olap.rowNumber;
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabaseBuilder;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -744,19 +744,22 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabase(dataSource, dialect);
         long salespersonId = newId();
         database.insert(
-             SaleRow.newBuilder()
+            SaleRow.newBuilder()
+                .saleId(newId())
                 .salespersonId(salespersonId)
                 .widgetId(1)
                 .quantity(10)
                 .price(new BigDecimal("100.01"))
                 .build(),
-             SaleRow.newBuilder()
+            SaleRow.newBuilder()
+                .saleId(newId())
                 .salespersonId(salespersonId)
                 .widgetId(2)
                 .quantity(20)
                 .price(new BigDecimal("200.02"))
                 .build(),
-             SaleRow.newBuilder()
+            SaleRow.newBuilder()
+                .saleId(newId())
                 .salespersonId(salespersonId)
                 .widgetId(3)
                 .quantity(30)
@@ -836,7 +839,10 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .comma(rowNumber())
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
             .orderBy(SalespersonRow::salespersonId)
-            .list();
+            .list()
+            .stream()
+            .sorted(comparing(Tuple2::item2))
+            .collect(toList());
 
         assertThat(result, hasSize(5));
         assertThat(result.get(0), is(Tuple.of(inserted.item1(), 1)));
@@ -1208,13 +1214,14 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     void page() {
         Database database = testDatabase(dataSource);
         Tuple2<Long, Long> inserted = insertSalespeople(database, 10);
+        String salespersonIdColumn = database.table(SalespersonRow.class).column(SalespersonRow::salespersonId).columnName();
 
         List<SalespersonRow> fullList = database.from(SalespersonRow.class)
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
             .list();
         List<SalespersonRow> reducedList = database.from(SalespersonRow.class)
             .where(SalespersonRow::salespersonId).isBetween(inserted.item1()).and(inserted.item2())
-            .page(2, 3, Ordering.of("SALESPERSON_ID", ASC_NULLS_FIRST))
+            .page(2, 3, Ordering.of(salespersonIdColumn, ASC_NULLS_FIRST))
             .list();
 
         assertThat(fullList, hasSize(10));
@@ -1818,8 +1825,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
     @Test
     void uuidAsChar() {
-        Database database = Database.newBuilder()
-            .defaultSchema("SIESTA")
+        Database database = testDatabaseBuilder()
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .type(UUID.class, DbTypeId.UUID, new DbTypeAdapter<>(DbTypeId.VARCHAR, UUID::toString, UUID::fromString))
             .build();

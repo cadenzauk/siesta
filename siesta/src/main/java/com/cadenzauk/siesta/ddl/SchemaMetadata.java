@@ -47,8 +47,7 @@ public class SchemaMetadata implements AutoCloseable {
     }
 
     public Stream<QualifiedName> tableNames(String catalog, String schema) {
-        return DatabaseMetaDataUtil.tableNames(databaseMetadata, catalog, schema)
-            .map(dialect::fixQualifiedName);
+        return DatabaseMetaDataUtil.tableNames(databaseMetadata, catalog, schema, dialect::fixQualifiedName);
     }
 
     public Stream<ForeignKeyName> foreignKeyNames(String catalog, String schema) {

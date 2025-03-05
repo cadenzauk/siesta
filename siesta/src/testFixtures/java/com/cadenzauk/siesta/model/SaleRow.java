@@ -30,6 +30,7 @@ import java.math.BigDecimal;
 
 @Table(name = "SALE", schema = "SIESTA")
 public class SaleRow {
+    private final long saleId;
     private final long salespersonId;
     private final long widgetId;
     private final long quantity;
@@ -37,6 +38,7 @@ public class SaleRow {
     private final BigDecimal price;
 
     private SaleRow(Builder builder) {
+        saleId = builder.saleId;
         salespersonId = builder.salespersonId;
         widgetId = builder.widgetId;
         quantity = builder.quantity;
@@ -79,6 +81,10 @@ public class SaleRow {
                    .toHashCode();
     }
 
+    public long saleId() {
+        return saleId;
+    }
+
     public long salespersonId() {
         return salespersonId;
     }
@@ -99,12 +105,18 @@ public class SaleRow {
         return new Builder();
     }
     public static final class Builder {
+        private long saleId;
         private long salespersonId;
         private long widgetId;
         private long quantity;
         private BigDecimal price;
 
         private Builder() {
+        }
+
+        public Builder saleId(long val) {
+            saleId = val;
+            return this;
         }
 
         public Builder salespersonId(long val) {

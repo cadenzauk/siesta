@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Cadenza United Kingdom Limited
+ * Copyright (c) 2024 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,34 +20,31 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.dialect;
+package com.cadenzauk.siesta.model;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.jetbrains.annotations.NotNull;
+import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Dialect;
 
-import java.util.Arrays;
+import javax.sql.DataSource;
 
-public class VersionNo implements Comparable<VersionNo> {
-    private final int[] parts;
-
-    public VersionNo(String version) {
-        this.parts = Arrays.stream(version.split("[^0-9]+"))
-            .mapToInt(Integer::parseInt)
-            .toArray();
+public class TestDatabaseFactory {
+    public Database testDatabase(DataSource dataSource) {
+        return TestDatabase.testDatabase(dataSource);
     }
 
-    @Override
-    public int compareTo(@NotNull VersionNo o) {
-        return new CompareToBuilder()
-            .append(parts, o.parts)
-            .toComparison();
+    public Database testDatabase(DataSource dataSource, Dialect dialect) {
+        return TestDatabase.testDatabase(dataSource, dialect);
     }
 
-    public boolean isAtLeast(VersionNo other) {
-        return compareTo(other) >= 0;
+    public Database testDatabase(Dialect dialect) {
+        return TestDatabase.testDatabase(dialect);
     }
 
-    public int majorVersion() {
-        return parts[0];
+    public Database.Builder testDatabaseBuilder() {
+        return TestDatabase.testDatabaseBuilder();
+    }
+
+    public Database.Builder testDatabaseBuilder(Dialect dialect) {
+        return TestDatabase.testDatabaseBuilder(dialect);
     }
 }

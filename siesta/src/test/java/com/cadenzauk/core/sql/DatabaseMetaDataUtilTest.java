@@ -44,6 +44,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -147,7 +148,7 @@ class DatabaseMetaDataUtilTest {
             .thenReturn(actualTable.length, TRUE)
             .thenReturn(FALSE);
 
-        boolean result = DatabaseMetaDataUtil.tableExists(metaData, catalog, schema, tableName);
+        boolean result = DatabaseMetaDataUtil.tableExists(metaData, catalog, schema, tableName, Function.identity());
 
         verify(metaData).getTables(isNull(), isNull(), isNull(), eq(new String[] {"TABLE"}));
         assertThat(result, is(exists));
@@ -197,7 +198,7 @@ class DatabaseMetaDataUtilTest {
             .thenReturn(actualTable.length, TRUE)
             .thenReturn(FALSE);
 
-        Stream<QualifiedName> result = DatabaseMetaDataUtil.tableNames(metaData, catalog, schema);
+        Stream<QualifiedName> result = DatabaseMetaDataUtil.tableNames(metaData, catalog, schema, Function.identity());
 
         assertThat(result, contains(expectedTables));
     }
@@ -249,7 +250,7 @@ class DatabaseMetaDataUtilTest {
         whenGetTablesThen(actualTableNames);
         whenGetImportedKeysThen(actualTableNames, actualFks);
 
-        Stream<ForeignKeyName> result = DatabaseMetaDataUtil.foreignKeyNames(metaData, catalog, schema);
+        Stream<ForeignKeyName> result = DatabaseMetaDataUtil.foreignKeyNames(metaData, catalog, schema, Function.identity());
 
         ForeignKeyName[] rStream = Arrays.stream(expectedFks)
             .filter(StringUtils::isNotBlank)

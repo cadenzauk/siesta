@@ -32,7 +32,7 @@ import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
-import com.cadenzauk.siesta.model.TestDatabase;
+import com.cadenzauk.siesta.model.TestDatabaseFactory;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,6 +69,9 @@ public abstract class IntegrationTest {
     @Autowired
     protected Dialect dialect;
 
+    @Autowired
+    protected TestDatabaseFactory testDatabaseFactory;
+
     protected Tuple2<Long,Long> insertSalespeople(Database database, int n) {
         long lowerBound = ids.get();
         SalespersonRow[] salesPeople = IntStream.range(0, n)
@@ -77,6 +80,26 @@ public abstract class IntegrationTest {
         database.insert(salesPeople);
         long upperBound = ids.get();
         return Tuple.of(lowerBound + 1, upperBound);
+    }
+
+    public Database testDatabase(DataSource dataSource) {
+        return testDatabaseFactory.testDatabase(dataSource);
+    }
+
+    public Database testDatabase(DataSource dataSource, Dialect dialect) {
+        return testDatabaseFactory.testDatabase(dataSource, dialect);
+    }
+
+    public Database testDatabase(Dialect dialect) {
+        return testDatabaseFactory.testDatabase(dialect);
+    }
+
+    public Database.Builder testDatabaseBuilder() {
+        return testDatabaseFactory.testDatabaseBuilder();
+    }
+
+    public Database.Builder testDatabaseBuilder(Dialect dialect) {
+        return testDatabaseFactory.testDatabaseBuilder(dialect);
     }
 
     public static SalespersonRow aRandomSalesperson() {
@@ -107,6 +130,7 @@ public abstract class IntegrationTest {
 
     public static SaleRow aRandomSale() {
         return SaleRow.newBuilder()
+            .saleId(newId())
             .salespersonId(newId())
             .widgetId(newId())
             .quantity(RandomUtils.nextLong(10, 400))
@@ -141,16 +165,21 @@ public abstract class IntegrationTest {
         }
 
         @Bean
-        public SpringSiesta springSiesta() {
+        public SpringSiesta springSiesta(TestDatabaseFactory testDatabaseFactory) {
             return new SpringSiesta()
                 .setDropFirst(true)
-                .setDatabase(database())
+                .setDatabase(database(testDatabaseFactory))
                 .setSchemaDefinition(new TestSchema(dialect()).schemaDefinition());
         }
 
         @Bean
-        public Database database() {
-            return TestDatabase.testDatabase(dataSource(), dialect());
+        public TestDatabaseFactory testDatabase() {
+            return new TestDatabaseFactory();
+        }
+
+        @Bean
+        public Database database(TestDatabaseFactory testDatabaseFactory) {
+            return testDatabaseFactory.testDatabase(dataSource(), dialect());
         }
 
         @Bean

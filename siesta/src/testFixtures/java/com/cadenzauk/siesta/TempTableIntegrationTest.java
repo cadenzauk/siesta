@@ -22,8 +22,6 @@
 
 package com.cadenzauk.siesta;
 
-import com.cadenzauk.core.junit.TestCase;
-import com.cadenzauk.core.junit.TestCaseArgumentsProvider;
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.lang.UncheckedAutoCloseable;
 import com.cadenzauk.core.sql.RuntimeSqlException;
@@ -37,7 +35,6 @@ import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.function.Function;
@@ -45,7 +42,6 @@ import java.util.function.Function;
 import static com.cadenzauk.core.sql.testutil.RuntimeSqlExceptionMatcher.subclass;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;

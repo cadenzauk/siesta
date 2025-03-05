@@ -36,7 +36,6 @@ import com.cadenzauk.siesta.model.IncorrectSalesAreaRow;
 import com.cadenzauk.siesta.model.NoSuchTableRow;
 import com.cadenzauk.siesta.model.SalesAreaRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
-import com.cadenzauk.siesta.model.TestDatabase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -61,7 +60,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @Test
     void uniqueConstraintViolationOnInsert() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow = aRandomSalesperson();
 
         calling(() -> database.insert(salespersonRow, salespersonRow))
@@ -72,7 +71,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void uniqueConstraintViolationOnInsertInTransaction() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow = aRandomSalesperson();
 
         try (Transaction transaction = database.beginTransaction()) {
@@ -85,7 +84,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void uniqueConstraintViolationOnUpdate() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow1 = aRandomSalesperson();
         SalespersonRow salespersonRow2 = aRandomSalesperson();
         database.insert(salespersonRow1, salespersonRow2);
@@ -102,7 +101,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void foreignKeyViolationOnInsert() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("Far East")
@@ -117,7 +116,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void foreignKeyViolationOnUpdate() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow = aRandomSalesperson();
         database.insert(salespersonRow);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
@@ -139,7 +138,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void foreignKeyViolationOnDelete() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow = aRandomSalesperson();
         database.insert(salespersonRow);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
@@ -160,7 +159,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void nullNotAllowedOnInsert() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .build();
@@ -173,7 +172,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void nullNotAllowedOnUpdate() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("Oceania")
@@ -192,7 +191,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void stringValueTooLongOnInsert() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenuakitanatahu")
@@ -206,7 +205,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void stringValueTooLongOnUpdate() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
@@ -225,7 +224,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void numericOverflowOnInsert() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
@@ -240,7 +239,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void numericOverflowOnUpdate() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
@@ -260,7 +259,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @Test
     void lockTimeoutOnInsert() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
@@ -283,7 +282,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @Test
     void lockTimeoutOnUpdate() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
@@ -313,7 +312,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @Test
     void lockTimeoutOnDelete() {
         assumeTrue(dialect.supportsLockTimeout(), "Database does not support lock timeouts.");
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalesAreaRow salesArea = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
             .salesAreaName("NZ")
@@ -340,10 +339,9 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
         }
     }
 
-    @SuppressWarnings("ThrowableNotThrown")
     @Test
     void deadlockOnUpdate() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
         SalespersonRow salespersonRow1 = aRandomSalesperson();
         SalespersonRow salespersonRow2 = aRandomSalesperson();
         database.insert(salespersonRow1, salespersonRow2);
@@ -382,7 +380,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
     @ParameterizedTest
     @MethodSource("columnNames")
     <T> void columnNameIncorrect(Class<T> table, Function1<T,String> column) {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
 
         calling(() -> database.from(table).select(column).list())
             .shouldThrow(RuntimeSqlException.class)
@@ -391,7 +389,7 @@ public abstract class ExceptionIntegrationTest extends IntegrationTest {
 
     @Test
     void tableNameIncorrect() {
-        Database database = TestDatabase.testDatabase(dataSource);
+        Database database = testDatabase(dataSource);
 
         calling(() -> database.from(NoSuchTableRow.class, "x").list())
             .shouldThrow(RuntimeSqlException.class)
