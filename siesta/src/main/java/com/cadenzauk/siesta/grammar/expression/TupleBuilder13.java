@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Cadenza United Kingdom Limited
+ * Copyright (c) 2020, 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -128,6 +128,14 @@ public class TupleBuilder13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T
 
     public <R, T14> TupleBuilder14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> comma(Alias<R> alias, FunctionOptional1<R,T14> methodRef) {
         return new TupleBuilder14<>(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, ResolvedColumn.of(alias, methodRef));
+    }
+
+    public <T14> TupleBuilder14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> comma(T14 value) {
+        return new TupleBuilder14<>(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, ValueExpression.of(value));
+    }
+
+    public <T14> TupleBuilder14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14> comma(TypedExpression<T14> item14) {
+        return new TupleBuilder14<>(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14);
     }
 
     @Override

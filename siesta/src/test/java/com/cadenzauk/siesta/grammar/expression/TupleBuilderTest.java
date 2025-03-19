@@ -166,11 +166,13 @@ class TupleBuilderTest {
     private static <T extends TupleBuilder> Stream<T> build(
         Function<Function1<SalespersonRow,Long>,T> f1,
         Function2<String,Function1<SalespersonRow,Long>,T> f2,
-        Function2<Alias<SalespersonRow>,Function1<SalespersonRow,Long>,T> f3) {
+        Function2<Alias<SalespersonRow>,Function1<SalespersonRow,Long>,T> f3,
+        Function<TypedExpression<Long>,T> f4) {
         return Stream.of(
             f1.apply(SalespersonRow::salespersonId),
             f2.apply("a", SalespersonRow::salespersonId),
-            f3.apply(alias(), SalespersonRow::salespersonId)
+            f3.apply(alias(), SalespersonRow::salespersonId),
+            f4.apply(TypedExpression.column(SalespersonRow::salespersonId))
         );
     }
 
@@ -186,7 +188,7 @@ class TupleBuilderTest {
     }
 
     private static Stream<TupleBuilder1<?>> tuples1() {
-        return build(TupleBuilder::tuple, TupleBuilder::tuple, TupleBuilder::tuple);
+        return build(TupleBuilder::tuple, TupleBuilder::tuple, TupleBuilder::tuple, TupleBuilder::tuple);
     }
 
     private static Stream<TupleBuilder1<?>> tuples1Opt() {
@@ -194,7 +196,7 @@ class TupleBuilderTest {
     }
 
     private static Stream<TupleBuilder2<?,?>> tuples2(TupleBuilder1<?> tuple) {
-        return build(tuple::comma, tuple::comma, tuple::comma);
+        return build(tuple::comma, tuple::comma, tuple::comma, tuple::comma);
     }
 
     private static Stream<TupleBuilder2<?,?>> tuples2Opt(TupleBuilder1<?> tuple) {
@@ -202,7 +204,7 @@ class TupleBuilderTest {
     }
 
     private static Stream<TupleBuilder3<?,?,?>> tuples3(TupleBuilder2<?,?> tuple) {
-        return build(tuple::comma, tuple::comma, tuple::comma);
+        return build(tuple::comma, tuple::comma, tuple::comma, tuple::comma);
     }
 
     private static Stream<TupleBuilder3<?,?,?>> tuples3Opt(TupleBuilder2<?,?> tuple) {
@@ -210,7 +212,7 @@ class TupleBuilderTest {
     }
 
     private static Stream<TupleBuilder4<?,?,?,?>> tuples4(TupleBuilder3<?,?,?> tuple) {
-        return build(tuple::comma, tuple::comma, tuple::comma);
+        return build(tuple::comma, tuple::comma, tuple::comma, tuple::comma);
     }
 
     private static Stream<TupleBuilder4<?,?,?,?>> tuples4Opt(TupleBuilder3<?,?,?> tuple) {

@@ -77,4 +77,13 @@ public abstract class TupleBuilder {
     public static <R, T1> TupleBuilder1<T1> tuple(Alias<R> alias, FunctionOptional1<R,T1> methodRef) {
         return new TupleBuilder1<>(ResolvedColumn.of(alias, methodRef));
     }
+
+    public static <T1> TupleBuilder1<T1> tuple(T1 item1) {
+        return new TupleBuilder1<>(ValueExpression.of(item1));
+    }
+
+    public static <T1> TupleBuilder1<T1> tuple(TypedExpression<T1> item1) {
+        return new TupleBuilder1<>(item1);
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Cadenza United Kingdom Limited
+ * Copyright (c) 2020, 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -96,6 +96,14 @@ public class TupleBuilder5<T1, T2, T3, T4, T5> extends TupleBuilder implements T
 
     public <R, T6> TupleBuilder6<T1,T2,T3,T4,T5,T6> comma(Alias<R> alias, FunctionOptional1<R,T6> methodRef) {
         return new TupleBuilder6<>(item1, item2, item3, item4, item5, ResolvedColumn.of(alias, methodRef));
+    }
+
+    public <T6> TupleBuilder6<T1,T2,T3,T4,T5,T6> comma(T6 value) {
+        return new TupleBuilder6<>(item1, item2, item3, item4, item5, ValueExpression.of(value));
+    }
+
+    public <T6> TupleBuilder6<T1,T2,T3,T4,T5,T6> comma(TypedExpression<T6> item6) {
+        return new TupleBuilder6<>(item1, item2, item3, item4, item5, item6);
     }
 
     @Override

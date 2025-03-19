@@ -72,12 +72,7 @@ public class Db2Dialect extends AnsiDialect {
                     return String.format("HEXTORAW('%s')", hex(value));
                 }
             })
-            .register(DbTypeId.VARCHAR, new DefaultVarchar() {
-                @Override
-                public String parameter(Database database, Optional<String> value) {
-                    return castParameter(database, value);
-                }
-            })
+            .register(DbTypeId.VARCHAR, new DefaultVarchar())
             .register(DbTypeId.JSON, new DefaultJson("varchar") {
                 @Override
                 public String parameter(Database database, Optional<Json> value) {
@@ -160,6 +155,11 @@ public class Db2Dialect extends AnsiDialect {
         return keepLocks
             .map(kl -> isolationLevelSqlWithLocks(sql, level, kl))
             .orElseGet(() -> isolationLevelWithNoLocks(sql, level));
+    }
+
+    @Override
+    public boolean requiresInValues() {
+        return true;
     }
 
     @Override

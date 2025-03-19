@@ -1,5 +1,5 @@
 /*
- * Copyright (c) ${year} Cadenza United Kingdom Limited
+ * Copyright (c) 2020, ${year} Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -114,6 +114,14 @@ public class TupleBuilder${n}<${typelist_space}> extends TupleBuilder implements
 
     public <R, T${n+1}> TupleBuilder${n+1}<${typelist},T${n+1}> comma(Alias<R> alias, FunctionOptional1<R,T${n+1}> methodRef) {
         return new TupleBuilder${n+1}<>(<#list 1..n as i>item${i}, </#list>ResolvedColumn.of(alias, methodRef));
+    }
+
+    public <T${n+1}> TupleBuilder${n+1}<${typelist},T${n+1}> comma(T${n+1} value) {
+        return new TupleBuilder${n+1}<>(<#list 1..n as i>item${i}, </#list>ValueExpression.of(value));
+    }
+
+    public <T${n+1}> TupleBuilder${n+1}<${typelist},T${n+1}> comma(TypedExpression<T${n+1}> item${n+1}) {
+        return new TupleBuilder${n+1}<>(<#list 1..n as i>item${i}, </#list>item${n+1});
     }
 </#if>
 

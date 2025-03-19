@@ -42,7 +42,8 @@ public class InListCondition<T> implements Condition<T> {
 
     @Override
     public String sql(Scope scope) {
-        return operator + " (" + Arrays.stream(values)
+        String valuesSql = scope.dialect().requiresInValues() ? "values " : "";
+        return operator + " (" + valuesSql + Arrays.stream(values)
             .map(x -> x.sql(scope))
             .collect(joining(", ")) + ")";
     }

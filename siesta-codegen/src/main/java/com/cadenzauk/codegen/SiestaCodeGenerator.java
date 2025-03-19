@@ -124,15 +124,14 @@ public class SiestaCodeGenerator {
     }
 
     private void generateAll() {
-//        generateFunctions(20);
-//        generateTuples(20);
-//        generateRowMappers(20);
-//        generateRowMapperFactories(20);
-//        generateProjections(20);
-//        generateExpectingJoins(20);
-//        generateInProjectionExpectingCommas(19);
-//        generateTupleBuilders(20);
-
+        generateFunctions(20);
+        generateTuples(20);
+        generateRowMappers(20);
+        generateRowMapperFactories(20);
+        generateProjections(20);
+        generateExpectingJoins(20);
+        generateInProjectionExpectingCommas(19);
+        generateTupleBuilders(20);
         generateExpectingJoinExtensions(20);
     }
 

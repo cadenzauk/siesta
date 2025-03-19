@@ -23,8 +23,11 @@
 package com.cadenzauk.siesta.grammar.dml;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
+
+import java.util.stream.Stream;
 
 public class ExecutableStatementClause {
     protected final ExecutableStatement statement;
@@ -48,6 +51,10 @@ public class ExecutableStatementClause {
 
     public String sql() {
         return statement.sql();
+    }
+
+    public Stream<Object> args() {
+        return statement.args(new Scope(database()));
     }
 
     private Database database() {

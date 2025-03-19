@@ -1560,6 +1560,77 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void selectInTupleListWithOneElement() {
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+
+        List<SalespersonRow> result = database.from(SalespersonRow.class, "s")
+            .where(
+                tuple(SalespersonRow::firstName)
+            )
+            .isIn(
+                tuple(salespersonRow1.firstName()),
+                tuple(salespersonRow2.firstName())
+            )
+            .list();
+
+        assertThat(result, containsInAnyOrder(salespersonRow1, salespersonRow2));
+    }
+
+    @Test
+    void selectInTupleListWithMoreThanOneElement() {
+        assumeTrue(dialect.supportsMultipleValueIn(), dialect.getClass().getSimpleName() + " does not support '... WHERE (A, B) in (SELECT A, B FROM ...)'");
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+
+        List<SalespersonRow> result = database.from(SalespersonRow.class, "s")
+            .where(
+                tuple(SalespersonRow::salespersonId)
+                    .comma(SalespersonRow::firstName)
+            )
+            .isIn(
+                tuple(salespersonRow1.salespersonId())
+                    .comma(salespersonRow1.firstName()),
+                tuple(salespersonRow2.salespersonId())
+                    .comma(salespersonRow2.firstName())
+            )
+            .list();
+
+        assertThat(result, containsInAnyOrder(salespersonRow1, salespersonRow2));
+    }
+
+
+    @Test
+    void deleteInTupleListWithMoreThanOneElement() {
+        assumeTrue(dialect.supportsMultipleValueIn(), dialect.getClass().getSimpleName() + " does not support '... WHERE (A, B) in (SELECT A, B FROM ...)'");
+        Database database = testDatabase(dataSource, dialect);
+        SalespersonRow salespersonRow1 = aRandomSalesperson();
+        SalespersonRow salespersonRow2 = aRandomSalesperson();
+        database.insert(salespersonRow1, salespersonRow2);
+
+        int result = database.delete(SalespersonRow.class)
+            .where(
+                tuple(SalespersonRow::salespersonId)
+                    .comma(SalespersonRow::firstName)
+            )
+            .isIn(
+                tuple(salespersonRow1.salespersonId())
+                    .comma(salespersonRow1.firstName())
+            )
+            .execute();
+
+        assertThat(result, is(1));
+        assertThat(
+            database.from(SalespersonRow.class).select(count()).where(SalespersonRow::salespersonId).isIn(salespersonRow1.salespersonId(), salespersonRow2.salespersonId()).single(),
+            is(1)
+        );
+    }
+
+    @Test
     void selectDistinctOnSingleTableDoesNotReturnDuplicatesWhereasOrdinarySelectDoes() {
         Database database = testDatabase(dataSource, dialect);
         SaleRow saleRow1 = aRandomSale();

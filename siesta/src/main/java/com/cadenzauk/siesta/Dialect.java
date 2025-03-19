@@ -121,4 +121,8 @@ public interface Dialect {
     default String orderSql(Order order) {
         return Order.orderWithNullClause(order);
     }
+
+    default boolean requiresInValues() {
+        return false;
+    }
 }

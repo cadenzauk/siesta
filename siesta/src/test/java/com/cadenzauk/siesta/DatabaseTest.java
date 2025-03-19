@@ -22,10 +22,13 @@
 
 package com.cadenzauk.siesta;
 
+import co.unruly.matchers.StreamMatchers;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
+import com.cadenzauk.siesta.grammar.dml.ExecutableStatementClause;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InWhereExpectingAnd;
+import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.apache.commons.lang3.ArrayUtils;
@@ -571,6 +574,41 @@ class DatabaseTest {
             "where (sp.FIRST_NAME, sp.NUMBER_OF_SALES, sp.SALESPERSON_ID) " +
             "in (select i.MIDDLE_NAMES as i_MIDDLE_NAMES, i.NUMBER_OF_SALES as i_NUMBER_OF_SALES, i.SALESPERSON_ID as i_SALESPERSON_ID " +
             "from SIESTA.SALESPERSON i)"));
+    }
+
+    @Test
+    void selectValueTuple() {
+        Database database = Database.newBuilder().build();
+        Alias<SalespersonRow> sp = database.table(SalespersonRow.class).as("sp");
+
+        Select<String> select = database.from(sp)
+            .select(SalespersonRow::firstName)
+            .where(tuple(SalespersonRow::firstName)
+                .comma("sp", SalespersonRow::numberOfSales)
+                .comma(sp, SalespersonRow::salespersonId))
+            .isIn(tuple(literal("Bob")).comma(10).comma(123L));
+
+        assertThat(select.sql(), is("select sp.FIRST_NAME as sp_FIRST_NAME from SIESTA.SALESPERSON sp " +
+            "where (sp.FIRST_NAME, sp.NUMBER_OF_SALES, sp.SALESPERSON_ID) " +
+            "in (('Bob', ?, ?))"));
+        assertThat(select.args(new Scope(database)), StreamMatchers.contains(10, 123L));
+    }
+
+    @Test
+    void deleteValueTuple() {
+        Database database = Database.newBuilder().build();
+        Alias<SalespersonRow> sp = database.table(SalespersonRow.class).as("sp");
+
+        ExecutableStatementClause delete = database.delete(sp)
+            .where(tuple(SalespersonRow::firstName)
+                .comma("sp", SalespersonRow::numberOfSales)
+                .comma(sp, SalespersonRow::salespersonId))
+            .isIn(tuple(literal("Bob")).comma(10).comma(123L));
+
+        assertThat(delete.sql(), is("delete from SIESTA.SALESPERSON sp " +
+            "where (sp.FIRST_NAME, sp.NUMBER_OF_SALES, sp.SALESPERSON_ID) " +
+            "in (('Bob', ?, ?))"));
+        assertThat(delete.args(), StreamMatchers.contains(10, 123L));
     }
 
     @NotNull

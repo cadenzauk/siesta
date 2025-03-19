@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Cadenza United Kingdom Limited
+ * Copyright (c) 2020, 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -144,6 +144,14 @@ public class TupleBuilder17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T
 
     public <R, T18> TupleBuilder18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18> comma(Alias<R> alias, FunctionOptional1<R,T18> methodRef) {
         return new TupleBuilder18<>(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, ResolvedColumn.of(alias, methodRef));
+    }
+
+    public <T18> TupleBuilder18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18> comma(T18 value) {
+        return new TupleBuilder18<>(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, ValueExpression.of(value));
+    }
+
+    public <T18> TupleBuilder18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18> comma(TypedExpression<T18> item18) {
+        return new TupleBuilder18<>(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18);
     }
 
     @Override

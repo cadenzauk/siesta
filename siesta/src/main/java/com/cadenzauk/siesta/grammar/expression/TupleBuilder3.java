@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Cadenza United Kingdom Limited
+ * Copyright (c) 2020, 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -88,6 +88,14 @@ public class TupleBuilder3<T1, T2, T3> extends TupleBuilder implements TypedExpr
 
     public <R, T4> TupleBuilder4<T1,T2,T3,T4> comma(Alias<R> alias, FunctionOptional1<R,T4> methodRef) {
         return new TupleBuilder4<>(item1, item2, item3, ResolvedColumn.of(alias, methodRef));
+    }
+
+    public <T4> TupleBuilder4<T1,T2,T3,T4> comma(T4 value) {
+        return new TupleBuilder4<>(item1, item2, item3, ValueExpression.of(value));
+    }
+
+    public <T4> TupleBuilder4<T1,T2,T3,T4> comma(TypedExpression<T4> item4) {
+        return new TupleBuilder4<>(item1, item2, item3, item4);
     }
 
     @Override
