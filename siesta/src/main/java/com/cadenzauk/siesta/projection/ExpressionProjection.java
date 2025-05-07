@@ -95,8 +95,6 @@ public class ExpressionProjection<T> implements Projection<T> {
 
     @Override
     public boolean includes(ColumnSpecifier<?> columnSpecifier) {
-        return columnSpecifier.asEffective(expression.type())
-            .map(cs -> cs.isSpecificationFor(expression, label))
-            .orElse(false);
+        return columnSpecifier.isSpecificationFor(expression, label);
     }
 }

@@ -90,7 +90,7 @@ public abstract class Alias<R> {
             if (requiredRowClass.isAssignableFrom(type().getRawType())) {
                 return Stream.of((Alias<R2>) this);
             }
-            throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + requiredRowClass);
+            throw new InvalidQueryException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + requiredRowClass + ".");
         }
         return Stream.empty();
     }

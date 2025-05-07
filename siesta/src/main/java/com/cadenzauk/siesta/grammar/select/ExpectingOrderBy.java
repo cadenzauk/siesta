@@ -46,6 +46,10 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
         return new InOrderByExpectingThen<>(statement).then(label);
     }
 
+    public <T> InOrderByExpectingThen<RT> orderBy(String alias, Label<T> label) {
+        return new InOrderByExpectingThen<>(statement).then(alias, label);
+    }
+
     public <T, R> InOrderByExpectingThen<RT> orderBy(Function1<R,T> columnGetter) {
         return new InOrderByExpectingThen<>(statement).then(columnGetter);
     }
@@ -80,6 +84,10 @@ public abstract class ExpectingOrderBy<RT> extends Select<RT> {
 
     public <T> InOrderByExpectingThen<RT> orderBy(Label<T> label, Order order) {
         return new InOrderByExpectingThen<>(statement).then(label, order);
+    }
+
+    public <T> InOrderByExpectingThen<RT> orderBy(String alias, Label<T> label, Order order) {
+        return new InOrderByExpectingThen<>(statement).then(alias, label, order);
     }
 
     public <T, R> InOrderByExpectingThen<RT> orderBy(Function1<R,T> columnGetter, Order order) {

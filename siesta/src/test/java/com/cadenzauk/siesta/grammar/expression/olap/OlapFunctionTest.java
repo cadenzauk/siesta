@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.SalespersonRow;
@@ -163,8 +164,7 @@ class OlapFunctionTest {
             .list(transaction);
 
         verify(transaction).query(sql.capture(), args.capture(), any());
-        assertThat(sql.getValue(), is("select row_number() over (" + expected + ") as row_number_1 " +
-            "from SIESTA.SALESPERSON s"));
+        assertThat(sql.getValue(), is("select row_number() over (" + expected + ") as row_number_1 from SIESTA.SALESPERSON s"));
         assertThat(args.getValue(), is(expectedArgs));}
 
     private static Arguments testCase(BiFunction<InOlapExpectingPartitionBy<Integer>,Alias<SalespersonRow>,TypedExpression<Integer>> f, String expectedSql, Object... expectedArgs) {
@@ -180,6 +180,8 @@ class OlapFunctionTest {
             testCase((r, s) -> r.partitionBy("s", SalespersonRow::middleNames), "partition by s.MIDDLE_NAMES"),
             testCase((r, s) -> r.partitionBy(s, SalespersonRow::salespersonId), "partition by s.SALESPERSON_ID"),
             testCase((r, s) -> r.partitionBy(s, SalespersonRow::middleNames), "partition by s.MIDDLE_NAMES"),
+            testCase((r, s) -> r.partitionBy(Label.of("MIDDLE_NAMES", String.class)), "partition by s.MIDDLE_NAMES"),
+            testCase((r, s) -> r.partitionBy("s", Label.of("MIDDLE_NAMES", String.class)), "partition by s.MIDDLE_NAMES"),
 
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then(upper(SalespersonRow::middleNames)), "partition by s.SALESPERSON_ID, upper(s.MIDDLE_NAMES)"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then(SalespersonRow::firstName), "partition by s.SALESPERSON_ID, s.FIRST_NAME"),
@@ -188,6 +190,8 @@ class OlapFunctionTest {
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then("s", SalespersonRow::middleNames), "partition by s.SALESPERSON_ID, s.MIDDLE_NAMES"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then(s, SalespersonRow::firstName), "partition by s.SALESPERSON_ID, s.FIRST_NAME"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then(s, SalespersonRow::middleNames), "partition by s.SALESPERSON_ID, s.MIDDLE_NAMES"),
+            testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then(Label.of("MIDDLE_NAMES", String.class)), "partition by s.SALESPERSON_ID, s.MIDDLE_NAMES"),
+            testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).then("s", Label.of("MIDDLE_NAMES", String.class)), "partition by s.SALESPERSON_ID, s.MIDDLE_NAMES"),
 
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(upper(SalespersonRow::middleNames)), "partition by s.SALESPERSON_ID order by upper(s.MIDDLE_NAMES) asc"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(SalespersonRow::firstName), "partition by s.SALESPERSON_ID order by s.FIRST_NAME asc"),
@@ -196,6 +200,8 @@ class OlapFunctionTest {
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy("s", SalespersonRow::middleNames), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES asc"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(s, SalespersonRow::firstName), "partition by s.SALESPERSON_ID order by s.FIRST_NAME asc"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(s, SalespersonRow::middleNames), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES asc"),
+            testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(Label.of("MIDDLE_NAMES", String.class)), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES asc"),
+            testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy("s", Label.of("MIDDLE_NAMES", String.class)), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES asc"),
 
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(upper(SalespersonRow::middleNames), DESC), "partition by s.SALESPERSON_ID order by upper(s.MIDDLE_NAMES) desc"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(SalespersonRow::firstName, DESC), "partition by s.SALESPERSON_ID order by s.FIRST_NAME desc"),
@@ -204,6 +210,8 @@ class OlapFunctionTest {
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy("s", SalespersonRow::middleNames, DESC), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES desc"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(s, SalespersonRow::firstName, DESC), "partition by s.SALESPERSON_ID order by s.FIRST_NAME desc"),
             testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(s, SalespersonRow::middleNames, DESC), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES desc"),
+            testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy(Label.of("MIDDLE_NAMES", String.class), DESC), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES desc"),
+            testCase((r, s) -> r.partitionBy(SalespersonRow::salespersonId).orderBy("s", Label.of("MIDDLE_NAMES", String.class), DESC), "partition by s.SALESPERSON_ID order by s.MIDDLE_NAMES desc"),
 
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(upper(SalespersonRow::middleNames)), "order by s.SALESPERSON_ID asc, upper(s.MIDDLE_NAMES) asc"),
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(SalespersonRow::firstName), "order by s.SALESPERSON_ID asc, s.FIRST_NAME asc"),
@@ -212,6 +220,8 @@ class OlapFunctionTest {
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then("s", SalespersonRow::middleNames), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES asc"),
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(s, SalespersonRow::firstName), "order by s.SALESPERSON_ID asc, s.FIRST_NAME asc"),
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(s, SalespersonRow::middleNames), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES asc"),
+            testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(Label.of("MIDDLE_NAMES", String.class)), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES asc"),
+            testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then("s", Label.of("MIDDLE_NAMES", String.class)), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES asc"),
 
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(upper(SalespersonRow::middleNames), DESC), "order by s.SALESPERSON_ID asc, upper(s.MIDDLE_NAMES) desc"),
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(SalespersonRow::firstName, DESC), "order by s.SALESPERSON_ID asc, s.FIRST_NAME desc"),
@@ -220,6 +230,8 @@ class OlapFunctionTest {
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then("s", SalespersonRow::middleNames, DESC), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES desc"),
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(s, SalespersonRow::firstName, DESC), "order by s.SALESPERSON_ID asc, s.FIRST_NAME desc"),
             testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(s, SalespersonRow::middleNames, DESC), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES desc"),
+            testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then(Label.of("MIDDLE_NAMES", String.class), DESC), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES desc"),
+            testCase((r, s) -> r.orderBy(SalespersonRow::salespersonId).then("s", Label.of("MIDDLE_NAMES", String.class), DESC), "order by s.SALESPERSON_ID asc, s.MIDDLE_NAMES desc"),
 
             testCase((r, a) -> r.partitionBy(substr(SalespersonRow::middleNames, 1)), "partition by substr(s.MIDDLE_NAMES, ?)", 1)
         );

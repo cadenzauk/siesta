@@ -26,8 +26,11 @@ import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.stream.StreamUtil;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,10 +83,41 @@ public class Scope {
     }
 
     public Alias<?> findAlias(ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias) {
-        Optional<Alias<?>> found = aliases.stream().flatMap(a -> a.as(this, columnSpecifier, requiredAlias)).findFirst();
-        return found
-            .orElseGet(() -> outer.map(o -> o.findAlias(columnSpecifier, requiredAlias))
-                .orElseThrow(() -> new IllegalArgumentException("No such alias as " + requiredAlias + " in scope.")));
+        return doFindAlias(columnSpecifier, requiredAlias, this);
+    }
+
+    private Alias<?> doFindAlias(ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias, Scope innerScope) {
+        List<Alias<?>> found = aliases.stream().flatMap(a -> a.as(this, columnSpecifier, requiredAlias)).collect(toList());
+        if (found.size() == 1) {
+            return found.get(0);
+        } else if (found.size() > 1) {
+            throw new InvalidQueryException("Ambiguous");
+        }
+        return outer.map(o -> o.doFindAlias(columnSpecifier, requiredAlias, innerScope))
+            .orElseThrow(() -> new InvalidQueryException(buildFindAliasFailedMessage(columnSpecifier, requiredAlias, innerScope)));
+    }
+
+    private String buildFindAliasFailedMessage(ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias, Scope innerScope) {
+        return columnSpecifier
+            .referringClass()
+            .map(cls -> buildFindAliasFailedMessage(cls, columnSpecifier, requiredAlias, innerScope))
+            .orElseGet(() -> "Unable to find column '" + columnSpecifier.columnName(this) + "' in " +
+                requiredAlias.orElseGet(() -> innerScope.allAliases().map(Alias::columnLabelPrefix).collect(Collectors.joining(", "))) + "."
+            );
+    }
+
+    private String buildFindAliasFailedMessage(Class<?> requiredClass, ColumnSpecifier<?> columnSpecifier, Optional<String> requiredAlias, Scope innerScope) {
+        List<? extends Alias<?>> matchingAliases = innerScope.allAliases().flatMap(a -> a.as(requiredClass)).collect(toList());
+        if (matchingAliases.isEmpty()) {
+            return "There is no alias for " + requiredClass.getName() + " in scope.";
+        }
+        return requiredAlias
+            .map(a -> "The aliases for " + requiredClass.getName() + " are " + matchingAliases.stream().map(Alias::columnLabelPrefix).collect(Collectors.joining(", "))+ " and not '" + a + "'.")
+            .orElseGet(() -> "Unable to find column '" + columnSpecifier.columnName(this) + "' in " + requiredClass.getName() + ".");
+    }
+
+    private Stream<Alias<?>> allAliases() {
+        return outer.map(o -> Stream.concat(aliases.stream(), o.allAliases())).orElseGet(() -> aliases.stream());
     }
 
     public <R> Alias<R> findAlias(Class<R> requiredRowClass, String requiredAlias) {

@@ -148,7 +148,7 @@ public class RegularTableAlias<R> extends TableAlias<R> {
         return table
             .columns()
             .flatMap(ac -> ac.as(columnSpecifier.effectiveType()))
-            .filter(ac -> columnSpecifier.specifies(scope, ac))
+            .filter(ac -> columnSpecifier.specifies(scope, ac, columnLabelPrefix()))
             .findFirst();
     }
 

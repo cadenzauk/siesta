@@ -1766,13 +1766,13 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         SalespersonRow salespersonRow2 = aRandomSalesperson(s -> s.numberOfSales(200));
         SalespersonRow salespersonRow3 = aRandomSalesperson(s -> s.numberOfSales(300));
         database.insert(salespersonRow1, salespersonRow2, salespersonRow3);
-        Label<Integer> rowNum = Label.of("rown", Integer.class);
+        Label<Integer> rowNum = Label.of("rown", Integer.TYPE);
 
         Select<Tuple2<Long, Integer>> subselect = database
             .from(SalespersonRow.class, "i")
             .select(SalespersonRow::salespersonId)
             .comma(rowNumber().orderBy(SalespersonRow::numberOfSales), rowNum)
-            .where("i", SalespersonRow::salespersonId).isIn(
+            .where(column("i", SalespersonRow::salespersonId)).isIn(
                 salespersonRow1.salespersonId(),
                 salespersonRow2.salespersonId(),
                 salespersonRow3.salespersonId()

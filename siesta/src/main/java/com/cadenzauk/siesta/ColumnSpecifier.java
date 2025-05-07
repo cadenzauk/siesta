@@ -55,11 +55,11 @@ public interface ColumnSpecifier<T> {
 
     <RT> Optional<MethodInfo<RT,T>> asReferringMethodInfo(TypeToken<RT> type);
 
-    boolean isSpecificationFor(TypedExpression<T> expression, Optional<String> label);
+    boolean isSpecificationFor(TypedExpression<?> expression, Optional<String> label);
 
     Optional<Column<T,?>> column(Scope scope);
 
-    boolean specifies(Scope scope, AliasColumn<T> x);
+    boolean specifies(Scope scope, AliasColumn<T> x, String prefix);
 
     boolean specifies(Scope scope, ProjectionColumn<T> x);
 
@@ -128,7 +128,7 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
-        public boolean isSpecificationFor(TypedExpression<T> expression, Optional<String> label) {
+        public boolean isSpecificationFor(TypedExpression<?> expression, Optional<String> label) {
             return OptionalUtil.as(ColumnExpression.class, expression)
                 .map(c -> c.includes(this))
                 .orElse(false);
@@ -140,7 +140,7 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
-        public boolean specifies(Scope scope, AliasColumn<T> x) {
+        public boolean specifies(Scope scope, AliasColumn<T> x, String prefix) {
             return StringUtils.equals(x.propertyName(), getterMethod.propertyName());
         }
 
@@ -196,8 +196,15 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
-        public boolean isSpecificationFor(TypedExpression<T> expression, Optional<String> label) {
-            return Objects.equals(label, Optional.of(columnLabel));
+        public boolean isSpecificationFor(TypedExpression<?> expression, Optional<String> label) {
+            if (Objects.equals(label, Optional.of(columnLabel))) {
+                if (!asEffective(expression.type()).isPresent()) {
+                    throw new InvalidQueryException("The column with the label of '" + columnLabel + "' is of type '" + expression.type() + "' and not '" + effectiveClass + "'.");
+                }
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
@@ -206,7 +213,7 @@ public interface ColumnSpecifier<T> {
         }
 
         @Override
-        public boolean specifies(Scope scope, AliasColumn<T> x) {
+        public boolean specifies(Scope scope, AliasColumn<T> x, String prefix) {
             return StringUtils.equals(x.columnName(), columnLabel);
         }
 

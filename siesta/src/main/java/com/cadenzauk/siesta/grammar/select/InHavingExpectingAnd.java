@@ -49,6 +49,10 @@ public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andHaving);
     }
 
+    public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> and(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andHaving);
+    }
+
     public <T, R> ExpressionBuilder<T,InHavingExpectingAnd<RT>> and(Function1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andHaving);
     }
@@ -83,6 +87,10 @@ public class InHavingExpectingAnd<RT> extends ExpectingUnion<RT> {
 
     public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(Label<T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orHaving);
+    }
+
+    public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::orHaving);
     }
 
     public <T, R> ExpressionBuilder<T,InHavingExpectingAnd<RT>> or(Function1<R,T> lhs) {

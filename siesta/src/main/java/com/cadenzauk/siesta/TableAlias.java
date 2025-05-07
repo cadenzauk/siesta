@@ -55,7 +55,7 @@ public abstract class TableAlias<T> extends Alias<T> {
                 if (columnSpecifier.referringClass().isEmpty() || columnSpecifier.referringClass().map(r -> r.isAssignableFrom(type().getRawType())).orElse(false)) {
                     return Stream.of(this);
                 }
-                throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A"));
+                throw new InvalidQueryException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A") + ".");
             } else {
                 return Stream.empty();
             }

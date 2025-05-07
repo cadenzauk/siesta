@@ -54,7 +54,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -284,7 +283,7 @@ class RegularTableAliasTest {
     @Test
     void findColumnOfCorrectTypeReturnsColumn() {
         when(columnSpecifier.effectiveType()).thenReturn(TypeToken.of(Long.class));
-        when(columnSpecifier.specifies(any(), any(AliasColumn.class))).thenReturn(true);
+        when(columnSpecifier.specifies(any(), any(AliasColumn.class), any())).thenReturn(true);
         when(widgetTable.columns()).thenReturn(Stream.of(widgetRowId));
         when(widgetRowId.columnName()).thenReturn("bob");
         when(widgetRowId.as(TypeToken.of(Long.class))).thenReturn(Stream.of(widgetRowId));
@@ -359,10 +358,10 @@ class RegularTableAliasTest {
         Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         calling(() -> sut.as(ManufacturerRow.class, "wilma"))
-            .shouldThrow(IllegalArgumentException.class)
+            .shouldThrow(InvalidQueryException.class)
             .withMessage(is("Alias wilma is an alias for " +
                 "com.cadenzauk.siesta.model.WidgetRow and not " +
-                "class com.cadenzauk.siesta.model.ManufacturerRow"));
+                "class com.cadenzauk.siesta.model.ManufacturerRow."));
     }
 
     @Test
@@ -433,10 +432,10 @@ class RegularTableAliasTest {
         Alias<WidgetRow> sut = RegularTableAlias.of(widgetTable, "wilma");
 
         calling(() -> sut.as(scope, columnSpecifier, Optional.of("wilma")))
-            .shouldThrow(IllegalArgumentException.class)
+            .shouldThrow(InvalidQueryException.class)
             .withMessage(is("Alias wilma is an alias for " +
                 "com.cadenzauk.siesta.model.WidgetRow and not " +
-                "class com.cadenzauk.siesta.model.ManufacturerRow"));
+                "class com.cadenzauk.siesta.model.ManufacturerRow."));
     }
 
     @Test

@@ -45,6 +45,11 @@ public class InGroupByExpectingComma<RT> extends ExpectingHaving<RT> {
         return this;
     }
 
+    public <T> InGroupByExpectingComma<RT> comma(String alias, Label<T> column) {
+        statement.addGroupBy(UnresolvedColumn.of(alias, column));
+        return this;
+    }
+
     public <T, R> InGroupByExpectingComma<RT> comma(Function1<R,T> column) {
         statement.addGroupBy(UnresolvedColumn.of(column));
         return this;

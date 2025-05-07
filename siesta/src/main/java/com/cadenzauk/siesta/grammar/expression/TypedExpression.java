@@ -64,6 +64,10 @@ public interface TypedExpression<T> extends Expression {
         return plus(UnresolvedColumn.of(value));
     }
 
+    default TypedExpression<T> plus(String alias, Label<T> value) {
+        return plus(UnresolvedColumn.of(alias, value));
+    }
+
     default <R> TypedExpression<T> plus(Function1<R,T> value) {
         return plus(UnresolvedColumn.of(value));
     }
@@ -98,6 +102,10 @@ public interface TypedExpression<T> extends Expression {
 
     default TypedExpression<T> minus(Label<T> value) {
         return minus(UnresolvedColumn.of(value));
+    }
+
+    default TypedExpression<T> minus(String alias, Label<T> value) {
+        return minus(UnresolvedColumn.of(alias, value));
     }
 
     default <R> TypedExpression<T> minus(Function1<R,T> value) {
@@ -136,6 +144,10 @@ public interface TypedExpression<T> extends Expression {
         return times(UnresolvedColumn.of(value));
     }
 
+    default TypedExpression<T> times(String alias, Label<T> value) {
+        return times(UnresolvedColumn.of(alias, value));
+    }
+
     default <R> TypedExpression<T> times(Function1<R,T> value) {
         return times(UnresolvedColumn.of(value));
     }
@@ -170,6 +182,10 @@ public interface TypedExpression<T> extends Expression {
 
     default TypedExpression<T> dividedBy(Label<T> value) {
         return dividedBy(UnresolvedColumn.of(value));
+    }
+
+    default TypedExpression<T> dividedBy(String alias, Label<T> value) {
+        return dividedBy(UnresolvedColumn.of(alias, value));
     }
 
     default <R> TypedExpression<T> dividedBy(Function1<R,T> value) {

@@ -46,6 +46,10 @@ public final class NumericFunctions extends UtilityClass {
         return SqlFunction.of(ABS, arg);
     }
 
+    public static TypedExpression<BigDecimal> abs(String alias, Label<BigDecimal> arg) {
+        return SqlFunction.of(ABS, alias, arg);
+    }
+
     public static <R> TypedExpression<BigDecimal> abs(Function1<R,BigDecimal> arg) {
         return SqlFunction.of(ABS, arg);
     }
@@ -80,6 +84,10 @@ public final class NumericFunctions extends UtilityClass {
 
     public static TypedExpression<BigDecimal> minus(Label<BigDecimal> arg) {
         return SqlFunction.of(MINUS, arg);
+    }
+
+    public static TypedExpression<BigDecimal> minus(String alias, Label<BigDecimal> arg) {
+        return SqlFunction.of(MINUS, alias, arg);
     }
 
     public static <R> TypedExpression<BigDecimal> minus(Function1<R,BigDecimal> arg) {

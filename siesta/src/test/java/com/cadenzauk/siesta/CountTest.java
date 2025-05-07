@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.cadenzauk.siesta.model.WidgetRow;
@@ -151,6 +152,8 @@ class CountTest {
             { testCase(a -> count("w", WidgetRow::description)), "count(w.DESCRIPTION)", args() },
             { testCase(a -> count(a, WidgetRow::name)), "count(w.NAME)", args() },
             { testCase(a -> count(a, WidgetRow::description)), "count(w.DESCRIPTION)", args() },
+            { testCase(a -> count(Label.of("DESCRIPTION", String.class))), "count(w.DESCRIPTION)", args() },
+            { testCase(a -> count("w", Label.of("DESCRIPTION", String.class))), "count(w.DESCRIPTION)", args() },
             { testCase(a -> countDistinct(value(2.0))), "count(distinct ?)", args(2.0) },
             { testCase(a -> countDistinct(WidgetRow::name)), "count(distinct w.NAME)", args() },
             { testCase(a -> countDistinct(WidgetRow::description)), "count(distinct w.DESCRIPTION)", args() },
@@ -158,6 +161,8 @@ class CountTest {
             { testCase(a -> countDistinct("w", WidgetRow::description)), "count(distinct w.DESCRIPTION)", args() },
             { testCase(a -> countDistinct(a, WidgetRow::name)), "count(distinct w.NAME)", args() },
             { testCase(a -> countDistinct(a, WidgetRow::description)), "count(distinct w.DESCRIPTION)", args() },
+            { testCase(a -> countDistinct(Label.of("DESCRIPTION", String.class))), "count(distinct w.DESCRIPTION)", args() },
+            { testCase(a -> countDistinct("w", Label.of("DESCRIPTION", String.class))), "count(distinct w.DESCRIPTION)", args() },
         };
     }
 
@@ -170,6 +175,8 @@ class CountTest {
             { testCase(a -> countBig("w", WidgetRow::description)), "count_big(w.DESCRIPTION)", args() },
             { testCase(a -> countBig(a, WidgetRow::name)), "count_big(w.NAME)", args() },
             { testCase(a -> countBig(a, WidgetRow::description)), "count_big(w.DESCRIPTION)", args() },
+            { testCase(a -> countBig(Label.of("DESCRIPTION", String.class))), "count_big(w.DESCRIPTION)", args() },
+            { testCase(a -> countBig("w", Label.of("DESCRIPTION", String.class))), "count_big(w.DESCRIPTION)", args() },
             { testCase(a -> countBigDistinct(value(2.0))), "count_big(distinct ?)", args(2.0) },
             { testCase(a -> countBigDistinct(WidgetRow::name)), "count_big(distinct w.NAME)", args() },
             { testCase(a -> countBigDistinct(WidgetRow::description)), "count_big(distinct w.DESCRIPTION)", args() },
@@ -177,6 +184,8 @@ class CountTest {
             { testCase(a -> countBigDistinct("w", WidgetRow::description)), "count_big(distinct w.DESCRIPTION)", args() },
             { testCase(a -> countBigDistinct(a, WidgetRow::name)), "count_big(distinct w.NAME)", args() },
             { testCase(a -> countBigDistinct(a, WidgetRow::description)), "count_big(distinct w.DESCRIPTION)", args() },
+            { testCase(a -> countBigDistinct(Label.of("DESCRIPTION", String.class))), "count_big(distinct w.DESCRIPTION)", args() },
+            { testCase(a -> countBigDistinct("w", Label.of("DESCRIPTION", String.class))), "count_big(distinct w.DESCRIPTION)", args() },
         };
     }
 }

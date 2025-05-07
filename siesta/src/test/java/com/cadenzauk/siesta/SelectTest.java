@@ -24,6 +24,7 @@ package com.cadenzauk.siesta;
 
 import com.cadenzauk.core.lang.CompositeAutoCloseable;
 import com.cadenzauk.core.sql.RowMapper;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.select.ExpectingJoin1;
 import com.cadenzauk.siesta.grammar.select.InOrderByExpectingThen;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
@@ -260,6 +261,8 @@ class SelectTest {
         return Stream.of(
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(max(Row2::description)), "max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::description), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Label.of("DESCRIPTION", String.class)), "q.DESCRIPTION asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Label.of("DESCRIPTION", String.class)), "q.DESCRIPTION asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment), "q.COMMENT asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::description), "q.DESCRIPTION asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::comment), "q.COMMENT asc"),
@@ -269,6 +272,8 @@ class SelectTest {
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(min(Row2::comment), Order.DESC), "min(q.COMMENT) desc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name, Order.ASC), "q.NAME asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name, Order.DESC), "q.NAME desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Label.of("DESCRIPTION", String.class), Order.DESC), "q.DESCRIPTION desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Label.of("DESCRIPTION", String.class), Order.DESC), "q.DESCRIPTION desc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::comment, Order.DESC), "q.COMMENT desc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::name, Order.ASC), "q.NAME asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy("q", Row2::name, Order.DESC), "q.NAME desc"),
@@ -279,6 +284,8 @@ class SelectTest {
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(max(Row2::description)), "q.NAME asc, max(q.DESCRIPTION) asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Row2::comment), "q.NAME asc, q.COMMENT asc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(Label.of("DESCRIPTION", String.class), Order.DESC), "q.NAME asc, q.DESCRIPTION desc"),
+            testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Label.of("DESCRIPTION", String.class), Order.DESC), "q.NAME asc, q.DESCRIPTION desc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::description), "q.NAME asc, q.DESCRIPTION asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then("q", Row2::comment), "q.NAME asc, q.COMMENT asc"),
             testCaseForOrderByOnSelect((a, w) -> w.orderBy(Row2::name).then(a, Row2::description), "q.NAME asc, q.DESCRIPTION asc"),

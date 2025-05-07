@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.InvalidQueryException;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
@@ -56,7 +57,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,9 +87,6 @@ class SubselectAliasTest {
 
     @Mock
     private RowMapperFactory<WidgetRow> rowMapperFactory;
-
-    @Mock
-    private RowMapperFactory<Long> columnRowMapperFactory;
 
     @Mock
     private RowMapper<WidgetRow> rowMapper;
@@ -328,10 +325,10 @@ class SubselectAliasTest {
         SubselectAlias<WidgetRow> sut = new SubselectAlias<>(select, "wilma");
 
         calling(() -> sut.as(scope, columnSpecifier, Optional.of("wilma")))
-            .shouldThrow(IllegalArgumentException.class)
+            .shouldThrow(InvalidQueryException.class)
             .withMessage(is("Alias wilma is an alias for " +
                 "com.cadenzauk.siesta.model.WidgetRow and not " +
-                "class com.cadenzauk.siesta.model.ManufacturerRow"));
+                "class com.cadenzauk.siesta.model.ManufacturerRow."));
     }
 
     @Test

@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -143,11 +144,12 @@ class ExpressionBuilderTest {
         return arguments(method, expectedSql, expectedArgs);
     }
 
-    @SuppressWarnings("unused")
     private static Stream<Arguments> argsForTestExpression() {
         return Stream.of(
             testCase((e, s) -> e.isEqualTo("A"), "= ?", "A"),
             testCase((e, s) -> e.isEqualTo(value("A")), "= ?", "A"),
+            testCase((e, s) -> e.isEqualTo(Label.of("SURNAME", String.class)), "= s.SURNAME"),
+            testCase((e, s) -> e.isEqualTo("s", Label.of("SURNAME", String.class)), "= s.SURNAME"),
             testCase((e, s) -> e.isEqualTo(SalespersonRow::surname), "= s.SURNAME"),
             testCase((e, s) -> e.isEqualTo(SalespersonRow::middleNames), "= s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isEqualTo("s", SalespersonRow::surname), "= s.SURNAME"),
@@ -157,6 +159,8 @@ class ExpressionBuilderTest {
 
             testCase((e, s) -> e.isNotEqualTo("A"), "<> ?", "A"),
             testCase((e, s) -> e.isNotEqualTo(value("A")), "<> ?", "A"),
+            testCase((e, s) -> e.isNotEqualTo(Label.of("SURNAME", String.class)), "<> s.SURNAME"),
+            testCase((e, s) -> e.isNotEqualTo("s", Label.of("SURNAME", String.class)), "<> s.SURNAME"),
             testCase((e, s) -> e.isNotEqualTo(SalespersonRow::surname), "<> s.SURNAME"),
             testCase((e, s) -> e.isNotEqualTo(SalespersonRow::middleNames), "<> s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isNotEqualTo("s", SalespersonRow::surname), "<> s.SURNAME"),
@@ -166,6 +170,8 @@ class ExpressionBuilderTest {
 
             testCase((e, s) -> e.isGreaterThan("A"), "> ?", "A"),
             testCase((e, s) -> e.isGreaterThan(value("A")), "> ?", "A"),
+            testCase((e, s) -> e.isGreaterThan(Label.of("SURNAME", String.class)), "> s.SURNAME"),
+            testCase((e, s) -> e.isGreaterThan("s", Label.of("SURNAME", String.class)), "> s.SURNAME"),
             testCase((e, s) -> e.isGreaterThan(SalespersonRow::surname), "> s.SURNAME"),
             testCase((e, s) -> e.isGreaterThan(SalespersonRow::middleNames), "> s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isGreaterThan("s", SalespersonRow::surname), "> s.SURNAME"),
@@ -175,6 +181,8 @@ class ExpressionBuilderTest {
 
             testCase((e, s) -> e.isLessThan("A"), "< ?", "A"),
             testCase((e, s) -> e.isLessThan(value("A")), "< ?", "A"),
+            testCase((e, s) -> e.isLessThan(Label.of("SURNAME", String.class)), "< s.SURNAME"),
+            testCase((e, s) -> e.isLessThan("s", Label.of("SURNAME", String.class)), "< s.SURNAME"),
             testCase((e, s) -> e.isLessThan(SalespersonRow::surname), "< s.SURNAME"),
             testCase((e, s) -> e.isLessThan(SalespersonRow::middleNames), "< s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isLessThan("s", SalespersonRow::surname), "< s.SURNAME"),
@@ -184,6 +192,8 @@ class ExpressionBuilderTest {
 
             testCase((e, s) -> e.isGreaterThanOrEqualTo("A"), ">= ?", "A"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo(value("A")), ">= ?", "A"),
+            testCase((e, s) -> e.isGreaterThanOrEqualTo(Label.of("SURNAME", String.class)), ">= s.SURNAME"),
+            testCase((e, s) -> e.isGreaterThanOrEqualTo("s", Label.of("SURNAME", String.class)), ">= s.SURNAME"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo(SalespersonRow::surname), ">= s.SURNAME"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo(SalespersonRow::middleNames), ">= s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isGreaterThanOrEqualTo("s", SalespersonRow::surname), ">= s.SURNAME"),
@@ -193,6 +203,8 @@ class ExpressionBuilderTest {
 
             testCase((e, s) -> e.isLessThanOrEqualTo("A"), "<= ?", "A"),
             testCase((e, s) -> e.isLessThanOrEqualTo(value("A")), "<= ?", "A"),
+            testCase((e, s) -> e.isLessThanOrEqualTo(Label.of("SURNAME", String.class)), "<= s.SURNAME"),
+            testCase((e, s) -> e.isLessThanOrEqualTo("s", Label.of("SURNAME", String.class)), "<= s.SURNAME"),
             testCase((e, s) -> e.isLessThanOrEqualTo(SalespersonRow::surname), "<= s.SURNAME"),
             testCase((e, s) -> e.isLessThanOrEqualTo(SalespersonRow::middleNames), "<= s.MIDDLE_NAMES"),
             testCase((e, s) -> e.isLessThanOrEqualTo("s", SalespersonRow::surname), "<= s.SURNAME"),

@@ -47,11 +47,11 @@ class AggregatesTest extends FunctionTest {
 
     @SuppressWarnings("unused")
     static Stream<Arguments> parametersForFunctionTest() {
-        //Label<String> stringLabel = Label.of("STRING_REQ", String.class);
         return Stream.of(
             testCase(s -> max("ABC"), "max(?)", toArray("ABC")),
             testCase(s -> max(lower("ABC")), "max(lower(?))", toArray("ABC")),
-            //testCase(s -> max(stringLabel), "max(s.STRING_REQ)", toArray()),
+            testCase(s -> max(Label.of("STRING_REQ", String.class)), "max(s.STRING_REQ)", toArray()),
+            testCase(s -> max("s", Label.of("STRING_REQ", String.class)), "max(s.STRING_REQ)", toArray()),
             testCase(s -> max(TestRow::stringReq), "max(s.STRING_REQ)", toArray()),
             testCase(s -> max(TestRow::stringOpt), "max(s.STRING_OPT)", toArray()),
             testCase(s -> max("s", TestRow::stringReq), "max(s.STRING_REQ)", toArray()),
@@ -61,6 +61,8 @@ class AggregatesTest extends FunctionTest {
 
             testCase(s -> min("ABC"), "min(?)", toArray("ABC")),
             testCase(s -> min(lower("ABC")), "min(lower(?))", toArray("ABC")),
+            testCase(s -> min(Label.of("STRING_REQ", String.class)), "min(s.STRING_REQ)", toArray()),
+            testCase(s -> min("s", Label.of("STRING_REQ", String.class)), "min(s.STRING_REQ)", toArray()),
             testCase(s -> min(TestRow::stringReq), "min(s.STRING_REQ)", toArray()),
             testCase(s -> min(TestRow::stringOpt), "min(s.STRING_OPT)", toArray()),
             testCase(s -> min("s", TestRow::stringReq), "min(s.STRING_REQ)", toArray()),
@@ -70,6 +72,8 @@ class AggregatesTest extends FunctionTest {
 
             testCase(s -> sum(1), "sum(?)", toArray(1)),
             testCase(s -> sum(TypedExpression.value(1.2)), "sum(?)", toArray(1.2)),
+            testCase(s -> sum(Label.of("INTEGER_REQ", Integer.class)), "sum(s.INTEGER_REQ)", toArray()),
+            testCase(s -> sum("s", Label.of("INTEGER_REQ", Integer.class)), "sum(s.INTEGER_REQ)", toArray()),
             testCase(s -> sum(TestRow::integerReq), "sum(s.INTEGER_REQ)", toArray()),
             testCase(s -> sum(TestRow::decimalOpt), "sum(s.DECIMAL_OPT)", toArray()),
             testCase(s -> sum("s", TestRow::integerReq), "sum(s.INTEGER_REQ)", toArray()),
@@ -79,6 +83,8 @@ class AggregatesTest extends FunctionTest {
 
             testCase(s -> avg(1), "avg(?)", toArray(1)),
             testCase(s -> avg(TypedExpression.value(1.2)), "avg(?)", toArray(1.2)),
+            testCase(s -> avg(Label.of("INTEGER_REQ", Integer.class)), "avg(s.INTEGER_REQ)", toArray()),
+            testCase(s -> avg("s", Label.of("INTEGER_REQ", Integer.class)), "avg(s.INTEGER_REQ)", toArray()),
             testCase(s -> avg(TestRow::integerReq), "avg(s.INTEGER_REQ)", toArray()),
             testCase(s -> avg(TestRow::decimalOpt), "avg(s.DECIMAL_OPT)", toArray()),
             testCase(s -> avg("s", TestRow::integerReq), "avg(s.INTEGER_REQ)", toArray()),

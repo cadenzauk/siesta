@@ -47,6 +47,11 @@ public class InOlapOrderBy<T> extends InOlapFunction<T> {
         return this;
     }
 
+    public <V> InOlapOrderBy<T> then(String alias, Label<V> label) {
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(alias, label), Order.ASC));
+        return this;
+    }
+
     public <R, V> InOlapOrderBy<T> then(Function1<R,V> method) {
         function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(method), Order.ASC));
         return this;
@@ -84,6 +89,11 @@ public class InOlapOrderBy<T> extends InOlapFunction<T> {
 
     public <V> InOlapOrderBy<T> then(Label<V> label, Order order) {
         function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(label), order));
+        return this;
+    }
+
+    public <V> InOlapOrderBy<T> then(String alias, Label<V> label, Order order) {
+        function.addOrderBy(new OrderByExpression<>(UnresolvedColumn.of(alias, label), order));
         return this;
     }
 

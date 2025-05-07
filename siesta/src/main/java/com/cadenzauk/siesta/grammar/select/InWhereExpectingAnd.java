@@ -50,6 +50,10 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
 
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> and(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::andWhere);
+    }
+
     public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> and(Function1<R,T> lhs) {
         return ColumnExpressionBuilder.of(UnresolvedColumn.of(lhs), this::andWhere);
     }
@@ -84,6 +88,10 @@ public class InWhereExpectingAnd<RT> extends ExpectingGroupBy<RT> {
 
     public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(Label<T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::orWhere);
+    }
+
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> or(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::orWhere);
     }
 
     public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> or(Function1<R,T> lhs) {

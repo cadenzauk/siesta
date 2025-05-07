@@ -50,6 +50,10 @@ public class ExpectingWhere<RT> extends ExpectingGroupBy<RT> {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
     }
 
+    public <T> ExpressionBuilder<T,InWhereExpectingAnd<RT>> where(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), statement::setWhereClause);
+    }
+
     public <T, R> ColumnExpressionBuilder<T,R,InWhereExpectingAnd<RT>> where(Function1<R,T> lhs) {
         return ColumnExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setWhereClause);
     }

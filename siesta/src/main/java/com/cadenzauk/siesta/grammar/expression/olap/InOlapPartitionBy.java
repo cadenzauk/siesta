@@ -45,6 +45,11 @@ public class InOlapPartitionBy<T> extends InOlapExpectingOrderBy<T> {
         return this;
     }
 
+    public <V> InOlapPartitionBy<T> then(String alias, Label<V> label) {
+        function.addPartitionBy(UnresolvedColumn.of(alias, label));
+        return this;
+    }
+
     public <R, V> InOlapPartitionBy<T> then(Function1<R,V> method) {
         function.addPartitionBy(UnresolvedColumn.of(method));
         return this;

@@ -23,18 +23,27 @@
 package com.cadenzauk.siesta;
 
 import co.unruly.matchers.StreamMatchers;
+import com.cadenzauk.core.sql.ConnectionUtil;
+import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.dml.ExecutableStatementClause;
 import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InWhereExpectingAnd;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.select.Select;
+import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.apache.commons.lang3.ArrayUtils;
+import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -42,11 +51,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
+import java.sql.SQLException;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.TupleBuilder.tuple;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
+import static com.cadenzauk.siesta.grammar.expression.olap.Olap.rowNumber;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
@@ -611,7 +625,41 @@ class DatabaseTest {
         assertThat(delete.args(), StreamMatchers.contains(10, 123L));
     }
 
-    @NotNull
+    @ParameterizedTest
+    @MethodSource("argsForThrowsWhenReferenceNotInScope")
+    void throwsWhenReferenceNotInScope(Function<Database,Select<?>> select, String expectedMessage) {
+        Database database = Database.newBuilder().build();
+
+        calling(() -> System.out.println(select.apply(database).sql()))
+            .shouldThrow(InvalidQueryException.class)
+            .withMessage(is(expectedMessage));
+    }
+
+    public static Function<Database,Select<?>> select(Function<Database,Select<?>> it) {
+        return it;
+    }
+
+    public static Stream<Arguments> argsForThrowsWhenReferenceNotInScope() {
+        return Stream.of(
+            Arguments.of(
+                select(d -> d.from(SalespersonRow.class, "s").orderBy(WidgetRow::description)),
+                "There is no alias for com.cadenzauk.siesta.model.WidgetRow in scope."),
+            Arguments.of(
+                select(d ->
+                    d.from(
+                        d.from(SalespersonRow.class, "s")
+                            .select(SalespersonRow::salespersonId)
+                            .comma(rowNumber().partitionBy(SalespersonRow::salespersonId), "rown"),
+                        "o"
+                    ).where(Label.of("rown", Long.class)).isEqualTo(1L)),
+                "The column with the label of 'rown' is of type 'java.lang.Integer' and not 'class java.lang.Long'."),
+            Arguments.of(
+                select(d -> d.from(SalespersonRow.class, "s").orderBy("s", WidgetRow::description)),
+                "Alias s is an alias for com.cadenzauk.siesta.model.SalespersonRow and not class com.cadenzauk.siesta.model.WidgetRow.")
+        );
+    }
+
+        @NotNull
     private Database database() {
         return Database.newBuilder()
             .defaultSchema("CUSTOMERS")

@@ -52,6 +52,10 @@ public class InSelectIntoExpectingWith<RT> extends ExpectingWhere<RT> {
         return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(label));
     }
 
+    public <T> InSelectIntoExpectingAs<RT,T> with(String alias, Label<T> label) {
+        return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(alias, label));
+    }
+
     public <T, R> InSelectIntoExpectingAs<RT,T> with(Function1<R,T> methodReference) {
         return new InSelectIntoExpectingAs<>(this, UnresolvedColumn.of(methodReference));
     }

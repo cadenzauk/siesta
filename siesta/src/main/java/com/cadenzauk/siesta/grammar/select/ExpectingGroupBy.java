@@ -41,6 +41,10 @@ public abstract class ExpectingGroupBy<RT> extends ExpectingUnion<RT> {
         return new InGroupByExpectingComma<>(statement).comma(expression);
     }
 
+    public <T> InGroupByExpectingComma<RT> groupBy(String alias, Label<T> expression) {
+        return new InGroupByExpectingComma<>(statement).comma(alias, expression);
+    }
+
     public <T, R> InGroupByExpectingComma<RT> groupBy(Function1<R,T> columnGetter) {
         return new InGroupByExpectingComma<>(statement).comma(columnGetter);
     }

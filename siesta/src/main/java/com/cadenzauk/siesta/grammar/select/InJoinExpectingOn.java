@@ -73,6 +73,10 @@ public class InJoinExpectingOn<J extends InJoinExpectingAnd<J,RT>, RT> {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setOnClause);
     }
 
+    public <T> ExpressionBuilder<T,J> on(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::setOnClause);
+    }
+
     public <T, R> ExpressionBuilder<T,J> on(Function1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::setOnClause);
     }

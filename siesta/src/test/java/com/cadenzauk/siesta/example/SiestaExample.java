@@ -84,7 +84,7 @@ class SiestaExample extends IntegrationTest {
             .defaultSchema("SIESTA")
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .build();
-        ZonedDateTime start = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
+        ZonedDateTime start = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
         database.insert(
             new Manufacturer(2004L, "Gizmos Inc"),
             new Manufacturer(2005L, "Acme Inc"));
@@ -92,7 +92,7 @@ class SiestaExample extends IntegrationTest {
             new Widget(1003L, "Gizmo", 2004L, Optional.empty()),
             new Widget(1004L, "Gizmo", 2005L, Optional.of("Acme Gizmo")),
             new Widget(1005L, "Gizmo", 2005L, Optional.of("Acme Gizmo Mk II")));
-        ZonedDateTime end = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
+        ZonedDateTime end = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
 
         List<Tuple3<String,String,ZonedDateTime>> makersOfGizmos = database.from(Widget.class, "w")
             .join(Manufacturer.class, "m").on(Manufacturer::manufacturerId).isEqualTo(Widget::manufacturerId)

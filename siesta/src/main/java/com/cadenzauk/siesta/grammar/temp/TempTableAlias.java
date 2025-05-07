@@ -67,7 +67,7 @@ public class TempTableAlias<R> extends TableAlias<R> {
         return tempTable
             .columns()
             .flatMap(ac -> ac.as(columnSpecifier.effectiveType()))
-            .filter(ac -> columnSpecifier.specifies(scope, ac))
+            .filter(ac -> columnSpecifier.specifies(scope, ac, columnLabelPrefix()))
             .findFirst();
     }
 

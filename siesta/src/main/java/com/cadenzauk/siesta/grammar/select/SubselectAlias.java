@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.AliasColumn;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.InvalidQueryException;
 import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
@@ -163,7 +164,7 @@ public class SubselectAlias<T> extends Alias<T> {
                 if (select.projectionIncludes(columnSpecifier)) {
                     return Stream.of(this);
                 }
-                throw new IllegalArgumentException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A"));
+                throw new InvalidQueryException("Alias " + columnLabelPrefix() + " is an alias for " + type() + " and not " + columnSpecifier.referringClass().map(Object::toString).orElse("N/A") + ".");
             } else {
                 return Stream.empty();
             }

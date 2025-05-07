@@ -22,13 +22,15 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
+import static com.cadenzauk.core.reflect.util.TypeUtil.boxedType;
+
 public class Label<T> {
     private final String label;
     private final Class<T> effectiveClass;
 
     private Label(String label, Class<T> effectiveClass) {
         this.label = label;
-        this.effectiveClass = effectiveClass;
+        this.effectiveClass = boxedType(effectiveClass);
     }
 
     public String label() {

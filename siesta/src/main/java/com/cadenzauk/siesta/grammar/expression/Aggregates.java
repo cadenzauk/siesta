@@ -48,6 +48,10 @@ public final class Aggregates extends UtilityClass {
         return SqlFunction.of(MAX, arg);
     }
 
+    public static <T> TypedExpression<T> max(String alias, Label<T> arg) {
+        return SqlFunction.of(MAX, alias, arg);
+    }
+
     public static <T, R> TypedExpression<T> max(Function1<R,T> arg) {
         return SqlFunction.of(MAX, arg);
     }
@@ -82,6 +86,10 @@ public final class Aggregates extends UtilityClass {
 
     public static <T> TypedExpression<T> min(Label<T> arg) {
         return SqlFunction.of(MIN, arg);
+    }
+
+    public static <T> TypedExpression<T> min(String alias, Label<T> arg) {
+        return SqlFunction.of(MIN, alias, arg);
     }
 
     public static <T, R> TypedExpression<T> min(Function1<R,T> arg) {
@@ -120,6 +128,10 @@ public final class Aggregates extends UtilityClass {
         return SqlFunction.of(SUM, arg);
     }
 
+    public static <T extends Number> TypedExpression<T> sum(String alias, Label<T> arg) {
+        return SqlFunction.of(SUM, alias, arg);
+    }
+
     public static <T extends Number, R> TypedExpression<T> sum(Function1<R,T> arg) {
         return SqlFunction.of(SUM, arg);
     }
@@ -154,6 +166,10 @@ public final class Aggregates extends UtilityClass {
 
     public static <T extends Number> TypedExpression<T> avg(Label<T> arg) {
         return SqlFunction.of(AVG, arg);
+    }
+
+    public static <T extends Number> TypedExpression<T> avg(String alias, Label<T> arg) {
+        return SqlFunction.of(AVG, alias, arg);
     }
 
     public static <T extends Number, R> TypedExpression<T> avg(Function1<R,T> arg) {
@@ -192,6 +208,10 @@ public final class Aggregates extends UtilityClass {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
 
+    public static <T> TypedExpression<Integer> count(String alias, Label<T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(alias, arg));
+    }
+
     public static <T, R> TypedExpression<Integer> count(Function1<R,T> arg) {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
@@ -228,6 +248,10 @@ public final class Aggregates extends UtilityClass {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
     }
 
+    public static <T> TypedExpression<Long> countBig(String alias, Label<T> arg) {
+        return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(alias, arg));
+    }
+
     public static <T, R> TypedExpression<Long> countBig(Function1<R,T> arg) {
         return new CountFunction<>(AggregateFunctionSpecs.COUNT_BIG, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
     }
@@ -260,6 +284,10 @@ public final class Aggregates extends UtilityClass {
         return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
 
+    public static <T> TypedExpression<Integer> countDistinct(String alias, Label<T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(alias, arg));
+    }
+
     public static <T, R> TypedExpression<Integer> countDistinct(Function1<R,T> arg) {
         return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_DISTINCT, TypeToken.of(Integer.class), UnresolvedColumn.of(arg));
     }
@@ -290,6 +318,10 @@ public final class Aggregates extends UtilityClass {
 
     public static <T> TypedExpression<Long> countBigDistinct(Label<T> arg) {
         return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(arg));
+    }
+
+    public static <T> TypedExpression<Long> countBigDistinct(String alias, Label<T> arg) {
+        return new CountDistinctFunction<>(AggregateFunctionSpecs.COUNT_BIG_DISTINCT, TypeToken.of(Long.class), UnresolvedColumn.of(alias, arg));
     }
 
     public static <T, R> TypedExpression<Long> countBigDistinct(Function1<R,T> arg) {

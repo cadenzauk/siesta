@@ -25,6 +25,7 @@ package com.cadenzauk.siesta;
 import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.tuple.Tuple3;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
+import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.select.ExpectingHaving;
 import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.model.TestDatabase;
@@ -43,6 +44,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
+import static com.cadenzauk.siesta.grammar.expression.Aggregates.countBig;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
@@ -78,6 +80,12 @@ class SelectHavingTest {
                 toArray()),
             havingTest((w, sel) -> sel.having(count()).isGreaterThan(countDistinct(WidgetRow::name)),
                 "having count(*) > count(distinct w.NAME)",
+                toArray()),
+            havingTest((w, sel) -> sel.having(Label.of("MANUFACTURER_ID", Long.class)).isEqualTo(literal(123L)),
+                "having w.MANUFACTURER_ID = 123",
+                toArray()),
+            havingTest((w, sel) -> sel.having("w", Label.of("MANUFACTURER_ID", Long.class)).isEqualTo(literal(123L)),
+                "having w.MANUFACTURER_ID = 123",
                 toArray()),
             havingTest((w, sel) -> sel.having(WidgetRow::manufacturerId).isEqualTo(1L),
                 "having w.MANUFACTURER_ID = ?",
@@ -158,12 +166,12 @@ class SelectHavingTest {
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
         having.apply(w, database
             .from(w)
-            .select(WidgetRow::manufacturerId).comma(WidgetRow::description).comma(max(WidgetRow::name))
+            .select(WidgetRow::manufacturerId).comma(WidgetRow::description).comma(max(WidgetRow::name), Label.of("MAX_NAME", String.class))
             .groupBy(WidgetRow::manufacturerId).comma(WidgetRow::description))
             .list(transaction);
 
         verify(transaction).query(sql.capture(), args.capture(), rowMapper.capture());
-        assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, w.DESCRIPTION as w_DESCRIPTION, max(w.NAME) as max_w_NAME " +
+        assertThat(sql.getValue(), is("select w.MANUFACTURER_ID as w_MANUFACTURER_ID, w.DESCRIPTION as w_DESCRIPTION, max(w.NAME) as MAX_NAME " +
             "from SIESTA.WIDGET w " +
             "group by w.MANUFACTURER_ID, w.DESCRIPTION " +
             expectedSql));

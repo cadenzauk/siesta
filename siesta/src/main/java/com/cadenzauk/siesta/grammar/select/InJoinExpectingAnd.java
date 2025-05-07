@@ -49,6 +49,10 @@ public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT>
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onAnd);
     }
 
+    public <T> ExpressionBuilder<T,S> and(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onAnd);
+    }
+
     public <T, R> ExpressionBuilder<T,S> and(Function1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onAnd);
     }
@@ -83,6 +87,10 @@ public abstract class InJoinExpectingAnd<S extends InJoinExpectingAnd<S,RT>, RT>
 
     public <T> ExpressionBuilder<T,S> or(Label<T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), this::onOr);
+    }
+
+    public <T> ExpressionBuilder<T,S> or(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), this::onOr);
     }
 
     public <T, R> ExpressionBuilder<T,S> or(Function1<R,T> lhs) {

@@ -102,6 +102,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(label), selectivity));
     }
 
+    public N isEqualTo(String alias, Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(alias, label), selectivity));
+    }
+
     public <R> N isEqualTo(Function1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>("=", UnresolvedColumn.of(getter), selectivity));
     }
@@ -137,6 +141,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     public N isNotEqualTo(Label<T> label) {
         return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(label), selectivity));
+    }
+
+    public N isNotEqualTo(String alias, Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("<>", UnresolvedColumn.of(alias, label), selectivity));
     }
 
     public <R> N isNotEqualTo(Function1<R,T> getter) {
@@ -176,6 +184,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(label), selectivity));
     }
 
+    public N isGreaterThan(String alias, Label<T> label) {
+        return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(alias, label), selectivity));
+    }
+
     public <R> N isGreaterThan(Function1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>(">", UnresolvedColumn.of(getter), selectivity));
     }
@@ -211,6 +223,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     public N isLessThan(Label<T> label) {
         return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(label), selectivity));
+    }
+
+    public N isLessThan(String alias, Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("<", UnresolvedColumn.of(alias, label), selectivity));
     }
 
     public <R> N isLessThan(Function1<R,T> getter) {
@@ -250,6 +266,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(label), selectivity));
     }
 
+    public N isGreaterThanOrEqualTo(String alias, Label<T> label) {
+        return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(alias, label), selectivity));
+    }
+
     public <R> N isGreaterThanOrEqualTo(Function1<R,T> getter) {
         return complete(new OperatorExpressionCondition<>(">=", UnresolvedColumn.of(getter), selectivity));
     }
@@ -285,6 +305,10 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
 
     public N isLessThanOrEqualTo(Label<T> label) {
         return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(label), selectivity));
+    }
+
+    public N isLessThanOrEqualTo(String alias, Label<T> label) {
+        return complete(new OperatorExpressionCondition<>("<=", UnresolvedColumn.of(alias, label), selectivity));
     }
 
     public <R> N isLessThanOrEqualTo(Function1<R,T> getter) {

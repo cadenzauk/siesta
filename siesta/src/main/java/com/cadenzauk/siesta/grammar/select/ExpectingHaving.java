@@ -49,6 +49,10 @@ public class ExpectingHaving<RT> extends ExpectingUnion<RT> {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setHavingClause);
     }
 
+    public <T> ExpressionBuilder<T,InHavingExpectingAnd<RT>> having(String alias, Label<T> lhs) {
+        return ExpressionBuilder.of(UnresolvedColumn.of(alias, lhs), statement::setHavingClause);
+    }
+
     public <T, R> ExpressionBuilder<T,InHavingExpectingAnd<RT>> having(Function1<R,T> lhs) {
         return ExpressionBuilder.of(UnresolvedColumn.of(lhs), statement::setHavingClause);
     }
