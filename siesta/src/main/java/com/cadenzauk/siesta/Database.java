@@ -68,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -182,6 +183,12 @@ public class Database {
             translateException(sql, exception);
             throw exception;
         }
+    }
+
+    public <T> CompletableFuture<T> executeAsync(String sql, Supplier<CompletableFuture<T>> statement) {
+        return statement
+            .get()
+            .exceptionally(ex -> translateException(sql, ex));
     }
 
     public <T> T translateException(String sql, Throwable throwable) {
@@ -388,6 +395,15 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
+    public <R> CompletableFuture<Integer> insertAsync(Transaction transaction, R... rows) {
+        if (rows.length == 0) {
+            return CompletableFuture.completedFuture(0);
+        }
+        Class<R> rowClass = (Class<R>) rows[0].getClass();
+        return table(rowClass).insertAsync(transaction, rows);
+    }
+
+    @SuppressWarnings("unchecked")
     public <R> int insert(Transaction transaction, TempTable<R> tempTable, R... rows) {
         if (rows.length == 0) {
             return 0;
@@ -454,6 +470,12 @@ public class Database {
         return table(rowClass).update(transaction, row);
     }
 
+    @SuppressWarnings("unchecked")
+    public <R> CompletableFuture<Integer> updateRowAsync(Transaction transaction, R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        return table(rowClass).updateAsync(transaction, row);
+    }
+
     @SafeVarargs
     public final <R> int upsertRows(R... rows) {
         return upsertRows(getDefaultSqlExecutor(), ImmutableList.copyOf(rows));
@@ -494,6 +516,15 @@ public class Database {
         return table(rowClass).upsert(transaction, rows);
     }
 
+    @SuppressWarnings("unchecked")
+    public <R> CompletableFuture<Integer> upsertRowsAsync(Transaction transaction, List<R> rows) {
+        if (rows.isEmpty()) {
+            return CompletableFuture.completedFuture(0);
+        }
+        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
+        return table(rowClass).upsertAsync(transaction, rows);
+    }
+
     public <D> ExpectingWhere delete(Alias<D> alias) {
         return Delete.delete(this, alias);
     }
@@ -514,21 +545,42 @@ public class Database {
         return Delete.delete(this, tempTable.as(alias));
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @Deprecated
     public <R> int delete(R row) {
-        return delete(getDefaultSqlExecutor(), row);
+        return deleteRow(getDefaultSqlExecutor(), row);
+    }
+
+    @Deprecated
+    public <R> int delete(SqlExecutor sqlExecutor, R row) {
+        return deleteRow(sqlExecutor, row);
+    }
+
+    @Deprecated
+    public <R> int delete(Transaction transaction, R row) {
+        return deleteRow(transaction, row);
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public <R> int deleteRow(R row) {
+        return deleteRow(getDefaultSqlExecutor(), row);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> int delete(SqlExecutor sqlExecutor, R row) {
+    public <R> int deleteRow(SqlExecutor sqlExecutor, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).delete(sqlExecutor, row);
     }
 
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
-    public <R> int delete(Transaction transaction, R row) {
+    public <R> int deleteRow(Transaction transaction, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).delete(transaction, row);
+    }
+
+    @SuppressWarnings({"unchecked", "UnusedReturnValue"})
+    public <R> CompletableFuture<Integer> deleteRowAsync(Transaction transaction, R row) {
+        Class<R> rowClass = (Class<R>) row.getClass();
+        return table(rowClass).deleteRowAsync(transaction, row);
     }
 
     public static Builder newBuilder() {

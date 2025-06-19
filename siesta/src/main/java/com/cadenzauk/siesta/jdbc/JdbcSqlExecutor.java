@@ -52,13 +52,15 @@ import static java.util.stream.Collectors.toList;
 public class JdbcSqlExecutor implements SqlExecutor {
     private final DataSource dataSource;
     private final int fetchSize;
-    private final Executor executor;
+    private final Executor queryExecutor;
+    private final Executor updateExecutor;
     private final JdbcDataTypeRegistry registry = new JdbcDataTypeRegistry();
 
-    private JdbcSqlExecutor(DataSource dataSource, int fetchSize, Executor executor) {
+    private JdbcSqlExecutor(DataSource dataSource, int fetchSize, Executor queryExecutor, Executor updateExecutor) {
         this.dataSource = dataSource;
         this.fetchSize = fetchSize;
-        this.executor = executor;
+        this.queryExecutor = queryExecutor;
+        this.updateExecutor = updateExecutor;
     }
 
     Connection connect() {
@@ -111,7 +113,7 @@ public class JdbcSqlExecutor implements SqlExecutor {
     }
 
     <T> CompletableFuture<List<T>> queryAsync(Connection connection, String sql, Object[] args, RowMapper<T> rowMapper) {
-        return CompletableFuture.supplyAsync(() -> query(connection, sql, args, rowMapper), executor);
+        return CompletableFuture.supplyAsync(() -> query(connection, sql, args, rowMapper), queryExecutor);
     }
 
     <T> Stream<T> stream(Connection connection, String sql, Object[] args, RowMapper<T> rowMapper, CompositeAutoCloseable closeable) {
@@ -152,7 +154,7 @@ public class JdbcSqlExecutor implements SqlExecutor {
     }
 
     public CompletableFuture<Integer> updateAsync(Connection connection, String sql, Object[] args) {
-        return CompletableFuture.supplyAsync(() -> update(connection, sql, args), executor);
+        return CompletableFuture.supplyAsync(() -> update(connection, sql, args), updateExecutor);
     }
 
     private PreparedStatement prepare(Connection connection, String sql, Object[] args, CompositeAutoCloseable closeable) {
@@ -162,18 +164,22 @@ public class JdbcSqlExecutor implements SqlExecutor {
     }
 
     public static JdbcSqlExecutor of(DataSource dataSource) {
-        return new JdbcSqlExecutor(dataSource, 0, ForkJoinPool.commonPool());
+        return new JdbcSqlExecutor(dataSource, 0, ForkJoinPool.commonPool(), ForkJoinPool.commonPool());
     }
 
     public static JdbcSqlExecutor of(DataSource dataSource, int fetchSize) {
-        return new JdbcSqlExecutor(dataSource, fetchSize, ForkJoinPool.commonPool());
+        return new JdbcSqlExecutor(dataSource, fetchSize, ForkJoinPool.commonPool(), ForkJoinPool.commonPool());
     }
 
     public static JdbcSqlExecutor of(DataSource dataSource, Executor executor) {
-        return new JdbcSqlExecutor(dataSource, 0, executor);
+        return new JdbcSqlExecutor(dataSource, 0, executor, executor);
     }
 
     public static JdbcSqlExecutor of(DataSource dataSource, int fetchSize, Executor executor) {
-        return new JdbcSqlExecutor(dataSource, fetchSize, executor);
+        return new JdbcSqlExecutor(dataSource, fetchSize, executor, executor);
+    }
+
+    public static JdbcSqlExecutor of(DataSource dataSource, int fetchSize, Executor queryExecutor, Executor updateExecutor) {
+        return new JdbcSqlExecutor(dataSource, fetchSize, queryExecutor, updateExecutor);
     }
 }

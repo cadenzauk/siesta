@@ -23,8 +23,6 @@
 package com.cadenzauk.siesta;
 
 import co.unruly.matchers.StreamMatchers;
-import com.cadenzauk.core.sql.ConnectionUtil;
-import com.cadenzauk.core.sql.RuntimeSqlException;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.dialect.H2Dialect;
 import com.cadenzauk.siesta.grammar.dml.ExecutableStatementClause;
@@ -32,12 +30,10 @@ import com.cadenzauk.siesta.grammar.dml.ExpectingWhere;
 import com.cadenzauk.siesta.grammar.dml.InWhereExpectingAnd;
 import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.select.Select;
-import com.cadenzauk.siesta.model.SaleRow;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
 import org.apache.commons.lang3.ArrayUtils;
-import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +47,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
-import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -61,12 +56,16 @@ import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.TupleBuilder.tuple;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.olap.Olap.rowNumber;
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @ExtendWith(MockitoExtension.class)
@@ -358,6 +357,41 @@ class DatabaseTest {
     }
 
     @Test
+    void insertMultipleInOneStatementTransactionAsync() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+        SalespersonRow[] salespersons = ArrayUtils.toArray(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson());
+        when(transaction.updateAsync(any(), any())).thenReturn(completedFuture(2));
+
+        database.insertAsync(transaction, salespersons);
+
+        verify(transaction).updateAsync(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        verifyNoMoreInteractions(transaction);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?), " +
+            "(?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons[0].salespersonId(),
+            salespersons[0].firstName(),
+            salespersons[0].middleNames().orElse(null),
+            salespersons[0].surname(),
+            salespersons[0].numberOfSales(),
+            salespersons[0].commission().orElse(null),
+            salespersons[1].salespersonId(),
+            salespersons[1].firstName(),
+            salespersons[1].middleNames().orElse(null),
+            salespersons[1].surname(),
+            salespersons[1].numberOfSales(),
+            salespersons[1].commission().orElse(null)
+        ));
+    }
+
+    @Test
     void insertMultipleInMultipleStatements() {
         Database database = Database.newBuilder()
             .defaultSqlExecutor(sqlExecutor)
@@ -371,6 +405,44 @@ class DatabaseTest {
 
         verify(sqlExecutor, times(2)).update(sqlCaptor.capture(), argCaptor.capture());
         verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getAllValues().get(0), arrayContaining(
+            salespersons[0].salespersonId(),
+            salespersons[0].firstName(),
+            salespersons[0].middleNames().orElse(null),
+            salespersons[0].surname(),
+            salespersons[0].numberOfSales(),
+            salespersons[0].commission().orElse(null)
+        ));
+        assertThat(argCaptor.getAllValues().get(1), arrayContaining(
+            salespersons[1].salespersonId(),
+            salespersons[1].firstName(),
+            salespersons[1].middleNames().orElse(null),
+            salespersons[1].surname(),
+            salespersons[1].numberOfSales(),
+            salespersons[1].commission().orElse(null)
+        ));
+    }
+
+
+    @Test
+    void insertMultipleInMultipleStatementsAsync() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new AnsiDialect())
+            .build();
+        SalespersonRow[] salespersons = ArrayUtils.toArray(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson());
+        when(transaction.updateAsync(any(), any())).thenReturn(completedFuture(1));
+
+        int rowsUpdated = database.insertAsync(transaction, salespersons).join();
+
+        assertThat(rowsUpdated, equalTo(2));
+        verify(transaction, times(2)).updateAsync(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(transaction);
         assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
             "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
             "values (?, ?, ?, ?, ?, ?)"));
@@ -444,6 +516,29 @@ class DatabaseTest {
         database.updateRow(transaction, salesperson);
 
         verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
+        assertThat(sqlCaptor.getValue(), is("update SIESTA.SALESPERSON " +
+            "set FIRST_NAME = ?, MIDDLE_NAMES = ?, SURNAME = ?, NUMBER_OF_SALES = ?, COMMISSION = ? " +
+            "where SIESTA.SALESPERSON.SALESPERSON_ID = ?"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salesperson.firstName(),
+            salesperson.middleNames().orElse(null),
+            salesperson.surname(),
+            salesperson.numberOfSales(),
+            salesperson.commission().orElse(null),
+            salesperson.salespersonId()
+        ));
+    }
+
+    @Test
+    void updateTransactionAsync() {
+        Database database = Database.newBuilder().build();
+        SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
+        when(transaction.updateAsync(any(), any())).thenReturn(completedFuture(1));
+
+        int rowsUpdated = database.updateRowAsync(transaction, salesperson).join();
+
+        assertThat(rowsUpdated, equalTo(1));
+        verify(transaction).updateAsync(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("update SIESTA.SALESPERSON " +
             "set FIRST_NAME = ?, MIDDLE_NAMES = ?, SURNAME = ?, NUMBER_OF_SALES = ?, COMMISSION = ? " +
             "where SIESTA.SALESPERSON.SALESPERSON_ID = ?"));
@@ -535,6 +630,21 @@ class DatabaseTest {
         database.delete(transaction, salesperson);
 
         verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
+        assertThat(sqlCaptor.getValue(), is("delete from SIESTA.SALESPERSON " +
+            "where SIESTA.SALESPERSON.SALESPERSON_ID = ?"));
+        assertThat(argCaptor.getValue(), arrayContaining(salesperson.salespersonId()));
+    }
+
+    @Test
+    void deleteTransactionAsync() {
+        Database database = Database.newBuilder().build();
+        SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
+        when(transaction.updateAsync(any(), any())).thenReturn(completedFuture(1));
+
+        int rowsUpdated = database.deleteRowAsync(transaction, salesperson).join();
+
+        assertThat(rowsUpdated, equalTo(1));
+        verify(transaction).updateAsync(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("delete from SIESTA.SALESPERSON " +
             "where SIESTA.SALESPERSON.SALESPERSON_ID = ?"));
         assertThat(argCaptor.getValue(), arrayContaining(salesperson.salespersonId()));

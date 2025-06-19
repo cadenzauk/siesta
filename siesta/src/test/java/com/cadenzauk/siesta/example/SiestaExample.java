@@ -105,8 +105,8 @@ class SiestaExample extends IntegrationTest {
         assertThat(makersOfGizmos.get(0).item1(), is("Gizmos Inc"));
         assertThat(makersOfGizmos.get(1).item1(), is("Acme Inc"));
         assertThat(makersOfGizmos.get(2).item1(), is("Acme Inc"));
-        assertThat(makersOfGizmos.get(0).item3(), not(before(start)));
-        assertThat(makersOfGizmos.get(0).item3(), not(after(end)));
+        assertThat(makersOfGizmos.get(0).item3().truncatedTo(ChronoUnit.MICROS), not(before(start)));
+        assertThat(makersOfGizmos.get(0).item3().truncatedTo(ChronoUnit.MICROS), not(after(end)));
     }
 
     private static class ManufacturerSummary {

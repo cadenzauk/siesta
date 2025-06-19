@@ -39,6 +39,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,6 +49,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -76,6 +78,13 @@ class JdbcSqlExecutorTest {
 
     @Mock
     private DatabaseMetaData metadata;
+
+    @Mock
+    private Executor queryExecutor;
+
+    @Mock
+    private Executor updateExecutor;
+
 
     @BeforeEach
     void wireUpMocks() throws SQLException {
@@ -301,5 +310,27 @@ class JdbcSqlExecutorTest {
         verify(closer, times(1)).add(connection);
         verify(connection, times(1)).getMetaData();
         verifyNoMoreInteractions(dataSource, connection, metadata);
+    }
+
+    @Test
+    void queryAsyncUsesTheQueryExecutor() {
+        Mockito.reset(connection);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource, 0, queryExecutor, updateExecutor);
+
+        sut.queryAsync(connection, "select name from foo where bar = ?", toArray(2L), rowMapper);
+
+        verify(queryExecutor).execute(any());
+        verifyNoMoreInteractions(updateExecutor, queryExecutor);
+    }
+
+    @Test
+    void updateAsyncUsesTheUpdateExecutor() {
+        Mockito.reset(connection);
+        JdbcSqlExecutor sut = JdbcSqlExecutor.of(dataSource, 0, queryExecutor, updateExecutor);
+
+        sut.updateAsync(connection, "update foo set num = ?", toArray(3));
+
+        verify(updateExecutor).execute(any());
+        verifyNoMoreInteractions(updateExecutor, queryExecutor);
     }
 }

@@ -22,12 +22,19 @@
 
 package com.cadenzauk.core.lang;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.Collections;
 import java.util.List;
 
 public class AggregateError extends Error {
+    private final List<Error> errors;
+    private final List<Exception> exceptions;
+
     public AggregateError(List<Error> errors, List<Exception> exceptions) {
         super("Multiple errors have occurred.", errors.get(0));
+        this.errors = ImmutableList.copyOf(errors);
+        this.exceptions = ImmutableList.copyOf(exceptions);
         errors.stream()
             .skip(1)
             .forEach(this::addSuppressed);
@@ -37,5 +44,13 @@ public class AggregateError extends Error {
 
     public AggregateError(List<Error> errors) {
         this(errors, Collections.emptyList());
+    }
+
+    public List<Exception> exceptions() {
+        return exceptions;
+    }
+
+    public List<Error> errors() {
+        return errors;
     }
 }

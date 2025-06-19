@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Cadenza United Kingdom Limited
+ * Copyright (c) 2018 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,24 +20,11 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.core.lang;
+package com.cadenzauk.siesta.oracle;
 
-import com.google.common.collect.ImmutableList;
+import com.cadenzauk.siesta.AsyncIntegrationTest;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
-
-public class AggregateException extends RuntimeException {
-    private final List<Exception> causes;
-
-    public AggregateException(List<Exception> causes) {
-        super("Multiple exceptions have occurred.", causes.get(0));
-        this.causes = ImmutableList.copyOf(causes);
-        causes.stream()
-            .skip(1)
-            .forEach(this::addSuppressed);
-    }
-
-    public List<Exception> causes() {
-        return causes;
-    }
+@ContextConfiguration(classes = OracleConfig.class)
+class AsyncIntegrationTestOracle extends AsyncIntegrationTest {
 }

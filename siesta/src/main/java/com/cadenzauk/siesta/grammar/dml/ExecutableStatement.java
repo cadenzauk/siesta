@@ -29,6 +29,7 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpression;
 import com.cadenzauk.siesta.grammar.expression.BooleanExpressionChain;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public abstract class ExecutableStatement {
@@ -49,6 +50,12 @@ public abstract class ExecutableStatement {
         Object[] args = args(scope).toArray();
         String sql = sql(scope);
         return scope.database().execute(sql, () -> transaction.update(sql, args));
+    }
+
+    CompletableFuture<Integer> executeAsync(Transaction transaction) {
+        Object[] args = args(scope).toArray();
+        String sql = sql(scope);
+        return scope.database().executeAsync(sql, () -> transaction.updateAsync(sql, args));
     }
 
     Database database() {

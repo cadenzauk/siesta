@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.SqlExecutor;
 import com.cadenzauk.siesta.Transaction;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class ExecutableStatementClause {
@@ -47,6 +48,10 @@ public class ExecutableStatementClause {
 
     public int execute(Transaction transaction) {
         return statement.execute(transaction);
+    }
+
+    public CompletableFuture<Integer> executeAsync(Transaction transaction) {
+        return statement.executeAsync(transaction);
     }
 
     public String sql() {

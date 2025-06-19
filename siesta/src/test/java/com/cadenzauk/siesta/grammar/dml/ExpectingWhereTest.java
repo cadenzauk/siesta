@@ -33,7 +33,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
@@ -159,7 +158,6 @@ class ExpectingWhereTest {
     @ParameterizedTest
     @MethodSource("parametersForWhere")
     void where(BiFunction<Alias<WidgetRow>,ExpectingWhere,ExecutableStatementClause> whereClause, String expectedSql, Object[] expectedArgs) {
-        MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder()
             .defaultSchema("SIESTA")
             .build();

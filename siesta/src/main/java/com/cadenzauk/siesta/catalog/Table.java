@@ -42,22 +42,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.cadenzauk.core.concurrent.CompletableFutureUtil.allAsList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class Table<R> implements ColumnCollection<R> {
-    private static final Logger LOG = LoggerFactory.getLogger(Table.class);
     private final Database database;
     private final TypeToken<R> rowType;
     private final String catalog;
@@ -143,6 +142,9 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     public int insert(SqlExecutor sqlExecutor, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return 0;
+        }
         if (database().dialect().supportsMultiInsert()) {
             return performInsert(sqlExecutor, rows);
         } else {
@@ -156,13 +158,35 @@ public class Table<R> implements ColumnCollection<R> {
         return insert(transaction, ImmutableList.copyOf(rows));
     }
 
+    public CompletableFuture<Integer> insertAsync(Transaction transaction, R[] rows) {
+        return insertAsync(transaction, ImmutableList.copyOf(rows));
+    }
+
     public int insert(Transaction transaction, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return 0;
+        }
         if (database().dialect().supportsMultiInsert()) {
             return performInsert(transaction, rows);
         } else {
             return rows.stream()
                 .mapToInt(r -> performInsert(transaction, ImmutableList.of(r)))
                 .sum();
+        }
+    }
+
+    public CompletableFuture<Integer> insertAsync(Transaction transaction, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return CompletableFuture.completedFuture(0);
+        }
+        if (database().dialect().supportsMultiInsert()) {
+            return performInsertAsync(transaction, rows);
+        } else {
+            return allAsList(
+                rows.stream().map(r -> performInsertAsync(transaction, ImmutableList.of(r)))
+            ).thenApply(counts ->
+                counts.stream().mapToInt(Integer::intValue).sum()
+            );
         }
     }
 
@@ -184,6 +208,15 @@ public class Table<R> implements ColumnCollection<R> {
         return database.execute(sql, () -> transaction.update(sql, args));
     }
 
+    public CompletableFuture<Integer> updateAsync(Transaction transaction, R row) {
+        if (row == null) {
+            return CompletableFuture.completedFuture(0);
+        }
+        String sql = updateSql(row);
+        Object[] args = columnMapping.updateArgs(row);
+        return database.executeAsync(sql, () -> transaction.updateAsync(sql, args));
+    }
+
     public int upsert(SqlExecutor sqlExecutor, List<R> rows) {
         if (rows == null || rows.isEmpty()) {
             return 0;
@@ -194,12 +227,23 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     public int upsert(Transaction transaction, List<R> rows) {
-        if (rows == null) {
+        if (rows == null || rows.isEmpty()) {
             return 0;
         }
         return rows
             .stream().mapToInt(row -> upsertRow(transaction, row))
             .sum();
+    }
+
+    public CompletableFuture<Integer> upsertAsync(Transaction transaction, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return CompletableFuture.completedFuture(0);
+        }
+        return allAsList(
+            rows.stream().map(row -> upsertRowAsync(transaction, row))
+        ).thenApply(counts ->
+            counts.stream().mapToInt(Integer::intValue).sum()
+        );
     }
 
     private int upsertRow(SqlExecutor sqlExecutor, R row) {
@@ -210,10 +254,23 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     private int upsertRow(Transaction transaction, R row) {
+        if (row == null) {
+            return 0;
+        }
         MergeSpec mergeSpec = mergeSpec(row);
         String sql = upsertSql(mergeSpec);
         Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
         return database.execute(sql, () -> transaction.update(sql, args));
+    }
+
+    private CompletableFuture<Integer> upsertRowAsync(Transaction transaction, R row) {
+        if (row == null) {
+            return CompletableFuture.completedFuture(0);
+        }
+        MergeSpec mergeSpec = mergeSpec(row);
+        String sql = upsertSql(mergeSpec);
+        Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
+        return database.executeAsync(sql, () -> transaction.updateAsync(sql, args));
     }
 
     public int delete(SqlExecutor sqlExecutor, R row) {
@@ -232,6 +289,15 @@ public class Table<R> implements ColumnCollection<R> {
         String sql = deleteSql();
         Object[] args = columnMapping.deleteArgs(row);
         return database.execute(sql, () -> transaction.update(sql, args));
+    }
+
+    public CompletableFuture<Integer> deleteRowAsync(Transaction transaction, R row) {
+        if (row == null) {
+            return CompletableFuture.completedFuture(0);
+        }
+        String sql = deleteSql();
+        Object[] args = columnMapping.deleteArgs(row);
+        return database.executeAsync(sql, () -> transaction.updateAsync(sql, args));
     }
 
     public <P> Optional<ForeignKeyReference<R,P>> foreignKey(Table<P> parent, Optional<String> name) {
@@ -260,7 +326,7 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     private int performInsert(SqlExecutor sqlExecutor, List<R> rows) {
-        if (rows.isEmpty()) {
+        if (rows == null || rows.isEmpty()) {
             return 0;
         }
         String sql = insertSql(rows);
@@ -269,12 +335,21 @@ public class Table<R> implements ColumnCollection<R> {
     }
 
     private int performInsert(Transaction transaction, List<R> rows) {
-        if (rows.isEmpty()) {
+        if (rows == null || rows.isEmpty()) {
             return 0;
         }
         String sql = insertSql(rows);
         Object[] args = columnMapping.insertArgs(rows);
         return database.execute(sql, () -> transaction.update(sql, args));
+    }
+
+    private CompletableFuture<Integer> performInsertAsync(Transaction transaction, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return CompletableFuture.completedFuture(0);
+        }
+        String sql = insertSql(rows);
+        Object[] args = columnMapping.insertArgs(rows);
+        return database.executeAsync(sql, () -> transaction.updateAsync(sql, args));
     }
 
     private String insertSql(List<R> rows) {
