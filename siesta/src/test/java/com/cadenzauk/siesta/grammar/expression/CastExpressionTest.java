@@ -50,7 +50,6 @@ import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -115,7 +114,7 @@ class CastExpressionTest {
         String result = sut.label(scope);
 
         assertThat(result, is("cast_345"));
-        verifyZeroInteractions(expression, scope, dialect, database, resultSet);
+        verifyNoMoreInteractions(expression, scope, dialect, database, resultSet);
     }
 
     @Test

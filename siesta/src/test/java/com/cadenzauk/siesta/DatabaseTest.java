@@ -63,8 +63,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
@@ -224,7 +224,7 @@ class DatabaseTest {
 
         int rows = database.insert();
 
-        verifyZeroInteractions(sqlExecutor);
+        verifyNoInteractions(sqlExecutor);
         assertThat(rows, is(0));
     }
 
@@ -236,7 +236,7 @@ class DatabaseTest {
 
         int rows = database.insert(sqlExecutor);
 
-        verifyZeroInteractions(sqlExecutor);
+        verifyNoInteractions(sqlExecutor);
         assertThat(rows, is(0));
     }
 
@@ -249,8 +249,8 @@ class DatabaseTest {
 
         int rows = database.insert(transaction);
 
-        verifyZeroInteractions(transaction);
-        verifyZeroInteractions(sqlExecutor);
+        verifyNoInteractions(transaction);
+        verifyNoInteractions(sqlExecutor);
         assertThat(rows, is(0));
     }
 

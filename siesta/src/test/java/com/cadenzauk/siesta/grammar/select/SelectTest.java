@@ -83,8 +83,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -159,7 +159,7 @@ class SelectTest {
         sut.list(sqlExecutor);
 
         verify(sqlExecutor).query(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -248,7 +248,7 @@ class SelectTest {
         sut.listAsync(sqlExecutor);
 
         verify(transaction).queryAsync(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -365,7 +365,7 @@ class SelectTest {
         sut.optional(sqlExecutor);
 
         verify(sqlExecutor).query(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -548,7 +548,7 @@ class SelectTest {
         sut.optionalAsync(sqlExecutor);
 
         verify(transaction).queryAsync(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -743,7 +743,7 @@ class SelectTest {
         sut.stream(sqlExecutor);
 
         verify(sqlExecutor).stream(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -756,7 +756,7 @@ class SelectTest {
         sut.stream(sqlExecutor, compositeCloseable);
 
         verify(sqlExecutor).stream(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -916,7 +916,7 @@ class SelectTest {
         sut.single(sqlExecutor);
 
         verify(sqlExecutor).query(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));
@@ -1077,7 +1077,7 @@ class SelectTest {
         sut.singleAsync(sqlExecutor);
 
         verify(transaction).queryAsync(sqlCaptor.capture(), argsCaptor.capture(), rowMapperCaptor.capture());
-        verifyZeroInteractions(defaultSqlExecutor);
+        verifyNoInteractions(defaultSqlExecutor);
         assertThat(sqlCaptor.getValue(), is("select q.SALESPERSON_ID as q_SALESPERSON_ID from SIESTA.SALESPERSON q where q.SURNAME = ?"));
         assertThat(argsCaptor.getValue(), arrayContaining("Kirk"));
         assertThat(rowMapperCaptor.getValue(), isLongMapperFor("q_SALESPERSON_ID"));

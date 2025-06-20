@@ -47,7 +47,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class TryTest {
     @ParameterizedTest
@@ -414,7 +414,7 @@ class TryTest {
 
         candidate.ifSuccess(consumer);
 
-        verifyZeroInteractions(consumer);
+        verifyNoInteractions(consumer);
     }
 
     @ParameterizedTest
@@ -431,7 +431,7 @@ class TryTest {
 
         candidate.ifFailure(consumer);
 
-        verifyZeroInteractions(consumer);
+        verifyNoInteractions(consumer);
     }
 
     @ParameterizedTest

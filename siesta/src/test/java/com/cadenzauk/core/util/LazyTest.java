@@ -39,8 +39,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -116,7 +116,7 @@ class LazyTest {
         Try<String> result = sut.tryGetOrCompute(supplier2);
 
         assertThat(result, is(Try.success("Computed value")));
-        verifyZeroInteractions(supplier);
+        verifyNoInteractions(supplier);
         verify(supplier2, times(1)).get();
     }
 
@@ -129,7 +129,7 @@ class LazyTest {
         Try<String> result = sut.tryGetOrCompute(supplier2);
 
         assertThat(result, is(Try.success("Computed value")));
-        verifyZeroInteractions(supplier2);
+        verifyNoInteractions(supplier2);
     }
 
     @Test
@@ -141,7 +141,7 @@ class LazyTest {
         Try<String> result = sut.tryGetOrCompute(supplier2);
 
         assertThat(result, is(Try.failure(new IllegalArgumentException("Bad argument."))));
-        verifyZeroInteractions(supplier2);
+        verifyNoInteractions(supplier2);
     }
 
     @Test
@@ -154,7 +154,7 @@ class LazyTest {
 
         assertThat(result1, is(Try.success("Computed value")));
         assertThat(result2, is(Try.success("Computed value")));
-        verifyZeroInteractions(supplier2);
+        verifyNoInteractions(supplier2);
     }
 
     @Test
@@ -218,7 +218,7 @@ class LazyTest {
         String result = sut.getOrCompute(supplier2);
 
         assertThat(result, is("Computed value"));
-        verifyZeroInteractions(supplier);
+        verifyNoInteractions(supplier);
         verify(supplier2, times(1)).get();
     }
 
@@ -231,7 +231,7 @@ class LazyTest {
         String result = sut.getOrCompute(supplier2);
 
         assertThat(result, is("Computed value"));
-        verifyZeroInteractions(supplier2);
+        verifyNoInteractions(supplier2);
     }
 
     @Test
@@ -244,7 +244,7 @@ class LazyTest {
             .shouldThrow(IllegalArgumentException.class)
             .withMessage("Bad argument.");
 
-        verifyZeroInteractions(supplier2);
+        verifyNoInteractions(supplier2);
     }
 
     @Test
@@ -257,7 +257,7 @@ class LazyTest {
 
         assertThat(result1, is("Computed value"));
         assertThat(result2, is("Computed value"));
-        verifyZeroInteractions(supplier2);
+        verifyNoInteractions(supplier2);
     }
 
     @Test
@@ -416,7 +416,7 @@ class LazyTest {
         Lazy<String> sut = new Lazy<>(supplier);
         Lazy<String> map = sut.map(mapFunction);
 
-        verifyZeroInteractions(supplier, mapFunction);
+        verifyNoInteractions(supplier, mapFunction);
 
         Try<String> result1 = map.tryGet();
         Try<String> result2 = map.tryGet();
@@ -437,7 +437,7 @@ class LazyTest {
         Lazy<String> sut = new Lazy<>(supplier);
         Lazy<String> map = sut.map(mapFunction);
 
-        verifyZeroInteractions(supplier, mapFunction);
+        verifyNoInteractions(supplier, mapFunction);
 
         Try<String> result1 = map.tryGet();
         Try<String> result2 = map.tryGet();
@@ -458,7 +458,7 @@ class LazyTest {
         Lazy<String> sut = new Lazy<>(supplier);
         Lazy<String> map = sut.flatMap(mapFunction);
 
-        verifyZeroInteractions(supplier, mapFunction);
+        verifyNoInteractions(supplier, mapFunction);
 
         Try<String> result1 = map.tryGet();
         Try<String> result2 = map.tryGet();
@@ -479,7 +479,7 @@ class LazyTest {
         Lazy<String> sut = new Lazy<>(supplier);
         Lazy<String> map = sut.flatMap(mapFunction);
 
-        verifyZeroInteractions(supplier, mapFunction);
+        verifyNoInteractions(supplier, mapFunction);
 
         Try<String> result1 = map.tryGet();
         Try<String> result2 = map.tryGet();
