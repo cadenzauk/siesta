@@ -20,28 +20,18 @@
  * SOFTWARE.
  */
 plugins {
-    id 'java-library'
+    java
+    `java-library`
+    `java-test-fixtures`
 }
 
-group = 'com.cadenzauk'
-version siestaVersion
+group = "com.cadenzauk"
+version = libs.versions.siesta.get()
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation "org.postgresql:postgresql:42.7.4"
-    implementation "com.cadenzauk:siesta:$siestaVersion"
-
-    testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")
-    testImplementation testFixtures("com.cadenzauk:siesta-jackson:$siestaVersion")
-    testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.11'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
-}
-
-test {
-    useJUnitPlatform {
-        excludeEngines 'junit-vintage'
-    }
+    implementation(libs.freemarker)
 }

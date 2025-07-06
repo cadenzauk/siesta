@@ -39,11 +39,13 @@ import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -70,14 +72,32 @@ public class HSqlDialect extends AnsiDialect {
         types()
             .register(DbTypeId.TIMESTAMP, new DefaultTimestamp() {
                 @Override
+                public String literal(Database database, LocalDateTime value) {
+                    return super.literal(database, convertDatabaseTimeToSystemDefault(database, value));
+                }
+
+                @Override
+                public Object convertToDatabase(Database database, LocalDateTime value) {
+                    if (value == null) {
+                        return null;
+                    }
+                    return Timestamp.valueOf(convertDatabaseTimeToSystemDefault(database, value));
+                }
+
+                private static LocalDateTime convertDatabaseTimeToSystemDefault(Database database, LocalDateTime value) {
+                    return ZonedDateTime.of(value, database.databaseTimeZone()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
+                }
+
+                @Override
                 public LocalDateTime getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
                     Timestamp ts = rs.getTimestamp(col);
-                    return rs.wasNull() ? null : ts.toLocalDateTime();
+                    return rs.wasNull() ? null : ZonedDateTime.of(ts.toLocalDateTime(), ZoneId.systemDefault()).withZoneSameInstant(database.databaseTimeZone()).toLocalDateTime();
                 }
+
                 @Override
                 public LocalDateTime getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
                     Timestamp ts = rs.getTimestamp(col);
-                    return rs.wasNull() ? null : ts.toLocalDateTime();
+                    return rs.wasNull() ? null : ZonedDateTime.of(ts.toLocalDateTime(), ZoneId.systemDefault()).withZoneSameInstant(database.databaseTimeZone()).toLocalDateTime();
                 }
             });
 

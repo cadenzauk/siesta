@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,10 @@
  * SOFTWARE.
  */
 
-plugins {
-    id 'java-library'
-}
-
-group = 'com.cadenzauk'
-version siestaVersion
-
-repositories {
-    mavenCentral()
-    mavenCentral()
-    maven {
-        url "https://www.oracle.com/content/secure/maven/content"
-        credentials {
-            username project.hasProperty("oracleUsername") ? oracleUsername : ""
-            password project.hasProperty("oraclePassword") ? oraclePassword : ""
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
         }
-    }
-}
-
-dependencies {
-    implementation ("com.oracle.database.jdbc:ojdbc8-production:21.1.0.0") {
-        exclude group: "com.oracle.database.xml"
-    }
-    implementation "com.cadenzauk:siesta:$siestaVersion"
-
-    testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")
-    testImplementation testFixtures("com.cadenzauk:siesta-jackson:$siestaVersion")
-    testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.11'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
-}
-
-test {
-    useJUnitPlatform {
-        excludeEngines 'junit-vintage'
     }
 }

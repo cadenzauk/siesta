@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,32 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-plugins {
-    id 'java-library'
-}
 
-group = 'com.cadenzauk'
-version siestaVersion
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
-dependencies {
-    implementation group: 'com.ibm.db2', name: 'db2jcc4', version: '11.1.0'
-    implementation group: 'com.ibm.db2', name: 'sqlj4', version: '11.1.0'
-    implementation "com.cadenzauk:siesta:$siestaVersion"
-
-    testImplementation testFixtures("com.cadenzauk:siesta:$siestaVersion")
-    testImplementation testFixtures("com.cadenzauk:siesta-jackson:$siestaVersion")
-
-    testRuntimeOnly group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.11'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
-}
-
-test {
-    useJUnitPlatform {
-        excludeEngines 'junit-vintage'
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }

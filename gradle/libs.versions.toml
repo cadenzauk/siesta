@@ -1,0 +1,71 @@
+[versions]
+apacheCommonsLang3 = "3.17.0"
+db2 = "11.1.0"
+derby = "10.16.1.1"
+freemarker = "2.3.34"
+googleGuava = "33.4.8-jre"
+h2 = "2.3.232"
+hamcrest = "3.0"
+hamcrestDate = "2.0.8"
+hamkrest = "1.8.0.1"
+hsqldb = "2.7.4"
+jackson = "2.19.1"
+junitJupiter = "5.13.3"
+junitPlatform = "1.13.2"
+kotlin = "2.0.21"
+mockito = "5.18.0"
+siesta = "1.0.0-SNAPSHOT"
+spring = "6.2.8"
+
+[libraries]
+apacheCommonsLang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheCommonsLang3" }
+db2jcc4 = { group = "com.ibm.db2", name = "db2jcc4", version.ref = "db2" }
+derby = { group = "org.apache.derby", name = "derby", version.ref = "derby" }
+derbytools = { group = "org.apache.derby", name = "derbytools", version.ref = "derby" }
+freemarker = { group = "org.freemarker", name = "freemarker", version.ref = "freemarker" }
+googleGuava = { group = "com.google.guava", name = "guava", version.ref = "googleGuava" }
+googleGuavaTestlib = { group = "com.google.guava", name = "guava-testlib", version.ref = "googleGuava" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest" }
+hamcrestDate = { group = "org.exparity", name = "hamcrest-date", version.ref = "hamcrestDate" }
+hamkrest = { group = "com.natpryce", name = "hamkrest", version.ref = "hamkrest" }
+hibernateJpa21Api = { group = "org.hibernate.javax.persistence", name = "hibernate-jpa-2.1-api", version = "1.0.0.Final" }
+hikariCP = { group = "com.zaxxer", name = "HikariCP", version = "5.0.1" }
+hsqldb = { group = "org.hsqldb", name = "hsqldb", version.ref = "hsqldb" }
+jacksonDatabind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jacksonDatatypeJdk8 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jdk8", version.ref = "jackson" }
+jacksonDataTypeJsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
+jacksonModuleKotlin = { group =  "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+java8Matchers = { group = "co.unruly", name = "java-8-matchers", version = "1.5" }
+jaxbImpl = { group = "com.sun.xml.bind", name = "jaxb-impl", version = "2.3.3" }
+jaybird = { group = "org.firebirdsql.jdbc", name = "jaybird", version = "4.0.10.java11" }
+jclOverSlf4j = { group = "org.slf4j", name = "jcl-over-slf4j", version = "1.7.25" }
+jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version = "15.0" }
+jsonPath = { group = "com.jayway.jsonpath", name = "json-path", version = "2.9.0" }
+jsonSmart = { group = "net.minidev", name = "json-smart", version = "2.5.2" }
+junitJupiterApi = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junitJupiter" }
+junitJupiterEngine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junitJupiter" }
+junitPlatformLauncher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatform" }
+junitJupiterParams = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junitJupiter" }
+kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+kotlinStdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version = "1.5.13" }
+mariadbJavaClient = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version = "3.1.3" }
+mockitoCore = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockitoJunitJupiter = { group = "org.mockito", name = "mockito-junit-jupiter", version.ref = "mockito" }
+mssqlJdbc = { group = "com.microsoft.sqlserver", name = "mssql-jdbc", version = "12.8.1.jre11" }
+mysqlConnectorJava = { group = "mysql", name = "mysql-connector-java", version = "8.0.33" }
+objenesis = { group = "org.objenesis", name = "objenesis", version = "2.5.1" }
+ojdbc8Production = { group = "com.oracle.database.jdbc", name = "ojdbc8-production", version = "21.1.0.0" }
+postgresql = { group = "org.postgresql", name = "postgresql", version = "42.7.4" }
+siesta = { group = "com.cadenzauk", name = "siesta", version.ref = "siesta" }
+siestaJackson = { group = "com.cadenzauk", name = "siesta-jackson", version.ref = "siesta" }
+siestaKotlin = { group = "com.cadenzauk", name = "siesta-kotlin", version.ref = "siesta" }
+slf4jApi = { group = "org.slf4j", name = "slf4j-api", version = "1.7.36" }
+springContext = { group = "org.springframework", name = "spring-context", version.ref = "spring" }
+springJdbc = { group = "org.springframework", name = "spring-jdbc", version.ref = "spring" }
+springTest = { group = "org.springframework", name = "spring-test", version.ref = "spring" }
+sqlj4 = { group = "com.ibm.db2", name = "sqlj4", version.ref = "db2" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}

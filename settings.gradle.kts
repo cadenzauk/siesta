@@ -20,32 +20,16 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.example;
+rootProject.name = "com.cadenzauk"
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-
-public class Manufacturer {
-    private final long manufacturerId;
-    private final String name;
-    private final ZonedDateTime insertionTs;
-
-    public Manufacturer(long manufacturerId, String name) {
-        this.manufacturerId = manufacturerId;
-        this.name = name;
-        insertionTs = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
-    }
-
-    public long manufacturerId() {
-        return manufacturerId;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public ZonedDateTime insertionTs() {
-        return insertionTs;
-    }
-}
+includeBuild ("siesta")
+includeBuild ("siesta-codegen")
+includeBuild ("siesta-db2")
+includeBuild ("siesta-firebird")
+includeBuild ("siesta-mariadb")
+includeBuild ("siesta-mysql")
+includeBuild ("siesta-oracle")
+includeBuild ("siesta-postgres")
+includeBuild ("siesta-sqlserver")
+includeBuild ("siesta-kotlin")
+includeBuild ("siesta-jackson")

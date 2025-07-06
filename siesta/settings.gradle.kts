@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,32 +20,10 @@
  * SOFTWARE.
  */
 
-package com.cadenzauk.siesta.example;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-
-public class Manufacturer {
-    private final long manufacturerId;
-    private final String name;
-    private final ZonedDateTime insertionTs;
-
-    public Manufacturer(long manufacturerId, String name) {
-        this.manufacturerId = manufacturerId;
-        this.name = name;
-        insertionTs = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
-    }
-
-    public long manufacturerId() {
-        return manufacturerId;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public ZonedDateTime insertionTs() {
-        return insertionTs;
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
     }
 }

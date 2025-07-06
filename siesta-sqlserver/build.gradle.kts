@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Cadenza United Kingdom Limited
+ * Copyright (c) 2017-2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,33 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+plugins {
+    `java-library`
+}
 
-package com.cadenzauk.siesta.example;
+group = "com.cadenzauk"
+version = libs.versions.siesta.get()
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
 
-public class Manufacturer {
-    private final long manufacturerId;
-    private final String name;
-    private final ZonedDateTime insertionTs;
+dependencies {
+    implementation(libs.mssqlJdbc)
+    implementation(libs.siesta)
 
-    public Manufacturer(long manufacturerId, String name) {
-        this.manufacturerId = manufacturerId;
-        this.name = name;
-        insertionTs = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MICROS);
+    testImplementation(testFixtures(libs.siesta))
+    testImplementation(testFixtures(libs.siestaJackson))
+    testImplementation(libs.hikariCP)
+
+    testRuntimeOnly(libs.logbackClassic)
+    testRuntimeOnly(libs.junitJupiterEngine)
+    testRuntimeOnly(libs.junitPlatformLauncher)
+}
+
+tasks.test {
+    useJUnitPlatform {
+        excludeEngines("junit-vintage")
     }
+}
 
-    public long manufacturerId() {
-        return manufacturerId;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    public ZonedDateTime insertionTs() {
-        return insertionTs;
-    }
+tasks.withType<Test> {
+    systemProperty("java.library.path", project.findProperty("sqlserverAuthPath") ?: "")
 }
