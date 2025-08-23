@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class MariaDbMergeInfo extends MergeInfo {
     public MariaDbMergeInfo(Dialect dialect) {
-        super(dialect);
+        super(dialect, false);
     }
 
     @Override

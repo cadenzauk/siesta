@@ -53,3 +53,7 @@ tasks.test {
 tasks.withType<Test> {
     systemProperty("java.library.path", project.findProperty("sqlserverAuthPath") ?: "")
 }
+
+java {
+    targetCompatibility = JavaVersion.VERSION_17
+}

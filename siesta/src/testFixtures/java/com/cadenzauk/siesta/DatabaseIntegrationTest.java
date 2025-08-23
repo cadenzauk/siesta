@@ -265,7 +265,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         SalespersonRow stored1 = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(original.salespersonId()).single();
         SalespersonRow stored2 = database.from(SalespersonRow.class).where(SalespersonRow::salespersonId).isEqualTo(inserted.salespersonId()).single();
 
-        assertThat(result, is(dialect.mergeInfo().insertedResult() + dialect.mergeInfo().updatedResult()));
+        assertThat(result, is(dialect.mergeInfo().insertedAndUpdatedResult()));
         assertThat(stored1, is(updated));
         assertThat(stored2, is(inserted));
     }

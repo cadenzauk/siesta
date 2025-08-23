@@ -48,3 +48,7 @@ tasks.test {
         excludeEngines("junit-vintage")
     }
 }
+
+java {
+    targetCompatibility = JavaVersion.VERSION_17
+}

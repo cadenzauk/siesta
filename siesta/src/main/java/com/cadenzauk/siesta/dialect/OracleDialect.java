@@ -38,6 +38,7 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
+import com.cadenzauk.siesta.dialect.merge.OracleMergeInfo;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
@@ -55,6 +56,7 @@ import com.cadenzauk.siesta.type.DefaultVarbinary;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -134,7 +136,7 @@ public class OracleDialect extends AnsiDialect {
                     if (bigDecimal != null) {
                         int scale = metaData.getScale(colNo);
                         if (scale > bigDecimal.scale()) {
-                            return bigDecimal.setScale(scale, BigDecimal.ROUND_UNNECESSARY);
+                            return bigDecimal.setScale(scale, RoundingMode.UNNECESSARY);
                         }
                     }
                     return bigDecimal;
@@ -226,6 +228,7 @@ public class OracleDialect extends AnsiDialect {
 
         setSequenceInfo(new OracleSequenceInfo());
         setTempTableInfo(new OracleTempTableInfo());
+        setMergeInfo(new OracleMergeInfo(this));
     }
 
     @Override

@@ -221,29 +221,41 @@ public class Table<R> implements ColumnCollection<R> {
         if (rows == null || rows.isEmpty()) {
             return 0;
         }
-        return rows
-            .stream().mapToInt(row -> upsertRow(sqlExecutor, row))
-            .sum();
+        if (database().dialect().supportsMultiUpsert()) {
+            return performUpsert(sqlExecutor, rows);
+        } else {
+            return rows
+                .stream().mapToInt(row -> upsertRow(sqlExecutor, row))
+                .sum();
+        }
     }
 
     public int upsert(Transaction transaction, List<R> rows) {
         if (rows == null || rows.isEmpty()) {
             return 0;
         }
-        return rows
-            .stream().mapToInt(row -> upsertRow(transaction, row))
-            .sum();
+        if (database().dialect().supportsMultiUpsert()) {
+            return performUpsert(transaction, rows);
+        } else {
+            return rows
+                .stream().mapToInt(row -> upsertRow(transaction, row))
+                .sum();
+        }
     }
 
     public CompletableFuture<Integer> upsertAsync(Transaction transaction, List<R> rows) {
         if (rows == null || rows.isEmpty()) {
             return CompletableFuture.completedFuture(0);
         }
-        return allAsList(
-            rows.stream().map(row -> upsertRowAsync(transaction, row))
-        ).thenApply(counts ->
-            counts.stream().mapToInt(Integer::intValue).sum()
-        );
+        if (database().dialect().supportsMultiUpsert()) {
+            return performUpsertAsync(transaction, rows);
+        } else {
+            return allAsList(
+                rows.stream().map(row -> upsertRowAsync(transaction, row))
+            ).thenApply(counts ->
+                counts.stream().mapToInt(Integer::intValue).sum()
+            );
+        }
     }
 
     private int upsertRow(SqlExecutor sqlExecutor, R row) {
@@ -352,6 +364,36 @@ public class Table<R> implements ColumnCollection<R> {
         return database.executeAsync(sql, () -> transaction.updateAsync(sql, args));
     }
 
+    private int performUpsert(SqlExecutor sqlExecutor, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return 0;
+        }
+        MergeSpec mergeSpec = mergeSpec(rows);
+        String sql = upsertSql(mergeSpec);
+        Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
+        return database.execute(sql, () -> sqlExecutor.update(sql, args));
+    }
+
+    private int performUpsert(Transaction transaction, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return 0;
+        }
+        MergeSpec mergeSpec = mergeSpec(rows);
+        String sql = upsertSql(mergeSpec);
+        Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
+        return database.execute(sql, () -> transaction.update(sql, args));
+    }
+
+    private CompletableFuture<Integer> performUpsertAsync(Transaction transaction, List<R> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return CompletableFuture.completedFuture(0);
+        }
+        MergeSpec mergeSpec = mergeSpec(rows);
+        String sql = upsertSql(mergeSpec);
+        Object[] args = database.dialect().mergeInfo().mergeArgs(mergeSpec);
+        return database.executeAsync(sql, () -> transaction.updateAsync(sql, args));
+    }
+
     private String insertSql(List<R> rows) {
         return String.format("insert into %s (%s) values %s",
             qualifiedName(),
@@ -392,6 +434,22 @@ public class Table<R> implements ColumnCollection<R> {
             .insertArgsSql(columns().flatMap(col -> col.insertArgsSql(database, Optional.of(row))).collect(toList()))
             .insertArgs(ImmutableList.of(columns().flatMap(col -> col.insertArgs(database, Optional.of(row))).toArray()))
             .selectArgs(ImmutableList.of(columns().flatMap(col -> col.selectArgs(database, Optional.of(row))).toArray()))
+            .build();
+    }
+
+    private MergeSpec mergeSpec(List<R> rows) {
+        return MergeSpec
+            .newBuilder()
+            .targetTableName(qualifiedName())
+            .targetAlias("t")
+            .selectRowsArgsSql(rows.stream().map(row -> columns().flatMap(col -> col.selectArgsSql(database, Optional.of(row))).collect(toList())).collect(toList()))
+            .columnNames(columns().flatMap(Column::columnNames).collect(toList()))
+            .sourceAlias("s")
+            .idColumnNames(columns().flatMap(Column::idColumnNames).collect(toList()))
+            .updateColumnNames(columns().flatMap(Column::updateColumnNames).collect(toList()))
+            .insertColumnNames(columns().flatMap(Column::insertColumnNames).collect(toList()))
+            .insertArgs(rows.stream().map(row -> columns().flatMap(col -> col.insertArgs(database, Optional.of(row))).toArray()).collect(toList()))
+            .selectArgs(rows.stream().map(row -> columns().flatMap(col -> col.selectArgs(database, Optional.of(row))).toArray()).collect(toList()))
             .build();
     }
 

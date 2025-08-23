@@ -71,7 +71,7 @@ dependencies {
     testImplementation(libs.googleGuavaTestlib)
     testImplementation(libs.jaxbImpl)
     testImplementation(libs.logbackClassic)
-//    testImplementation(libs.junitJupiterEngine)
+    testImplementation(libs.junitJupiterEngine)
 
     testRuntimeOnly(libs.junitPlatformLauncher)
 }
@@ -80,6 +80,10 @@ tasks.test {
     useJUnitPlatform {
         excludeEngines("junit-vintage")
     }
+}
+
+java {
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 val javadocJar = tasks.register<Jar>("javadocJar") {

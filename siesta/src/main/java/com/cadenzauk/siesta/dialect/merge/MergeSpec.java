@@ -22,6 +22,8 @@
 
 package com.cadenzauk.siesta.dialect.merge;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 
 public class MergeSpec {
@@ -33,6 +35,7 @@ public class MergeSpec {
     private final List<String> updateColumnNames;
     private final String sourceAlias;
     private final List<String> selectArgsSql;
+    private final List<List<String>> selectRowsArgsSql;
     private final List<Object[]> selectArgs;
     private final List<String> insertArgsSql;
     private final List<Object[]> insertArgs;
@@ -46,6 +49,7 @@ public class MergeSpec {
         updateColumnNames = builder.updateColumnNames;
         sourceAlias = builder.sourceAlias;
         selectArgsSql = builder.selectArgsSql;
+        selectRowsArgsSql = builder.selectRowsArgsSql;
         selectArgs = builder.selectArgs;
         insertArgsSql = builder.insertArgsSql;
         insertArgs = builder.insertArgs;
@@ -83,6 +87,13 @@ public class MergeSpec {
         return selectArgsSql;
     }
 
+    public List<List<String>> selectRowsArgsSql() {
+        if (selectRowsArgsSql == null) {
+            return ImmutableList.of(selectArgsSql);
+        }
+        return selectRowsArgsSql;
+    }
+
     public List<Object[]> selectArgs() {
         return selectArgs;
     }
@@ -108,6 +119,7 @@ public class MergeSpec {
         private List<String> updateColumnNames;
         private String sourceAlias;
         private List<String> selectArgsSql;
+        private List<List<String>> selectRowsArgsSql;
         private List<Object[]> selectArgs;
         private List<String> insertArgsSql;
         private List<Object[]> insertArgs;
@@ -152,6 +164,11 @@ public class MergeSpec {
 
         public Builder selectArgsSql(List<String> val) {
             selectArgsSql = val;
+            return this;
+        }
+
+        public Builder selectRowsArgsSql(List<List<String>> val) {
+            selectRowsArgsSql = val;
             return this;
         }
 

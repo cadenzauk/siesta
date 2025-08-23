@@ -60,6 +60,10 @@ public interface Dialect {
 
     boolean supportsMultiInsert();
 
+    default boolean supportsMultiUpsert() {
+        return mergeInfo().supportsMultiRowUpsert();
+    }
+
     boolean requiresFromDual();
 
     String dual();

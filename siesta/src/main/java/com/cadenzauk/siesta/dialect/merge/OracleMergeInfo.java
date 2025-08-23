@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Cadenza United Kingdom Limited
+ * Copyright (c) 2025 Cadenza United Kingdom Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,28 +24,25 @@ package com.cadenzauk.siesta.dialect.merge;
 
 import com.cadenzauk.siesta.Dialect;
 import com.cadenzauk.siesta.MergeInfo;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class PostgresMergeInfo extends MergeInfo {
-    public PostgresMergeInfo(Dialect dialect) {
-        super(dialect);
+import static java.lang.Math.min;
+import static java.util.stream.Collectors.joining;
+
+public class OracleMergeInfo extends MergeInfo {
+    public OracleMergeInfo(Dialect dialect) {
+        super(dialect, true);
     }
 
     @Override
-    public String mergeSql(MergeSpec mergeSpec) {
-        return String.format("insert into %s as %s(%s) values %s on conflict (%s) do update set %s",
-            mergeSpec.targetTableName(),
-            mergeSpec.targetAlias(),
-            String.join(", ", mergeSpec.insertColumnNames()),
-            mergeSpec.insertArgs().stream().map(x -> "(" + String.join(", ", mergeSpec.insertArgsSql()) + ")").collect(Collectors.joining(", ")),
-            String.join(", ", mergeSpec.idColumnNames()),
-            mergeSpec.updateColumnNames().stream().map(col -> String.format("%s = EXCLUDED.%s", col, col)).collect(Collectors.joining(", ")));
-    }
-
-    @Override
-    public Object[] mergeArgs(MergeSpec mergeSpec) {
-        return mergeSpec.insertArgs().stream().flatMap(Arrays::stream).toArray();
+    protected @NotNull String selectRowsArgsSql(MergeSpec mergeSpec) {
+        return mergeSpec.selectRowsArgsSql().stream()
+            .map(r -> IntStream.range(0, min(mergeSpec.columnNames().size(), r.size()))
+                .mapToObj(i -> String.format("%s %s", r.get(i), mergeSpec.columnNames().get(i)))
+                .collect(Collectors.joining(", ", "select ", " from dual")))
+            .collect(joining(" union all "));
     }
 }

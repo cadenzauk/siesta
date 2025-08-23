@@ -62,6 +62,10 @@ tasks.test {
     }
 }
 
+java {
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 val javadocJar = tasks.register<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
     from(tasks["javadoc"])

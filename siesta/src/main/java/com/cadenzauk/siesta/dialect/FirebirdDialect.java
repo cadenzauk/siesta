@@ -37,6 +37,7 @@ import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.string.StringFunctionSpecs;
+import com.cadenzauk.siesta.dialect.merge.FirebirdMergeInfo;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultInteger;
@@ -171,6 +172,7 @@ public class FirebirdDialect extends AnsiDialect {
 
         setSequenceInfo(new FirebirdSequenceInfo());
         setTempTableInfo(new FirebirdTempTableInfo());
+        setMergeInfo(new FirebirdMergeInfo(this));
     }
 
 

@@ -22,14 +22,15 @@
 
 package com.cadenzauk.siesta.dialect;
 
+import com.cadenzauk.core.sql.exception.DuplicateKeyException;
+import com.cadenzauk.core.sql.exception.IllegalNullException;
+import com.cadenzauk.core.sql.exception.InvalidValueException;
+import com.cadenzauk.core.sql.exception.LockingException;
 import com.cadenzauk.core.sql.exception.NoSuchObjectException;
 import com.cadenzauk.core.sql.exception.ReferentialIntegrityException;
-import com.cadenzauk.core.sql.exception.LockingException;
-import com.cadenzauk.core.sql.exception.IllegalNullException;
 import com.cadenzauk.core.sql.exception.SqlSyntaxException;
-import com.cadenzauk.core.sql.exception.DuplicateKeyException;
-import com.cadenzauk.core.sql.exception.InvalidValueException;
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.MergeInfo;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.function.ArgumentlessFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.FunctionSpec;
@@ -37,7 +38,6 @@ import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.aggregate.AggregateFunctionSpecs;
 import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
-import com.cadenzauk.siesta.dialect.merge.PostgresMergeInfo;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
@@ -175,7 +175,7 @@ public class PostgresDialect extends AnsiDialect {
             .register("55P03", LockingException::new);
 
         setTempTableInfo(new PostgresTempTableInfo());
-        setMergeInfo(new PostgresMergeInfo(this));
+        setMergeInfo(new MergeInfo(this));
     }
 
     @Override

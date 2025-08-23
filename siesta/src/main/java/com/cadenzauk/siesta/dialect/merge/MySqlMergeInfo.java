@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class MySqlMergeInfo extends MergeInfo {
     public MySqlMergeInfo(Dialect dialect) {
-        super(dialect);
+        super(dialect, false);
     }
 
     @Override
