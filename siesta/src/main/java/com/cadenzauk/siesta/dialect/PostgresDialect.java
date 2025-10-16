@@ -224,6 +224,6 @@ public class PostgresDialect extends AnsiDialect {
 
     @Override
     public String nextFromSequence(String catalog, String schema, String sequenceName) {
-        return "nextval('" + sequenceName + "')";
+        return "nextval('" + qualifiedSequenceName(catalog, schema, sequenceName) + "')";
     }
 }
