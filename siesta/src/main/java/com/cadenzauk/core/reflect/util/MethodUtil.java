@@ -60,27 +60,27 @@ public final class MethodUtil extends UtilityClass {
     }
 
     public static <T, V> Method fromReference(Function1<T,V> methodReference) {
-        return OptionalUtil.orGet(fromJavaFunction(methodReference), () -> fromKotlinFunction(methodReference))
+        return OptionalUtil.orGet(fromKotlinFunction(methodReference), () -> fromJavaFunction(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T> Method fromReference(FunctionInt<T> methodReference) {
-        return OptionalUtil.orGet(fromJavaFunction(methodReference), () -> fromKotlinFunction(methodReference))
+        return OptionalUtil.orGet(fromKotlinFunction(methodReference), () -> fromJavaFunction(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T, V> Method fromReference(FunctionOptional1<T,V> methodReference) {
-        return OptionalUtil.orGet(fromJavaFunction(methodReference), () -> fromKotlinFunction(methodReference))
+        return OptionalUtil.orGet(fromKotlinFunction(methodReference), () -> fromJavaFunction(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T, V> Class<?> referringClass(Function1<T,V> methodReference) {
-        return OptionalUtil.orGet(referringJavaClass(methodReference), () -> referringKotlinClass(methodReference))
+        return OptionalUtil.orGet(referringKotlinClass(methodReference), () -> referringJavaClass(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 
     public static <T> Class<?> referringClass(FunctionInt<T> methodReference) {
-        return OptionalUtil.orGet(referringJavaClass(methodReference), () -> referringKotlinClass(methodReference))
+        return OptionalUtil.orGet(referringKotlinClass(methodReference), () -> referringJavaClass(methodReference))
             .orElseThrow(() -> new RuntimeException("Failed to find writeReplace method in " + methodReference.getClass()));
     }
 

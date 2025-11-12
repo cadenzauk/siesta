@@ -24,9 +24,7 @@ package com.cadenzauk.siesta.kotlin
 
 import co.unruly.matchers.OptionalMatchers.contains
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.Optional
 
 open class Widget {
     var id: String = "WIDG-101"

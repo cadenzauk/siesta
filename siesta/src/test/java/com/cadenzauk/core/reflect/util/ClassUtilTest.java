@@ -75,6 +75,20 @@ class ClassUtilTest {
     }
 
     @Test
+    void getDeclaredMethodWithParameterSubtypeThrows() {
+        calling(() -> ClassUtil.getDeclaredMethod(TestingTarget.class, "canRetry", RuntimeException.class))
+            .shouldThrow(NoSuchElementException.class)
+            .withMessage(is("No such method as canRetry(class java.lang.RuntimeException) in class com.cadenzauk.core.reflect.util.ClassUtilTest$TestingTarget"));
+    }
+
+    @Test
+    void getDeclaredMethodWithParameterSupertypeThrows() {
+        calling(() -> ClassUtil.getDeclaredMethod(TestingTarget.class, "canRetry", Throwable.class))
+            .shouldThrow(NoSuchElementException.class)
+            .withMessage(is("No such method as canRetry(class java.lang.Throwable) in class com.cadenzauk.core.reflect.util.ClassUtilTest$TestingTarget"));
+    }
+
+    @Test
     void declaredMethodForMethodThatExistsIsTheMethod() {
         Optional<Method> method0 = ClassUtil.declaredMethod(TestingTarget.class, "method");
 
@@ -85,6 +99,20 @@ class ClassUtilTest {
     @Test
     void declaredMethodForMethodWithWrongParametersIsEmpty() {
         Optional<Method> method0 = ClassUtil.declaredMethod(TestingTarget.class, "method", Integer.class);
+
+        assertThat(method0, is(Optional.empty()));
+    }
+
+    @Test
+    void declaredMethodForMethodWithParametersSubTypeIsEmpty() {
+        Optional<Method> method0 = ClassUtil.declaredMethod(TestingTarget.class, "canRetry", RuntimeException.class);
+
+        assertThat(method0, is(Optional.empty()));
+    }
+
+    @Test
+    void declaredMethodForMethodWithParametersSuperTypeIsEmpty() {
+        Optional<Method> method0 = ClassUtil.declaredMethod(TestingTarget.class, "canRetry", Throwable.class);
 
         assertThat(method0, is(Optional.empty()));
     }
@@ -269,7 +297,6 @@ class ClassUtilTest {
         assertThat(result.isPresent(), is(true));
     }
 
-
     private interface TestingBaseInterface {
     }
 
@@ -292,6 +319,10 @@ class ClassUtilTest {
 
         public void method() {
             System.out.println("method called");
+        }
+
+        public boolean canRetry(Exception exception) {
+            return false;
         }
     }
 }

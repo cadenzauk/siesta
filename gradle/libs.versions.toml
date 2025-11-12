@@ -69,3 +69,4 @@ sqlj4 = { group = "com.ibm.db2", name = "sqlj4", version.ref = "db2" }
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
+jmh = { id = "me.champeau.jmh", version = "0.7.3" }

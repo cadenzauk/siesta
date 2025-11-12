@@ -70,11 +70,16 @@ public final class ClassUtil extends UtilityClass {
     }
 
     public static Optional<Method> declaredMethod(Class<?> aClass, String name, Class<?>... parameterTypes) {
-        try {
-            return Optional.of(aClass.getDeclaredMethod(name, parameterTypes));
-        } catch (NoSuchMethodException e) {
-            return Optional.empty();
+        Method[] declaredMethods = aClass.getDeclaredMethods();
+        for (Method declaredMethod : declaredMethods) {
+            if (declaredMethod.getName().equals(name)
+                    && declaredMethod.getParameterCount() == parameterTypes.length
+                    && Arrays.equals(declaredMethod.getParameterTypes(), parameterTypes)
+            ) {
+                return Optional.of(declaredMethod);
+            }
         }
+        return Optional.empty();
     }
 
     public static Stream<Method> declaredMethods(Class<?> aClass) {
@@ -87,11 +92,13 @@ public final class ClassUtil extends UtilityClass {
     }
 
     public static Optional<Field> declaredField(Class<?> aClass, String fieldName) {
-        try {
-            return Optional.of(aClass.getDeclaredField(fieldName));
-        } catch (NoSuchFieldException e) {
-            return Optional.empty();
+        Field[] declaredFields = aClass.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (declaredField.getName().equals(fieldName)) {
+                return Optional.of(declaredField);
+            }
         }
+        return Optional.empty();
     }
 
     public static Optional<Field> findField(Class<?> aClass, String fieldName) {

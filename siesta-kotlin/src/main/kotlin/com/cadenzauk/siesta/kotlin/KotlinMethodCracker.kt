@@ -28,6 +28,7 @@ import com.cadenzauk.core.reflect.util.MethodUtil
 import com.cadenzauk.core.util.OptionalUtil
 import java.lang.reflect.Method
 import java.util.Optional
+import kotlin.jvm.internal.PropertyReference
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
@@ -74,15 +75,12 @@ class KotlinMethodCracker : MethodUtil.MethodCracker {
         if (methodReference == null) {
             return Optional.empty()
         }
-        methodReference.toString()
         val fromArg1: Optional<T> = ClassUtil.findField(methodReference.javaClass, "arg$1")
             .map { field -> FieldUtil.get(field, methodReference) }
             .flatMap { crackProperty(it, target) }
         return OptionalUtil.orGet(fromArg1) {
-            ClassUtil.findField(methodReference.javaClass, "reflected")
-                .map { FieldUtil.get(it, methodReference) }
-                .map { it as? KProperty<*> }
-                .map { it?.getter }
+            val compute = (methodReference as? PropertyReference)?.compute()
+            Optional.ofNullable((compute as? KProperty<*>)?.getter)
                 .map { target(it) }
         }
     }
