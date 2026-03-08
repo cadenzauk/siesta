@@ -73,7 +73,7 @@ public class DbTypeId<T> {
     public static final DbTypeId<LocalDate> DATE = new DbTypeId<>("date", Types.DATE, LocalDate.class);
     public static final DbTypeId<LocalTime> TIME = new DbTypeId<>("time", Types.TIME, LocalTime.class);
     public static final DbTypeId<LocalDateTime> TIMESTAMP = new DbTypeId<>("timestamp", Types.TIMESTAMP, LocalDateTime.class);
-    public static final DbTypeId<UUID> UUID = new DbTypeId<UUID>("guid", Types.BINARY, UUID.class) {
+    public static final DbTypeId<UUID> UUID = new DbTypeId<>("uuid", Types.BINARY, UUID.class) {
         @Override
         public Optional<Integer> length(int len, int prec) {
             return Optional.of(len);

@@ -1057,6 +1057,50 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         assertThat(result, is(expected));
     }
 
+    @Test
+    void canRoundTripUuids() {
+        Database database = testDatabase(dataSource, dialect);
+        UUID expected = UUID.randomUUID();
+        UuidTestRow input = UuidTestRow
+            .newBuilder()
+            .guid(expected)
+            .guidOpt(Optional.of(expected))
+            .build();
+
+        database.insert(input);
+        UuidTestRow result = database
+            .from(UuidTestRow.class)
+            .where(UuidTestRow::guid).isEqualTo(literal(input.guid()))
+            .single();
+
+        assertThat(result.guid(), is(expected));
+        assertThat(result.guidOpt(), is(Optional.of(expected)));
+    }
+
+    @Test
+    void canRoundTripUuidsAsBinary() {
+        Database database = testDatabaseBuilder(dialect)
+            .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
+            .withOption(DatabaseOptions.Option.UuidAsBinary)
+            .table(UuidTestRow.class, t -> t.tableName("BINARY_UUID_TEST_TABLE"))
+            .build();
+        UUID expected = UUID.randomUUID();
+        UuidTestRow input = UuidTestRow
+            .newBuilder()
+            .guid(expected)
+            .guidOpt(Optional.of(expected))
+            .build();
+
+        database.insert(input);
+        UuidTestRow result = database
+            .from(UuidTestRow.class)
+            .where(UuidTestRow::guid).isEqualTo(literal(input.guid()))
+            .single();
+
+        assertThat(result.guid(), is(expected));
+        assertThat(result.guidOpt(), is(Optional.of(expected)));
+    }
+
     @ParameterizedTest
     @ArgumentsSource(TestCaseArgumentsProvider.class)
     @TestCase({"true"})
@@ -1295,6 +1339,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         UUID guid = UUID.randomUUID();
         database.insert(TestRow.newBuilder()
             .guid(guid)
+            .guidOpt(null)
             .decimalOpt(null)
             .decimalReq(null)
             .integerOpt(null)
@@ -1316,6 +1361,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
             .where(TestRow::guid).isEqualTo(guid)
             .single();
 
+        assertThat(result.guidOpt(), is(Optional.empty()));
         assertThat(result.decimalOpt(), is(Optional.empty()));
         assertThat(result.decimalReq(), nullValue());
         assertThat(result.integerOpt(), is(Optional.empty()));
@@ -1899,14 +1945,16 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         Database database = testDatabaseBuilder()
             .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource))
             .type(UUID.class, DbTypeId.UUID, new DbTypeAdapter<>(DbTypeId.VARCHAR, UUID::toString, UUID::fromString))
+            .table(UuidTestRow.class, t -> t.tableName("UUID_AS_VARCHAR_TEST_TABLE"))
             .build();
         UuidTestRow testRow = UuidTestRow.newBuilder()
             .guid(UUID.randomUUID())
+            .guidOpt(Optional.of(UUID.randomUUID()))
             .textValue("Testing 123")
             .build();
 
         database.insert(testRow);
-        UuidTestRow result = database.from(UuidTestRow.class).where(UuidTestRow::guid).isEqualTo(testRow.guid()).single();
+        UuidTestRow result = database.from(UuidTestRow.class).where(UuidTestRow::guid).isEqualTo(literal(testRow.guid())).single();
 
         assertThat(result, Is.is(testRow));
     }

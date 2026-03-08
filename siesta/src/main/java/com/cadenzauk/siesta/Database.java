@@ -88,6 +88,7 @@ public class Database {
     private final Dialect dialect;
     private final Optional<SqlExecutor> defaultSqlExecutor;
     private final ZoneId databaseTimeZone;
+    private final DatabaseOptions options;
 
     private Database(Builder builder) {
         dataTypeRegistry = new DataTypeRegistry();
@@ -97,6 +98,7 @@ public class Database {
         dialect = builder.dialect();
         defaultSqlExecutor = builder.defaultSqlExecutor;
         databaseTimeZone = builder.databaseTimeZone;
+        options = builder.options;
 
         builder.customizations.forEach(c -> c.accept(dialect));
         builder.dataTypes.forEach(d -> d.accept(dataTypeRegistry));
@@ -174,6 +176,14 @@ public class Database {
 
     public ZoneId databaseTimeZone() {
         return databaseTimeZone;
+    }
+
+    public boolean isSet(DatabaseOptions.Option option) {
+        return options.isSet(option);
+    }
+
+    public boolean isNotSet(DatabaseOptions.Option option) {
+        return !options.isSet(option);
     }
 
     public <T> T execute(String sql, Supplier<T> statement) {
@@ -594,6 +604,7 @@ public class Database {
         private Optional<Dialect> dialect = Optional.empty();
         private Optional<SqlExecutor> defaultSqlExecutor = Optional.empty();
         private ZoneId databaseTimeZone = ZoneId.systemDefault();
+        private DatabaseOptions options = DatabaseOptions.None;
         private final List<Consumer<Dialect>> customizations = new ArrayList<>();
         private final List<Consumer<DataTypeRegistry>> dataTypes = new ArrayList<>();
         private final Map<TypeToken<?>,TableInitializer<?,?>> tables = new HashMap<>();
@@ -678,6 +689,11 @@ public class Database {
                     ? TableInitializer.of(rowType, init)
                     : ((TableInitializer<R,?>) existing).concat(init);
             tables.put(rowType, tableInitializer);
+            return this;
+        }
+
+        public Builder withOption(DatabaseOptions.Option option) {
+            options = options.with(option);
             return this;
         }
 

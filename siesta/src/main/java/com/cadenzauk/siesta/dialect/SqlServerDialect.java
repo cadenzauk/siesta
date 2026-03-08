@@ -45,6 +45,7 @@ import com.cadenzauk.siesta.type.DefaultTime;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
+import com.cadenzauk.siesta.type.DefaultUuid;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 
 import java.time.LocalDate;
@@ -104,6 +105,12 @@ public class SqlServerDialect extends AnsiDialect {
             });
 
         types()
+            .register(DbTypeId.BINARY, new DefaultVarbinary("binary") {
+                @Override
+                public String literal(Database database, byte[] value) {
+                    return String.format("0x%s", hex(value));
+                }
+            })
             .register(DbTypeId.BOOLEAN, new BooleanAsTinyInt())
             .register(DbTypeId.TINYINT, new DefaultTinyint() {
                 @Override
@@ -161,7 +168,8 @@ public class SqlServerDialect extends AnsiDialect {
                 public String parameter(Database database, Optional<ZonedDateTime> value) {
                     return "cast(? as datetime2)";
                 }
-            });
+            })
+            .register(DbTypeId.UUID, new DefaultUuid("uniqueidentifier"));
 
         exceptions()
             .register("22001", InvalidValueException::new)

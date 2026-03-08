@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,7 +62,7 @@ public abstract class JsonIntegrationTest extends IntegrationTest {
     @Configuration
     public static class JsonConfig extends Config {
         @Bean
-        public Object initializeJsonFunctions(DataSource dataSource, Database database) {
+        public Object initializeJsonFunctions(DataSource dataSource, @Qualifier("database") Database database) {
             JsonFunctions.initialise(dataSource, database);
             return new Object();
         }

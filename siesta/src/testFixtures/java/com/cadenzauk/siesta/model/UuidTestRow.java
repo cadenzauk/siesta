@@ -26,21 +26,27 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.persistence.Table;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Table(name = "UUID_TEST_TABLE", schema = "SIESTA")
 public class UuidTestRow {
     private final UUID guid;
-
+    private final Optional<UUID> guidOpt;
     private final String textValue;
 
     private UuidTestRow(Builder builder) {
         guid = builder.guid;
+        guidOpt = builder.guidOpt;
         textValue = builder.textValue;
     }
 
     public UUID guid() {
         return guid;
+    }
+
+    public Optional<UUID> guidOpt() {
+        return guidOpt;
     }
 
     public String textValue() {
@@ -74,15 +80,22 @@ public class UuidTestRow {
 
     public static final class Builder {
         private UUID guid;
+        private Optional<UUID> guidOpt;
         private String textValue;
 
         private Builder() {
             this.guid = UUID.randomUUID();
+            this.guidOpt = Optional.empty();
             this.textValue = RandomStringUtils.randomAlphabetic(10, 20);
         }
 
         public Builder guid(UUID guid) {
             this.guid = guid;
+            return this;
+        }
+
+        public Builder guidOpt(Optional<UUID> guidOpt) {
+            this.guidOpt = guidOpt;
             return this;
         }
 

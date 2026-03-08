@@ -39,6 +39,7 @@ import com.cadenzauk.siesta.dialect.function.aggregate.CountDistinctFunctionSpec
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
+import com.cadenzauk.siesta.type.DefaultUuid;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
@@ -99,7 +100,8 @@ public class HSqlDialect extends AnsiDialect {
                     Timestamp ts = rs.getTimestamp(col);
                     return rs.wasNull() ? null : ZonedDateTime.of(ts.toLocalDateTime(), ZoneId.systemDefault()).withZoneSameInstant(database.databaseTimeZone()).toLocalDateTime();
                 }
-            });
+            })
+            .register(DbTypeId.UUID, new DefaultUuid(true));
 
         exceptions()
             .register("2200[13]", InvalidValueException::new)

@@ -40,6 +40,7 @@ import java.util.UUID;
 public class TestRow {
     private final UUID guid;
 
+    private final Optional<UUID> guidOpt;
     private final String stringReq;
     private final Optional<String> stringOpt;
     private final Integer integerReq;
@@ -59,6 +60,7 @@ public class TestRow {
 
     private TestRow(Builder builder) {
         guid = builder.guid;
+        guidOpt = builder.guidOpt;
         stringReq = builder.stringReq;
         stringOpt = builder.stringOpt;
         integerReq = builder.integerReq;
@@ -79,6 +81,10 @@ public class TestRow {
 
     public UUID guid() {
         return guid;
+    }
+
+    public Optional<UUID> guidOpt() {
+        return guidOpt;
     }
 
     public String stringReq() {
@@ -152,6 +158,13 @@ public class TestRow {
             .build();
     }
 
+    public static TestRow of(UUID uuid) {
+        return TestRow.newBuilder()
+            .guid(uuid)
+            .guidOpt(Optional.ofNullable(uuid))
+            .build();
+    }
+
     public static TestRow of(LocalTime localTimeOpt) {
         return TestRow.newBuilder()
             .localTimeOpt(Optional.of(localTimeOpt))
@@ -182,6 +195,7 @@ public class TestRow {
 
     public static final class Builder {
         private UUID guid;
+        private Optional<UUID> guidOpt;
         private String stringReq;
         private Optional<String> stringOpt;
         private Integer integerReq;
@@ -201,6 +215,7 @@ public class TestRow {
 
         private Builder() {
             this.guid = UUID.randomUUID();
+            this.guidOpt = Optional.empty();
             this.stringReq = RandomStringUtils.randomAlphabetic(10, 20);
             this.stringOpt = Optional.empty();
             this.integerReq = RandomUtils.nextInt();
@@ -219,6 +234,11 @@ public class TestRow {
 
         public Builder guid(UUID guid) {
             this.guid = guid;
+            return this;
+        }
+
+        public Builder guidOpt(Optional<UUID> guidOpt) {
+            this.guidOpt = guidOpt;
             return this;
         }
 

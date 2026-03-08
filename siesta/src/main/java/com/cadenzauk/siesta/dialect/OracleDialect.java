@@ -101,7 +101,12 @@ public class OracleDialect extends AnsiDialect {
         ;
 
         types()
-            .register(DbTypeId.BINARY, new DefaultVarbinary("raw"))
+            .register(DbTypeId.BINARY, new DefaultVarbinary("raw") {
+                @Override
+                public String literal(Database database, byte[] value) {
+                    return String.format("hextoraw('%s')", hex(value));
+                }
+            })
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
             .register(DbTypeId.BOOLEAN, new BooleanAsTinyInt("smallint"))
             .register(DbTypeId.SMALLINT, new DefaultSmallint(){

@@ -27,6 +27,7 @@ import com.cadenzauk.core.tuple.Tuple;
 import com.cadenzauk.core.tuple.Tuple2;
 import com.cadenzauk.siesta.ddl.TestSchema;
 import com.cadenzauk.siesta.dialect.AutoDetectDialect;
+import com.cadenzauk.siesta.jdbc.JdbcSqlExecutor;
 import com.cadenzauk.siesta.model.MoneyAmount;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.SaleRow;
@@ -37,6 +38,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -165,11 +167,24 @@ public abstract class IntegrationTest {
         }
 
         @Bean
-        public SpringSiesta springSiesta(TestDatabaseFactory testDatabaseFactory) {
+        public TestSchema testSchema(Dialect dialect) {
+            return new TestSchema(dialect);
+        }
+
+        @Bean
+        public SpringSiesta springSiesta(TestSchema testSchema, TestDatabaseFactory testDatabaseFactory) {
             return new SpringSiesta()
                 .setDropFirst(true)
                 .setDatabase(database(testDatabaseFactory))
-                .setSchemaDefinition(new TestSchema(dialect()).schemaDefinition());
+                .setSchemaDefinition(testSchema.schemaDefinition());
+        }
+
+        @Bean
+        public SpringSiesta springSiestaBinaryUuid(@Qualifier("springSiesta") SpringSiesta ignored, TestSchema testSchema, TestDatabaseFactory testDatabaseFactory) {
+            return new SpringSiesta()
+                .setDropFirst(false)
+                .setDatabase(binaryUuidDatabase(testDatabaseFactory))
+                .setSchemaDefinition(testSchema.binaryUuidSchema());
         }
 
         @Bean
@@ -180,6 +195,15 @@ public abstract class IntegrationTest {
         @Bean
         public Database database(TestDatabaseFactory testDatabaseFactory) {
             return testDatabaseFactory.testDatabase(dataSource(), dialect());
+        }
+
+        @Bean
+        public Database binaryUuidDatabase(TestDatabaseFactory testDatabaseFactory) {
+            return testDatabaseFactory
+                .testDatabaseBuilder(dialect())
+                .defaultSqlExecutor(JdbcSqlExecutor.of(dataSource()))
+                .withOption(DatabaseOptions.Option.UuidAsBinary)
+                .build();
         }
 
         @Bean

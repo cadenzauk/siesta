@@ -37,7 +37,6 @@ import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.fore
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.notNull;
 import static com.cadenzauk.siesta.ddl.definition.action.Column.Constraints.primaryKey;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.bigint;
-import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.binary;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.bool;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.character;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.date;
@@ -48,6 +47,7 @@ import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.jsonb;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.smallint;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.time;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.timestamp;
+import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.uuid;
 import static com.cadenzauk.siesta.ddl.definition.action.ColumnDataType.varchar;
 
 public class TestSchema {
@@ -140,7 +140,8 @@ public class TestSchema {
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("TEST_TABLE")
-                .column(TestRow::guid, binary(16), notNull(), primaryKey())
+                .column(TestRow::guid, uuid(), notNull(), primaryKey())
+                .column(TestRow::guidOpt, uuid())
                 .column(TestRow::stringReq, varchar(40))
                 .column(TestRow::stringOpt, varchar(40))
                 .column(TestRow::integerReq, integer())
@@ -163,7 +164,17 @@ public class TestSchema {
                 .author("mark")
                 .schemaName("SIESTA")
                 .tableName("UUID_TEST_TABLE")
+                .column(UuidTestRow::guid, uuid(), notNull(), primaryKey())
+                .column(UuidTestRow::guidOpt, uuid())
+                .column(UuidTestRow::textValue, varchar(40))
+            )
+            .createTable(t -> t
+                .id("create uuid_as_varchar_test_table table")
+                .author("mark")
+                .schemaName("SIESTA")
+                .tableName("UUID_AS_VARCHAR_TEST_TABLE")
                 .column(UuidTestRow::guid, varchar(36), notNull(), primaryKey())
+                .column(UuidTestRow::guidOpt, varchar(36))
                 .column(UuidTestRow::textValue, varchar(40))
             )
             .createTable(t -> t
@@ -206,6 +217,21 @@ public class TestSchema {
                 .column("JSON_ID", bigint(), notNull(), primaryKey())
                 .column("DATA", json(1000))
                 .column("DATA_BINARY", jsonb(1000))
+            )
+            .build();
+    }
+
+    public SchemaDefinition binaryUuidSchema() {
+        return SchemaDefinition.newBuilder()
+            .id("test binary schema")
+            .createTable(t -> t
+                .id("create binary_uuid_test_table table")
+                .author("mark")
+                .schemaName("SIESTA")
+                .tableName("BINARY_UUID_TEST_TABLE")
+                .column(UuidTestRow::guid, uuid(), notNull(), primaryKey())
+                .column(UuidTestRow::guidOpt, uuid())
+                .column(UuidTestRow::textValue, varchar(40))
             )
             .build();
     }

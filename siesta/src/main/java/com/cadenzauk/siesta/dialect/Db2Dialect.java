@@ -66,6 +66,12 @@ public class Db2Dialect extends AnsiDialect {
 
         types()
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))
+            .register(DbTypeId.BINARY, new DefaultVarbinary("binary") {
+                @Override
+                public String literal(Database database, byte[] value) {
+                    return String.format("HEXTORAW('%s')", hex(value));
+                }
+            })
             .register(DbTypeId.VARBINARY, new DefaultVarbinary() {
                 @Override
                 public String literal(Database database, byte[] value) {

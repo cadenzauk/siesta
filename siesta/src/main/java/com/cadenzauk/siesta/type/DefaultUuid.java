@@ -23,6 +23,7 @@
 package com.cadenzauk.siesta.type;
 
 import com.cadenzauk.siesta.Database;
+import com.cadenzauk.siesta.DatabaseOptions;
 
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
@@ -31,49 +32,103 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class DefaultUuid implements DbType<UUID> {
+    private final boolean uuidIsSupported;
+    private final String typename;
+
+    public DefaultUuid(boolean uuidIsSupported, String typename) {
+        this.uuidIsSupported = uuidIsSupported;
+        this.typename = typename;
+    }
+
+    public DefaultUuid(boolean uuidIsSupported) {
+        this(uuidIsSupported, "uuid");
+    }
+
+    public DefaultUuid(String typename) {
+        this(true, typename);
+    }
+
+    public DefaultUuid() {
+        this(false, "uuid");
+    }
+
     @Override
     public UUID getColumnValue(Database database, ResultSet rs, String col) throws SQLException {
-        byte[] bytes = rs.getBytes(col);
-        return rs.wasNull() || bytes == null ? null : fromBytes(bytes);
+        if (useUuid(database)) {
+            UUID uuid = rs.getObject(col, UUID.class);
+            return rs.wasNull() || uuid == null ? null : uuid;
+        } else {
+            byte[] bytes = rs.getBytes(col);
+            return rs.wasNull() || bytes == null ? null : fromBytes(bytes);
+        }
     }
 
     @Override
     public UUID getColumnValue(Database database, ResultSet rs, int col) throws SQLException {
-        byte[] bytes = rs.getBytes(col);
-        return rs.wasNull() || bytes == null ? null : fromBytes(bytes);
+        if (useUuid(database)) {
+            UUID uuid = rs.getObject(col, UUID.class);
+            return rs.wasNull() || uuid == null ? null : uuid;
+        } else {
+            byte[] bytes = rs.getBytes(col);
+            return rs.wasNull() || bytes == null ? null : fromBytes(bytes);
+        }
     }
 
     @Override
     public String sqlType(Database database) {
-        return type(database).sqlType(database, 16);
+        if (useUuid(database)) {
+            return typename;
+        } else {
+            return binaryType(database).sqlType(database, 16);
+        }
     }
 
     @Override
     public String sqlType(Database database, int arg) {
-        return type(database).sqlType(database, arg);
+        if (useUuid(database)) {
+            return typename;
+        } else {
+            return binaryType(database).sqlType(database, arg);
+        }
     }
 
     @Override
     public String sqlType(Database database, int arg1, int arg2) {
-        return type(database).sqlType(database, arg1, arg2);
+        if (useUuid(database)) {
+            return typename;
+        } else {
+            return binaryType(database).sqlType(database, arg1, arg2);
+        }
     }
 
     @Override
     public Object convertToDatabase(Database database, UUID value) {
-        return type(database).convertToDatabase(database, value == null ? null : toBytes(value));
+        if (useUuid(database)) {
+            return value;
+        } else {
+            return binaryType(database).convertToDatabase(database, value == null ? null : toBytes(value));
+        }
     }
 
     @Override
     public String literal(Database database, UUID value) {
-        return type(database).literal(database, toBytes(value));
+        if (useUuid(database)) {
+            return "'" + value.toString() + "'";
+        } else {
+            return binaryType(database).literal(database, toBytes(value));
+        }
     }
 
     @Override
     public String parameter(Database database, Optional<UUID> value) {
-        return type(database).parameter(database, value.map(DefaultUuid::toBytes));
+        if (useUuid(database)) {
+            return "?";
+        } else {
+            return binaryType(database).parameter(database, value.map(DefaultUuid::toBytes));
+        }
     }
 
-    private DbType<byte[]> type(Database database) {
+    private DbType<byte[]> binaryType(Database database) {
         return database.dialect().type(DbTypeId.BINARY);
     }
 
@@ -89,5 +144,9 @@ public class DefaultUuid implements DbType<UUID> {
         buffer.putLong(uuid.getMostSignificantBits());
         buffer.putLong(uuid.getLeastSignificantBits());
         return buffer.array();
+    }
+
+    private boolean useUuid(Database database) {
+        return uuidIsSupported && database.isNotSet(DatabaseOptions.Option.UuidAsBinary);
     }
 }

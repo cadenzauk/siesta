@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 public class ColumnDataType<T> {
     private final DbTypeId<T> dataTypeId;
@@ -120,6 +121,10 @@ public class ColumnDataType<T> {
 
     public static ColumnDataType<BigDecimal> decimal(int precision, int scale) {
         return new ColumnDataType<>(DbTypeId.DECIMAL, precision, scale);
+    }
+
+    public static ColumnDataType<UUID> uuid() {
+        return new ColumnDataType<>(DbTypeId.UUID);
     }
 
     public static <T> ColumnDataType<T> of(DbTypeId<T> type, int len, int prec, int scale) {

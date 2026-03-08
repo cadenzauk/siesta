@@ -46,6 +46,7 @@ import com.cadenzauk.siesta.type.DefaultSmallint;
 import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
+import com.cadenzauk.siesta.type.DefaultUuid;
 import com.cadenzauk.siesta.type.DefaultVarchar;
 
 import java.time.LocalDateTime;
@@ -169,7 +170,7 @@ public class MariaDbDialect extends AnsiDialect {
                     return "cast(? as datetime)";
                 }
             })
-        ;
+            .register(DbTypeId.UUID, new DefaultUuid(true));
 
         exceptions()
             .register("42S02", NoSuchObjectException::new)

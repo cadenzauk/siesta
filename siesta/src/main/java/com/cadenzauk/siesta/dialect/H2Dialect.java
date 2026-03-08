@@ -44,6 +44,7 @@ import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBinaryJson;
 import com.cadenzauk.siesta.type.DefaultJson;
+import com.cadenzauk.siesta.type.DefaultUuid;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -102,7 +103,8 @@ public class H2Dialect extends AnsiDialect {
                 public Object convertToDatabase(Database database, BinaryJson value) {
                     return value == null ? null : value.data().getBytes(StandardCharsets.UTF_8);
                 }
-            });
+            })
+            .register(DbTypeId.UUID, new DefaultUuid(true));
 
         functions()
             .register(DateFunctionSpecs::registerDateAdd)

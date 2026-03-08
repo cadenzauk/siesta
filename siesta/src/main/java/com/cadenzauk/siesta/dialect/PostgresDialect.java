@@ -45,6 +45,7 @@ import com.cadenzauk.siesta.type.DbTypeId;
 import com.cadenzauk.siesta.type.DefaultBinaryJson;
 import com.cadenzauk.siesta.type.DefaultJson;
 import com.cadenzauk.siesta.type.DefaultTinyint;
+import com.cadenzauk.siesta.type.DefaultUuid;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
 
 import java.util.Arrays;
@@ -161,6 +162,7 @@ public class PostgresDialect extends AnsiDialect {
                     return "?::jsonb";
                 }
             })
+            .register(DbTypeId.UUID, new DefaultUuid(true))
         ;
 
         exceptions()
