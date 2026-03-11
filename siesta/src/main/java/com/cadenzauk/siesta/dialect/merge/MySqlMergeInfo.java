@@ -40,11 +40,14 @@ public class MySqlMergeInfo extends MergeInfo {
 
     @Override
     public String mergeSql(MergeSpec mergeSpec) {
+        String onDuplicateKeyUpdates = mergeSpec.updateColumnNames().isEmpty()
+            ? mergeSpec.insertColumnNames().get(0) + " = " + mergeSpec.insertColumnNames().get(0)
+            : mergeSpec.updateColumnNames().stream().map(col -> String.format("%s = values(%s)", col, col)).collect(Collectors.joining(", "));
         return String.format("insert into %s(%s) values %s on duplicate key update %s",
             mergeSpec.targetTableName(),
             String.join(", ", mergeSpec.insertColumnNames()),
             mergeSpec.insertArgs().stream().map(x -> "(" + String.join(", ", mergeSpec.insertArgsSql()) + ")").collect(Collectors.joining(", ")),
-            mergeSpec.updateColumnNames().stream().map(col -> String.format("%s = values(%s)", col, col)).collect(Collectors.joining(", ")));
+            onDuplicateKeyUpdates);
     }
 
     @Override

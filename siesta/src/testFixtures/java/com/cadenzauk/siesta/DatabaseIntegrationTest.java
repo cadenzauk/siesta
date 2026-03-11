@@ -52,6 +52,7 @@ import com.cadenzauk.siesta.json.Json;
 import com.cadenzauk.siesta.model.JsonDataRow;
 import com.cadenzauk.siesta.model.ManufacturerRow;
 import com.cadenzauk.siesta.model.MoneyAmount;
+import com.cadenzauk.siesta.model.NonUpdateableSalespersonRow;
 import com.cadenzauk.siesta.model.PartRow;
 import com.cadenzauk.siesta.model.PartType;
 import com.cadenzauk.siesta.model.PartWithTypeRow;
@@ -267,6 +268,24 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
 
         assertThat(result, is(dialect.mergeInfo().insertedAndUpdatedResult()));
         assertThat(stored1, is(updated));
+        assertThat(stored2, is(inserted));
+    }
+
+    @Test
+    void upsertCanDoInsertOnlyIfNoColumnsAreUpdateable() {
+        assumeTrue(dialect.mergeInfo().supportsUpsert());
+
+        Database database = testDatabase(dataSource, dialect);
+        NonUpdateableSalespersonRow original = new NonUpdateableSalespersonRow(aRandomSalesperson(s -> s.numberOfSales(20)));
+        NonUpdateableSalespersonRow updated = new NonUpdateableSalespersonRow(aRandomSalesperson(s -> s.numberOfSales(30).salespersonId(original.salespersonId())));
+        NonUpdateableSalespersonRow inserted = new NonUpdateableSalespersonRow(aRandomSalesperson(s -> s.numberOfSales(40)));
+        database.insert(original);
+
+        int result = database.upsertRows(updated, inserted);
+        NonUpdateableSalespersonRow stored1 = database.from(NonUpdateableSalespersonRow.class).where(NonUpdateableSalespersonRow::salespersonId).isEqualTo(original.salespersonId()).single();
+        NonUpdateableSalespersonRow stored2 = database.from(NonUpdateableSalespersonRow.class).where(NonUpdateableSalespersonRow::salespersonId).isEqualTo(inserted.salespersonId()).single();
+
+        assertThat(stored1, is(original));
         assertThat(stored2, is(inserted));
     }
 

@@ -88,13 +88,14 @@ public class MergeInfo {
 
     public String mergeSql(MergeSpec mergeSpec) {
         String selectSql = selectSql(mergeSpec);
-        return String.format("merge into %s %s using (%s) %s on (%s) when matched then update set %s when not matched then insert(%s) values(%s)",
+        String whenMatched = mergeSpec.updateColumnNames().isEmpty() ? "" : "when matched then update set " + mergeSpec.updateColumnNames().stream().map(col -> String.format("%s = %s.%s", col, mergeSpec.sourceAlias(), col)).collect(joining(", "));
+        return String.format("merge into %s %s using (%s) %s on (%s) %s when not matched then insert(%s) values(%s)",
             mergeSpec.targetTableName(),
             mergeSpec.targetAlias(),
             selectSql,
             mergeSpec.sourceAlias(),
             mergeSpec.idColumnNames().stream().map(col -> String.format("%s.%s = %s.%s", mergeSpec.targetAlias(), col, mergeSpec.sourceAlias(), col)).collect(joining(" and ")),
-            mergeSpec.updateColumnNames().stream().map(col -> String.format("%s = %s.%s", col, mergeSpec.sourceAlias(), col)).collect(joining(", ")),
+            whenMatched,
             String.join(", ", mergeSpec.insertColumnNames()),
             mergeSpec.insertColumnNames().stream().map(col -> String.format("%s.%s", mergeSpec.sourceAlias(), col)).collect(joining(", ")));
     }
