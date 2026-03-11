@@ -14,7 +14,7 @@ junitJupiter = "5.13.3"
 junitPlatform = "1.13.2"
 kotlin = "2.0.21"
 mockito = "5.18.0"
-siesta = "1.0.0-SNAPSHOT"
+siesta = "0.13.0"
 spring = "6.2.8"
 
 [libraries]
