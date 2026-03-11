@@ -1,3 +1,7 @@
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Base64
+
 /*
  * Copyright (c) 2017, 2025 Cadenza United Kingdom Limited
  *
@@ -64,4 +68,18 @@ tasks.clean {
 
 tasks.check {
     dependsOn("integrationTest")
+}
+
+tasks.register("uploadRepository") {
+    description = "Uploads OSSRH repository to the Central Publisher Portal."
+    group = "publishing"
+    doLast {
+        val username = project.findProperty("ossrhUsername") as? String ?: ""
+        val password = project.findProperty("ossrhPassword") as? String ?: ""
+        val token = String(Base64.getEncoder().encode("$username:$password".toByteArray()))
+        val request = URL("https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.cadenzauk").openConnection() as HttpURLConnection
+        request.requestMethod = "POST"
+        request.setRequestProperty("Authorization", "Bearer $token")
+        println(request.responseCode)
+    }
 }
