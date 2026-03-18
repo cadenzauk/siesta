@@ -31,7 +31,6 @@ import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class JacksonJsonProvider implements JsonProvider {
     private static final ObjectMapper mapper = new ObjectMapper();

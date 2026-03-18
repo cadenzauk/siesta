@@ -38,7 +38,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.MappedSuperclass;
@@ -242,7 +241,6 @@ class SelectTest {
     @ParameterizedTest
     @MethodSource("parametersForWhere")
     void where(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InWhereExpectingAnd<Row2>> where, String expected) {
-        MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
 
         Alias<Row2> alias = database.table(Row2.class).as("q");
@@ -296,7 +294,6 @@ class SelectTest {
     @ParameterizedTest
     @MethodSource("parametersForOrderByOnSelect")
     void orderByOnSelect(BiFunction<Alias<Row2>,ExpectingJoin1<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        MockitoAnnotations.initMocks(this);
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 
@@ -345,8 +342,6 @@ class SelectTest {
     @ParameterizedTest
     @MethodSource("parametersForOrderByOnWhereClause")
     void orderByOnWhereClause(BiFunction<Alias<Row2>,InWhereExpectingAnd<Row2>,InOrderByExpectingThen<Row2>> orderBy, String expected) {
-        MockitoAnnotations.initMocks(this);
-
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Alias<Row2> alias = database.table(Row2.class).as("q");
 

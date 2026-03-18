@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.db2;
 
-import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import com.cadenzauk.siesta.TempTableIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 

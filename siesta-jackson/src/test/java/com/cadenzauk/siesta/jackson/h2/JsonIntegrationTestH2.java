@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.jackson.h2;
 
 import com.cadenzauk.siesta.jackson.test.JsonIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 
 class JsonIntegrationTestH2 extends JsonIntegrationTest {
 }

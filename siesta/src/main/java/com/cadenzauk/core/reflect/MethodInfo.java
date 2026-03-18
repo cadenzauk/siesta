@@ -39,7 +39,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 public class MethodInfo<C, R> {

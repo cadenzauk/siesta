@@ -48,5 +48,5 @@ public class DatabaseOptions {
         return set.contains(option);
     }
 
-    public static DatabaseOptions None = new DatabaseOptions(noneOf(Option.class));
+    public static final DatabaseOptions None = new DatabaseOptions(noneOf(Option.class));
 }

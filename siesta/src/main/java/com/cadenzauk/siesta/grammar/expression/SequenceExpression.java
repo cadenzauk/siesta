@@ -22,14 +22,12 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.Sequence;
 import com.cadenzauk.siesta.grammar.LabelGenerator;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class SequenceExpression<T> implements TypedExpression<T> {

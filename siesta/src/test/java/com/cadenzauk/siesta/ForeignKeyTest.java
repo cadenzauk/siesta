@@ -209,7 +209,7 @@ class ForeignKeyTest {
                     .column(Child::distributionHash).references(Parent::distributionHash))
             )
             .build();
-        long randomChildId = RandomUtils.nextLong();
+        long randomChildId = RandomUtils.insecure().randomLong();
 
         database.from(Child.class, "c")
             .join(Parent.class, "p")

@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.mariadb;
 
-import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import com.cadenzauk.siesta.TempTableIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 

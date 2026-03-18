@@ -22,8 +22,6 @@
 
 package com.cadenzauk.core.util;
 
-import com.cadenzauk.core.reflect.Factory;
-import com.cadenzauk.core.sql.PreparedStatementUtil;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

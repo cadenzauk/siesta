@@ -40,7 +40,7 @@ import com.cadenzauk.siesta.dialect.merge.MergeSpec;
 import com.cadenzauk.siesta.grammar.InvalidForeignKeyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -332,7 +332,7 @@ public class Table<R> implements ColumnCollection<R> {
     public <F> Optional<Column<F,R>> findColumn(Class<F> fieldClass, String propertyName) {
         return columns()
             .filter(c -> fieldClass.isAssignableFrom(c.type().getRawType()))
-            .filter(c -> StringUtils.equals(propertyName, c.propertyName()))
+            .filter(c -> Strings.CS.equals(propertyName, c.propertyName()))
             .map(x -> (Column<F,R>) x)
             .findFirst();
     }

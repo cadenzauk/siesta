@@ -24,7 +24,6 @@ package com.cadenzauk.siesta.grammar.temp;
 
 import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.reflect.MethodInfo;
-import com.cadenzauk.core.sql.QualifiedName;
 import com.cadenzauk.core.util.TokenReplacer;
 import com.cadenzauk.siesta.Database;
 import com.google.common.collect.ImmutableMap;
@@ -61,13 +60,13 @@ public class LocalTempTable<R> extends TempTable<R> {
             "columnDefs", columnsSql
         ));
         switch (onCommit()) {
-            case PRESERVE_ROWS:
-            default:
-                return database().dialect().tempTableInfo().createLocalPreserveRowsSql(tokenReplacer);
             case DELETE_ROWS:
                 return database().dialect().tempTableInfo().createLocalDeleteRowsSql(tokenReplacer);
             case DROP_TABLE:
                 return database().dialect().tempTableInfo().createLocalDropTableSql(tokenReplacer);
+            case PRESERVE_ROWS:
+            default:
+                return database().dialect().tempTableInfo().createLocalPreserveRowsSql(tokenReplacer);
         }
     }
 

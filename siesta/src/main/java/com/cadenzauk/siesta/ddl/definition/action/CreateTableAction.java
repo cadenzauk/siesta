@@ -97,12 +97,12 @@ public class CreateTableAction extends LoggableAction {
         }
 
         public Builder schemaName(String val) {
-            schemaName = OptionalUtil.ofBlankable(val).map(name -> d -> name);;
+            schemaName = OptionalUtil.ofBlankable(val).map(name -> d -> name);
             return this;
         }
 
         public Builder tableName(String val) {
-            tableName = OptionalUtil.ofBlankable(val).map(name -> d -> name);;
+            tableName = OptionalUtil.ofBlankable(val).map(name -> d -> name);
             return this;
         }
 

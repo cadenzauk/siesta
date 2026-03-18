@@ -33,8 +33,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.Calendar.APRIL;
@@ -78,7 +76,7 @@ public abstract class RandomValues extends UtilityClass {
     }
 
     public static BigDecimal randomBigDecimal(int scale, int precision) {
-        return new BigDecimal(RandomStringUtils.randomNumeric(1, scale) + "." + RandomStringUtils.randomNumeric(precision));
+        return new BigDecimal(RandomStringUtils.insecure().nextNumeric(1, scale) + "." + RandomStringUtils.insecure().nextNumeric(precision));
     }
 
     @SuppressWarnings("MagicConstant")

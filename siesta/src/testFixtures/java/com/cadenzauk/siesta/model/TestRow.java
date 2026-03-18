@@ -216,9 +216,9 @@ public class TestRow {
         private Builder() {
             this.guid = UUID.randomUUID();
             this.guidOpt = Optional.empty();
-            this.stringReq = RandomStringUtils.randomAlphabetic(10, 20);
+            this.stringReq = RandomStringUtils.insecure().nextAlphabetic(10, 20);
             this.stringOpt = Optional.empty();
-            this.integerReq = RandomUtils.nextInt();
+            this.integerReq = RandomUtils.insecure().randomInt();
             this.integerOpt = Optional.empty();
             this.decimalReq = RandomValues.randomBigDecimal(4, 5);
             this.decimalOpt = Optional.empty();

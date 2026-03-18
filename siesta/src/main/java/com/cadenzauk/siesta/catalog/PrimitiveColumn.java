@@ -33,7 +33,7 @@ import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.ddl.definition.action.ColumnDataType;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.sql.ResultSet;
 import java.util.NoSuchElementException;
@@ -79,7 +79,7 @@ public class PrimitiveColumn<T, R, B> implements TableColumn<T,R,B> {
 
     @Override
     public boolean includes(Scope scope, ColumnSpecifier<?> columnSpecifier) {
-        return StringUtils.equals(columnSpecifier.columnName(scope), columnName);
+        return Strings.CS.equals(columnSpecifier.columnName(scope), columnName);
     }
 
     @Override

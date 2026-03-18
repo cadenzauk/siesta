@@ -94,15 +94,15 @@ class DataTypeTest {
 
     private static Stream<Arguments> parametersForToDatabase() {
         return Stream.of(
-            testCaseForToDatabase(DataType.BIG_DECIMAL, new BigDecimal(RandomUtils.nextDouble())),
+            testCaseForToDatabase(DataType.BIG_DECIMAL, new BigDecimal(RandomUtils.insecure().randomDouble())),
             testCaseForToDatabase(DataType.BYTE, RandomValues.randomByte()),
-            testCaseForToDatabase(DataType.BYTE_ARRAY, RandomUtils.nextBytes(40)),
-            testCaseForToDatabase(DataType.DOUBLE, RandomUtils.nextDouble()),
-            testCaseForToDatabase(DataType.FLOAT, RandomUtils.nextFloat()),
-            testCaseForToDatabase(DataType.INTEGER, RandomUtils.nextInt()),
-            testCaseForToDatabase(DataType.LONG, RandomUtils.nextLong()),
+            testCaseForToDatabase(DataType.BYTE_ARRAY, RandomUtils.insecure().randomBytes(40)),
+            testCaseForToDatabase(DataType.DOUBLE, RandomUtils.insecure().randomDouble()),
+            testCaseForToDatabase(DataType.FLOAT, RandomUtils.insecure().randomFloat()),
+            testCaseForToDatabase(DataType.INTEGER, RandomUtils.insecure().randomInt()),
+            testCaseForToDatabase(DataType.LONG, RandomUtils.insecure().randomLong()),
             testCaseForToDatabase(DataType.SHORT, RandomValues.randomShort()),
-            testCaseForToDatabase(DataType.STRING, RandomStringUtils.random(20)),
+            testCaseForToDatabase(DataType.STRING, RandomStringUtils.insecure().next(20)),
             testCaseForToDatabase(DataType.BIG_DECIMAL, null),
             testCaseForToDatabase(DataType.BYTE, null),
             testCaseForToDatabase(DataType.BYTE_ARRAY, null),

@@ -22,14 +22,12 @@
 
 package com.cadenzauk.siesta.grammar.expression.olap;
 
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.grammar.expression.Precedence;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class InOlapFunction<T> implements TypedExpression<T> {

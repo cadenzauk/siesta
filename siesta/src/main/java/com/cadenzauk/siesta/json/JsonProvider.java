@@ -25,10 +25,8 @@ package com.cadenzauk.siesta.json;
 import com.cadenzauk.core.reflect.Factory;
 import com.cadenzauk.core.reflect.util.ClassUtil;
 import com.cadenzauk.core.util.Lazy;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.Strings;
 
-import java.util.List;
 import java.util.Map;
 
 public interface JsonProvider {
@@ -48,7 +46,7 @@ public interface JsonProvider {
             String className = System.getProperty("com.cadenzauk.json.provider", DEFAULT_PROVIDER);
             Class<?> jacksonClass = ClassUtil.forName(className)
                 .orElseThrow(() -> new JsonProviderException(className + " was not found in your class path." +
-                    (StringUtils.equals(className, DEFAULT_PROVIDER) ? "  Please add a dependency on com.cadenzauk:siesta-jackson" : "")));
+                    (Strings.CS.equals(className, DEFAULT_PROVIDER) ? "  Please add a dependency on com.cadenzauk:siesta-jackson" : "")));
 
             return (JsonProvider) Factory.forClass(jacksonClass).get();
         }

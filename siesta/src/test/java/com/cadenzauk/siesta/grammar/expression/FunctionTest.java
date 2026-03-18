@@ -36,7 +36,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.Function;
@@ -63,7 +62,6 @@ abstract class FunctionTest {
     @ParameterizedTest
     @MethodSource("parametersForFunctionTest")
     void functionTest(Function<Alias<TestRow>, TypedExpression<?>> sutSupplier, String expectedSql, Object[] expectedArgs) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<TestRow> alias = database.table(TestRow.class).as("s");
 

@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.core.util.OptionalUtil;
 import com.cadenzauk.siesta.Scope;
@@ -30,7 +29,6 @@ import com.google.common.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ConcatOperator  implements TypedExpression<String> {

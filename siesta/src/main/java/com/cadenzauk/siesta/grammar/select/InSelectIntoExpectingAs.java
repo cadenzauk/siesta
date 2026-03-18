@@ -26,7 +26,6 @@ import com.cadenzauk.core.function.Function1;
 import com.cadenzauk.core.function.FunctionOptional1;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
-import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
 public class InSelectIntoExpectingAs<RT, T> {
     private final InSelectIntoExpectingWith<RT> inSelectIntoExpectingWith;

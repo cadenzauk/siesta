@@ -66,8 +66,8 @@ class ResultSetUtilTest {
 
     @Test
     void getString() throws SQLException {
-        String column = RandomStringUtils.randomAlphabetic(10);
-        String expectedValue = RandomStringUtils.random(40);
+        String column = RandomStringUtils.insecure().nextAlphabetic(10);
+        String expectedValue = RandomStringUtils.insecure().next(40);
         when(resultSet.getString(column)).thenReturn(expectedValue);
 
         String result = ResultSetUtil.getString(resultSet, column);
@@ -88,8 +88,8 @@ class ResultSetUtilTest {
     @ParameterizedTest
     @CsvSource({"true", "false"})
     void stream(boolean close) throws SQLException {
-        int count = RandomUtils.nextInt(5, 10);
-        String[] mappedRows = Stream.generate(() -> RandomStringUtils.randomAlphabetic(30)).limit(count).toArray(String[]::new);
+        int count = RandomUtils.insecure().randomInt(5, 10);
+        String[] mappedRows = Stream.generate(() -> RandomStringUtils.insecure().nextAlphabetic(30)).limit(count).toArray(String[]::new);
         MockUtil.when(rowMapper.mapRow(resultSet)).thenReturn(mappedRows);
         MockUtil.when(resultSet.next()).thenReturn(count, true).thenReturn(false);
 
@@ -108,9 +108,9 @@ class ResultSetUtilTest {
 
     @Test
     void streamEarlyExit() throws SQLException {
-        int count = RandomUtils.nextInt(5, 10);
-        int limit = RandomUtils.nextInt(1, 4);
-        String[] mappedRows = Stream.generate(() -> RandomStringUtils.randomAlphabetic(30)).limit(count).toArray(String[]::new);
+        int count = RandomUtils.insecure().randomInt(5, 10);
+        int limit = RandomUtils.insecure().randomInt(1, 4);
+        String[] mappedRows = Stream.generate(() -> RandomStringUtils.insecure().nextAlphabetic(30)).limit(count).toArray(String[]::new);
         MockUtil.when(rowMapper.mapRow(resultSet)).thenReturn(mappedRows);
         MockUtil.when(resultSet.next()).thenReturn(count, true).thenReturn(false);
 
@@ -130,8 +130,8 @@ class ResultSetUtilTest {
     @TestCase("true")
     @TestCase("false")
     void streamSupplier(boolean close) throws SQLException {
-        int count = RandomUtils.nextInt(5, 10);
-        String[] mappedRows = Stream.generate(() -> RandomStringUtils.random(30)).limit(count).toArray(String[]::new);
+        int count = RandomUtils.insecure().randomInt(5, 10);
+        String[] mappedRows = Stream.generate(() -> RandomStringUtils.insecure().next(30)).limit(count).toArray(String[]::new);
         MockUtil.when(rowMapper.mapRow(resultSet)).thenReturn(mappedRows);
         MockUtil.when(resultSet.next()).thenReturn(count, true).thenReturn(false);
 
@@ -150,9 +150,9 @@ class ResultSetUtilTest {
 
     @Test
     void streamSupplierEarlyExit() throws SQLException {
-        int count = RandomUtils.nextInt(5, 10);
-        int limit = RandomUtils.nextInt(1, 4);
-        String[] mappedRows = Stream.generate(() -> RandomStringUtils.randomAlphabetic(30)).limit(count).toArray(String[]::new);
+        int count = RandomUtils.insecure().randomInt(5, 10);
+        int limit = RandomUtils.insecure().randomInt(1, 4);
+        String[] mappedRows = Stream.generate(() -> RandomStringUtils.insecure().nextAlphabetic(30)).limit(count).toArray(String[]::new);
         MockUtil.when(rowMapper.mapRow(resultSet)).thenReturn(mappedRows);
         MockUtil.when(resultSet.next()).thenReturn(count, true).thenReturn(false);
 

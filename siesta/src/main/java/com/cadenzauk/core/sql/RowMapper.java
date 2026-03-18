@@ -24,6 +24,7 @@ package com.cadenzauk.core.sql;
 
 import java.sql.ResultSet;
 
+@FunctionalInterface
 public interface RowMapper<T> {
     T mapRow(ResultSet rs);
 }

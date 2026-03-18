@@ -22,12 +22,10 @@
 
 package com.cadenzauk.siesta.grammar.expression;
 
-import com.cadenzauk.core.sql.RowMapper;
 import com.cadenzauk.core.sql.RowMapperFactory;
 import com.cadenzauk.siesta.Scope;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ParenthesisedArithmeticExpression<T> implements TypedExpression<T> {

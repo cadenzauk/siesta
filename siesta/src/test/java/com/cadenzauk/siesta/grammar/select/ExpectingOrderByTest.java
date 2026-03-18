@@ -29,7 +29,6 @@ import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.RegularTableAlias;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,7 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.siesta.grammar.expression.StringFunctions.upper;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;

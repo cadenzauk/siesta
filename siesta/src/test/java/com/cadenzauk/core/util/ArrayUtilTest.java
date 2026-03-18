@@ -46,7 +46,7 @@ class ArrayUtilTest {
 
     @Test
     void newArrayClass() {
-        int size = RandomUtils.nextInt(5, 20);
+        int size = RandomUtils.insecure().randomInt(5, 20);
 
         ZonedDateTime[] result = ArrayUtil.newArray(ZonedDateTime.class, size);
 
@@ -55,16 +55,16 @@ class ArrayUtilTest {
 
     @Test
     void newArrayTypeToken() {
-        int size = RandomUtils.nextInt(5, 20);
+        int size = RandomUtils.insecure().randomInt(5, 20);
 
-        List<Integer>[] result = ArrayUtil.newArray(new TypeToken<List<Integer>>() {}, size);
+        List<Integer>[] result = ArrayUtil.newArray(new TypeToken<>() { }, size);
 
         assertThat(result, arrayWithSize(size));
     }
 
     @Test
     void generator() {
-        int size = RandomUtils.nextInt(5, 20);
+        int size = RandomUtils.insecure().randomInt(5, 20);
 
         IntFunction<List<String>[]> result = ArrayUtil.generator(List.class);
 
@@ -73,8 +73,8 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfString() {
-        int size = RandomUtils.nextInt(10, 20);
-        String value = RandomStringUtils.randomAlphabetic(10);
+        int size = RandomUtils.insecure().randomInt(10, 20);
+        String value = RandomStringUtils.insecure().nextAlphabetic(10);
 
         String[] result = ArrayUtil.arrayOf(size, value);
 
@@ -84,7 +84,7 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfChar() {
-        int size = RandomUtils.nextInt(10, 20);
+        int size = RandomUtils.insecure().randomInt(10, 20);
         char value = RandomValues.randomChar();
 
         char[] result = ArrayUtil.arrayOf(size, value);
@@ -95,8 +95,8 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfBoolean() {
-        int size = RandomUtils.nextInt(10, 20);
-        boolean value = RandomUtils.nextBoolean();
+        int size = RandomUtils.insecure().randomInt(10, 20);
+        boolean value = RandomUtils.insecure().randomBoolean();
 
         boolean[] result = ArrayUtil.arrayOf(size, value);
 
@@ -106,7 +106,7 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfByte() {
-        int size = RandomUtils.nextInt(10, 20);
+        int size = RandomUtils.insecure().randomInt(10, 20);
         byte value = RandomValues.randomByte();
 
         byte[] result = ArrayUtil.arrayOf(size, value);
@@ -117,7 +117,7 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfShort() {
-        int size = RandomUtils.nextInt(10, 20);
+        int size = RandomUtils.insecure().randomInt(10, 20);
         short value = RandomValues.randomShort();
 
         short[] result = ArrayUtil.arrayOf(size, value);
@@ -128,8 +128,8 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfInteger() {
-        int size = RandomUtils.nextInt(10, 20);
-        int value = RandomUtils.nextInt(1000, 2000);
+        int size = RandomUtils.insecure().randomInt(10, 20);
+        int value = RandomUtils.insecure().randomInt(1000, 2000);
 
         int[] result = ArrayUtil.arrayOf(size, value);
 
@@ -139,8 +139,8 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfLong() {
-        int size = RandomUtils.nextInt(10, 20);
-        long value = RandomUtils.nextLong(100000, 200000);
+        int size = RandomUtils.insecure().randomInt(10, 20);
+        long value = RandomUtils.insecure().randomLong(100000, 200000);
 
         long[] result = ArrayUtil.arrayOf(size, value);
 
@@ -150,8 +150,8 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfFloat() {
-        int size = RandomUtils.nextInt(10, 20);
-        float value = RandomUtils.nextFloat(100000, 200000);
+        int size = RandomUtils.insecure().randomInt(10, 20);
+        float value = RandomUtils.insecure().randomFloat(100000, 200000);
 
         float[] result = ArrayUtil.arrayOf(size, value);
 
@@ -161,8 +161,8 @@ class ArrayUtilTest {
 
     @Test
     void arrayOfDouble() {
-        int size = RandomUtils.nextInt(10, 20);
-        double value = RandomUtils.nextDouble(100000, 200000);
+        int size = RandomUtils.insecure().randomInt(10, 20);
+        double value = RandomUtils.insecure().randomDouble(100000, 200000);
 
         double[] result = ArrayUtil.arrayOf(size, value);
 

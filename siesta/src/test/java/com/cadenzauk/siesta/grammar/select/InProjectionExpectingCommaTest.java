@@ -29,13 +29,14 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.expression.ValueExpression;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
@@ -47,6 +48,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class InProjectionExpectingCommaTest {
     @Mock
     private Transaction transaction;
@@ -482,7 +484,6 @@ class InProjectionExpectingCommaTest {
     @ParameterizedTest
     @MethodSource("argsForComma")
     void testComma(BiFunction<InProjectionExpectingComma1<String>,Alias<SalespersonRow>,Select<?>> method, String expectedSql, Object[] expectedArgs) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
 

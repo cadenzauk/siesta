@@ -86,7 +86,7 @@ public class UuidTestRow {
         private Builder() {
             this.guid = UUID.randomUUID();
             this.guidOpt = Optional.empty();
-            this.textValue = RandomStringUtils.randomAlphabetic(10, 20);
+            this.textValue = RandomStringUtils.insecure().nextAlphabetic(10, 20);
         }
 
         public Builder guid(UUID guid) {

@@ -30,7 +30,6 @@ import com.cadenzauk.siesta.Scope;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
-import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 
 public class JsonKeyValue<T> {
     private final TypedExpression<String> key;

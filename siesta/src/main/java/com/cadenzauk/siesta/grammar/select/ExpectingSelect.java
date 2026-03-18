@@ -29,7 +29,6 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.DynamicRowMapperFactory;
 import com.cadenzauk.siesta.Projection;
 import com.cadenzauk.siesta.RegularTableAlias;
-import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.Table;
 import com.cadenzauk.siesta.grammar.expression.Label;
 import com.cadenzauk.siesta.grammar.expression.ResolvedColumn;

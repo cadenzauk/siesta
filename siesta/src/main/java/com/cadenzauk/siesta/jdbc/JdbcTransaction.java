@@ -53,6 +53,7 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void commit() {
         beforeCommitHooks.forEach(hook -> hook.accept(this));
@@ -61,11 +62,13 @@ public class JdbcTransaction implements Transaction {
         beforeCommitHooks.clear();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void beforeCommit(Consumer<Transaction> hook) {
         beforeCommitHooks.add(hook);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void rollback() {
         ConnectionUtil.rollback(connection);
@@ -74,48 +77,52 @@ public class JdbcTransaction implements Transaction {
         beforeCommitHooks.clear();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void afterRollback(Consumer<Transaction> hook) {
         afterRollbackHooks.add(hook);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
         return sqlExecutor.query(connection, sql, args, rowMapper);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> CompletableFuture<List<T>> queryAsync(String sql, Object[] args, RowMapper<T> rowMapper) {
         return sqlExecutor.queryAsync(connection, sql, args, rowMapper);
     }
 
+    /** {@inheritDoc} */
     @Override
     public <T> Stream<T> stream(String sql, Object[] args, RowMapper<T> rowMapper) {
         return autoCloseable.add(sqlExecutor.stream(connection, sql, args, rowMapper, new CompositeAutoCloseable()));
     }
 
+    /** {@inheritDoc} */
     @Override
     public int update(String sql, Object[] args) {
         return sqlExecutor.update(connection, sql, args);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean execute(String sql, Object[] args) {
         return sqlExecutor.execute(connection, sql, args);
     }
 
+    /** {@inheritDoc} */
     @Override
     public CompletableFuture<Integer> updateAsync(String sql, Object[] args) {
         return sqlExecutor.updateAsync(connection, sql, args);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void close() {
         rollback();
         autoCloseable.close();
-    }
-
-    Connection connection() {
-        return connection;
     }
 }

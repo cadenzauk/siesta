@@ -42,6 +42,7 @@ import com.cadenzauk.siesta.NamingStrategy;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -144,7 +145,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
     }
 
     DynamicRowMapperFactory<R> dynamicRowMapperFactoryFactory(Alias<?> alias) {
-        return new DynamicRowMapperFactory<R>() {
+        return new DynamicRowMapperFactory<>() {
             private final Set<String> labels = new HashSet<>();
 
             @Override
@@ -198,7 +199,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
 
     <T> Optional<Column<T,R>> findColumn(TypeToken<T> type, String propertyName) {
         return columnsOfType(type)
-            .filter(c -> StringUtils.equals(c.propertyName(), propertyName))
+            .filter(c -> Strings.CS.equals(c.propertyName(), propertyName))
             .findFirst();
     }
 
@@ -347,7 +348,7 @@ public class ColumnMapping<R, B> implements ColumnCollection<R> {
         protected Optional<? extends Column<Object,R>> findColumn(String propertyName) {
             return columns
                 .stream()
-                .filter(col -> StringUtils.equalsIgnoreCase(col.propertyName(), propertyName))
+                .filter(col -> Strings.CI.equals(col.propertyName(), propertyName))
                 .map(col -> (Column<Object,R>)col)
                 .findFirst();
         }

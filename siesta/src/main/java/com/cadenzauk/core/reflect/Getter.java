@@ -29,7 +29,7 @@ import com.cadenzauk.core.reflect.util.FieldUtil;
 import com.cadenzauk.core.reflect.util.MethodUtil;
 import com.cadenzauk.core.util.UtilityClass;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -66,7 +66,7 @@ public final class Getter extends UtilityClass {
     }
 
     public static boolean isGetter(Method method, Field forField) {
-        return getMethods().anyMatch(g -> StringUtils.equals(g.apply(forField.getName()), method.getName()));
+        return getMethods().anyMatch(g -> Strings.CS.equals(g.apply(forField.getName()), method.getName()));
     }
 
     public static Stream<String> possibleFieldNames(String name) {

@@ -34,7 +34,7 @@ import com.cadenzauk.siesta.ProjectionColumn;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.catalog.ForeignKeyReference;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.List;
 import java.util.Optional;
@@ -230,7 +230,7 @@ public class SubselectAlias<T> extends Alias<T> {
                 .components()
                 .stream()
                 .flatMap(c -> c.as(type))
-                .filter(c -> StringUtils.equals(c.propertyName(), propertyName))
+                .filter(c -> Strings.CS.equals(c.propertyName(), propertyName))
                 .map(c -> new SubselectAliasColumn<>(scope, c))
                 .findAny()
                 .map(Function.identity());

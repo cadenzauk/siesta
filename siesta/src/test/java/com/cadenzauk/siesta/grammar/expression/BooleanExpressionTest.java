@@ -27,6 +27,7 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Scope;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,7 +35,7 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -46,6 +47,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class BooleanExpressionTest {
     @Mock(answer = Answers.CALLS_REAL_METHODS)
     private BooleanExpression sut;
@@ -88,7 +90,6 @@ class BooleanExpressionTest {
     @ParameterizedTest
     @MethodSource("argsForAnd")
     void testAnd(BiFunction<Alias<SalespersonRow>,BooleanExpression, BooleanExpression> method, String expectedSql) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
         Scope scope = new Scope(database, alias);
@@ -103,7 +104,6 @@ class BooleanExpressionTest {
     @ParameterizedTest
     @MethodSource("argsForOr")
     void testOr(BiFunction<Alias<SalespersonRow>,BooleanExpression, BooleanExpression> method, String expectedSql) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
         Scope scope = new Scope(database, alias);

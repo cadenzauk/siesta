@@ -125,7 +125,7 @@ public class AddForeignKeyAction extends LoggableAction {
         }
 
         public Builder schemaName(String val) {
-            schemaName = OptionalUtil.ofBlankable(val).map(name -> d -> name);;
+            schemaName = OptionalUtil.ofBlankable(val).map(name -> d -> name);
             return this;
         }
 
@@ -140,7 +140,7 @@ public class AddForeignKeyAction extends LoggableAction {
         }
 
         public Builder tableName(Optional<String> val) {
-            tableName = val.filter(StringUtils::isNotBlank).map(name -> d -> name);;
+            tableName = val.filter(StringUtils::isNotBlank).map(name -> d -> name);
             return this;
         }
 

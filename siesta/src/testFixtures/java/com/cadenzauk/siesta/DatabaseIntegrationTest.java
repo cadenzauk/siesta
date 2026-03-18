@@ -1552,7 +1552,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         database.insert(salespersonRow1, salespersonRow2);
         SalesAreaRow salesAreaRow = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
-            .salesAreaName(RandomStringUtils.randomAlphabetic(10))
+            .salesAreaName(RandomStringUtils.insecure().nextAlphabetic(10))
             .salespersonId(Optional.of(salespersonRow1.salespersonId()))
             .build();
         database.insert(salesAreaRow);
@@ -1745,7 +1745,7 @@ public abstract class DatabaseIntegrationTest extends IntegrationTest {
         database.insert(salespersonRow1, salespersonRow2);
         SalesAreaRow salesAreaRow = SalesAreaRow.newBuilder()
             .salesAreaId(newId())
-            .salesAreaName(RandomStringUtils.randomAlphabetic(10))
+            .salesAreaName(RandomStringUtils.insecure().nextAlphabetic(10))
             .salespersonId(Optional.of(salespersonRow1.salespersonId()))
             .build();
         database.insert(salesAreaRow);

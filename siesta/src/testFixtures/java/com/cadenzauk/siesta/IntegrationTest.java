@@ -53,8 +53,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAscii;
-
 @ContextConfiguration
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ExtendWith(SpringExtension.class)
@@ -107,8 +105,8 @@ public abstract class IntegrationTest {
     public static SalespersonRow aRandomSalesperson() {
         return SalespersonRow.newBuilder()
             .salespersonId(newId())
-            .firstName(RandomStringUtils.randomAlphabetic(3, 12))
-            .surname(RandomStringUtils.randomAlphabetic(5, 15))
+            .firstName(RandomStringUtils.insecure().nextAlphabetic(3, 12))
+            .surname(RandomStringUtils.insecure().nextAlphabetic(5, 15))
             .build();
     }
 
@@ -116,8 +114,8 @@ public abstract class IntegrationTest {
         return init.apply(
             SalespersonRow.newBuilder()
                 .salespersonId(newId())
-                .firstName(RandomStringUtils.randomAlphabetic(3, 12))
-                .surname(RandomStringUtils.randomAlphabetic(5, 15)))
+                .firstName(RandomStringUtils.insecure().nextAlphabetic(3, 12))
+                .surname(RandomStringUtils.insecure().nextAlphabetic(5, 15)))
             .build();
     }
 
@@ -125,8 +123,8 @@ public abstract class IntegrationTest {
         return init.apply(
             SalesAreaRow.newBuilder()
                 .salesAreaId(newId())
-                .salesAreaName(RandomStringUtils.randomAlphabetic(10, 20))
-                .salesCount(Optional.of(RandomUtils.nextLong(100, 1000))))
+                .salesAreaName(RandomStringUtils.insecure().nextAlphabetic(10, 20))
+                .salesCount(Optional.of(RandomUtils.insecure().randomLong(100, 1000))))
             .build();
     }
 
@@ -135,7 +133,7 @@ public abstract class IntegrationTest {
             .saleId(newId())
             .salespersonId(newId())
             .widgetId(newId())
-            .quantity(RandomUtils.nextLong(10, 400))
+            .quantity(RandomUtils.insecure().randomLong(10, 400))
             .price(RandomValues.randomBigDecimal(12, 2))
             .build();
     }
@@ -143,8 +141,8 @@ public abstract class IntegrationTest {
     public static PartRow aRandomPart() {
         return PartRow.newBuilder()
             .partId(newId())
-            .description(RandomStringUtils.randomAlphabetic(10, 30))
-            .purchasePrice(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), randomAscii(3)))
+            .description(RandomStringUtils.insecure().nextAlphabetic(10, 30))
+            .purchasePrice(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), RandomValues.randomStringOf(3, 'A', 'Z')))
             .retailPrice(Optional.of(new MoneyAmount(RandomValues.randomBigDecimal(12, 2), RandomValues.randomStringOf(3, 'A', 'Z'))))
             .widgetId(newId())
             .build();

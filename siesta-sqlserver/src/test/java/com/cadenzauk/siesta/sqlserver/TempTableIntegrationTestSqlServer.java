@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.sqlserver;
 
 import com.cadenzauk.siesta.TempTableIntegrationTest;
-import com.cadenzauk.siesta.TransactionIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = SqlServerConfig.class)

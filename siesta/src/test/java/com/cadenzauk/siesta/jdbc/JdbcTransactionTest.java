@@ -45,6 +45,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("resource")
 @ExtendWith(MockitoExtension.class)
 class JdbcTransactionTest {
     @Mock
@@ -55,18 +56,6 @@ class JdbcTransactionTest {
 
     @Mock
     private Stream<String> stream;
-
-    @Test
-    void connection() throws SQLException {
-        when(sqlExecutor.connect()).thenReturn(connection);
-        JdbcTransaction sut = new JdbcTransaction(sqlExecutor);
-
-        Connection result = sut.connection();
-
-        assertThat(result, sameInstance(connection));
-        verify(connection).setAutoCommit(false);
-        verifyNoMoreInteractions(sqlExecutor, connection);
-    }
 
     @Test
     void commit() throws SQLException {
@@ -96,7 +85,7 @@ class JdbcTransactionTest {
     void query() throws SQLException {
         when(sqlExecutor.connect()).thenReturn(connection);
         JdbcTransaction sut = new JdbcTransaction(sqlExecutor);
-        String sql = RandomStringUtils.randomAlphabetic(20, 30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(20, 30);
         Object[] args = new Object[0];
         RowMapper<String> rowMapper = s -> "Hello";
         List<String> list = ImmutableList.of("A", "B");
@@ -114,7 +103,7 @@ class JdbcTransactionTest {
     void stream() throws SQLException {
         when(sqlExecutor.connect()).thenReturn(connection);
         JdbcTransaction sut = new JdbcTransaction(sqlExecutor);
-        String sql = RandomStringUtils.randomAlphabetic(20, 30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(20, 30);
         Object[] args = new Object[0];
         RowMapper<String> rowMapper = s -> "Hello";
         when(sqlExecutor.stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any())).thenReturn(stream);
@@ -131,7 +120,7 @@ class JdbcTransactionTest {
     void streamClosedOnTransactionClose() throws SQLException {
         when(sqlExecutor.connect()).thenReturn(connection);
         JdbcTransaction sut = new JdbcTransaction(sqlExecutor);
-        String sql = RandomStringUtils.randomAlphabetic(20, 30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(20, 30);
         Object[] args = new Object[0];
         RowMapper<String> rowMapper = s -> "Hello";
         when(sqlExecutor.stream(eq(connection), eq(sql), eq(args), eq(rowMapper), any())).thenReturn(stream);
@@ -152,7 +141,7 @@ class JdbcTransactionTest {
     void update() throws SQLException {
         when(sqlExecutor.connect()).thenReturn(connection);
         JdbcTransaction sut = new JdbcTransaction(sqlExecutor);
-        String sql = RandomStringUtils.randomAlphabetic(20, 30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(20, 30);
         Object[] args = new Object[0];
         int rowsUpdated = RandomValues.randomShort();
         when(sqlExecutor.update(connection, sql, args)).thenReturn(rowsUpdated);

@@ -37,14 +37,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.count;
-import static com.cadenzauk.siesta.grammar.expression.Aggregates.countBig;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.countDistinct;
 import static com.cadenzauk.siesta.grammar.expression.Aggregates.max;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
@@ -161,7 +159,6 @@ class SelectHavingTest {
     @ParameterizedTest
     @MethodSource("parametersForHaving")
     void having(BiFunction<Alias<WidgetRow>,ExpectingHaving<Tuple3<Long,String,String>>,Select<Tuple3<Long,String,String>>> having, String expectedSql, Object[] expectedArgs) {
-        MockitoAnnotations.initMocks(this);
         Database database = TestDatabase.testDatabase(new AnsiDialect());
         Alias<WidgetRow> w = database.table(WidgetRow.class).as("w");
         having.apply(w, database

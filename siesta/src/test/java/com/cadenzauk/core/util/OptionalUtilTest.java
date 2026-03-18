@@ -101,7 +101,7 @@ class OptionalUtilTest {
 
     @Test
     void withValue() {
-        String value = RandomStringUtils.randomAscii(10);
+        String value = RandomStringUtils.insecure().nextAscii(10);
 
         OptionalUtil.with(Optional.of(value))
             .ifPresent(consumer)

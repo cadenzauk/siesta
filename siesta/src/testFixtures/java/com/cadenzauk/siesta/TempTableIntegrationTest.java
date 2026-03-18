@@ -343,7 +343,7 @@ public abstract class TempTableIntegrationTest extends IntegrationTest {
         }
 
         @SafeVarargs
-        private final Scenario<T> containing(T... content) {
+        private Scenario<T> containing(T... content) {
             database.insert(tran, sut, content);
             return this;
         }

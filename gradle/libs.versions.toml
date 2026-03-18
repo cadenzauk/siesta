@@ -1,5 +1,5 @@
 [versions]
-apacheCommonsLang3 = "3.17.0"
+apacheCommonsLang3 = "3.20.0"
 db2 = "11.1.0"
 derby = "10.16.1.1"
 freemarker = "2.3.34"
@@ -13,7 +13,7 @@ jackson = "2.19.1"
 junitJupiter = "5.13.3"
 junitPlatform = "1.13.2"
 kotlin = "2.0.21"
-mockito = "5.18.0"
+mockito = "5.23.0"
 siesta = "1.0.0-SNAPSHOT"
 spring = "6.2.8"
 
@@ -30,7 +30,7 @@ hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest"
 hamcrestDate = { group = "org.exparity", name = "hamcrest-date", version.ref = "hamcrestDate" }
 hamkrest = { group = "com.natpryce", name = "hamkrest", version.ref = "hamkrest" }
 hibernateJpa21Api = { group = "org.hibernate.javax.persistence", name = "hibernate-jpa-2.1-api", version = "1.0.0.Final" }
-hikariCP = { group = "com.zaxxer", name = "HikariCP", version = "5.0.1" }
+hikariCP = { group = "com.zaxxer", name = "HikariCP", version = "7.0.2" }
 hsqldb = { group = "org.hsqldb", name = "hsqldb", version.ref = "hsqldb" }
 jacksonDatabind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jacksonDatatypeJdk8 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jdk8", version.ref = "jackson" }

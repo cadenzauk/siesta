@@ -22,7 +22,6 @@
 
 package com.cadenzauk.siesta.postgres;
 
-import com.cadenzauk.siesta.DatabaseIntegrationTest;
 import com.cadenzauk.siesta.jackson.test.JsonIntegrationTest;
 import org.springframework.test.context.ContextConfiguration;
 

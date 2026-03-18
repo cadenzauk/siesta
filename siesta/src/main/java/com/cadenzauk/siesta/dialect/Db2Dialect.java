@@ -32,7 +32,6 @@ import com.cadenzauk.core.sql.exception.SqlSyntaxException;
 import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.IsolationLevel;
 import com.cadenzauk.siesta.LockLevel;
-import com.cadenzauk.siesta.dialect.function.SimpleFunctionSpec;
 import com.cadenzauk.siesta.dialect.function.date.DateFunctionSpecs;
 import com.cadenzauk.siesta.json.BinaryJson;
 import com.cadenzauk.siesta.json.Json;
@@ -45,7 +44,6 @@ import com.cadenzauk.siesta.type.DefaultVarchar;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 
 import static com.cadenzauk.core.lang.StringUtil.hex;
@@ -62,7 +60,6 @@ public class Db2Dialect extends AnsiDialect {
             .register(MINUTE_DIFF, (s, a)-> "TIMESTAMPDIFF(4, char(trunc(" + a[0] + ", 'MI') - trunc(" + a[1] + ", 'MI')))")
             .register(SECOND_DIFF, (s, a) -> "TIMESTAMPDIFF(2, char(trunc(" + a[0] + ", 'SS') - trunc(" + a[1] + ", 'SS')))")
             .register(JSON_VALUE, (s, a) -> "JSON_VALUE(" + a[0] + " format json, " + a[1] + ")");
-        ;
 
         types()
             .register(DbTypeId.TINYINT, new DefaultTinyint("smallint"))

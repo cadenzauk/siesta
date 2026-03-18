@@ -48,7 +48,6 @@ import java.util.Optional;
 import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonFieldText;
 import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonValue;
 import static com.cadenzauk.siesta.grammar.expression.JsonFunctions.jsonbValue;
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;

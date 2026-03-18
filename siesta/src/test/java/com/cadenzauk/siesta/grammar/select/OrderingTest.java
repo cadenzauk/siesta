@@ -26,7 +26,6 @@ import com.cadenzauk.siesta.Alias;
 import com.cadenzauk.siesta.ColumnSpecifier;
 import com.cadenzauk.siesta.Order;
 import com.cadenzauk.siesta.Scope;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

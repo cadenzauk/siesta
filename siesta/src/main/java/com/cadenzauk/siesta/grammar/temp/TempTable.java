@@ -34,7 +34,6 @@ import com.google.common.reflect.TypeToken;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -104,7 +103,7 @@ public abstract class TempTable<R> {
     }
 
     @SafeVarargs
-    private final int performInsert(Transaction transaction, R... rows) {
+    private int performInsert(Transaction transaction, R... rows) {
         if (rows.length == 0) {
             return 0;
         }
@@ -117,8 +116,8 @@ public abstract class TempTable<R> {
         return String.format("insert into %s (%s) values %s",
             qualifiedTableName(),
             columnMapping.columns().flatMap(Column::insertColumnSql).collect(joining(", ")),
-            IntStream.range(0, rows.length)
-                .mapToObj(i -> "(" + columnMapping.columns().flatMap(col -> col.insertArgsSql(database, Optional.of(rows[i]))).collect(joining(", ")) + ")")
+            Arrays.stream(rows)
+                .map(row -> "(" + columnMapping.columns().flatMap(col -> col.insertArgsSql(database, Optional.of(row))).collect(joining(", ")) + ")")
                 .collect(joining(", ")));
     }
 

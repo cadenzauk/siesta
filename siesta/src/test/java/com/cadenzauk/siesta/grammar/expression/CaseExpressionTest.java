@@ -46,7 +46,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.cadenzauk.siesta.grammar.expression.TypedExpression.column;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.value;
 import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;

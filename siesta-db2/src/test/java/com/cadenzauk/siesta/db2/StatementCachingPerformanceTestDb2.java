@@ -35,8 +35,6 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.sql.DataSource;
 import java.util.concurrent.TimeUnit;
 
-import static com.cadenzauk.siesta.model.TestDatabase.testDatabase;
-
 @ContextConfiguration(classes = Db2Config.class)
 class StatementCachingPerformanceTestDb2 extends IntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(StatementCachingPerformanceTestDb2.class);

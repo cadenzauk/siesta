@@ -30,7 +30,7 @@ import com.cadenzauk.siesta.catalog.Column;
 import com.cadenzauk.siesta.grammar.expression.ColumnExpression;
 import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.google.common.reflect.TypeToken;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -129,6 +129,7 @@ public interface ColumnSpecifier<T> {
 
         @Override
         public boolean isSpecificationFor(TypedExpression<?> expression, Optional<String> label) {
+            //noinspection unchecked
             return OptionalUtil.as(ColumnExpression.class, expression)
                 .map(c -> c.includes(this))
                 .orElse(false);
@@ -141,12 +142,12 @@ public interface ColumnSpecifier<T> {
 
         @Override
         public boolean specifies(Scope scope, AliasColumn<T> x, String prefix) {
-            return StringUtils.equals(x.propertyName(), getterMethod.propertyName());
+            return Strings.CS.equals(x.propertyName(), getterMethod.propertyName());
         }
 
         @Override
         public boolean specifies(Scope scope, ProjectionColumn<T> x) {
-            return StringUtils.equals(x.propertyName(), getterMethod.propertyName());
+            return Strings.CS.equals(x.propertyName(), getterMethod.propertyName());
         }
     }
 
@@ -198,7 +199,7 @@ public interface ColumnSpecifier<T> {
         @Override
         public boolean isSpecificationFor(TypedExpression<?> expression, Optional<String> label) {
             if (Objects.equals(label, Optional.of(columnLabel))) {
-                if (!asEffective(expression.type()).isPresent()) {
+                if (asEffective(expression.type()).isEmpty()) {
                     throw new InvalidQueryException("The column with the label of '" + columnLabel + "' is of type '" + expression.type() + "' and not '" + effectiveClass + "'.");
                 }
                 return true;
@@ -214,12 +215,12 @@ public interface ColumnSpecifier<T> {
 
         @Override
         public boolean specifies(Scope scope, AliasColumn<T> x, String prefix) {
-            return StringUtils.equals(x.columnName(), columnLabel);
+            return Strings.CS.equals(x.columnName(), columnLabel);
         }
 
         @Override
         public boolean specifies(Scope scope, ProjectionColumn<T> x) {
-            return StringUtils.equals(x.columnName(), columnLabel);
+            return Strings.CS.equals(x.columnName(), columnLabel);
         }
     }
 

@@ -77,7 +77,7 @@ class ConnectionUtilTest {
 
     @Test
     void getMetaDataThatThrows() throws SQLException {
-        String message = RandomStringUtils.randomAlphabetic(50);
+        String message = RandomStringUtils.insecure().nextAlphabetic(50);
         when(connection.getMetaData()).thenThrow(new SQLException(message));
 
         calling(() -> ConnectionUtil.getMetaData(connection))
@@ -99,7 +99,7 @@ class ConnectionUtilTest {
 
     @Test
     void commitThatThrows() throws SQLException {
-        String message = RandomStringUtils.randomAlphabetic(50);
+        String message = RandomStringUtils.insecure().nextAlphabetic(50);
         doThrow(new SQLException(message)).when(connection).commit();
 
         calling(() -> ConnectionUtil.commit(connection))
@@ -121,7 +121,7 @@ class ConnectionUtilTest {
 
     @Test
     void rollbackThatThrows() throws SQLException {
-        String message = RandomStringUtils.randomAlphabetic(50);
+        String message = RandomStringUtils.insecure().nextAlphabetic(50);
         doThrow(new SQLException(message)).when(connection).rollback();
 
         calling(() -> ConnectionUtil.rollback(connection))
@@ -135,7 +135,7 @@ class ConnectionUtilTest {
 
     @Test
     void execute() throws SQLException {
-        String sql = RandomStringUtils.randomAlphabetic(30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(30);
         when(connection.createStatement()).thenReturn(statement);
         when(statement.execute(sql)).thenReturn(true);
 
@@ -150,10 +150,10 @@ class ConnectionUtilTest {
 
     @Test
     void executeThatThrowsInCreateStatement() throws SQLException {
-        String message = RandomStringUtils.randomAlphabetic(50);
+        String message = RandomStringUtils.insecure().nextAlphabetic(50);
         when(connection.createStatement()).thenThrow(new SQLException(message));
 
-        calling(() -> ConnectionUtil.execute(connection, RandomStringUtils.randomAlphabetic(30)))
+        calling(() -> ConnectionUtil.execute(connection, RandomStringUtils.insecure().nextAlphabetic(30)))
             .shouldThrow(RuntimeSqlException.class)
             .withCause(SQLException.class)
             .withMessage(is(message));
@@ -164,8 +164,8 @@ class ConnectionUtilTest {
 
     @Test
     void executeThatThrowsInStatementExecute() throws SQLException {
-        String message = RandomStringUtils.randomAlphabetic(50);
-        String sql = RandomStringUtils.randomAlphabetic(30);
+        String message = RandomStringUtils.insecure().nextAlphabetic(50);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(30);
         when(connection.createStatement()).thenReturn(statement);
         when(statement.execute(sql)).thenThrow(new SQLException(message));
 
@@ -182,7 +182,7 @@ class ConnectionUtilTest {
 
     @Test
     void prepare() throws SQLException {
-        String sql = RandomStringUtils.randomAlphabetic(30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(30);
         when(connection.prepareStatement(any())).thenReturn(preparedStatement);
 
         PreparedStatement actual = ConnectionUtil.prepare(connection, sql);
@@ -194,7 +194,7 @@ class ConnectionUtilTest {
 
     @Test
     void prepareThatThrows() throws SQLException {
-        String sql = RandomStringUtils.randomAlphabetic(30);
+        String sql = RandomStringUtils.insecure().nextAlphabetic(30);
         when(connection.prepareStatement(sql)).thenThrow(new SQLException("Syntax error"));
 
         calling(() -> ConnectionUtil.prepare(connection, sql))

@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -98,8 +97,6 @@ class Select1Test {
     @ParameterizedTest
     @MethodSource("parametersForJoin")
     void join(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
-        MockitoAnnotations.initMocks(this);
-
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Alias<Parent> p = database.table(Parent.class).as("p");
         Alias<Child> c = database.table(Child.class).as("c");
@@ -114,8 +111,6 @@ class Select1Test {
     @ParameterizedTest
     @MethodSource("parametersForJoinToSubselect")
     void joinToSubselect(BiFunction<Alias<Child>,ExpectingJoin1<Parent>,ExpectingJoin2<Parent,Child>> join, String expected) {
-        MockitoAnnotations.initMocks(this);
-
         Database database = Database.newBuilder().defaultSchema("SIESTA").build();
         Alias<Parent> p = database.table(Parent.class).as("p");
         Alias<Child> c = database.table(Child.class).as("c");

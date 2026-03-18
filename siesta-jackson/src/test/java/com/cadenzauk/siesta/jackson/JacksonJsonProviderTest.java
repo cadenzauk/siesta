@@ -25,8 +25,6 @@ package com.cadenzauk.siesta.jackson;
 import com.cadenzauk.siesta.json.JsonProvider;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Supplier;
-
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

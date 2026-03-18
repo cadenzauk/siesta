@@ -24,6 +24,7 @@ package com.cadenzauk.core.sql;
 
 import com.cadenzauk.core.stream.StreamUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -103,7 +104,7 @@ public class QualifiedName {
 
     private static boolean matchesOrBlank(Optional<String> candidate, String value) {
         String candidateValue = candidate.orElse("");
-        return StringUtils.equalsIgnoreCase(candidateValue, value) || isBlank(candidateValue) || isBlank(value);
+        return Strings.CI.equals(candidateValue, value) || isBlank(candidateValue) || isBlank(value);
     }
 
     public static QualifiedName parseString(String stringRepresentation) {

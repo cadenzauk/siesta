@@ -46,6 +46,7 @@ import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.TestDatabase;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import org.apache.commons.lang3.RandomUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -74,7 +75,6 @@ import static com.cadenzauk.core.function.FunctionUtil.supplier;
 import static com.cadenzauk.core.testutil.FluentAssert.calling;
 import static com.cadenzauk.siesta.grammar.expression.TypedExpression.literal;
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.is;
@@ -1194,7 +1194,7 @@ class SelectTest {
     @Test
     void fetchFirstModifiesSql() {
         Select<Long> sut = db2Database().from(SalespersonRow.class, "p").select(SalespersonRow::salespersonId);
-        long rows = nextLong(100, 200);
+        long rows = RandomUtils.insecure().randomLong(100, 200);
 
         sut.fetchFirst(rows);
 
@@ -1452,12 +1452,12 @@ class SelectTest {
     }
 
     private Matcher<RowMapper<Long>> isLongMapperFor(String column) {
-        return new TypeSafeMatcher<RowMapper<Long>>() {
+        return new TypeSafeMatcher<>() {
             @Override
             protected boolean matchesSafely(RowMapper<Long> item) {
                 try {
                     ResultSet rs = mock(ResultSet.class);
-                    long randomLong = nextLong();
+                    long randomLong = RandomUtils.insecure().randomLong();
                     when(rs.getLong(column)).thenReturn(randomLong);
                     Long result = item.mapRow(rs);
                     verify(rs).getLong(column);

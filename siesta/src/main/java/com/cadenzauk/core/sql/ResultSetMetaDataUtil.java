@@ -23,7 +23,7 @@
 package com.cadenzauk.core.sql;
 
 import com.cadenzauk.core.util.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
 public final class ResultSetMetaDataUtil extends UtilityClass  {
     public static int findColumnWithLabel(ResultSetMetaData metaData, String columnLabel) {
         return IntStream.range(1, getColumnCount(metaData) + 1)
-            .filter(i -> StringUtils.equalsIgnoreCase(getColumnLabel(metaData, i), columnLabel))
+            .filter(i -> Strings.CI.equals(getColumnLabel(metaData, i), columnLabel))
             .findFirst()
             .orElseThrow(() -> new RuntimeSqlException("No such column as " + columnLabel + " in result set."));
     }

@@ -30,7 +30,6 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.model.SalespersonRow;
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +38,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -262,7 +260,6 @@ class ExpressionBuilderTest {
     @ParameterizedTest
     @MethodSource("argsForTestExpression")
     void testExpression(BiFunction<ExpressionBuilder<String,InWhereExpectingAnd<String>>,Alias<SalespersonRow>,InWhereExpectingAnd<String>> method, String expectedSql, Object[] expectedArgs) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         Alias<SalespersonRow> alias = database.table(SalespersonRow.class).as("s");
 
@@ -282,7 +279,6 @@ class ExpressionBuilderTest {
         ExpressionBuilder<String,InWhereExpectingAnd<SalespersonRow>> select = database.from(SalespersonRow.class)
             .where(SalespersonRow::firstName);
 
-        //noinspection Convert2MethodRef
         calling(() -> select.isIn(new String[0]))
             .shouldThrow(IllegalArgumentException.class);
     }
@@ -293,7 +289,6 @@ class ExpressionBuilderTest {
         ExpressionBuilder<String,InWhereExpectingAnd<SalespersonRow>> select = database.from(SalespersonRow.class)
             .where(SalespersonRow::firstName);
 
-        //noinspection Convert2MethodRef
         calling(() -> select.isNotIn(new String[0]))
             .shouldThrow(IllegalArgumentException.class);
     }

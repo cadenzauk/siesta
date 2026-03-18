@@ -76,7 +76,7 @@ class TupleBuilderTest {
 
     @Test
     void label() {
-        long labelNum = RandomUtils.nextLong(1, 400);
+        long labelNum = RandomUtils.insecure().randomLong(1, 400);
         when(scope.newLabel()).thenReturn(labelNum);
         TupleBuilder1<Long> sut = TupleBuilder.tuple(SalespersonRow::salespersonId);
 

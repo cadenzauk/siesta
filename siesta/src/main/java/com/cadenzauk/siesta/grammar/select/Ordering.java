@@ -23,7 +23,6 @@
 package com.cadenzauk.siesta.grammar.select;
 
 import com.cadenzauk.siesta.Order;
-import com.cadenzauk.siesta.grammar.expression.TypedExpression;
 import com.cadenzauk.siesta.grammar.expression.UnresolvedColumn;
 
 import java.util.Optional;

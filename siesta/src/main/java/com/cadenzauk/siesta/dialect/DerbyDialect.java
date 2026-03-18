@@ -49,7 +49,7 @@ import com.cadenzauk.siesta.type.DefaultTimestamp;
 import com.cadenzauk.siesta.type.DefaultTinyint;
 import com.cadenzauk.siesta.type.DefaultUtcTimestamp;
 import com.cadenzauk.siesta.type.DefaultVarbinary;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
@@ -244,7 +244,7 @@ public class DerbyDialect extends AnsiDialect {
     @Override
     public String createJavaProcSql(Database database, Class<?> procClass, String methodName, String functionName) {
         Method method = ClassUtil.declaredMethods(procClass)
-            .filter(it -> StringUtils.equals(it.getName(), methodName))
+            .filter(it -> Strings.CS.equals(it.getName(), methodName))
             .limit(1)
             .findFirst()
             .orElseThrow(IllegalArgumentException::new);

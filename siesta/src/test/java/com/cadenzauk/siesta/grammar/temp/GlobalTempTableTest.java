@@ -50,7 +50,7 @@ class GlobalTempTableTest {
 
     @Test
     void tableName() {
-        String randomTableName = RandomStringUtils.randomAlphabetic(20);
+        String randomTableName = RandomStringUtils.insecure().nextAlphabetic(20);
         when(database.dataTypeOf(FieldInfo.of(TestRow.class, "id", long.class))).thenReturn(Optional.of(DataType.LONG));
         when(database.columnName("id")).thenReturn("ID");
         TempTable<TestRow> sut = GlobalTempTable.newBuilder(database, TestRow.class)

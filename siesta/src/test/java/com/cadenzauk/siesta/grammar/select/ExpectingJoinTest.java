@@ -28,13 +28,14 @@ import com.cadenzauk.siesta.Database;
 import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
@@ -47,6 +48,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ExpectingJoinTest {
     @Mock
     private Transaction transaction;
@@ -176,7 +178,6 @@ class ExpectingJoinTest {
     @ParameterizedTest
     @MethodSource("argsForJoin")
     void testJoin(BiFunction<ExpectingJoin1<SalespersonRow>,Alias<SalespersonRow>[],ExpectingSelect<?>> method, String expectedSql) {
-        MockitoAnnotations.initMocks(this);
         Database database = testDatabase(new AnsiDialect());
         @SuppressWarnings("unchecked") Alias<SalespersonRow>[] alias = toArray(
             database.table(SalespersonRow.class).as("s1"),

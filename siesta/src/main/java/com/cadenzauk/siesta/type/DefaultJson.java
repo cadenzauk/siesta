@@ -27,7 +27,6 @@ import com.cadenzauk.siesta.json.Json;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
 public class DefaultJson extends DefaultDbType<Json> {
     public DefaultJson() {
