@@ -33,6 +33,7 @@ import com.cadenzauk.siesta.grammar.select.Select;
 import com.cadenzauk.siesta.model.SalespersonRow;
 import com.cadenzauk.siesta.model.WidgetRow;
 import com.cadenzauk.siesta.name.UppercaseUnderscores;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.Column;
 import javax.persistence.Table;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -229,12 +233,37 @@ class DatabaseTest {
     }
 
     @Test
+    void insertEmptyCollection() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.insert(Collections.<SalespersonRow>emptySet());
+
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
     void insertZeroLengthSqlExecutor() {
         Database database = Database.newBuilder()
             .dialect(new H2Dialect())
             .build();
 
         int rows = database.insert(sqlExecutor);
+
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void insertEmptyCollectionSqlExecutor() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.insert(sqlExecutor, Collections.<SalespersonRow>emptySet());
 
         verifyNoInteractions(sqlExecutor);
         assertThat(rows, is(0));
@@ -248,6 +277,34 @@ class DatabaseTest {
             .build();
 
         int rows = database.insert(transaction);
+
+        verifyNoInteractions(transaction);
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void insertEmptyCollectionTransaction() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.insert(transaction, Collections.<SalespersonRow>emptySet());
+
+        verifyNoInteractions(transaction);
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void insertEmptyCollectionAsync() throws ExecutionException, InterruptedException {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.insertAsync(transaction, Collections.<SalespersonRow>emptySet()).get();
 
         verifyNoInteractions(transaction);
         verifyNoInteractions(sqlExecutor);
@@ -289,6 +346,41 @@ class DatabaseTest {
     }
 
     @Test
+    void insertCollectionInOneStatement() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson()
+        );
+
+        database.insert(salespersons);
+
+        verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?), " +
+            "(?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null),
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
+        ));
+    }
+
+    @Test
     void insertMultipleInOneStatementSqlExecutor() {
         Database database = Database.newBuilder()
             .defaultSqlExecutor(sqlExecutor)
@@ -323,6 +415,40 @@ class DatabaseTest {
     }
 
     @Test
+    void insertCollectionInOneStatementSqlExecutor() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson());
+
+        database.insert(sqlExecutor, salespersons);
+
+        verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?), " +
+            "(?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null),
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
+        ));
+    }
+
+    @Test
     void insertMultipleInOneStatementTransaction() {
         Database database = Database.newBuilder()
             .dialect(new H2Dialect())
@@ -353,6 +479,41 @@ class DatabaseTest {
             salespersons[1].surname(),
             salespersons[1].numberOfSales(),
             salespersons[1].commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void insertCollectionInOneStatementTransaction() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson()
+        );
+
+        database.insert(transaction, salespersons);
+
+        verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        verifyNoMoreInteractions(transaction);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?), " +
+            "(?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null),
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
         ));
     }
 
@@ -426,6 +587,41 @@ class DatabaseTest {
         ));
     }
 
+    @Test
+    void insertCollectionInMultipleStatements() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new AnsiDialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson()
+        );
+
+        database.insert(salespersons);
+
+        verify(sqlExecutor, times(2)).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getAllValues().get(0), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null)
+        ));
+        assertThat(argCaptor.getAllValues().get(1), arrayContaining(
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
+        ));
+    }
 
     @Test
     void insertMultipleInMultipleStatementsAsync() {
@@ -461,6 +657,45 @@ class DatabaseTest {
             salespersons[1].surname(),
             salespersons[1].numberOfSales(),
             salespersons[1].commission().orElse(null)
+        ));
+    }
+
+
+    @Test
+    void insertCollectionInInMultipleStatementsAsync() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new AnsiDialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(),
+            IntegrationTest.aRandomSalesperson()
+        );
+        when(transaction.updateAsync(any(), any())).thenReturn(completedFuture(1));
+
+        int rowsUpdated = database.insertAsync(transaction, salespersons).join();
+
+        assertThat(rowsUpdated, equalTo(2));
+        verify(transaction, times(2)).updateAsync(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(transaction);
+        assertThat(sqlCaptor.getValue(), is("insert into SIESTA.SALESPERSON " +
+            "(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values (?, ?, ?, ?, ?, ?)"));
+        assertThat(argCaptor.getAllValues().get(0), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null)
+        ));
+        assertThat(argCaptor.getAllValues().get(1), arrayContaining(
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
         ));
     }
 
@@ -595,13 +830,373 @@ class DatabaseTest {
     }
 
     @Test
+    void upsertZeroVarargs() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.upsertRows();
+
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void upsertEmptyCollection() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.upsertRows(Collections.<SalespersonRow>emptySet());
+
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void upsertZeroVarargsSqlExecutor() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.upsertRows(sqlExecutor);
+
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void upsertEmptyCollectionSqlExecutor() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.upsertRows(sqlExecutor, Collections.<SalespersonRow>emptySet());
+
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void upsertZeroArgsTransaction() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.upsertRows(transaction);
+
+        verifyNoInteractions(transaction);
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void upsertEmptyCollectionTransaction() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+
+        int rows = database.upsertRows(transaction, Collections.<SalespersonRow>emptyList());
+
+        verifyNoInteractions(transaction);
+        verifyNoInteractions(sqlExecutor);
+        assertThat(rows, is(0));
+    }
+
+    @Test
+    void upsertVararg() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+        SalespersonRow[] salespersons = ArrayUtils.toArray(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+
+        database.upsertRows(salespersons);
+
+        verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons[0].salespersonId(),
+            salespersons[0].firstName(),
+            salespersons[0].middleNames().orElse(null),
+            salespersons[0].surname(),
+            salespersons[0].numberOfSales(),
+            salespersons[0].commission().orElse(null),
+            salespersons[1].salespersonId(),
+            salespersons[1].firstName(),
+            salespersons[1].middleNames().orElse(null),
+            salespersons[1].surname(),
+            salespersons[1].numberOfSales(),
+            salespersons[1].commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void upsertCollection() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+
+        database.upsertRows(salespersons);
+
+        verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null),
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void upsertVarargSqlExecutor() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+        SalespersonRow[] salespersons = ArrayUtils.toArray(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+
+        database.upsertRows(sqlExecutor, salespersons);
+
+        verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons[0].salespersonId(),
+            salespersons[0].firstName(),
+            salespersons[0].middleNames().orElse(null),
+            salespersons[0].surname(),
+            salespersons[0].numberOfSales(),
+            salespersons[0].commission().orElse(null),
+            salespersons[1].salespersonId(),
+            salespersons[1].firstName(),
+            salespersons[1].middleNames().orElse(null),
+            salespersons[1].surname(),
+            salespersons[1].numberOfSales(),
+            salespersons[1].commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void upsertCollectionSqlExecutor() {
+        Database database = Database.newBuilder()
+            .defaultSqlExecutor(sqlExecutor)
+            .dialect(new H2Dialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+
+        database.upsertRows(sqlExecutor, salespersons);
+
+        verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null),
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void upsertVarargTransaction() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+        SalespersonRow[] salespersons = ArrayUtils.toArray(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+
+        database.upsertRows(transaction, salespersons);
+
+        verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        verifyNoMoreInteractions(transaction);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons[0].salespersonId(),
+            salespersons[0].firstName(),
+            salespersons[0].middleNames().orElse(null),
+            salespersons[0].surname(),
+            salespersons[0].numberOfSales(),
+            salespersons[0].commission().orElse(null),
+            salespersons[1].salespersonId(),
+            salespersons[1].firstName(),
+            salespersons[1].middleNames().orElse(null),
+            salespersons[1].surname(),
+            salespersons[1].numberOfSales(),
+            salespersons[1].commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void upsertCollectionTransaction() {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+        List<SalespersonRow> salespersons = ImmutableList.of(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+
+        database.upsertRows(transaction, salespersons);
+
+        verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        verifyNoMoreInteractions(transaction);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons.get(0).salespersonId(),
+            salespersons.get(0).firstName(),
+            salespersons.get(0).middleNames().orElse(null),
+            salespersons.get(0).surname(),
+            salespersons.get(0).numberOfSales(),
+            salespersons.get(0).commission().orElse(null),
+            salespersons.get(1).salespersonId(),
+            salespersons.get(1).firstName(),
+            salespersons.get(1).middleNames().orElse(null),
+            salespersons.get(1).surname(),
+            salespersons.get(1).numberOfSales(),
+            salespersons.get(1).commission().orElse(null)
+        ));
+    }
+
+    @Test
+    void upsertVarargTransactionAsync() throws ExecutionException, InterruptedException {
+        Database database = Database.newBuilder()
+            .dialect(new H2Dialect())
+            .build();
+        SalespersonRow[] salespersons = ArrayUtils.toArray(
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Fred").surname("Flintstone")),
+            IntegrationTest.aRandomSalesperson(b -> b.firstName("Barney").surname("Rubble"))
+        );
+        when(transaction.updateAsync(any(), any())).thenReturn(completedFuture(2));
+
+        int rowsUpdated = database.upsertRowsAsync(transaction, salespersons).get();
+
+        verify(transaction).updateAsync(sqlCaptor.capture(), argCaptor.capture());
+        verifyNoMoreInteractions(sqlExecutor);
+        verifyNoMoreInteractions(transaction);
+        assertThat(sqlCaptor.getValue(), is("merge into SIESTA.SALESPERSON t " +
+            "using (select * from (values " +
+            "(cast(? as bigint), cast(? as varchar(4)), cast(? as varchar(1)), cast(? as varchar(10)), cast(? as integer), cast(? as decimal)), " +
+            "(cast(? as bigint), cast(? as varchar(6)), cast(? as varchar(1)), cast(? as varchar(6)), cast(? as integer), cast(? as decimal))) " +
+            "as x(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION)) s " +
+            "on (t.SALESPERSON_ID = s.SALESPERSON_ID) " +
+            "when matched then update set FIRST_NAME = s.FIRST_NAME, MIDDLE_NAMES = s.MIDDLE_NAMES, SURNAME = s.SURNAME, NUMBER_OF_SALES = s.NUMBER_OF_SALES, COMMISSION = s.COMMISSION " +
+            "when not matched then insert(SALESPERSON_ID, FIRST_NAME, MIDDLE_NAMES, SURNAME, NUMBER_OF_SALES, COMMISSION) " +
+            "values(s.SALESPERSON_ID, s.FIRST_NAME, s.MIDDLE_NAMES, s.SURNAME, s.NUMBER_OF_SALES, s.COMMISSION)"));
+        assertThat(argCaptor.getValue(), arrayContaining(
+            salespersons[0].salespersonId(),
+            salespersons[0].firstName(),
+            salespersons[0].middleNames().orElse(null),
+            salespersons[0].surname(),
+            salespersons[0].numberOfSales(),
+            salespersons[0].commission().orElse(null),
+            salespersons[1].salespersonId(),
+            salespersons[1].firstName(),
+            salespersons[1].middleNames().orElse(null),
+            salespersons[1].surname(),
+            salespersons[1].numberOfSales(),
+            salespersons[1].commission().orElse(null)
+        ));
+        assertThat(rowsUpdated, is(2));
+    }
+
+    @Test
     void delete() {
         Database database = Database.newBuilder()
             .defaultSqlExecutor(sqlExecutor)
             .build();
         SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
 
-        database.delete(salesperson);
+        database.deleteRow(salesperson);
 
         verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("delete from SIESTA.SALESPERSON " +
@@ -614,7 +1209,7 @@ class DatabaseTest {
         Database database = Database.newBuilder().build();
         SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
 
-        database.delete(sqlExecutor, salesperson);
+        database.deleteRow(sqlExecutor, salesperson);
 
         verify(sqlExecutor).update(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("delete from SIESTA.SALESPERSON " +
@@ -627,7 +1222,7 @@ class DatabaseTest {
         Database database = Database.newBuilder().build();
         SalespersonRow salesperson = IntegrationTest.aRandomSalesperson();
 
-        database.delete(transaction, salesperson);
+        database.deleteRow(transaction, salesperson);
 
         verify(transaction).update(sqlCaptor.capture(), argCaptor.capture());
         assertThat(sqlCaptor.getValue(), is("delete from SIESTA.SALESPERSON " +

@@ -30,6 +30,7 @@ import com.cadenzauk.siesta.Transaction;
 import com.cadenzauk.siesta.dialect.AnsiDialect;
 import com.cadenzauk.siesta.grammar.select.InWhereExpectingAnd;
 import com.cadenzauk.siesta.model.SalespersonRow;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -211,7 +212,11 @@ class ExpressionBuilderTest {
             testCase((e, s) -> e.isLessThanOrEqualTo(s, SalespersonRow::middleNames), "<= s.MIDDLE_NAMES"),
 
             testCase((e, s) -> e.isIn("A", "B", "C"), "in (?, ?, ?)", "A", "B", "C"),
+            testCase((e, s) -> e.isIn(ImmutableList.of("A", "B", "C")), "in (?, ?, ?)", "A", "B", "C"),
+            testCase((e, s) -> e.isInLiteral(ImmutableList.of("A", "B", "C")), "in ('A', 'B', 'C')"),
             testCase((e, s) -> e.isNotIn("D", "E"), "not in (?, ?)", "D", "E"),
+            testCase((e, s) -> e.isNotIn(ImmutableList.of("D", "E")), "not in (?, ?)", "D", "E"),
+            testCase((e, s) -> e.isNotInLiteral(ImmutableList.of("D", "E")), "not in ('D', 'E')"),
             testCase((e, s) -> e.isIn(literal("A"), value("B"), literal("C")), "in ('A', ?, 'C')", "B"),
             testCase((e, s) -> e.isNotIn(value("D"), literal("E")), "not in (?, 'E')", "D"),
 

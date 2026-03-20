@@ -38,6 +38,7 @@ import com.cadenzauk.siesta.grammar.select.Select;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -346,6 +347,14 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
         return isOpIn("in", values);
     }
 
+    public N isIn(Collection<T> values) {
+        return isOpIn("in", values.stream().map(ValueExpression::of).toArray(generator(TypedExpression.class)));
+    }
+
+    public N isInLiteral(Collection<T> values) {
+        return isOpIn("in", values.stream().map(LiteralExpression::of).toArray(generator(TypedExpression.class)));
+    }
+
     @SafeVarargs
     public final N isNotIn(T... values) {
         return isOpIn("not in", Arrays.stream(values).map(ValueExpression::of).toArray(generator(TypedExpression.class)));
@@ -354,6 +363,14 @@ public class ExpressionBuilder<T, N> implements TypedExpression<T> {
     @SafeVarargs
     public final N isNotIn(TypedExpression<T>... values) {
         return isOpIn("not in", values);
+    }
+
+    public final N isNotIn(Collection<T> values) {
+        return isOpIn("not in", values.stream().map(ValueExpression::of).toArray(generator(TypedExpression.class)));
+    }
+
+    public final N isNotInLiteral(Collection<T> values) {
+        return isOpIn("not in", values.stream().map(LiteralExpression::of).toArray(generator(TypedExpression.class)));
     }
 
     public N isIn(Select<T> select) {

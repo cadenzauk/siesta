@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ import static java.util.stream.Collectors.joining;
 public class Database {
     private static final Logger LOG = LoggerFactory.getLogger(Database.class);
 
-    private final Map<TypeToken<?>,Table<?>> metadataCache = new ConcurrentHashMap<>();
+    private final Map<TypeToken<?>, Table<?>> metadataCache = new ConcurrentHashMap<>();
     private final DataTypeRegistry dataTypeRegistry;
     private final String defaultCatalog;
     private final String defaultSchema;
@@ -183,7 +184,7 @@ public class Database {
     }
 
     public boolean isNotSet(DatabaseOptions.Option option) {
-        return !options.isSet(option);
+        return !isSet(option);
     }
 
     public <T> T execute(String sql, Supplier<T> statement) {
@@ -209,18 +210,18 @@ public class Database {
         throw new RuntimeException(String.format("Error while executing '%s'.", sql), throwable);
     }
 
-    public <T,B> TempTable<T> createTemporaryTable(Transaction transaction, Class<T> rowClass, Function1<LocalTempTable.Builder<T,T>,LocalTempTable.Builder<T,B>> init) {
+    public <T, B> TempTable<T> createTemporaryTable(Transaction transaction, Class<T> rowClass, Function1<LocalTempTable.Builder<T, T>, LocalTempTable.Builder<T, B>> init) {
         LocalTempTable<T> tempTable = init.apply(LocalTempTable.newBuilder(this, rowClass)).build();
         String sql = tempTable.createSql();
         execute(sql, () -> transaction.execute(sql, new Object[0]));
-        if (! dialect.tempTableInfo().supportsLocalOnCommitDeleteRows() && tempTable.onCommit() == TempTableCommitAction.DELETE_ROWS) {
+        if (!dialect.tempTableInfo().supportsLocalOnCommitDeleteRows() && tempTable.onCommit() == TempTableCommitAction.DELETE_ROWS) {
             ExpectingWhere delete = delete(tempTable.as(""));
             transaction.beforeCommit(delete::execute);
         }
-        if (! dialect.tempTableInfo().supportsLocalOnCommitDropTable() && tempTable.onCommit() == TempTableCommitAction.DROP_TABLE) {
+        if (!dialect.tempTableInfo().supportsLocalOnCommitDropTable() && tempTable.onCommit() == TempTableCommitAction.DROP_TABLE) {
             transaction.beforeCommit(t -> dropTemporaryTable(t, tempTable));
         }
-        if (! dialect.tempTableInfo().createLocalIsTransactional() && (tempTable.onCommit() != TempTableCommitAction.DROP_TABLE || ! dialect.tempTableInfo().supportsLocalOnCommitDropTable())) {
+        if (!dialect.tempTableInfo().createLocalIsTransactional() && (tempTable.onCommit() != TempTableCommitAction.DROP_TABLE || !dialect.tempTableInfo().supportsLocalOnCommitDropTable())) {
             transaction.afterRollback(t -> dropTemporaryTable(t, tempTable));
         }
         return tempTable;
@@ -231,13 +232,15 @@ public class Database {
         execute(sql, () -> transaction.execute(sql, new Object[0]));
     }
 
-    public <T,B> TempTable<T> globalTemporaryTable(Transaction transaction, Class<T> rowClass, Function1<GlobalTempTable.Builder<T,T>,GlobalTempTable.Builder<T,B>> init) {
-        TempTable<T> tempTable = init.apply(GlobalTempTable
-                                            .newBuilder(this, rowClass)
-                                            .catalog(defaultCatalog)
-                                            .schema(defaultSchema))
-                                 .build();
-        if (! dialect.tempTableInfo().clearsGlobalOnCommit()) {
+    public <T, B> TempTable<T> globalTemporaryTable(Transaction transaction, Class<T> rowClass, Function1<GlobalTempTable.Builder<T, T>, GlobalTempTable.Builder<T, B>> init) {
+        TempTable<T> tempTable = init.apply(
+            GlobalTempTable
+                .newBuilder(this, rowClass)
+                .catalog(defaultCatalog)
+                .schema(defaultSchema)
+            )
+            .build();
+        if (!dialect.tempTableInfo().clearsGlobalOnCommit()) {
             ExpectingWhere delete = delete(tempTable.as(""));
             transaction.beforeCommit(delete::execute);
         }
@@ -245,26 +248,26 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    private <R, B> Table<R> table(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> init) {
+    private <R, B> Table<R> table(TypeToken<R> rowType, Function<Table.Builder<R, R>, Table.Builder<R, B>> init) {
         return (Table<R>) metadataCache.computeIfAbsent(rowType, k -> {
-            Table.Builder<R,R> builder = new Table.Builder<>(this, rowType, rowType, Function.identity());
+            Table.Builder<R, R> builder = new Table.Builder<>(this, rowType, rowType, Function.identity());
             return init.apply(builder).build();
         });
     }
 
-    public <R, T> String columnNameFor(MethodInfo<R,T> getterMethod) {
+    public <R, T> String columnNameFor(MethodInfo<R, T> getterMethod) {
         return nameFromMethodAnnotation(getterMethod)
             .orElseGet(() -> nameFromFieldAnnotation(getterMethod)
                 .orElseGet(() -> namingStrategy().columnName(getterMethod.propertyName())));
     }
 
-    public <R, T> String columnNameFor(FieldInfo<R,T> fieldInfo) {
+    public <R, T> String columnNameFor(FieldInfo<R, T> fieldInfo) {
         return nameFromMethodAnnotation(fieldInfo)
             .orElseGet(() -> nameFromFieldAnnotation(fieldInfo)
                 .orElseGet(() -> namingStrategy().columnName(fieldInfo.field().getName())));
     }
 
-    public <T, R> DataType<T> getDataTypeOf(MethodInfo<R,T> getterInfo) {
+    public <T, R> DataType<T> getDataTypeOf(MethodInfo<R, T> getterInfo) {
         return dataTypeOf(getterInfo)
             .orElseThrow(() -> new RuntimeException("Unable to determine the type of " + getterInfo));
     }
@@ -285,11 +288,11 @@ public class Database {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public <T, R> Optional<DataType<T>> dataTypeOf(MethodInfo<R,T> getterInfo) {
+    public <T, R> Optional<DataType<T>> dataTypeOf(MethodInfo<R, T> getterInfo) {
         return dataTypeRegistry.dataTypeOf(getterInfo.effectiveClass());
     }
 
-    public <T, R> Optional<DataType<T>> dataTypeOf(FieldInfo<R,T> fieldInfo) {
+    public <T, R> Optional<DataType<T>> dataTypeOf(FieldInfo<R, T> fieldInfo) {
         return dataTypeRegistry.dataTypeOf(fieldInfo.effectiveClass());
     }
 
@@ -297,42 +300,48 @@ public class Database {
         return namingStrategy.columnName(fieldName);
     }
 
-    private <R, T> Optional<String> nameFromMethodAnnotation(FieldInfo<R,T> fieldInfo) {
+    private <R, T> Optional<String> nameFromMethodAnnotation(FieldInfo<R, T> fieldInfo) {
         return MethodInfo.findGetterForField(fieldInfo)
             .flatMap(this::nameFromMethodAnnotation);
     }
 
-    private <R, T> Optional<String> nameFromMethodAnnotation(MethodInfo<R,T> getterMethod) {
+    private <R, T> Optional<String> nameFromMethodAnnotation(MethodInfo<R, T> getterMethod) {
         return getterMethod.annotation(javax.persistence.Column.class)
             .map(javax.persistence.Column::name)
             .filter(StringUtils::isNotBlank);
     }
 
-    private <R, T> Optional<String> nameFromFieldAnnotation(MethodInfo<R,T> getterMethod) {
+    private <R, T> Optional<String> nameFromFieldAnnotation(MethodInfo<R, T> getterMethod) {
         return FieldInfo.ofGetter(getterMethod)
             .flatMap(this::nameFromFieldAnnotation);
     }
 
-    private <R, T> Optional<String> nameFromFieldAnnotation(FieldInfo<R,T> f) {
+    private <R, T> Optional<String> nameFromFieldAnnotation(FieldInfo<R, T> f) {
         return f.annotation(javax.persistence.Column.class)
             .map(javax.persistence.Column::name)
             .filter(StringUtils::isNotBlank);
     }
 
-    public <T, R> Column<T,R> column(Function1<R,T> getter) {
-        MethodInfo<R,T> methodInfo = MethodInfo.of(getter);
+    public <T, R> Column<T, R> column(Function1<R, T> getter) {
+        MethodInfo<R, T> methodInfo = MethodInfo.of(getter);
         return column(methodInfo);
     }
 
-    public <T, R> Column<T,R> column(FunctionOptional1<R,T> getter) {
-        MethodInfo<R,T> methodInfo = MethodInfo.of(getter);
+    public <T, R> Column<T, R> column(FunctionOptional1<R, T> getter) {
+        MethodInfo<R, T> methodInfo = MethodInfo.of(getter);
         return column(methodInfo);
     }
 
-    public <T, R> Column<T,R> column(MethodInfo<R,T> methodInfo) {
+    public <T, R> Column<T, R> column(MethodInfo<R, T> methodInfo) {
         return table(methodInfo.referringClass()).column(methodInfo);
     }
 
+    /**
+     * Gets the default {@link SqlExecutor}.
+     *
+     * @return The default executor for SQL.
+     * @throws IllegalStateException If no default SqlExecutor has been set.
+     */
     public SqlExecutor getDefaultSqlExecutor() {
         return defaultSqlExecutor.orElseThrow(() -> new IllegalStateException("Default SQL executor has not been set."));
     }
@@ -404,12 +413,59 @@ public class Database {
         return table(rowClass).insert(transaction, rows);
     }
 
+    public <R> int insert(Collection<R> rows) {
+        return insert(getDefaultSqlExecutor(), rows);
+    }
+
+    public <R> int insert(List<R> rows) {
+        return insert(getDefaultSqlExecutor(), rows);
+    }
+
+    public <R> int insert(SqlExecutor sqlExecutor, Collection<R> rows) {
+        return insert(sqlExecutor, ImmutableList.copyOf(rows));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int insert(SqlExecutor sqlExecutor, List<R> rows) {
+        if (rows.isEmpty()) {
+            return 0;
+        }
+        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
+        return table(rowClass).insert(sqlExecutor, rows);
+    }
+
+    public <R> int insert(Transaction transaction, Collection<R> rows) {
+        return insert(transaction, ImmutableList.copyOf(rows));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> int insert(Transaction transaction, List<R> rows) {
+        if (rows.isEmpty()) {
+            return 0;
+        }
+        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
+        return table(rowClass).insert(transaction, rows);
+    }
+
     @SuppressWarnings("unchecked")
     public <R> CompletableFuture<Integer> insertAsync(Transaction transaction, R... rows) {
         if (rows.length == 0) {
             return CompletableFuture.completedFuture(0);
         }
         Class<R> rowClass = (Class<R>) rows[0].getClass();
+        return table(rowClass).insertAsync(transaction, rows);
+    }
+
+    public <R> CompletableFuture<Integer> insertAsync(Transaction transaction, Collection<R> rows) {
+        return insertAsync(transaction, ImmutableList.copyOf(rows));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> CompletableFuture<Integer> insertAsync(Transaction transaction, List<R> rows) {
+        if (rows.isEmpty()) {
+            return CompletableFuture.completedFuture(0);
+        }
+        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
         return table(rowClass).insertAsync(transaction, rows);
     }
 
@@ -449,37 +505,105 @@ public class Database {
         return Update.update(this, tempTable.as(alias));
     }
 
+    /**
+     * @deprecated Use {@link #updateRow(Object) updateRow(R)}
+     */
     @Deprecated
     public <R> int update(R row) {
         return updateRow(row);
     }
 
+    /**
+     * @deprecated Use {@link #updateRow(SqlExecutor, Object) updateRow(SqlExecutor, R)}
+     */
     @Deprecated
     public <R> int update(SqlExecutor sqlExecutor, R row) {
         return updateRow(sqlExecutor, row);
     }
 
+    /**
+     * @deprecated Use {@link #updateRow(Transaction, Object) updateRow(Transaction, R)}
+     */
     @Deprecated
     public <R> int update(Transaction transaction, R row) {
         return updateRow(transaction, row);
     }
 
+    /**
+     * Performs an update of the table for the given row using the values of the {@link javax.persistence.Id} annotated fields for the where clause.
+     * All columns will be updated with the values in the given object except:
+     * <ul>
+     *     <li>Fields annotated with {@link javax.persistence.Id}</li>
+     *     <li>Fields annotated with {@link javax.persistence.Column} with a value of {@code updatable = false}.</li>
+     *     <li>Fields annotated with {@link javax.persistence.Transient}</li>
+     * </ul>
+     * The default {@link SqlExecutor} is used - see {@link #getDefaultSqlExecutor}.
+     *
+     * @param row An object containing the values for the row to be updated.
+     * @param <R> The type of the row.
+     * @return The number of rows updated.  If the {@code Id} columns represent a primary key then this will be 0 or 1 depending on whether the row existed or not.
+     * @throws IllegalStateException If no default SqlExecutor has been set.
+     */
     public <R> int updateRow(R row) {
         return updateRow(getDefaultSqlExecutor(), row);
     }
 
+    /**
+     * Performs an update of the table for the given row using the values of the {@link javax.persistence.Id} annotated fields for the where clause.
+     * All columns will be updated with the values in the given object except:
+     * <ul>
+     *     <li>Fields annotated with {@link javax.persistence.Id}</li>
+     *     <li>Fields annotated with {@link javax.persistence.Column} with a value of {@code updatable = false}.</li>
+     *     <li>Fields annotated with {@link javax.persistence.Transient}</li>
+     * </ul>
+     *
+     * @param sqlExecutor The executor used to perform the update.
+     * @param row         An object containing the values for the row to be updated.
+     * @param <R>         The type of the row.
+     * @return The number of rows updated.  If the {@code Id} columns represent a primary key then this will be 0 or 1 depending on whether the row existed or not.
+     */
     @SuppressWarnings("unchecked")
     public <R> int updateRow(SqlExecutor sqlExecutor, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).update(sqlExecutor, row);
     }
 
+    /**
+     * Performs an update of the table for the given row using the values of the {@link javax.persistence.Id} annotated fields for the where clause.
+     * All columns will be updated with the values in the given object except:
+     * <ul>
+     *     <li>Fields annotated with {@link javax.persistence.Id}</li>
+     *     <li>Fields annotated with {@link javax.persistence.Column} with a value of {@code updatable = false}.</li>
+     *     <li>Fields annotated with {@link javax.persistence.Transient}</li>
+     * </ul>
+     *
+     * @param transaction Transaction in which the update will be performed.
+     * @param row         An object containing the values for the row to be updated.
+     * @param <R>         The type of the row.
+     * @return The number of rows updated.  If the {@code Id} columns represent a primary key then this will be 0 or 1 depending on whether the row existed or not.
+     * @throws IllegalStateException if the transaction has previously been committed or rolled back.
+     */
     @SuppressWarnings("unchecked")
     public <R> int updateRow(Transaction transaction, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
         return table(rowClass).update(transaction, row);
     }
 
+    /**
+     * Performs an asynchronous update of the table for the given row using the values of the {@link javax.persistence.Id} annotated fields for the where clause.
+     * All columns will be updated with the values in the given object except:
+     * <ul>
+     *     <li>Fields annotated with {@link javax.persistence.Id}</li>
+     *     <li>Fields annotated with {@link javax.persistence.Column} with a value of {@code updatable = false}.</li>
+     *     <li>Fields annotated with {@link javax.persistence.Transient}</li>
+     * </ul>
+     *
+     * @param transaction Transaction in which the update will be performed.
+     * @param row         An object containing the values for the row to be updated.
+     * @param <R>         The type of the row.
+     * @return A future containing the number of rows updated.  If the {@code Id} columns represent a primary key then this will be 0 or 1 depending on whether the row existed or not.
+     * @throws IllegalStateException if the transaction has previously been committed or rolled back.
+     */
     @SuppressWarnings("unchecked")
     public <R> CompletableFuture<Integer> updateRowAsync(Transaction transaction, R row) {
         Class<R> rowClass = (Class<R>) row.getClass();
@@ -501,7 +625,12 @@ public class Database {
         return upsertRows(transaction, ImmutableList.copyOf(rows));
     }
 
-    public <R> int upsertRows(List<R> rows) {
+    @SafeVarargs
+    public final <R> CompletableFuture<Integer> upsertRowsAsync(Transaction transaction, R... rows) {
+        return upsertRowsAsync(transaction, ImmutableList.copyOf(rows));
+    }
+
+    public <R> int upsertRows(Collection<R> rows) {
         if (rows.isEmpty()) {
             return 0;
         }
@@ -509,30 +638,33 @@ public class Database {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> int upsertRows(SqlExecutor sqlExecutor, List<R> rows) {
+    public <R> int upsertRows(SqlExecutor sqlExecutor, Collection<R> rows) {
         if (rows.isEmpty()) {
             return 0;
         }
-        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
-        return table(rowClass).upsert(sqlExecutor, rows);
+        var asList = ImmutableList.copyOf(rows);
+        Class<R> rowClass = (Class<R>) asList.get(0).getClass();
+        return table(rowClass).upsert(sqlExecutor, asList);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> int upsertRows(Transaction transaction, List<R> rows) {
+    public <R> int upsertRows(Transaction transaction, Collection<R> rows) {
         if (rows.isEmpty()) {
             return 0;
         }
-        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
-        return table(rowClass).upsert(transaction, rows);
+        var asList = ImmutableList.copyOf(rows);
+        Class<R> rowClass = (Class<R>) asList.get(0).getClass();
+        return table(rowClass).upsert(transaction, asList);
     }
 
     @SuppressWarnings("unchecked")
-    public <R> CompletableFuture<Integer> upsertRowsAsync(Transaction transaction, List<R> rows) {
+    public <R> CompletableFuture<Integer> upsertRowsAsync(Transaction transaction, Collection<R> rows) {
         if (rows.isEmpty()) {
             return CompletableFuture.completedFuture(0);
         }
-        Class<R> rowClass = (Class<R>) rows.get(0).getClass();
-        return table(rowClass).upsertAsync(transaction, rows);
+        var asList = ImmutableList.copyOf(rows);
+        Class<R> rowClass = (Class<R>) asList.get(0).getClass();
+        return table(rowClass).upsertAsync(transaction, asList);
     }
 
     public <D> ExpectingWhere delete(Alias<D> alias) {
@@ -555,16 +687,36 @@ public class Database {
         return Delete.delete(this, tempTable.as(alias));
     }
 
+    /**
+     * @deprecated Use {@link #deleteRow(Object) deleteRow(R)}
+     * @param row the row to be deleted.
+     * @return the number of rows deleted.
+     * @param <R> the type of the row.
+     */
     @Deprecated
     public <R> int delete(R row) {
         return deleteRow(getDefaultSqlExecutor(), row);
     }
 
+    /**
+     * @deprecated Use {@link #deleteRow(SqlExecutor, Object) deleteRow(SqlExecutor, R)}
+     * @param sqlExecutor the {@code SqlExecutor} used to execute the delete statement.
+     * @param row the row to be deleted.
+     * @return the number of rows deleted.
+     * @param <R> the type of the row.
+     */
     @Deprecated
     public <R> int delete(SqlExecutor sqlExecutor, R row) {
         return deleteRow(sqlExecutor, row);
     }
 
+    /**
+     * @deprecated Use {@link #deleteRow(Transaction, Object) deleteRow(Transaction, R)}
+     * @param transaction the transaction in which the deletion will occur.
+     * @param row the row to be deleted.
+     * @return the number of rows deleted.
+     * @param <R> the type of the row.
+     */
     @Deprecated
     public <R> int delete(Transaction transaction, R row) {
         return deleteRow(transaction, row);
@@ -607,7 +759,7 @@ public class Database {
         private DatabaseOptions options = DatabaseOptions.None;
         private final List<Consumer<Dialect>> customizations = new ArrayList<>();
         private final List<Consumer<DataTypeRegistry>> dataTypes = new ArrayList<>();
-        private final Map<TypeToken<?>,TableInitializer<?,?>> tables = new HashMap<>();
+        private final Map<TypeToken<?>, TableInitializer<?, ?>> tables = new HashMap<>();
 
         private Builder() {
         }
@@ -654,7 +806,7 @@ public class Database {
             return this;
         }
 
-        public <T, D> Builder adapter(Class<T> javaClass, DbTypeId<D> dbTypeId, Function<T,D> toDb, Function<D,T> fromDb) {
+        public <T, D> Builder adapter(Class<T> javaClass, DbTypeId<D> dbTypeId, Function<T, D> toDb, Function<D, T> fromDb) {
             return type(javaClass, DbTypeId.of(javaClass), new DbTypeAdapter<>(dbTypeId, toDb, fromDb));
         }
 
@@ -662,7 +814,7 @@ public class Database {
             return type(javaClass, EnumByName.id(javaClass), new EnumByName<>(javaClass));
         }
 
-        public <R> Builder table(Class<R> rowClass, Consumer<Table.Builder<R,?>> init) {
+        public <R> Builder table(Class<R> rowClass, Consumer<Table.Builder<R, ?>> init) {
             return table(TypeToken.of(rowClass), init);
         }
 
@@ -682,12 +834,12 @@ public class Database {
         }
 
         @SuppressWarnings({"unchecked", "WeakerAccess"})
-        public <R> Builder table(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
-            TableInitializer<?,?> existing = tables.get(rowType);
-            TableInitializer<?,?> tableInitializer =
+        public <R> Builder table(TypeToken<R> rowType, Consumer<Table.Builder<R, ?>> init) {
+            TableInitializer<?, ?> existing = tables.get(rowType);
+            TableInitializer<?, ?> tableInitializer =
                 existing == null
                     ? TableInitializer.of(rowType, init)
-                    : ((TableInitializer<R,?>) existing).concat(init);
+                    : ((TableInitializer<R, ?>) existing).concat(init);
             tables.put(rowType, tableInitializer);
             return this;
         }
@@ -712,30 +864,25 @@ public class Database {
         }
     }
 
-    private static class TableInitializer<R, B> {
-        private final TypeToken<R> rowType;
-        private final Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer;
-
-        private TableInitializer(TypeToken<R> rowType, Function<Table.Builder<R,R>,Table.Builder<R,B>> initializer) {
-            this.rowType = rowType;
-            this.initializer = initializer;
-        }
-
+    private record TableInitializer<R, B>(
+        TypeToken<R> rowType,
+        Function<Table.Builder<R, R>, Table.Builder<R, B>> initializer
+    ) {
         @SuppressWarnings("UnusedReturnValue")
         private Table<R> apply(Database database) {
             return database.table(rowType, initializer);
         }
 
-        private TableInitializer<R,B> concat(Consumer<Table.Builder<R,?>> next) {
-            Function<Table.Builder<R,R>,Table.Builder<R,B>> newInitializer = b -> {
-                Table.Builder<R,B> builder = initializer.apply(b);
+        private TableInitializer<R, B> concat(Consumer<Table.Builder<R, ?>> next) {
+            Function<Table.Builder<R, R>, Table.Builder<R, B>> newInitializer = b -> {
+                Table.Builder<R, B> builder = initializer.apply(b);
                 next.accept(builder);
                 return builder;
             };
             return new TableInitializer<>(rowType, newInitializer);
         }
 
-        private static <R> TableInitializer<R,?> of(TypeToken<R> rowType, Consumer<Table.Builder<R,?>> init) {
+        private static <R> TableInitializer<R, ?> of(TypeToken<R> rowType, Consumer<Table.Builder<R, ?>> init) {
             return new TableInitializer<>(rowType, Function.identity()).concat(init);
         }
     }
